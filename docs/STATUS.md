@@ -68,22 +68,28 @@
 ### COMPLETADO ✅
 - [x] Documentación leída (INDEX + 00_README + 01)
 - [x] Herramientas verificadas (Rust, Node.js, Tauri CLI, etc)
-- [x] Repositorio GitHub creado
-- [x] Proyecto clonado en C:\Dev\NeoCab
+- [x] Repositorio GitHub creado (FranciscoCV2707/NeoCab)
+- [x] Proyecto clonado en C:\Users\Pako\Desktop\arcade\NeoCab
 - [x] Tauri inicializado (cargo create-tauri-app)
 - [x] npm install completado
+- [x] .gitignore mejorado (Rust, ROMs, binarios, etc)
+- [x] CLAUDE.md creado con documentación proyecto
+- [x] Primer commit hecho (2ccce5a - initial NeoCab project setup)
 
-### HOYYA (Sesión siguiente)
-- [ ] Ejecutar `npm tauri dev` y verificar ventana abre
-- [ ] Crear .gitignore mejorado
-- [ ] Hacer primer commit
-- [ ] Leer 02_PLAN_MAESTRO_PARTE_2.md (arquitectura)
-
-### ESTA SEMANA
+### HOY (Esta sesión - Semana 1, Día 2)
+- [x] .gitignore mejorado
+- [x] Primer commit exitoso
+- [ ] Leer 02_PLAN_MAESTRO_PARTE_2.md (arquitectura) ← AHORA
+- [ ] Ejecutar `npm run tauri dev` y verificar compilación
 - [ ] Crear estructura de carpetas (src-tauri/src/*, src/*)
-- [ ] Configurar Cargo.toml con dependencias
-- [ ] Configurar package.json con scripts
+
+### PRÓXIMA SESIÓN (Semana 1, Días 3-5)
+- [ ] Configurar Cargo.toml con dependencias (sqlx, serde, gilrs, sdl2)
+- [ ] Configurar package.json con scripts dev/build/test
+- [ ] Crear módulos base en Rust (models, db, commands)
+- [ ] Crear estructura React (pages, components, hooks)
 - [ ] Verificar que compila sin errores
+- [ ] Segundo commit
 
 ---
 
