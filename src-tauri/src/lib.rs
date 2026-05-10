@@ -21,12 +21,13 @@ pub fn run() {
             });
 
             match result {
-                Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager)) => {
+                Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel)) => {
                     app.manage(game_library);
                     app.manage(emulator_manager);
                     app.manage(coin_manager);
                     app.manage(timer_manager);
                     app.manage(input_manager);
+                    app.manage(operator_panel);
                     Ok(())
                 }
                 Err(e) => {
@@ -65,12 +66,19 @@ pub fn run() {
             commands::get_config,
             commands::set_config,
             commands::reload_config,
+            commands::authenticate_operator,
+            commands::logout_operator,
+            commands::is_operator_authenticated,
+            commands::change_operator_pin,
+            commands::get_operator_stats,
+            commands::get_session_stats,
+            commands::get_system_health,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
-async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager, core::TimerManager, input::InputManager)> {
+async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager, core::TimerManager, input::InputManager, core::OperatorPanel)> {
     let db = std::sync::Arc::new(db::Database::new("./data/neocab.db").await?);
     db.init_default_systems().await?;
 
@@ -82,6 +90,7 @@ async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, c
     let coin_manager = core::CoinManager::new(db);
     let timer_manager = core::TimerManager::new();
     let input_manager = input::InputManager::new();
+    let operator_panel = core::OperatorPanel::new("0000".to_string());
 
-    Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager))
+    Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel))
 }

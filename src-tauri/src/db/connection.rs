@@ -513,4 +513,24 @@ impl Database {
 
         Ok(events)
     }
+
+    pub async fn get_total_games(&self) -> Result<i64> {
+        let result = sqlx::query_scalar::<_, i64>(
+            "SELECT COUNT(*) FROM games"
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(result)
+    }
+
+    pub async fn get_total_sessions(&self) -> Result<i64> {
+        let result = sqlx::query_scalar::<_, i64>(
+            "SELECT COUNT(*) FROM sessions"
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(result)
+    }
 }
