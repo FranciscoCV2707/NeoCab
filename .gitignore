@@ -1,0 +1,86 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node
+node_modules
+dist
+dist-ssr
+*.local
+
+# Rust / Cargo
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Tauri
+src-tauri/target/
+src-tauri/Cargo.lock
+
+# ROMs (CRITICAL: never commit game files)
+roms/
+*.zip
+*.7z
+*.rar
+*.iso
+*.cue
+*.bin
+*.rom
+*.nes
+*.snes
+*.gba
+*.z64
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Config (may contain personal data)
+config/inputs.yaml
+config/settings.json
+
+# Binaries
+*.exe
+*.app
+*.dmg
+*.msi
+*.deb
+*.AppImage
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.vim
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+out/
+build/
+dist/
+release/
+debug/
