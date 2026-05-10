@@ -1,8 +1,8 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-10 (Semana 12 completada)  
-**Fase actual:** SEMANA 12 - Autoboot + Kiosk  
-**Progreso:** 12 de 16 semanas completadas (75%)
+**Última actualización:** 2026-05-10 (Semana 13 completada)  
+**Fase actual:** SEMANA 13 - Theme System  
+**Progreso:** 13 de 16 semanas completadas (81.25%)
 
 ---
 
@@ -135,6 +135,16 @@
 - ✅ Thread-safe state management via Tauri State
 - ✅ Exit code handling y error reporting
 
+### Semana 13: Theme System
+- ✅ ThemeManager con 3 themes (Classic, Neon, Cyberpunk)
+- ✅ ThemeConfig struct con colores y fuentes customizables
+- ✅ Theme persistence y real-time switching
+- ✅ CSS variables generation para frontend theming
+- ✅ 4 Tauri commands: set_theme, get_current_theme, get_theme_css, list_available_themes
+- ✅ Classic (orange/black), Neon (green/cyan), Cyberpunk (pink/cyan) themes
+- ✅ Full color customization per theme
+- ✅ Monospace fonts para arcade aesthetic
+
 ---
 
 ## 🔧 ARQUITECTURA ACTUAL
@@ -221,7 +231,8 @@
 | 10 | Input System | ✅ | SDL2 + GilRs device mapping |
 | 11 | Operator Panel | ✅ | PIN + statistics + earnings |
 | 12 | Autoboot + Kiosk | ✅ | Windows Registry + full-screen mode |
-| 13-16 | Features avanzadas | ⏳ | Themes, Testing, Release |
+| 13 | Theme System | ✅ | 3 arcade-style themes + CSS vars |
+| 14-16 | Emulators, Testing, Release | ⏳ | PSX/N64, stability, v1.0 |
 
 ---
 
@@ -253,6 +264,7 @@
 ## 💾 ÚLTIMOS COMMITS
 
 ```
+cba9b9d - feat: implement Week 13 theme system with 3 arcade themes (Semana 13)
 1b9f19e - feat: implement Week 12 autoboot and kiosk mode (Semana 12)
 7aed774 - feat: implement Week 11 operator panel with PIN authentication (Semana 11)
 f9455b1 - feat: complete Week 10 input system with SDL2/GilRs support (Semana 10)
@@ -389,4 +401,4 @@ Los archivos clave para Week 5:
 ---
 
 **Plan completo:** 16 semanas | ~80-120 horas  
-**Estado:** On track - 75% completado (12/16 semanas)
+**Estado:** On track - 81.25% completado (13/16 semanas)
