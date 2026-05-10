@@ -318,4 +318,102 @@ impl Database {
     pub fn pool(&self) -> &SqlitePool {
         &self.pool
     }
+
+    // Config management methods
+    pub async fn get_config(&self, key: &str) -> Result<Option<String>> {
+        let value = sqlx::query_scalar::<_, String>(
+            "SELECT value FROM config WHERE key = ?"
+        )
+        .bind(key)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(value)
+    }
+
+    pub async fn set_config(&self, key: &str, value: &str) -> Result<()> {
+        sqlx::query(
+            "INSERT INTO config (key, value) VALUES (?, ?)
+             ON CONFLICT(key) DO UPDATE SET value = excluded.value"
+        )
+        .bind(key)
+        .bind(value)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn get_all_config(&self) -> Result<Vec<(String, String)>> {
+        let rows = sqlx::query_as::<_, (String, String)>(
+            "SELECT key, value FROM config ORDER BY key"
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(rows)
+    }
+
+    // Game library methods
+    pub async fn get_games_by_system(&self, system_id: i64) -> Result<Vec<crate::models::Game>> {
+        let games = sqlx::query_as::<_, crate::models::Game>(
+            "SELECT * FROM games WHERE system_id = ? ORDER BY sort_title"
+        )
+        .bind(system_id)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(games)
+    }
+
+    pub async fn insert_game(&self, game: &crate::models::Game) -> Result<i64> {
+        let result = sqlx::query(
+            "INSERT INTO games (title, sort_title, system_id, emulator_id, rom_path,
+             filename, file_size, crc32, sha1, md5, description, year, developer,
+             publisher, genre, region, language)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        )
+        .bind(&game.title)
+        .bind(&game.sort_title)
+        .bind(game.system_id)
+        .bind(game.emulator_id)
+        .bind(&game.rom_path)
+        .bind(&game.filename)
+        .bind(game.file_size)
+        .bind(&game.crc32)
+        .bind(&game.sha1)
+        .bind(&game.md5)
+        .bind(&game.description)
+        .bind(game.year)
+        .bind(&game.developer)
+        .bind(&game.publisher)
+        .bind(&game.genre)
+        .bind(&game.region)
+        .bind(&game.language)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(result.last_insert_rowid())
+    }
+
+    pub async fn get_systems(&self) -> Result<Vec<crate::models::System>> {
+        let systems = sqlx::query_as::<_, crate::models::System>(
+            "SELECT * FROM systems WHERE enabled = 1 ORDER BY sort_order"
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(systems)
+    }
+
+    pub async fn get_emulator(&self, name: &str) -> Result<Option<crate::models::Emulator>> {
+        let emu = sqlx::query_as::<_, crate::models::Emulator>(
+            "SELECT * FROM emulators WHERE name = ? AND enabled = 1"
+        )
+        .bind(name)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(emu)
+    }
 }

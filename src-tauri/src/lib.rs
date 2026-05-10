@@ -16,6 +16,9 @@ pub fn run() {
             commands::get_system_info,
             commands::list_games,
             commands::list_emulators,
+            commands::get_config,
+            commands::set_config,
+            commands::reload_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

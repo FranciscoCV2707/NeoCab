@@ -110,8 +110,16 @@
 - **Día 1:** ✅ Schema SQLite completo (10 tablas optimizadas)
 - **Día 2:** ✅ Modelos Rust con sqlx::FromRow (Game, System, Emulator, Session, Profile, InputDevice)
 - **Día 3-4:** ✅ Conexión a BD con auto-init schema y pragmas de performance
-- **Día 5:** ⏳ Tests unitarios
+- **Día 5:** ✅ Database helper methods (queries, inserts, config)
 - **Entregable:** ✅ BD compilando, tipos listos
+
+### Semana 3: Config Manager + Hot-reload ✅
+- **Día 1:** ✅ ConfigManager con YAML parsing
+- **Día 2:** ✅ Hot-reload y persistence en SQLite
+- **Día 3:** ✅ Database config get/set/all methods
+- **Día 4:** ✅ Tauri commands (get_config, set_config, reload_config)
+- **Día 5:** ✅ Compilación exitosa
+- **Entregable:** ✅ Config system functional, ready for Game Scanner
 
 ---
 
@@ -155,9 +163,10 @@ neocab/
 
 | Semana | Fase | Hito | Estado |
 |--------|------|------|--------|
-| 0 | Organización | Herramientas ✅ Docs ✅ Setup ✅ | Completado |
+| 0 | Organización | Herramientas ✅ Docs ✅ Setup ✅ | ✅ Completado |
 | 1 | Setup | Proyecto compilando | ✅ Completado |
-| 2 | Models + DB | Schema SQLite + modelos Rust | ✅ En progreso |
+| 2 | Models + DB | Schema SQLite + modelos Rust | ✅ Completado |
+| 3 | Config Manager | YAML + hot-reload + Tauri commands | ✅ Completado |
 | 3 | Config | YAML parser + hot-reload | Pendiente |
 | 4 | Game Library | Scanner ROMs | Pendiente |
 | 5 | First Emulator | MAME funcionando | Pendiente |
