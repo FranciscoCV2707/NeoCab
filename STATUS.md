@@ -1,8 +1,8 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-10 (Semana 7 completada)  
-**Fase actual:** SEMANA 7 - UI Básica React  
-**Progreso:** 7 de 16 semanas completadas (43.75%)
+**Última actualización:** 2026-05-10 (Semana 8 completada)  
+**Fase actual:** SEMANA 8 - Timer Manager  
+**Progreso:** 8 de 16 semanas completadas (50%)
 
 ---
 
@@ -85,6 +85,16 @@
 - ✅ Tauri command integration (scan_roms, launch_game)
 - ✅ Hover effects y animaciones
 
+### Semana 8: Timer Manager
+- ✅ TimerManager con full game session control
+- ✅ start(duration), pause, resume, stop methods
+- ✅ add_time() para coin-based extensions
+- ✅ TimerStatus con elapsed/remaining/total seconds
+- ✅ Overtime detection y percentage tracking
+- ✅ Instant-based timing (sin polling)
+- ✅ Tauri commands: start_timer, pause_timer, resume_timer, etc
+- ✅ Integration ready con coin system
+
 ---
 
 ## 🔧 ARQUITECTURA ACTUAL
@@ -162,9 +172,10 @@
 | 5 | MAME Adapter | ✅ | Primer emulador funcionando |
 | 6 | Coin System | ✅ | Coin balance + event tracking |
 | 7 | UI Básica | ✅ | Menú React funcional |
-| 8 | Timer Manager | ⏳ | Game timer + overlay |
+| 8 | Timer Manager | ✅ | Game timer + elapsed tracking |
 | 9 | RetroArch Multi-emu | ⏳ | Multi-emulator support |
-| 10-16 | Features avanzadas | ⏳ | - |
+| 10 | Input System | ⏳ | SDL2 + GilRs |
+| 11-16 | Features avanzadas | ⏳ | Panel, Autoboot, Temas, Testing |
 
 ---
 
@@ -194,13 +205,13 @@
 ## 💾 ÚLTIMOS COMMITS
 
 ```
+484df50 - feat: implement Timer Manager for arcade game sessions (Semana 8)
 5baace6 - feat: implement basic React UI with arcade styling (Semana 7)
 466a6dc - feat: implement Coin System for arcade operation (Semana 6)
 c388e90 - feat: implement MAME Emulator Adapter (Semana 5)
 26e057a - feat: implement Game Library Scanner with ROM indexing (Semana 4)
 c45f7a5 - feat: complete Config Manager with YAML hot-reload (Semana 3)
 8a24620 - feat: complete SQLite database schema and Rust models (Semana 2)
-6ee42f6 - feat: complete Rust architecture and module structure (Semana 1)
 ```
 
 ---
@@ -325,4 +336,4 @@ Los archivos clave para Week 5:
 ---
 
 **Plan completo:** 16 semanas | ~80-120 horas  
-**Estado:** On track - 43.75% completado (7/16 semanas)
+**Estado:** On track - 50% completado (8/16 semanas) - MILESTONE ✅
