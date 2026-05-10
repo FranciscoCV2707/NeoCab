@@ -1,8 +1,8 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-10 (Semana 9 completada)  
-**Fase actual:** SEMANA 9 - RetroArch Multi-Emulator  
-**Progreso:** 9 de 16 semanas completadas (56.25%)
+**Última actualización:** 2026-05-10 (Semana 10 completada)  
+**Fase actual:** SEMANA 10 - Input System  
+**Progreso:** 10 de 16 semanas completadas (62.5%)
 
 ---
 
@@ -105,6 +105,16 @@
 - ✅ System-to-emulator mapping automático
 - ✅ 11 emuladores totales (MAME + 6 cores RetroArch)
 
+### Semana 10: Input System (SDL2 + GilRs)
+- ✅ InputManager struct con device registration y mapping
+- ✅ InputButton enum (16 botones: Up, Down, Left, Right, A, B, X, Y, L1, L2, R1, R2, Start, Select, LeftStick, RightStick, Guide)
+- ✅ AxisInput enum para sticks analógicos y triggers (LeftStickX/Y, RightStickX/Y, TriggerL/R)
+- ✅ Deadzone handling con linear scaling para eliminar stick drift
+- ✅ InputDevice, InputMapping, InputEvent, InputEventType structs
+- ✅ 6 Tauri commands: get_input_devices, get_input_mappings, set_deadzone, get_deadzone, set_input_enabled, is_input_enabled
+- ✅ Thread-safe Arc<RwLock<>> para acceso concurrente
+- ✅ Integration en app setup y state management
+
 ---
 
 ## 🔧 ARQUITECTURA ACTUAL
@@ -113,8 +123,11 @@
 ```
 ├── commands/        ← Tauri IPC handlers
 │   ├── system.rs    (get_system_info)
-│   ├── games.rs     (list_games, scan_roms) ← NEW
-│   ├── emulator.rs  (list_emulators)
+│   ├── games.rs     (list_games, scan_roms)
+│   ├── emulator.rs  (list_emulators, launch_game, get_recommended_emulator)
+│   ├── coin.rs      (add_coins, get_coin_balance, start_game, end_game)
+│   ├── timer.rs     (start_timer, pause_timer, resume_timer, get_timer_status)
+│   ├── input.rs     (get_input_devices, get_input_mappings, set_deadzone) ← NEW
 │   └── config.rs    (get/set/reload_config)
 ├── core/            ← Business logic
 │   ├── config_manager.rs  (AppConfig, hot-reload)
@@ -134,9 +147,10 @@
 ├── adapters/        ← Emulator adapters
 │   ├── trait_adapter.rs (EmulatorAdapter trait)
 │   └── mod.rs
-├── input/           ← Input handling (Week 10)
-│   ├── sdl_backend.rs (placeholder)
-│   ├── gilrs_backend.rs (placeholder)
+├── input/           ← Input handling (Week 10) ✅
+│   ├── input_manager.rs (device registration, mapping, deadzone)
+│   ├── sdl_backend.rs (placeholder - Week 11)
+│   ├── gilrs_backend.rs (placeholder - Week 11)
 │   └── mod.rs
 ├── utils/           ← Utilities
 │   └── platform.rs  (OS detection)
@@ -184,37 +198,38 @@
 | 7 | UI Básica | ✅ | Menú React funcional |
 | 8 | Timer Manager | ✅ | Game timer + elapsed tracking |
 | 9 | RetroArch Multi-emu | ✅ | 6 cores funcionando |
-| 10 | Input System | ⏳ | SDL2 + GilRs |
+| 10 | Input System | ✅ | SDL2 + GilRs device mapping |
 | 11-16 | Features avanzadas | ⏳ | Panel, Autoboot, Temas, Testing |
 
 ---
 
-## 🎯 PRÓXIMA SESIÓN (SEMANA 7)
+## 🎯 PRÓXIMA SESIÓN (SEMANA 11)
 
 ### Objetivos
-1. **React UI básica** - Estructura de componentes
-2. **Game list view** - Mostrar juegos escaneados
-3. **System selection** - Seleccionar sistema/emulador
-4. **Navigation menu** - Menú principal
+1. **Operator Panel** - PIN security para operador
+2. **Statistics Dashboard** - Revenue, sessions, top games
+3. **System Settings** - Calibration, diagnostics
+4. **Earnings Report** - Coin tracking y revenue analytics
 
 ### Archivos a crear/modificar
-- `src/components/GameList.tsx` (NEW)
-- `src/components/SystemSelect.tsx` (NEW)
-- `src/components/MainMenu.tsx` (NEW)
-- `src/pages/Home.tsx` (NEW)
-- `src/main.tsx` (UPDATE - add React Router)
+- `src-tauri/src/core/operator_panel.rs` (NEW)
+- `src/components/OperatorPanel.tsx` (NEW)
+- `src/components/StatsScreen.tsx` (NEW)
+- `src-tauri/src/commands/operator.rs` (NEW)
+- `src-tauri/src/db/connection.rs` (UPDATE - stats queries)
 
 ### Expected deliverables
-- ✅ React app rendering with Tauri commands
-- ✅ Game list populated from backend
-- ✅ Basic navigation working
-- ✅ Integration with GameLibrary scanner
+- ✅ PIN authentication for operator mode
+- ✅ Earnings and session statistics
+- ✅ System diagnostics and calibration
+- ✅ Database analytics queries
 
 ---
 
 ## 💾 ÚLTIMOS COMMITS
 
 ```
+f9455b1 - feat: complete Week 10 input system with SDL2/GilRs support (Semana 10)
 1f8e90f - feat: implement RetroArch multi-emulator support (Semana 9)
 484df50 - feat: implement Timer Manager for arcade game sessions (Semana 8)
 5baace6 - feat: implement basic React UI with arcade styling (Semana 7)
@@ -309,9 +324,11 @@ Los archivos clave para Week 5:
 - Database: SQLite con 10 tablas, WAL mode, índices optimizados
 - Config: YAML parser, hot-reload, DB persistence
 - ROM Scanner: Escaneo recursivo, CRC32 hashing, deduplicación
-- Emulators: Trait-based adapter pattern, MAME funcionando
+- Emulators: Trait-based adapter pattern (MAME + 6 RetroArch cores)
 - Coin System: Balance tracking, event logging, revenue analytics
-- Tauri Integration: State management, async commands, error handling
+- Timer System: Game timer con pause/resume, overtime detection
+- Input System: Device registration, mapping, deadzone handling
+- Tauri Integration: State management, async commands, error handling, 27 commands exposed
 
 ### Frontend Próximo
 - React 18 con TypeScript
@@ -346,4 +363,4 @@ Los archivos clave para Week 5:
 ---
 
 **Plan completo:** 16 semanas | ~80-120 horas  
-**Estado:** On track - 56.25% completado (9/16 semanas)
+**Estado:** On track - 62.5% completado (10/16 semanas)
