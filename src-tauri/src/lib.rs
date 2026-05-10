@@ -21,8 +21,9 @@ pub fn run() {
             });
 
             match result {
-                Ok(game_library) => {
+                Ok((game_library, emulator_manager)) => {
                     app.manage(game_library);
+                    app.manage(emulator_manager);
                     Ok(())
                 }
                 Err(e) => {
@@ -36,6 +37,8 @@ pub fn run() {
             commands::list_games,
             commands::scan_roms,
             commands::list_emulators,
+            commands::launch_game,
+            commands::stop_game,
             commands::get_config,
             commands::set_config,
             commands::reload_config,
@@ -44,10 +47,14 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
-async fn initialize_app() -> Result<core::GameLibrary> {
+async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager)> {
     let db = std::sync::Arc::new(db::Database::new("./data/neocab.db").await?);
     db.init_default_systems().await?;
-    let game_library = core::GameLibrary::new(db);
 
-    Ok(game_library)
+    let game_library = core::GameLibrary::new(db.clone());
+
+    let mut emulator_manager = core::EmulatorManager::new(db);
+    emulator_manager.initialize_default_emulators().await?;
+
+    Ok((game_library, emulator_manager))
 }
