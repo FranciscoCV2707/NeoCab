@@ -69,14 +69,71 @@ impl EmulatorManager {
     pub async fn initialize_default_emulators(&mut self) -> Result<()> {
         info!("Initializing default emulators");
 
-        // MAME (most common arcade emulator)
+        // MAME (arcade)
         let mame = Arc::new(MameAdapter::new(
             "mame".to_string(),
             "0.262".to_string(),
         ));
         self.register_adapter("mame".to_string(), mame);
 
-        info!("Default emulators initialized");
+        // RetroArch with cores
+        let retroarch_snes = Arc::new(crate::adapters::RetroArchAdapter::new(
+            "retroarch".to_string(),
+            "1.15.0".to_string(),
+            crate::adapters::RetroArchCore::Snes9x,
+        ));
+        self.register_adapter("retroarch-snes".to_string(), retroarch_snes);
+
+        let retroarch_nes = Arc::new(crate::adapters::RetroArchAdapter::new(
+            "retroarch".to_string(),
+            "1.15.0".to_string(),
+            crate::adapters::RetroArchCore::Nestopia,
+        ));
+        self.register_adapter("retroarch-nes".to_string(), retroarch_nes);
+
+        let retroarch_genesis = Arc::new(crate::adapters::RetroArchAdapter::new(
+            "retroarch".to_string(),
+            "1.15.0".to_string(),
+            crate::adapters::RetroArchCore::Genesis,
+        ));
+        self.register_adapter("retroarch-genesis".to_string(), retroarch_genesis);
+
+        let retroarch_gb = Arc::new(crate::adapters::RetroArchAdapter::new(
+            "retroarch".to_string(),
+            "1.15.0".to_string(),
+            crate::adapters::RetroArchCore::Gambatte,
+        ));
+        self.register_adapter("retroarch-gb".to_string(), retroarch_gb);
+
+        let retroarch_psx = Arc::new(crate::adapters::RetroArchAdapter::new(
+            "retroarch".to_string(),
+            "1.15.0".to_string(),
+            crate::adapters::RetroArchCore::Pcsx,
+        ));
+        self.register_adapter("retroarch-psx".to_string(), retroarch_psx);
+
+        let retroarch_n64 = Arc::new(crate::adapters::RetroArchAdapter::new(
+            "retroarch".to_string(),
+            "1.15.0".to_string(),
+            crate::adapters::RetroArchCore::Mupen64plus,
+        ));
+        self.register_adapter("retroarch-n64".to_string(), retroarch_n64);
+
+        info!("Default emulators initialized (MAME + RetroArch cores)");
         Ok(())
+    }
+
+    pub fn get_recommended_emulator(&self, system_name: &str) -> Option<String> {
+        // Map systems to recommended emulator
+        match system_name {
+            "nes" => Some("retroarch-nes".to_string()),
+            "snes" => Some("retroarch-snes".to_string()),
+            "genesis" => Some("retroarch-genesis".to_string()),
+            "gb" => Some("retroarch-gb".to_string()),
+            "psx" => Some("retroarch-psx".to_string()),
+            "n64" => Some("retroarch-n64".to_string()),
+            "mame" => Some("mame".to_string()),
+            _ => self.adapters.keys().next().cloned(),
+        }
     }
 }

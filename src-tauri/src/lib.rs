@@ -41,6 +41,7 @@ pub fn run() {
             commands::list_emulators,
             commands::launch_game,
             commands::stop_game,
+            commands::get_recommended_emulator,
             commands::add_coins,
             commands::get_coin_balance,
             commands::start_game,

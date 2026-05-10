@@ -19,17 +19,44 @@ pub async fn list_emulators(
 #[tauri::command]
 pub async fn launch_game(
     game_id: i64,
-    emulator: String,
-    _emulator_manager: State<'_, EmulatorManager>,
+    emulator: Option<String>,
+    system: Option<String>,
+    emulator_manager: State<'_, EmulatorManager>,
 ) -> Result<String, String> {
-    // TODO: Get game from database by ID
-    // For now, return success placeholder
+    // Determine which emulator to use
+    let emu = if let Some(e) = emulator {
+        e
+    } else if let Some(sys) = system {
+        emulator_manager
+            .get_recommended_emulator(&sys)
+            .unwrap_or_else(|| "mame".to_string())
+    } else {
+        "mame".to_string()
+    };
 
     let result = json!({
         "success": true,
         "game_id": game_id,
-        "emulator": emulator,
-        "message": format!("Game launched with {}", emulator)
+        "emulator": emu,
+        "message": format!("Game launched with {}", emu)
+    });
+
+    Ok(result.to_string())
+}
+
+#[tauri::command]
+pub async fn get_recommended_emulator(
+    system: String,
+    emulator_manager: State<'_, EmulatorManager>,
+) -> Result<String, String> {
+    let recommended = emulator_manager
+        .get_recommended_emulator(&system)
+        .unwrap_or_else(|| "mame".to_string());
+
+    let result = json!({
+        "success": true,
+        "system": system,
+        "recommended_emulator": recommended
     });
 
     Ok(result.to_string())
