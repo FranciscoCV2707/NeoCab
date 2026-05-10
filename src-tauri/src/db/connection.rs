@@ -416,4 +416,58 @@ impl Database {
 
         Ok(emu)
     }
+
+    pub async fn get_game_by_crc32(&self, crc32: &str) -> Result<Option<crate::models::Game>> {
+        let game = sqlx::query_as::<_, crate::models::Game>(
+            "SELECT * FROM games WHERE crc32 = ?"
+        )
+        .bind(crc32)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(game)
+    }
+
+    pub async fn init_default_systems(&self) -> Result<()> {
+        // Check if systems already exist
+        let count = sqlx::query_scalar::<_, i64>(
+            "SELECT COUNT(*) FROM systems"
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        if count > 0 {
+            return Ok(());
+        }
+
+        // Insert default systems
+        let systems = vec![
+            ("nes", "Nintendo Entertainment System", "Classic", "Nintendo", 1983, 1995, "nes,zip", 0),
+            ("snes", "Super Nintendo", "Classic", "Nintendo", 1990, 2003, "smc,sfc,zip", 0),
+            ("genesis", "Genesis", "Sega", "Sega", 1988, 1997, "md,bin,zip", 0),
+            ("mame", "Multiple Arcade Machine Emulator", "Arcade", "Multiple", 1996, 2024, "zip,7z", 0),
+            ("gb", "Game Boy", "Handheld", "Nintendo", 1989, 2008, "gb,gbc,zip", 0),
+            ("psx", "PlayStation 1", "Console", "Sony", 1994, 2006, "iso,cue,bin,zip", 0),
+            ("n64", "Nintendo 64", "Console", "Nintendo", 1996, 2002, "z64,n64,zip", 0),
+        ];
+
+        for (i, (name, display, category, mfr, year_start, year_end, exts, sort_order)) in systems.iter().enumerate() {
+            sqlx::query(
+                "INSERT INTO systems (name, display_name, category, manufacturer, year_start, year_end, extensions, sort_order, enabled)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)"
+            )
+            .bind(name)
+            .bind(display)
+            .bind(category)
+            .bind(mfr)
+            .bind(year_start)
+            .bind(year_end)
+            .bind(exts)
+            .bind(*sort_order + i as i64)
+            .execute(&self.pool)
+            .await?;
+        }
+
+        Ok(())
+    }
 }
