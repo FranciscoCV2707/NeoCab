@@ -76,20 +76,25 @@
 - [x] CLAUDE.md creado con documentación proyecto
 - [x] Primer commit hecho (2ccce5a - initial NeoCab project setup)
 
-### HOY (Esta sesión - Semana 1, Día 2)
+### HOY (Esta sesión - Semana 1, Día 2-3)
 - [x] .gitignore mejorado
 - [x] Primer commit exitoso
-- [ ] Leer 02_PLAN_MAESTRO_PARTE_2.md (arquitectura) ← AHORA
-- [ ] Ejecutar `npm run tauri dev` y verificar compilación
-- [ ] Crear estructura de carpetas (src-tauri/src/*, src/*)
+- [x] Leer arquitectura (02_PLAN_MAESTRO_PARTE_2.md)
+- [x] Crear estructura completa de carpetas (src-tauri/src/*, src/*)
+- [x] Configurar Cargo.toml con todas las dependencias clave
+- [x] Configurar package.json con scripts dev/build/tauri
+- [x] Crear módulos base Rust (models, db, commands, core, adapters, input, utils)
+- [x] Crear comandos Tauri básicos (system, games, emulator)
+- [x] Crear error handling y structures
+- [x] ✅ **PROYECTO COMPILANDO SIN ERRORES**
 
-### PRÓXIMA SESIÓN (Semana 1, Días 3-5)
-- [ ] Configurar Cargo.toml con dependencias (sqlx, serde, gilrs, sdl2)
-- [ ] Configurar package.json con scripts dev/build/test
-- [ ] Crear módulos base en Rust (models, db, commands)
-- [ ] Crear estructura React (pages, components, hooks)
-- [ ] Verificar que compila sin errores
-- [ ] Segundo commit
+### PRÓXIMA SESIÓN (Semana 1, Días 4-5)
+- [ ] Ejecutar `npm install` (actualizar dependencias frontend)
+- [ ] Ejecutar `npm run tauri dev` y verificar que abre ventana
+- [ ] Crear estructura React básica (pages, hooks, store)
+- [ ] Crear base de datos SQLite (schema y migrations - Semana 2)
+- [ ] Hacer commits incrementales
+- [ ] Leer 03_PLAN_MAESTRO_PARTE_3.md (Semana 2 plan)
 
 ---
 
