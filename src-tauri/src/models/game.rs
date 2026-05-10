@@ -1,10 +1,39 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct Game {
     pub id: i64,
     pub title: String,
+    pub sort_title: Option<String>,
     pub system_id: i64,
+    pub emulator_id: Option<i64>,
     pub rom_path: String,
-    pub year: Option<i32>,
+    pub filename: Option<String>,
+    pub file_size: Option<i64>,
+    pub crc32: Option<String>,
+    pub sha1: Option<String>,
+    pub md5: Option<String>,
+    pub description: Option<String>,
+    pub year: Option<i64>,
+    pub developer: Option<String>,
+    pub publisher: Option<String>,
+    pub genre: Option<String>,
+    pub players: Option<i64>,
+    pub rating: f64,
+    pub rating_count: i64,
+    pub play_count: i64,
+    pub total_play_time: i64,
+    pub last_played: Option<String>,
+    pub is_favorite: i64,
+    pub is_hidden: i64,
+    pub has_save_state: i64,
+    pub image_path: Option<String>,
+    pub marquee_path: Option<String>,
+    pub video_path: Option<String>,
+    pub external_id: Option<String>,
+    pub region: Option<String>,
+    pub language: Option<String>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
 }

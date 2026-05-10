@@ -100,19 +100,18 @@
 
 ## 🎯 SEMANAS 1-2 (ESTADO ACTUAL)
 
-### Semana 1: Setup + Estructura Inicial
+### Semana 1: Setup + Estructura Inicial ✅
 - **Día 1:** ✅ Crear repo GitHub + clonar + inicializar Tauri
-- **Día 2:** ⏳ HOYYA - Verificar npm tauri dev + primer commit
-- **Día 3-4:** ⏳ Próxima sesión - Crear estructura carpetas
-- **Día 5:** ⏳ Próxima sesión - Configurar Cargo.toml + package.json
-- **Entregable esperado:** Proyecto compilando sin errores ✅
+- **Día 2-3:** ✅ Crear estructura carpetas + configurar Cargo.toml + package.json
+- **Día 4-5:** ✅ Crear módulos Rust base + compilación exitosa
+- **Entregable:** ✅ Proyecto compilando sin errores
 
-### Semana 2: Models + Database
-- **Día 1:** ⏳ Schema SQLite completo
-- **Día 2:** ⏳ Modelos Rust (types y structs)
-- **Día 3-4:** ⏳ Conexión a BD y migrations
+### Semana 2: Models + Database ✅
+- **Día 1:** ✅ Schema SQLite completo (10 tablas optimizadas)
+- **Día 2:** ✅ Modelos Rust con sqlx::FromRow (Game, System, Emulator, Session, Profile, InputDevice)
+- **Día 3-4:** ✅ Conexión a BD con auto-init schema y pragmas de performance
 - **Día 5:** ⏳ Tests unitarios
-- **Entregable:** BD funcionando, tipos compilando
+- **Entregable:** ✅ BD compilando, tipos listos
 
 ---
 
@@ -156,9 +155,9 @@ neocab/
 
 | Semana | Fase | Hito | Estado |
 |--------|------|------|--------|
-| 0 | Organización | Herramientas ✅ Docs ✅ Setup ⏳ | En progreso |
-| 1 | Setup | Proyecto compilando | Pendiente |
-| 2 | Models | BD funcionando | Pendiente |
+| 0 | Organización | Herramientas ✅ Docs ✅ Setup ✅ | Completado |
+| 1 | Setup | Proyecto compilando | ✅ Completado |
+| 2 | Models + DB | Schema SQLite + modelos Rust | ✅ En progreso |
 | 3 | Config | YAML parser + hot-reload | Pendiente |
 | 4 | Game Library | Scanner ROMs | Pendiente |
 | 5 | First Emulator | MAME funcionando | Pendiente |
