@@ -1,8 +1,8 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-10 (Semana 11 completada)  
-**Fase actual:** SEMANA 11 - Operator Panel  
-**Progreso:** 11 de 16 semanas completadas (68.75%)
+**Última actualización:** 2026-05-10 (Semana 12 completada)  
+**Fase actual:** SEMANA 12 - Autoboot + Kiosk  
+**Progreso:** 12 de 16 semanas completadas (75%)
 
 ---
 
@@ -125,6 +125,16 @@
 - ✅ Thread-safe Arc<RwLock<>> para PIN y auth state
 - ✅ Failed attempt tracking con lockout protection
 
+### Semana 12: Autoboot + Kiosk Mode
+- ✅ AutobootManager con Windows Registry (HKCU\Run) integration
+- ✅ Linux autostart via .desktop files (for future Linux support)
+- ✅ Kiosk mode toggle para full-screen enforcement
+- ✅ Platform detection para Windows/Linux
+- ✅ 6 Tauri commands: enable_autoboot, disable_autoboot, is_autoboot_enabled, enable_kiosk_mode, disable_kiosk_mode, is_kiosk_mode_enabled
+- ✅ Graceful platform-specific implementations con fallbacks
+- ✅ Thread-safe state management via Tauri State
+- ✅ Exit code handling y error reporting
+
 ---
 
 ## 🔧 ARQUITECTURA ACTUAL
@@ -210,36 +220,40 @@
 | 9 | RetroArch Multi-emu | ✅ | 6 cores funcionando |
 | 10 | Input System | ✅ | SDL2 + GilRs device mapping |
 | 11 | Operator Panel | ✅ | PIN + statistics + earnings |
-| 12-16 | Features avanzadas | ⏳ | Autoboot, Themes, Testing, Release |
+| 12 | Autoboot + Kiosk | ✅ | Windows Registry + full-screen mode |
+| 13-16 | Features avanzadas | ⏳ | Themes, Testing, Release |
 
 ---
 
-## 🎯 PRÓXIMA SESIÓN (SEMANA 12)
+## 🎯 PRÓXIMA SESIÓN (SEMANA 13)
 
 ### Objetivos
-1. **Autoboot Windows** - Registry entries, startup service
-2. **Kiosk Mode** - Full-screen enforcement, input restrictions
-3. **System Configuration** - Service startup, auto-launch game
-4. **Operator PIN at Boot** - Security on startup
+1. **Theme System** - 3+ visual themes (Classic, Neon, Cyberpunk)
+2. **Theme Persistence** - Database storage + config reload
+3. **Dynamic Styling** - CSS variables, theme switching
+4. **UI Updates** - Apply themes across all components
 
 ### Archivos a crear/modificar
-- `src-tauri/src/core/autoboot.rs` (NEW)
-- `src-tauri/src/adapters/windows_autoboot.rs` (NEW)
-- `src-tauri/src/commands/system.rs` (UPDATE - autoboot commands)
-- `src/components/AutobootSettings.tsx` (NEW)
-- `src/components/KioskMode.tsx` (NEW)
+- `src-tauri/src/core/theme_manager.rs` (NEW)
+- `src/hooks/useTheme.ts` (NEW)
+- `src/themes/classic.css` (NEW)
+- `src/themes/neon.css` (NEW)
+- `src/themes/cyberpunk.css` (NEW)
+- `src-tauri/src/commands/theme.rs` (NEW)
+- `src/App.tsx` (UPDATE - theme provider)
 
 ### Expected deliverables
-- ✅ Windows Registry autoboot configuration
-- ✅ Kiosk mode with full-screen enforcement
-- ✅ Service startup integration
-- ✅ PIN authentication on system boot
+- ✅ 3+ distinct arcade-style themes
+- ✅ Theme persistence in database
+- ✅ Real-time theme switching without reload
+- ✅ CSS variables for easy customization
 
 ---
 
 ## 💾 ÚLTIMOS COMMITS
 
 ```
+1b9f19e - feat: implement Week 12 autoboot and kiosk mode (Semana 12)
 7aed774 - feat: implement Week 11 operator panel with PIN authentication (Semana 11)
 f9455b1 - feat: complete Week 10 input system with SDL2/GilRs support (Semana 10)
 1f8e90f - feat: implement RetroArch multi-emulator support (Semana 9)
@@ -375,4 +389,4 @@ Los archivos clave para Week 5:
 ---
 
 **Plan completo:** 16 semanas | ~80-120 horas  
-**Estado:** On track - 68.75% completado (11/16 semanas)
+**Estado:** On track - 75% completado (12/16 semanas)
