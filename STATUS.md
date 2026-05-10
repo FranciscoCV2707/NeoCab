@@ -1,8 +1,8 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-10 (Semana 10 completada)  
-**Fase actual:** SEMANA 10 - Input System  
-**Progreso:** 10 de 16 semanas completadas (62.5%)
+**Última actualización:** 2026-05-10 (Semana 11 completada)  
+**Fase actual:** SEMANA 11 - Operator Panel  
+**Progreso:** 11 de 16 semanas completadas (68.75%)
 
 ---
 
@@ -115,6 +115,16 @@
 - ✅ Thread-safe Arc<RwLock<>> para acceso concurrente
 - ✅ Integration en app setup y state management
 
+### Semana 11: Operator Panel
+- ✅ OperatorPanel struct con PIN-based authentication
+- ✅ AuthLevel enum (Guest, Operator, Admin)
+- ✅ Protección con máximo 3 intentos fallidos
+- ✅ SessionStats, OperatorStats, SystemHealth structs para analytics
+- ✅ 7 Tauri commands: authenticate_operator, logout_operator, is_operator_authenticated, change_operator_pin, get_operator_stats, get_session_stats, get_system_health
+- ✅ Database methods: get_total_games(), get_total_sessions() para analytics
+- ✅ Thread-safe Arc<RwLock<>> para PIN y auth state
+- ✅ Failed attempt tracking con lockout protection
+
 ---
 
 ## 🔧 ARQUITECTURA ACTUAL
@@ -199,36 +209,38 @@
 | 8 | Timer Manager | ✅ | Game timer + elapsed tracking |
 | 9 | RetroArch Multi-emu | ✅ | 6 cores funcionando |
 | 10 | Input System | ✅ | SDL2 + GilRs device mapping |
-| 11-16 | Features avanzadas | ⏳ | Panel, Autoboot, Temas, Testing |
+| 11 | Operator Panel | ✅ | PIN + statistics + earnings |
+| 12-16 | Features avanzadas | ⏳ | Autoboot, Themes, Testing, Release |
 
 ---
 
-## 🎯 PRÓXIMA SESIÓN (SEMANA 11)
+## 🎯 PRÓXIMA SESIÓN (SEMANA 12)
 
 ### Objetivos
-1. **Operator Panel** - PIN security para operador
-2. **Statistics Dashboard** - Revenue, sessions, top games
-3. **System Settings** - Calibration, diagnostics
-4. **Earnings Report** - Coin tracking y revenue analytics
+1. **Autoboot Windows** - Registry entries, startup service
+2. **Kiosk Mode** - Full-screen enforcement, input restrictions
+3. **System Configuration** - Service startup, auto-launch game
+4. **Operator PIN at Boot** - Security on startup
 
 ### Archivos a crear/modificar
-- `src-tauri/src/core/operator_panel.rs` (NEW)
-- `src/components/OperatorPanel.tsx` (NEW)
-- `src/components/StatsScreen.tsx` (NEW)
-- `src-tauri/src/commands/operator.rs` (NEW)
-- `src-tauri/src/db/connection.rs` (UPDATE - stats queries)
+- `src-tauri/src/core/autoboot.rs` (NEW)
+- `src-tauri/src/adapters/windows_autoboot.rs` (NEW)
+- `src-tauri/src/commands/system.rs` (UPDATE - autoboot commands)
+- `src/components/AutobootSettings.tsx` (NEW)
+- `src/components/KioskMode.tsx` (NEW)
 
 ### Expected deliverables
-- ✅ PIN authentication for operator mode
-- ✅ Earnings and session statistics
-- ✅ System diagnostics and calibration
-- ✅ Database analytics queries
+- ✅ Windows Registry autoboot configuration
+- ✅ Kiosk mode with full-screen enforcement
+- ✅ Service startup integration
+- ✅ PIN authentication on system boot
 
 ---
 
 ## 💾 ÚLTIMOS COMMITS
 
 ```
+7aed774 - feat: implement Week 11 operator panel with PIN authentication (Semana 11)
 f9455b1 - feat: complete Week 10 input system with SDL2/GilRs support (Semana 10)
 1f8e90f - feat: implement RetroArch multi-emulator support (Semana 9)
 484df50 - feat: implement Timer Manager for arcade game sessions (Semana 8)
@@ -363,4 +375,4 @@ Los archivos clave para Week 5:
 ---
 
 **Plan completo:** 16 semanas | ~80-120 horas  
-**Estado:** On track - 62.5% completado (10/16 semanas)
+**Estado:** On track - 68.75% completado (11/16 semanas)
