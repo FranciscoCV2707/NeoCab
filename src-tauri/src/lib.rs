@@ -21,10 +21,11 @@ pub fn run() {
             });
 
             match result {
-                Ok((game_library, emulator_manager, coin_manager)) => {
+                Ok((game_library, emulator_manager, coin_manager, timer_manager)) => {
                     app.manage(game_library);
                     app.manage(emulator_manager);
                     app.manage(coin_manager);
+                    app.manage(timer_manager);
                     Ok(())
                 }
                 Err(e) => {
@@ -46,6 +47,13 @@ pub fn run() {
             commands::end_game,
             commands::return_coins,
             commands::get_earnings,
+            commands::start_timer,
+            commands::pause_timer,
+            commands::resume_timer,
+            commands::stop_timer,
+            commands::get_timer_status,
+            commands::add_timer_time,
+            commands::is_time_up,
             commands::get_config,
             commands::set_config,
             commands::reload_config,
@@ -54,7 +62,7 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
-async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager)> {
+async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager, core::TimerManager)> {
     let db = std::sync::Arc::new(db::Database::new("./data/neocab.db").await?);
     db.init_default_systems().await?;
 
@@ -64,6 +72,7 @@ async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, c
     emulator_manager.initialize_default_emulators().await?;
 
     let coin_manager = core::CoinManager::new(db);
+    let timer_manager = core::TimerManager::new();
 
-    Ok((game_library, emulator_manager, coin_manager))
+    Ok((game_library, emulator_manager, coin_manager, timer_manager))
 }
