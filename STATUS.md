@@ -1,8 +1,8 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-10 (Semana 4 completada)  
-**Fase actual:** SEMANA 4 - Game Library Scanner  
-**Progreso:** 4 de 16 semanas completadas (25%)
+**Última actualización:** 2026-05-10 (Semana 6 completada)  
+**Fase actual:** SEMANA 6 - Coin System  
+**Progreso:** 6 de 16 semanas completadas (37.5%)
 
 ---
 
@@ -54,6 +54,26 @@
 - ✅ init_default_systems con 7 emuladores clásicos
 - ✅ scan_roms Tauri command
 - ✅ Tauri state management para GameLibrary
+
+### Semana 5: MAME Emulator Adapter
+- ✅ MameAdapter implementando EmulatorAdapter trait
+- ✅ launch() spawns proceso MAME con ROM path
+- ✅ stop() mata emulador gracefully
+- ✅ is_running() verifica estado proceso
+- ✅ EmulatorManager para múltiples emuladores
+- ✅ register_adapter() y launch_game()
+- ✅ Tauri commands: list_emulators, launch_game, stop_game
+- ✅ State management para EmulatorManager
+
+### Semana 6: Coin System
+- ✅ CoinManager con full coin lifecycle
+- ✅ add_coins(), use_coins(), return_coins()
+- ✅ start_game()/end_game() para sesiones
+- ✅ CoinState con balance tracking
+- ✅ CoinEvent enum (Inserted, Used, Returned, Error)
+- ✅ Database coin event logging
+- ✅ get_earnings() para revenue tracking
+- ✅ Tauri commands: add_coins, get_coin_balance, etc
 
 ---
 
@@ -129,36 +149,42 @@
 | 2 | Models + DB | ✅ | Schema SQLite + modelos |
 | 3 | Config Manager | ✅ | YAML hot-reload |
 | 4 | ROM Scanner | ✅ | scan_roms command |
-| 5 | MAME Adapter | ⏳ | Primer emulador funcionando |
-| 6 | Coin System | ⏳ | Detector monedas |
+| 5 | MAME Adapter | ✅ | Primer emulador funcionando |
+| 6 | Coin System | ✅ | Coin balance + event tracking |
 | 7 | UI Básica | ⏳ | Menú React |
-| 8-16 | Features avanzadas | ⏳ | - |
+| 8 | Timer Manager | ⏳ | Game timer + overlay |
+| 9-16 | Features avanzadas | ⏳ | - |
 
 ---
 
-## 🎯 PRÓXIMA SESIÓN (SEMANA 5)
+## 🎯 PRÓXIMA SESIÓN (SEMANA 7)
 
 ### Objetivos
-1. **Crear MAME Adapter** - Primera implementación del trait EmulatorAdapter
-2. **Implement run_game** - Lanzar juegos con parámetros
-3. **Command execution** - Tauri invoke para ejecutar emuladores
-4. **Error handling** - Capturar output y errores de proceso
+1. **React UI básica** - Estructura de componentes
+2. **Game list view** - Mostrar juegos escaneados
+3. **System selection** - Seleccionar sistema/emulador
+4. **Navigation menu** - Menú principal
 
 ### Archivos a crear/modificar
-- `src-tauri/src/adapters/mame_adapter.rs` (NEW)
-- `src-tauri/src/core/emulator_manager.rs` (IMPLEMENT)
-- `src-tauri/src/commands/emulator.rs` (ADD run_game)
+- `src/components/GameList.tsx` (NEW)
+- `src/components/SystemSelect.tsx` (NEW)
+- `src/components/MainMenu.tsx` (NEW)
+- `src/pages/Home.tsx` (NEW)
+- `src/main.tsx` (UPDATE - add React Router)
 
 ### Expected deliverables
-- ✅ MAME emulator ready to launch
-- ✅ Game execution command functional
-- ✅ Process output logging
+- ✅ React app rendering with Tauri commands
+- ✅ Game list populated from backend
+- ✅ Basic navigation working
+- ✅ Integration with GameLibrary scanner
 
 ---
 
 ## 💾 ÚLTIMOS COMMITS
 
 ```
+466a6dc - feat: implement Coin System for arcade operation (Semana 6)
+c388e90 - feat: implement MAME Emulator Adapter (Semana 5)
 26e057a - feat: implement Game Library Scanner with ROM indexing (Semana 4)
 c45f7a5 - feat: complete Config Manager with YAML hot-reload (Semana 3)
 8a24620 - feat: complete SQLite database schema and Rust models (Semana 2)
@@ -245,5 +271,23 @@ Los archivos clave para Week 5:
 
 ---
 
+## ✅ RESUMEN TÉCNICO
+
+### Backend Completado
+- Database: SQLite con 10 tablas, WAL mode, índices optimizados
+- Config: YAML parser, hot-reload, DB persistence
+- ROM Scanner: Escaneo recursivo, CRC32 hashing, deduplicación
+- Emulators: Trait-based adapter pattern, MAME funcionando
+- Coin System: Balance tracking, event logging, revenue analytics
+- Tauri Integration: State management, async commands, error handling
+
+### Frontend Próximo
+- React 18 con TypeScript
+- Game list UI
+- System/emulator selector
+- Navigation menu
+
+---
+
 **Plan completo:** 16 semanas | ~80-120 horas  
-**Estado:** On track - 25% completado (4/16 semanas)
+**Estado:** On track - 37.5% completado (6/16 semanas)
