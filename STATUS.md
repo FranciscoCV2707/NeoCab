@@ -1,8 +1,8 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-10 (Semana 8 completada)  
-**Fase actual:** SEMANA 8 - Timer Manager  
-**Progreso:** 8 de 16 semanas completadas (50%)
+**Última actualización:** 2026-05-10 (Semana 9 completada)  
+**Fase actual:** SEMANA 9 - RetroArch Multi-Emulator  
+**Progreso:** 9 de 16 semanas completadas (56.25%)
 
 ---
 
@@ -95,6 +95,16 @@
 - ✅ Tauri commands: start_timer, pause_timer, resume_timer, etc
 - ✅ Integration ready con coin system
 
+### Semana 9: RetroArch Multi-Emulator
+- ✅ RetroArchAdapter con múltiples cores
+- ✅ RetroArchCore enum (Snes9x, Genesis, Nestopia, Gambatte, Pcsx, Mupen64plus)
+- ✅ launch() con parámetro de core
+- ✅ Soporte para 6 sistemas diferentes
+- ✅ EmulatorManager con inicialización de cores RetroArch
+- ✅ get_recommended_emulator() para auto-detección
+- ✅ System-to-emulator mapping automático
+- ✅ 11 emuladores totales (MAME + 6 cores RetroArch)
+
 ---
 
 ## 🔧 ARQUITECTURA ACTUAL
@@ -173,7 +183,7 @@
 | 6 | Coin System | ✅ | Coin balance + event tracking |
 | 7 | UI Básica | ✅ | Menú React funcional |
 | 8 | Timer Manager | ✅ | Game timer + elapsed tracking |
-| 9 | RetroArch Multi-emu | ⏳ | Multi-emulator support |
+| 9 | RetroArch Multi-emu | ✅ | 6 cores funcionando |
 | 10 | Input System | ⏳ | SDL2 + GilRs |
 | 11-16 | Features avanzadas | ⏳ | Panel, Autoboot, Temas, Testing |
 
@@ -205,13 +215,13 @@
 ## 💾 ÚLTIMOS COMMITS
 
 ```
+1f8e90f - feat: implement RetroArch multi-emulator support (Semana 9)
 484df50 - feat: implement Timer Manager for arcade game sessions (Semana 8)
 5baace6 - feat: implement basic React UI with arcade styling (Semana 7)
 466a6dc - feat: implement Coin System for arcade operation (Semana 6)
 c388e90 - feat: implement MAME Emulator Adapter (Semana 5)
 26e057a - feat: implement Game Library Scanner with ROM indexing (Semana 4)
 c45f7a5 - feat: complete Config Manager with YAML hot-reload (Semana 3)
-8a24620 - feat: complete SQLite database schema and Rust models (Semana 2)
 ```
 
 ---
@@ -336,4 +346,4 @@ Los archivos clave para Week 5:
 ---
 
 **Plan completo:** 16 semanas | ~80-120 horas  
-**Estado:** On track - 50% completado (8/16 semanas) - MILESTONE ✅
+**Estado:** On track - 56.25% completado (9/16 semanas)
