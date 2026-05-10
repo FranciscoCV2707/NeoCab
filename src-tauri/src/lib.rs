@@ -21,7 +21,7 @@ pub fn run() {
             });
 
             match result {
-                Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager)) => {
+                Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager)) => {
                     app.manage(game_library);
                     app.manage(emulator_manager);
                     app.manage(coin_manager);
@@ -29,6 +29,7 @@ pub fn run() {
                     app.manage(input_manager);
                     app.manage(operator_panel);
                     app.manage(autoboot_manager);
+                    app.manage(theme_manager);
                     Ok(())
                 }
                 Err(e) => {
@@ -80,12 +81,16 @@ pub fn run() {
             commands::enable_kiosk_mode,
             commands::disable_kiosk_mode,
             commands::is_kiosk_mode_enabled,
+            commands::set_theme,
+            commands::get_current_theme,
+            commands::get_theme_css,
+            commands::list_available_themes,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
-async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager, core::TimerManager, input::InputManager, core::OperatorPanel, core::AutobootManager)> {
+async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager, core::TimerManager, input::InputManager, core::OperatorPanel, core::AutobootManager, core::ThemeManager)> {
     let db = std::sync::Arc::new(db::Database::new("./data/neocab.db").await?);
     db.init_default_systems().await?;
 
@@ -99,6 +104,7 @@ async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, c
     let input_manager = input::InputManager::new();
     let operator_panel = core::OperatorPanel::new("0000".to_string());
     let autoboot_manager = core::AutobootManager::default();
+    let theme_manager = core::ThemeManager::default();
 
-    Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager))
+    Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager))
 }

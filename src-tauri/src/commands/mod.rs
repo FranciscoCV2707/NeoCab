@@ -6,6 +6,7 @@ pub mod coin;
 pub mod timer;
 pub mod input;
 pub mod operator;
+pub mod theme;
 
 pub use system::*;
 pub use games::*;
@@ -15,3 +16,4 @@ pub use coin::*;
 pub use timer::*;
 pub use input::*;
 pub use operator::*;
+pub use theme::*;
