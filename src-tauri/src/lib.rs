@@ -21,9 +21,10 @@ pub fn run() {
             });
 
             match result {
-                Ok((game_library, emulator_manager)) => {
+                Ok((game_library, emulator_manager, coin_manager)) => {
                     app.manage(game_library);
                     app.manage(emulator_manager);
+                    app.manage(coin_manager);
                     Ok(())
                 }
                 Err(e) => {
@@ -39,6 +40,12 @@ pub fn run() {
             commands::list_emulators,
             commands::launch_game,
             commands::stop_game,
+            commands::add_coins,
+            commands::get_coin_balance,
+            commands::start_game,
+            commands::end_game,
+            commands::return_coins,
+            commands::get_earnings,
             commands::get_config,
             commands::set_config,
             commands::reload_config,
@@ -47,14 +54,16 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
-async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager)> {
+async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager)> {
     let db = std::sync::Arc::new(db::Database::new("./data/neocab.db").await?);
     db.init_default_systems().await?;
 
     let game_library = core::GameLibrary::new(db.clone());
 
-    let mut emulator_manager = core::EmulatorManager::new(db);
+    let mut emulator_manager = core::EmulatorManager::new(db.clone());
     emulator_manager.initialize_default_emulators().await?;
 
-    Ok((game_library, emulator_manager))
+    let coin_manager = core::CoinManager::new(db);
+
+    Ok((game_library, emulator_manager, coin_manager))
 }

@@ -470,4 +470,47 @@ impl Database {
 
         Ok(())
     }
+
+    pub async fn log_coin_event(
+        &self,
+        event_type: &str,
+        amount: i64,
+        source: &str,
+        game_id: Option<i64>,
+    ) -> Result<()> {
+        sqlx::query(
+            "INSERT INTO coin_events (event_type, amount, source, game_id)
+             VALUES (?, ?, ?, ?)"
+        )
+        .bind(event_type)
+        .bind(amount)
+        .bind(source)
+        .bind(game_id)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn get_total_coin_earnings(&self) -> Result<i64> {
+        let total: i64 = sqlx::query_scalar(
+            "SELECT COALESCE(SUM(amount), 0) FROM coin_events WHERE event_type = 'inserted'"
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(total)
+    }
+
+    pub async fn get_coin_events(&self, limit: i64) -> Result<Vec<(String, i64, String)>> {
+        let events = sqlx::query_as::<_, (String, i64, String)>(
+            "SELECT event_type, amount, timestamp FROM coin_events
+             ORDER BY timestamp DESC LIMIT ?"
+        )
+        .bind(limit)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(events)
+    }
 }
