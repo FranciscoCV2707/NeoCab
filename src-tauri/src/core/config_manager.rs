@@ -1,10 +1,55 @@
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::collections::HashMap;
 use tokio::sync::RwLock;
 use tracing::info;
 use crate::error::Result;
 use crate::db::Database;
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum GameMode {
+    Arcade,
+    Console,
+    TimedFree,
+}
+
+impl GameMode {
+    pub fn default_time(&self) -> u32 {
+        match self {
+            GameMode::Arcade => 180,    // 3 minutos
+            GameMode::Console => 300,   // 5 minutos
+            GameMode::TimedFree => 600, // 10 minutos
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SystemGameConfig {
+    pub system: String,
+    pub mode: GameMode,
+    pub coins_per_time: u32,
+    pub max_time: u32,
+    pub show_overlay: bool,
+    pub warn_before: u32,
+    pub auto_exit: bool,
+}
+
+impl SystemGameConfig {
+    pub fn new(system: String, mode: GameMode) -> Self {
+        let coins_per_time = mode.default_time();
+        Self {
+            system,
+            mode,
+            coins_per_time,
+            max_time: coins_per_time * 3,
+            show_overlay: true,
+            warn_before: 30,
+            auto_exit: true,
+        }
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppConfig {
@@ -13,6 +58,8 @@ pub struct AppConfig {
     pub display: DisplaySettings,
     pub input: InputSettings,
     pub emulators: EmulatorsSettings,
+    #[serde(default)]
+    pub systems: HashMap<String, SystemGameConfig>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -57,6 +104,15 @@ pub struct EmulatorsSettings {
 
 impl Default for AppConfig {
     fn default() -> Self {
+        let mut systems = HashMap::new();
+        systems.insert("mame".to_string(), SystemGameConfig::new("mame".to_string(), GameMode::Arcade));
+        systems.insert("nes".to_string(), SystemGameConfig::new("nes".to_string(), GameMode::Console));
+        systems.insert("snes".to_string(), SystemGameConfig::new("snes".to_string(), GameMode::Console));
+        systems.insert("genesis".to_string(), SystemGameConfig::new("genesis".to_string(), GameMode::Console));
+        systems.insert("gbc".to_string(), SystemGameConfig::new("gbc".to_string(), GameMode::Console));
+        systems.insert("ps1".to_string(), SystemGameConfig::new("ps1".to_string(), GameMode::Console));
+        systems.insert("n64".to_string(), SystemGameConfig::new("n64".to_string(), GameMode::Console));
+
         Self {
             app: AppSettings {
                 name: "NeoCab".to_string(),
@@ -88,6 +144,7 @@ impl Default for AppConfig {
                 default: "retroarch".to_string(),
                 auto_select: true,
             },
+            systems,
         }
     }
 }
@@ -182,5 +239,36 @@ impl ConfigManager {
         std::fs::write(&self.config_path, yaml)?;
         info!("Config saved to {:?}", self.config_path);
         Ok(())
+    }
+
+    pub async fn save_system_config(&self, config: SystemGameConfig) -> Result<()> {
+        let mut app_config = self.config.write().await;
+        app_config.systems.insert(config.system.clone(), config.clone());
+
+        self.db.set_config(
+            &format!("system_{}", config.system),
+            &serde_json::to_string(&config)?
+        ).await?;
+
+        info!("System config saved for: {}", config.system);
+        Ok(())
+    }
+
+    pub async fn load_system_config(&self, system: &str) -> Result<SystemGameConfig> {
+        let config = self.config.read().await;
+
+        if let Some(sys_config) = config.systems.get(system) {
+            Ok(sys_config.clone())
+        } else {
+            let default = SystemGameConfig::new(system.to_string(), GameMode::Console);
+            Ok(default)
+        }
+    }
+
+    pub async fn get_all_system_configs(&self) -> Result<Vec<SystemGameConfig>> {
+        let config = self.config.read().await;
+        let mut systems: Vec<SystemGameConfig> = config.systems.values().cloned().collect();
+        systems.sort_by(|a, b| a.system.cmp(&b.system));
+        Ok(systems)
     }
 }

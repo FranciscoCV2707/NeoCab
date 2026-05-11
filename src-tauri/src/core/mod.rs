@@ -15,7 +15,7 @@ pub mod shader_manager;
 
 pub use emulator_manager::EmulatorManager;
 pub use game_library::GameLibrary;
-pub use config_manager::ConfigManager;
+pub use config_manager::{ConfigManager, SystemGameConfig, GameMode};
 pub use coin_manager::{CoinManager, CoinState, CoinEvent};
 pub use coin_hardware::{CoinHardwareExt, HardwareConfig, HardwareType, HardwareMonitor};
 pub use timer_manager::{TimerManager, TimerStatus, TimerState};

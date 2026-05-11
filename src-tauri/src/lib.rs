@@ -50,7 +50,7 @@ pub fn run() {
             });
 
             match result {
-                Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager, media_manager, shader_manager)) => {
+                Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager, media_manager, shader_manager, config_manager)) => {
                     app.manage(game_library);
                     app.manage(emulator_manager);
                     app.manage(coin_manager);
@@ -61,6 +61,7 @@ pub fn run() {
                     app.manage(theme_manager);
                     app.manage(media_manager);
                     app.manage(shader_manager);
+                    app.manage(config_manager);
                     Ok(())
                 }
                 Err(e) => {
@@ -99,6 +100,9 @@ pub fn run() {
             commands::get_config,
             commands::set_config,
             commands::reload_config,
+            commands::save_system_config,
+            commands::load_system_config,
+            commands::get_all_system_configs,
             commands::authenticate_operator,
             commands::logout_operator,
             commands::is_operator_authenticated,
@@ -124,13 +128,6 @@ pub fn run() {
             commands::get_hardware_status,
             commands::start_hardware_monitoring,
             commands::stop_hardware_monitoring,
-            commands::list_themes,
-            commands::get_current_theme,
-            commands::load_theme,
-            commands::save_custom_theme,
-            commands::export_theme,
-            commands::import_theme,
-            commands::apply_theme,
             commands::scan_media,
             commands::get_media_stats,
             commands::get_system_media,
@@ -159,7 +156,7 @@ fn init_logging() {
         .try_init();
 }
 
-async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager, core::TimerManager, input::InputManager, core::OperatorPanel, core::AutobootManager, core::ThemeManager, core::MediaManager, core::ShaderManager)> {
+async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager, core::TimerManager, input::InputManager, core::OperatorPanel, core::AutobootManager, core::ThemeManager, core::MediaManager, core::ShaderManager, core::ConfigManager)> {
     let db = std::sync::Arc::new(db::Database::new("./data/neocab.db").await?);
     db.init_default_systems().await?;
 
@@ -168,7 +165,7 @@ async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, c
     let mut emulator_manager = core::EmulatorManager::new(db.clone());
     emulator_manager.initialize_default_emulators().await?;
 
-    let coin_manager = core::CoinManager::new(db);
+    let coin_manager = core::CoinManager::new(db.clone());
     let timer_manager = core::TimerManager::new();
     let input_manager = input::InputManager::new();
     let operator_panel = core::OperatorPanel::new("0000".to_string());
@@ -176,6 +173,7 @@ async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, c
     let theme_manager = core::ThemeManager::default();
     let media_manager = core::MediaManager::new("./data".into(), 256 * 1024 * 1024);
     let shader_manager = core::ShaderManager::new("./public/shaders".into());
+    let config_manager = core::ConfigManager::new("./data/config.yml", db).await?;
 
-    Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager, media_manager, shader_manager))
+    Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager, media_manager, shader_manager, config_manager))
 }
