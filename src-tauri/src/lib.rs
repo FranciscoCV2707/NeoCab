@@ -122,6 +122,13 @@ pub fn run() {
             commands::get_hardware_status,
             commands::start_hardware_monitoring,
             commands::stop_hardware_monitoring,
+            commands::list_themes,
+            commands::get_current_theme,
+            commands::load_theme,
+            commands::save_custom_theme,
+            commands::export_theme,
+            commands::import_theme,
+            commands::apply_theme,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

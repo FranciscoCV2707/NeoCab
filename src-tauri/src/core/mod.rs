@@ -19,7 +19,7 @@ pub use coin_hardware::{CoinHardwareExt, HardwareConfig, HardwareType, HardwareM
 pub use timer_manager::{TimerManager, TimerStatus, TimerState};
 pub use operator_panel::{OperatorPanel, AuthLevel, SessionStats, OperatorStats, SystemHealth};
 pub use autoboot::AutobootManager;
-pub use theme_manager::{ThemeManager, Theme, ThemeConfig};
+pub use theme_manager::{ThemeManager, Theme, ThemeInfo, ThemeColors, WheelSettings, OverlaySettings};
 pub use game_state::{GameStateManager, AppState};
 pub use gpio_coins::{GPIOCoinDetector, GPIOConfig};
 pub use arduino_serial::{ArduinoInterface, ArduinoConfig};
