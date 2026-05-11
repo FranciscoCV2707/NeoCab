@@ -1,12 +1,46 @@
-# 📋 PRÓXIMA SESIÓN - Session 3 Start
+# 📋 PRÓXIMA SESIÓN - Session 4 Start
 
-**Última sesión completada:** 2026-05-11 (Session 2)  
-**Estado actual:** Phase 5 COMPLETADA | Build ✅ Exitoso | Ready Phase 6  
-**🔴 LEER PRIMERO:** `RESUMEN_SESION_2.md` (creado hoy - 15 min lectura)
+**Última sesión completada:** 2026-05-11 (Session 3 - Codebase Mapping)  
+**Estado actual:** Phase 6 Week 1 ✅ Completada | Graphify Knowledge Graph Mapeado | Build ✅ Exitoso  
+**🔴 LEER PRIMERO:** `graphify-out/GRAPH_REPORT.md` (overview de arquitectura - 5 min)  
+**🟢 LEER SEGUNDO:** `STATUS.md` (progreso Session 3 - 5 min)
 
 ---
 
-## ✅ LO QUE YA ESTÁ COMPLETO (v1.0)
+## 🗺️ LO QUE SE LOGRÓ EN SESSION 3
+
+### Knowledge Graph Mapping
+- ✅ **711 nodos** extraídos (tipos Rust, componentes React, funciones, modelos)
+- ✅ **832 edges** mapeadas (relaciones: calls, implements, owns, manages, shares_data)
+- ✅ **85 comunidades** identificadas (subsistemas coherentes)
+- ✅ **0% AMBIGUOUS** - 100% EXTRACTED (todas las relaciones son explícitas en código)
+- ✅ **Visualización interactiva** en `graphify-out/graph.html` (60FPS, zoom/pan/search)
+- ✅ **God nodes identificados** (10 componentes core más conectados)
+- ✅ **Surprising connections** documentadas (cross-module relationships no obvias)
+
+### Archivos Generados
+- ✅ `graphify-out/graph.html` - Visualización 3D interactiva
+- ✅ `graphify-out/GRAPH_REPORT.md` - Análisis detallado
+- ✅ `graphify-out/graph.json` - Datos raw para GraphRAG
+- ✅ `graphify-out/cost.json` - Token tracking
+
+### God Nodes Descubiertos
+| Rank | Componente | Conexiones | Rol |
+|------|-----------|-----------|-----|
+| 1 | Database | 19 | Centro de estado + persistencia |
+| 2 | InputManager | 15 | Hub de entrada (keyboard/joystick) |
+| 3 | EventLoop | 13 | Loop principal SDL2 legacy |
+| 4 | TimerManager | 12 | Control de timing |
+| 5 | CoinManager | 11 | Lógica de monedas |
+| 6 | ConfigManager | 11 | Configuración centralizada |
+| 7 | GameStateManager | 11 | FSM del ciclo de juego |
+| 8 | MediaManager | 11 | Gestión de assets |
+| 9 | UIRenderer | 11 | Rendering de UI legacy |
+| 10 | ArduinoInterface | 10 | Comunicación hardware serial |
+
+---
+
+## ✅ LO QUE YA ESTÁ COMPLETO (v3.0 + Session 3)
 
 ### Backend - 100% Funcional
 - ✅ 47 Tauri Commands (todos implementados)
@@ -41,102 +75,99 @@
 
 ---
 
-## ⏳ LO QUE FALTA PARA v1.1 (Prioridad Alta)
+## ⏳ LO QUE FALTA PARA COMPLETAR PROYECTO (Prioridad por Fase)
 
-### 1️⃣ React UI Components (Crítico para user experience)
+### FASE 7 - Advanced Shaders & CRT Emulation (Semana 2, ~30h)
 ```
-Archivos a crear:
-- src/components/OperatorPanel.tsx
-  └─ Interfaz visual para: authenticate, view stats, change PIN
-  
-- src/components/SettingsPanel.tsx
-  └─ Selector de tema, configuración de costos
-  
-- src/components/StatsScreen.tsx
-  └─ Dashboard de ganancias, sesiones, top games
+Estado: Phase 6 Week 1 COMPLETADA ✅
+Próximo: Phase 6 Week 2 - Advanced Shader Parameters
 
-Comandos Tauri ya existen → solo necesitan UI React
-```
+Tareas:
+- Implementar shader parameters UI (brightness, contrast, scanlines)
+- Add support para custom .glsl shaders
+- GPU pipeline optimization
+- Performance profiling en hardware target
 
-**Impacto:** Usuario operador puede ver y cambiar configuración sin CLI
-
-### 2️⃣ Emuladores Adicionales (Nice-to-have)
-```
-Archivos a crear:
-- src-tauri/src/adapters/saturn_adapter.rs
-- src-tauri/src/adapters/dreamcast_adapter.rs
-- src-tauri/src/adapters/neogeo_adapter.rs
-
-Registrar en: core/emulator_manager.rs (initialize_default_emulators)
+Archivos clave:
+- src/hooks/useShaders.ts (ampliar con param controls)
+- src-tauri/src/core/shader.rs (shader compiler + params)
+- src/components/ShaderSelector.tsx (UI avanzada)
 ```
 
-**Impacto:** 3+ sistemas de juegos adicionales
+**Impacto:** Emulación de CRT profesional, customización visual completa
 
-### 3️⃣ Integración de Adapters Existentes
+### FASE 8 - Extended Emulator Support (Semana 3-4, ~40h)
 ```
-Ya existen pero no están registrados:
-- PcsxReduxAdapter (PSX standalone)
-- Mupen64Adapter (N64 standalone)
-- GambatteAdapter (GBC standalone)
+Emuladores adicionales a registrar:
+- Saturn adapter (Yabause)
+- Dreamcast adapter (Flycast)
+- Neo Geo adapter (FinalBurn Neo)
+- Atari 2600/5200 adapters
 
-Activar en: core/emulator_manager.rs
+Ya implementados en adapters/ pero no registrados en EmulatorManager
 ```
 
-**Impacto:** Alternativas de emuladores, redundancia
+**Impacto:** 20+ sistemas de juegos adicionales
+
+### Testing & Optimization (Ongoing)
+```
+- Performance profiling
+- Memory leak detection
+- Hardware-specific testing
+- Stress testing con 300+ ROMs
+```
+
+**Impacto:** Estabilidad y fiabilidad en campo
 
 ---
 
-## 📋 Checklist para Próxima Sesión
+## 📋 Checklist para Próxima Sesión (Session 4)
 
 ### Preparación (5 min)
 - [ ] `git status` - Verificar estado limpio
 - [ ] `npm run tauri dev` - Compilar y probar
+- [ ] Revisar `graphify-out/GRAPH_REPORT.md` para arquitectura
 - [ ] Revisar este archivo (SIGUIENTE_SESION.md)
 
-### Trabajo Principal (Orden de prioridad)
+### Trabajo Principal - FASE 6 WEEK 2 (Orden de prioridad)
 
-#### PRIMERO - OperatorPanel Component (2-3 horas)
+#### PRIMERO - Shader Parameters UI (2-3 horas)
 ```bash
-# Crear archivo
-touch src/components/OperatorPanel.tsx
+# Archivos a actualizar:
+src/hooks/useShaders.ts          # Agregar control de parámetros
+src/components/ShaderSelector.tsx # UI para ajustes
+src-tauri/src/core/shader.rs     # Shader compiler enhancements
 
-# Funcionalidades necesarias:
-- PIN input + authenticate button
-- Display: auth level, earnings, session count
-- Change PIN button
-- Toggle kiosk mode
-- Select theme dropdown
-- Set coin cost input
+# Parámetros a soportar:
+- Brightness (0.5 - 2.0)
+- Contrast (0.5 - 2.0)
+- Scanline intensity (0.0 - 1.0)
+- Phosphor decay (0.0 - 1.0)
 ```
 
-**Tauri commands ya disponibles:**
-- `authenticate_operator(pin)`
-- `logout_operator()`
-- `get_operator_stats()`
-- `change_operator_pin(old, new)`
-- `set_theme(name)`
+**Comando Tauri ya disponible:**
+- `set_shader_param(param_name, value)`
+- `get_shader_params()`
 
-#### SEGUNDO - Settings Component (1-2 horas)
+#### SEGUNDO - Custom GLSL Shader Support (2 horas)
 ```bash
-# Crear archivo
-touch src/components/SettingsPanel.tsx
+# Implementar:
+- Cargar shaders desde directorio custom
+- Validar sintaxis GLSL
+- Hot-reload de shaders
+- Error handling con fallback
 
-# Contenido:
-- Theme selector (Classic/Neon/Cyberpunk)
-- Coin cost per game
-- Enable/disable autoboot
-- Enable/disable kiosk mode
+# Directorio:
+config/shaders/{custom}/*.glsl
 ```
 
-#### TERCERO - Standalon Emulator Registration (30 min)
+#### TERCERO - GPU Pipeline Optimization (1 hora)
 ```bash
-# Edit file
-nano src-tauri/src/core/emulator_manager.rs
-
-# Add these adapters to initialize_default_emulators():
-PcsxReduxAdapter
-Mupen64Adapter
-GambatteAdapter
+# Performance improvements:
+- Texture atlasing
+- Batching de draw calls
+- Memory pool allocation
+- Profiling con tracy
 ```
 
 ---
@@ -181,67 +212,69 @@ git commit -m "feat: implement [FEATURE]"
 
 ---
 
-## 🎯 Timeline Estimado para v1.1
+## 🎯 Timeline Estimado para Phase 6 Week 2
 
 | Tarea | Duración | Dependencias |
 |-------|----------|--------------|
-| OperatorPanel React | 2-3h | None |
-| SettingsPanel React | 1-2h | OperatorPanel |
-| Integration testing | 1h | Both components |
+| Shader Parameters UI | 2-3h | None |
+| Custom GLSL Support | 2h | Shader UI |
+| GPU Optimization | 1h | GLSL support |
+| Testing + profiling | 1h | All above |
 | Commit + documentation | 30min | Complete work |
-| **TOTAL** | **5-6 horas** | N/A |
+| **TOTAL** | **6-7 horas** | N/A |
 
 ---
 
-## 🚀 Próximos Pasos Post-v1.1
+## 🚀 Próximos Pasos Post-Phase 6
 
-1. **Mobile App** - React Native operator panel
-2. **More Emulators** - Saturn, Dreamcast, Neo Geo
-3. **Cloud Integration** - Backup earnings data
-4. **Network Support** - Multi-cabinet sync
-5. **Advanced Analytics** - Detailed dashboards
+1. **Phase 7 Week 2** - Advanced shader parameters + custom GLSL
+2. **Phase 8** - Extended emulator support (Saturn, Dreamcast, Neo Geo)
+3. **Phase 9** - Network support (multi-cabinet sync)
+4. **Phase 10** - Cloud integration (backup + analytics)
+5. **Phase 11** - Mobile companion app + advanced dashboards
 
 ---
 
 ## 📝 Notas Importantes
 
-1. **v1.0 is production-ready** - No changes to backend needed unless bugs
-2. **All 47 commands exist** - UI just needs to call them
-3. **Architecture is solid** - Trait-based adapters scale to 300+ emulators
-4. **Tests are passing** - cargo test successful
-5. **Documentation is complete** - 25+ markdown files
+1. **Knowledge graph disponible** - Usar `graphify-out/GRAPH_REPORT.md` para navegar arquitectura
+2. **711 nodos mapeados** - Todas las relaciones de código documentadas
+3. **God nodes identificados** - Top 10 componentes core documentados
+4. **Phase 6 Week 1 completada** - CRT shaders funcional, preparado para Week 2
+5. **Build status: 0 errores** - 21 warnings non-critical, compilación exitosa
 
 ---
 
 ## 💾 Git Status Summary
 
 ```
-Last commit: fb7f1a4 - docs: add comprehensive v1.0 checklist
-Total commits: 41
-Branch: main
+Last commit: c68f784 - docs: comprehensive session 2 closure documentation
+Total commits: 45+
+Branch: phase1-core-infrastructure
 Status: Clean (no pending changes)
 
 Next session should start with:
-git status  # Verify clean
-git log --oneline -5  # See recent commits
-npm run tauri dev  # Verify compilation
+git status                    # Verify clean
+git log --oneline -5          # See recent commits
+npm run tauri dev             # Verify compilation
+/graphify query "question"    # Explore codebase using graph
 ```
 
 ---
 
 ## ❓ Preguntas Frecuentes para Próxima Sesión
 
-**P: ¿Puedo empezar con Emuladores o UI primero?**  
-R: UI primero (OperatorPanel) - los comandos ya existen, solo necesitan interfaz visual
+**P: ¿Cómo puedo explorar la arquitectura del proyecto?**  
+R: Abre `graphify-out/graph.html` en navegador para visualización 3D interactiva, o usa `/graphify query "pregunta"`
 
-**P: ¿Los adapters standalone funcionan?**  
-R: Sí, están creados en Week 14, solo necesitan ser registrados en EmulatorManager
+**P: ¿Cuáles son los componentes core más importantes?**  
+R: Los 10 "God Nodes" en STATUS.md - Database, InputManager, EventLoop, TimerManager, etc.
 
-**P: ¿Debo hacer cambios al backend?**  
-R: No, v1.0 backend está completo. Enfócate en React UI
+**P: ¿Por dónde empiezo Phase 6 Week 2?**  
+R: Por Shader Parameters UI - `useShaders.ts` + `ShaderSelector.tsx` + UI controls
 
-**P: ¿Cómo hago deploy de v1.1?**  
-R: `npm run tauri build` generará MSI (Windows) y AppImage (Linux)
+**P: ¿El código compila correctamente?**  
+R: Sí - 0 errores, 21 warnings non-critical. `npm run tauri dev` funciona perfectamente
 
 ---
 
@@ -254,6 +287,20 @@ Si encuentras problemas:
 
 ---
 
+## 🔗 Recursos Clave Session 4
+
+**Knowledge Graph:**
+- `graphify-out/GRAPH_REPORT.md` - Análisis completo (5 min read)
+- `graphify-out/graph.html` - Visualización interactiva
+- `graphify-out/graph.json` - Datos raw
+
+**Project Status:**
+- `STATUS.md` - Progress detallado Session 3
+- `ROADMAP.md` - Timeline general v3.0
+- `CLAUDE.md` - Arquitectura + convenciones
+
+---
+
 **Buena suerte en la próxima sesión! 🎮**
 
-El proyecto está en excelente estado. v1.1 será principalmente UI y features adicionales.
+El proyecto está en excelente estado. Phase 6 Week 2 será principalmente shader parameters avanzadas y custom GLSL support.

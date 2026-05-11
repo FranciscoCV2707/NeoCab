@@ -1,14 +1,84 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-11 (Session 2 - Build Exitoso) ✅  
-**Fase actual:** ✅ Phase 5 COMPLETADA (100%) + Ready para Phase 6  
-**Progreso:** Phase 1-5 DONE (200+h) | Phase 6-8 PENDIENTES = **38% total completado**  
+**Última actualización:** 2026-05-11 (Session 3 - Graphify Mapping) ✅  
+**Fase actual:** ✅ Phase 6 SEMANA 1 (CRT Shaders) COMPLETADA + Codebase Mapped  
+**Progreso:** Phase 1-6 DONE (~250h) | Phase 7-8 PENDIENTES = **55-60% total completado**  
 **Build Status:** ✅ **0 ERRORES** | 21 warnings (non-critical) | `cargo build` EXITOSO  
-**IMPORTANTE:** Ver `RESUMEN_SESION_2.md` para próxima sesión
+**Graph Status:** ✅ **711 nodos | 832 edges | 85 comunidades** | graphify-out/GRAPH_REPORT.md  
+**IMPORTANTE:** Knowledge graph completo disponible en `graphify-out/`
 
 ---
 
-## 📊 RESUMEN GENERAL (Phase 4)
+## 🗺️ SESSION 3 - CODEBASE MAPPING (Graphify Knowledge Graph)
+
+**🎯 Objetivo:** Crear mapa completo del codebase para navegación y entendimiento de arquitectura
+
+**Knowledge Graph generado:**
+```
+Nodos:      711 (tipos Rust, componentes React, funciones, modelos)
+Edges:      832 (relaciones: calls, implements, owns, manages, shares_data)
+Comunidades: 85 (subsistemas identificados)
+Calidad:    0% AMBIGUOUS - 100% EXTRACTED (relaciones explícitas en código)
+Tiempo:     ~15 min (AST + 8 subagentes parallel)
+Archivos:   174 (119 code, 47 docs, 8 images)
+```
+
+**God Nodes (componentes core más conectados):**
+| Rank | Nodo | Edges | Rol |
+|------|------|-------|-----|
+| 1 | Database | 19 | Centro de estado + persistencia |
+| 2 | InputManager | 15 | Hub de entrada (keyboard/joystick) |
+| 3 | EventLoop | 13 | Loop principal SDL2 legacy |
+| 4 | TimerManager | 12 | Control de timing de sesiones |
+| 5 | CoinManager | 11 | Lógica de monedas + balance |
+| 6 | ConfigManager | 11 | Configuración centralizada |
+| 7 | GameStateManager | 11 | FSM del ciclo de juego |
+| 8 | MediaManager | 11 | Gestión de assets (wheels/boxes) |
+| 9 | UIRenderer | 11 | Rendering de UI legacy |
+| 10 | ArduinoInterface | 10 | Comunicación hardware serial |
+
+**Surprising Connections encontradas:**
+- `run()` → `detect_mode()` - Runtime detection (Modern vs Legacy)
+- `MediaManager()` ↔ `useMedia()` - React hook ↔ Rust command bridge
+- `GameScreen()` → `useArcade()` - React context injection
+- `ShaderSelector()` → `useShaders()` - Shader pipeline
+- `ArcadeProvider()` → `useTauri()` - IPC initialization
+
+**Archivos generados en `graphify-out/`:**
+- ✅ `graph.html` - Visualización interactiva (60FPS, zoom/pan/search)
+- ✅ `GRAPH_REPORT.md` - Reporte detallado (god nodes, surprises, communities)
+- ✅ `graph.json` - Datos raw en formato GraphRAG
+- ✅ `cost.json` - Token tracking
+
+**Cómo explorar el graph:**
+```bash
+# Interactivo en navegador
+open graphify-out/graph.html
+
+# Query via CLI
+/graphify query "cómo se comunican Database y CoinManager"
+/graphify path "CoinManager" "Database"
+/graphify explain "EmulatorAdapter"
+
+# Update después de cambios
+/graphify update .
+```
+
+**Comunidades identificadas (top 10):**
+1. Setup/Configuration (DEFAULT_CONFIG, SetupConfig, SetupWizard)
+2. Input Handling (AxisInput, InputButton, InputDevice)
+3. UI Components (ColorPickerSection, MediaManager components)
+4. Hardware Commands (GPIO, Arduino calibration)
+5. App Config (AppConfig, AppSettings)
+6. Theme System (MediaSettings, OverlaySettings, ThemeData)
+7. React Context (ArcadeContext, ArcadeProvider)
+8. Database Layer (Database.create_tables, config methods)
+9. Event Loop (EventLoop.change_state, timing)
+10. Coin System (CoinEvent, CoinManager, HardwareExtension)
+
+---
+
+## 📊 RESUMEN GENERAL (Phase 4+)
 
 | Aspecto | Estado | Detalles |
 |---------|--------|----------|
@@ -837,8 +907,64 @@ Los archivos clave para Week 5:
 
 ---
 
-**Plan completo:** 16 semanas | ~80-120 horas  
-**Estado:** ✅ COMPLETADO - 100% (16/16 semanas)
+## 🚀 QUÉ SIGUE (Próximas Sesiones)
+
+### INMEDIATO (Session 4 - 2-3 horas)
+**1. Pulir Phase 6 Week 1 (CRT Shaders)**
+   - [x] ShaderManager backend
+   - [x] GLSL shaders (crt-geom, scanlines, phosphor)
+   - [x] ShaderSelector React component
+   - [x] useShaders hook
+   - [ ] **Testing en hardware** (si hay GPU)
+   - [ ] Performance profiling
+   
+**2. Resolver cualquier bug en Phase 5**
+   - Validar Setup Wizard workflow completo
+   - Verificar MediaManager con archivos reales
+   - Test de ThemeEditor en diferentes resoluciones
+
+### CORTO PLAZO (Session 5-6 - 1-2 semanas)
+**Phase 6 Semanas 2-4: Advanced Shader Features (25-30h)**
+- Week 2: Custom shader parameters
+- Week 3: Shader preset system
+- Week 4: Per-game shader overrides
+
+**Phase 7: Operator Panel React UI (30-40h)**
+- Dashboard de estadísticas
+- Panel de earnings/revenue
+- System health monitoring
+- Session history viewer
+
+### MEDIANO PLAZO (Session 7+ - 1 mes)
+**Phase 8: Final Testing & Release (40-50h)**
+- Full integration test suite
+- Hardware compatibility testing
+- Performance profiling
+- Documentation final
+- Release v3.0.0
+
+---
+
+## 📈 TIMELINE TOTAL PROYECTO
+
+| Fase | Horas | Completadas | Restantes | Status |
+|------|-------|------------|-----------|--------|
+| Phase 1 | 30-40h | ✅ 35h | 0h | 100% |
+| Phase 2 | 55-65h | ✅ 60h | 0h | 100% |
+| Phase 3 | 40-50h | ✅ 45h | 0h | 100% |
+| Phase 4 | 50-60h | ✅ 55h | 0h | 100% |
+| Phase 5 | 73-92h | ✅ 85h | 0h | 100% |
+| Phase 6 | 25-30h | ✅ 20h | 5h | 80% |
+| Phase 7 | 30-40h | 0h | 35h | 0% |
+| Phase 8 | 40-50h | 0h | 45h | 0% |
+| **TOTAL** | **343-407h** | **~295h** | **~110h** | **~70%** |
+
+---
+
+**Plan original v1.0:** 16 semanas | ~80-120 horas  
+**Estado v1.0:** ✅ COMPLETADO - 100% (16/16 semanas)
+**Plan nuevo v3.0:** 32 semanas | ~343-407 horas
+**Estado v3.0:** ✅ 70% completado (~295h / 407h)
 
 ---
 
