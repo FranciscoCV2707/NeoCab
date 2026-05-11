@@ -1,7 +1,7 @@
 #[cfg(feature = "legacy-ui")]
 use sdl2::video::Window;
 #[cfg(feature = "legacy-ui")]
-use sdl2::{render::Canvas, pixels::Color};
+use sdl2::{render::Canvas, pixels::Color, Sdl};
 
 use crate::Result;
 use super::{DisplayConfig, FrameBuffer, WheelRenderer, UIRenderer};
@@ -14,6 +14,7 @@ pub struct Renderer {
     wheel_renderer: WheelRenderer,
     ui_renderer: UIRenderer,
     config: DisplayConfig,
+    sdl_context: Sdl,
 }
 
 /// Dummy renderer for modern mode (SDL2 disabled)
@@ -60,6 +61,7 @@ impl Renderer {
             wheel_renderer,
             ui_renderer,
             config,
+            sdl_context,
         })
     }
 
@@ -88,6 +90,10 @@ impl Renderer {
 
     pub fn get_size(&self) -> (u32, u32) {
         (self.config.width, self.config.height)
+    }
+
+    pub fn get_sdl_context(&self) -> &Sdl {
+        &self.sdl_context
     }
 
     pub fn set_fullscreen(&mut self, fullscreen: bool) -> Result<()> {

@@ -1,8 +1,10 @@
 pub mod joystick;
 pub mod keyboard;
+pub mod sdl_event_handler;
 
 pub use joystick::JoystickInput;
 pub use keyboard::KeyboardInput;
+pub use sdl_event_handler::SDLEventHandler;
 
 use crate::Result;
 
@@ -32,6 +34,8 @@ pub enum InputEvent {
 
 /// Input handler for SDL2 in legacy mode
 pub struct InputHandler {
+    #[cfg(feature = "legacy-ui")]
+    sdl_handler: Option<SDLEventHandler>,
     joystick_input: JoystickInput,
     keyboard_input: KeyboardInput,
 }
@@ -43,24 +47,37 @@ impl InputHandler {
         let joystick_input = JoystickInput::new()?;
         let keyboard_input = KeyboardInput::new()?;
 
+        #[cfg(feature = "legacy-ui")]
+        let sdl_handler = None; // Will be initialized with SDL context
+
         tracing::info!("Input handler ready: {} joysticks detected",
             joystick_input.get_device_count());
 
         Ok(Self {
+            #[cfg(feature = "legacy-ui")]
+            sdl_handler,
             joystick_input,
             keyboard_input,
         })
     }
 
+    #[cfg(feature = "legacy-ui")]
+    pub fn initialize_sdl(&mut self, sdl_context: &sdl2::Sdl) -> Result<()> {
+        self.sdl_handler = Some(SDLEventHandler::new(sdl_context)?);
+        Ok(())
+    }
+
     pub fn poll_events(&mut self) -> Vec<InputEvent> {
+        #[cfg(feature = "legacy-ui")]
+        if let Some(handler) = &mut self.sdl_handler {
+            let (events, _) = handler.poll_events();
+            return events;
+        }
+
         let mut events = Vec::new();
-
-        // Poll joystick events
+        // Fallback to manual polling
         events.extend(self.joystick_input.poll());
-
-        // Poll keyboard events
         events.extend(self.keyboard_input.poll());
-
         events
     }
 

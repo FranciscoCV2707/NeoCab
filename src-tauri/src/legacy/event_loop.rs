@@ -31,6 +31,10 @@ impl EventLoop {
 
         #[cfg(feature = "legacy-ui")]
         {
+            // Initialize SDL input handler
+            let sdl_ctx = renderer.get_sdl_context();
+            input_handler.initialize_sdl(sdl_ctx)?;
+
             while self.running {
                 let frame_start = Instant::now();
 
