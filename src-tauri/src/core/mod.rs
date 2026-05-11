@@ -10,6 +10,7 @@ pub mod theme_manager;
 pub mod game_state;
 pub mod gpio_coins;
 pub mod arduino_serial;
+pub mod media_manager;
 
 pub use emulator_manager::EmulatorManager;
 pub use game_library::GameLibrary;
@@ -23,3 +24,4 @@ pub use theme_manager::{ThemeManager, Theme, ThemeInfo, ThemeColors, WheelSettin
 pub use game_state::{GameStateManager, AppState};
 pub use gpio_coins::{GPIOCoinDetector, GPIOConfig};
 pub use arduino_serial::{ArduinoInterface, ArduinoConfig};
+pub use media_manager::{MediaManager, MediaType, MediaFile, MediaLibrary, MediaStats};

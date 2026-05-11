@@ -9,6 +9,7 @@ pub mod operator;
 pub mod theme;
 pub mod theme_commands;
 pub mod hardware;
+pub mod media;
 
 pub use system::*;
 pub use games::*;
@@ -21,3 +22,4 @@ pub use operator::*;
 pub use theme::*;
 pub use theme_commands::*;
 pub use hardware::*;
+pub use media::*;

@@ -253,6 +253,66 @@
 | Horas invertidas | 28-32h |
 | **Phase 5 Week 1 Progress** | **100%** |
 
+### Phase 5 Week 2: Media Management System ✅ 100% DONE (15-18h)
+
+#### Task 5.2a: MediaManager Backend ✅ DONE
+- ✅ MediaManager struct con directory scanning
+- ✅ HyperSpin folder structure support
+  - media/{system}/Images/{Wheel,Boxes,Backgrounds}
+- ✅ MediaType enum (Wheel, BoxArt, Background, Screenshot, Custom)
+- ✅ MediaLibrary with HashMap-based organization
+- ✅ MediaStats struct for reporting
+- ✅ File type detection (PNG, JPG, GIF, WebP)
+- ✅ Media organization from source directories
+- ✅ Smart file naming inference
+- ✅ Unit tests for media detection
+
+**Archivo:** `src-tauri/src/core/media_manager.rs` (450 líneas)
+
+#### Task 5.2b: Media Tauri Commands ✅ DONE
+- ✅ scan_media() - Full library scan
+- ✅ get_media_stats() - Statistics report
+- ✅ get_system_media() - System-specific media
+- ✅ organize_media() - Auto-organize from directory
+- ✅ get_media() - Retrieve specific game media
+- ✅ import_media() - Direct import with archive support
+
+**Archivo:** `src-tauri/src/commands/media.rs` (170 líneas)
+
+#### Task 5.2c: React Media Manager UI ✅ DONE
+- ✅ MediaManager.tsx (340 líneas)
+  - Tab-based interface (Stats/Organize/Import)
+  - Real-time statistics display
+  - Media organization wizard
+  - Import management
+  - File path input validation
+  - Success/error messaging
+
+- ✅ useMedia.ts hook (180 líneas)
+  - Tauri command wrappers para media operations
+  - State management (stats, system media, loading, error)
+  - Auto-load stats on mount
+  - Full error handling
+
+- ✅ MediaManager.css (300 líneas)
+  - Arcade-style tab interface
+  - Stat cards with hover effects
+  - Responsive input section
+  - Message animations
+  - Mobile-optimized layout
+
+### Phase 5 Week 2 Statistics
+| Métrica | Valor |
+|---------|-------|
+| Backend Implementation | MediaManager (450 líneas) |
+| Tauri Commands | 6 commands (170 líneas) |
+| React Components | 1 (340 líneas) |
+| React Hook | 1 (180 líneas) |
+| CSS Styling | 1 (300 líneas) |
+| **Total nuevas líneas** | **~1,440** |
+| Horas invertidas | 15-18h |
+| **Phase 5 Week 2 Progress** | **100%** |
+
 ### Features Implementadas
 1. **Color Customization**: 7 colores (primary, secondary, accent, text, background, success, error)
 2. **Wheel Configuration**: Size, spacing, animation duration, item colors
@@ -802,9 +862,10 @@ Los archivos clave para Week 5:
 | Phase 3 | ✅ 100% | 40-50h | 125-155h |
 | Phase 4 | ✅ 100% | 50-60h | 175-215h |
 | Phase 5 Week 1 | ✅ 100% | 28-32h | 203-247h |
-| Phase 5 Weeks 2-4 | ⏳ 0% | 60-80h | 263-327h |
-| Phase 6-8 | ⏳ 0% | 100-150h | 363-477h |
-| **TOTAL v3.0** | **~40-44%** | **463-477h** | **463-477h** |
+| Phase 5 Week 2 | ✅ 100% | 15-18h | 218-265h |
+| Phase 5 Weeks 3-4 | ⏳ 0% | 50-65h | 268-330h |
+| Phase 6-8 | ⏳ 0% | 100-150h | 368-480h |
+| **TOTAL v3.0** | **~44-48%** | **463-480h** | **463-480h** |
 
 ### Commits totales sesión: 9
 - Phase 1: 3 commits (e89fd54, f88324a, 6446828)

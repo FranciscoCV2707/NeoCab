@@ -50,7 +50,7 @@ pub fn run() {
             });
 
             match result {
-                Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager)) => {
+                Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager, media_manager)) => {
                     app.manage(game_library);
                     app.manage(emulator_manager);
                     app.manage(coin_manager);
@@ -59,6 +59,7 @@ pub fn run() {
                     app.manage(operator_panel);
                     app.manage(autoboot_manager);
                     app.manage(theme_manager);
+                    app.manage(media_manager);
                     Ok(())
                 }
                 Err(e) => {
@@ -129,6 +130,12 @@ pub fn run() {
             commands::export_theme,
             commands::import_theme,
             commands::apply_theme,
+            commands::scan_media,
+            commands::get_media_stats,
+            commands::get_system_media,
+            commands::organize_media,
+            commands::get_media,
+            commands::import_media,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -146,7 +153,7 @@ fn init_logging() {
         .try_init();
 }
 
-async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager, core::TimerManager, input::InputManager, core::OperatorPanel, core::AutobootManager, core::ThemeManager)> {
+async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager, core::TimerManager, input::InputManager, core::OperatorPanel, core::AutobootManager, core::ThemeManager, core::MediaManager)> {
     let db = std::sync::Arc::new(db::Database::new("./data/neocab.db").await?);
     db.init_default_systems().await?;
 
@@ -161,6 +168,7 @@ async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, c
     let operator_panel = core::OperatorPanel::new("0000".to_string());
     let autoboot_manager = core::AutobootManager::default();
     let theme_manager = core::ThemeManager::default();
+    let media_manager = core::MediaManager::new("./data".into(), 256 * 1024 * 1024);
 
-    Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager))
+    Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager, media_manager))
 }
