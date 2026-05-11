@@ -1,22 +1,22 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-10 (Phase 4 - Hardware Integration 30% complete)  
-**Fase actual:** ⏳ Phase 4/8 - Hardware Integration (30-35% progress)  
-**Progreso:** Phase 1-3 completadas (125-155h), Phase 4 60% done (15-20h invested)  
-**Estado:** Tasks 4.1-4.3 implementadas, 4.4 pendiente, integración en progreso
+**Última actualización:** 2026-05-10 (Phase 4 - Hardware Integration 60% complete)  
+**Fase actual:** 🔄 Phase 4/8 - Hardware Integration (Tasks 4.1-4.3 DONE, 4.4 IN PROGRESS)  
+**Progreso:** Phase 1-3 completadas (125-155h), Phase 4 60% done (15-20h invested) = 33% total  
+**Estado:** GPIO/Arduino/UI implementadas, integración con CoinManager pendiente
 
 ---
 
-## 📊 RESUMEN GENERAL
+## 📊 RESUMEN GENERAL (Phase 4)
 
 | Aspecto | Estado | Detalles |
 |---------|--------|----------|
-| **Compilación** | ✅ Exitosa | Rust + React compilando sin errores |
-| **Database** | ✅ Operacional | SQLite 10 tablas, WAL mode, indexes |
-| **Config System** | ✅ Completo | YAML parsing + hot-reload + DB persistence |
-| **ROM Scanner** | ✅ Completo | Scan recursivo, deduplicación CRC32, 7 sistemas |
-| **Tauri Setup** | ✅ Completo | State management, async initialization |
-| **Frontend** | ⏳ Próxima | React structure ready |
+| **GPIO Coin Detection** | ✅ Completo | RPi monitoring, debounce/threshold, thread-safe |
+| **Arduino Serial Interface** | ✅ Completo | Coin/solenoid protocol, feature-gated, multi-platform |
+| **Coin Overlay UI** | ✅ Completo | Animations, progress bar, arcade aesthetic |
+| **Hardware Calibration** | 🔄 75% | Type selector, GPIO/Arduino config, testing |
+| **CoinManager Integration** | ⏳ Pendiente | Event channel, database persistence |
+| **Full Build Test** | ⏳ Pendiente | Verify cargo build, dependency resolution |
 
 ---
 
@@ -175,6 +175,87 @@
 - ✅ Architecture overview documentation
 - ✅ User manual para operadores
 - ✅ Final QA checklist completion
+
+---
+
+## 🔄 PHASE 4: HARDWARE INTEGRATION (Session 2)
+
+### Task 4.1: GPIO Coin Detection ✅ DONE
+- ✅ GPIOCoinDetector struct con async monitoring
+- ✅ Debounce (10-100ms) y pulse threshold (50-500ms)
+- ✅ Platform-gated [cfg(target_os = "linux")]
+- ✅ Arc<AtomicBool> para thread-safety
+- ✅ CoinEvent channel integration
+- ✅ Mock implementations para non-Linux
+- ✅ Unit tests con GPIOConfig defaults
+
+**Archivo:** `src-tauri/src/core/gpio_coins.rs` (150 líneas)
+
+### Task 4.2: Arduino Serial Interface ✅ DONE
+- ✅ ArduinoInterface con serial port communication
+- ✅ Protocolo binario: 'C' (coins), 'S' (solenoid), 'P' (ping)
+- ✅ Feature-gated [cfg(feature = "hardware-arduino")]
+- ✅ detect_coins(), trigger_solenoid(), test_connection()
+- ✅ list_ports() con platform-specific defaults
+- ✅ Configurable baud rate (9600-115200)
+- ✅ Error handling con NeoCabError::System
+
+**Archivo:** `src-tauri/src/core/arduino_serial.rs` (250 líneas)
+
+### Task 4.3: Coin Overlay UI ✅ DONE
+- ✅ CoinOverlay React component con fixed positioning
+- ✅ Animated coin insert effect (scale + fade, 0.6s)
+- ✅ Progress bar (coins needed vs balance)
+- ✅ "Ready to play" indicator con pulse animation
+- ✅ Mobile-responsive design
+- ✅ Arcade aesthetic (naranja #ff6b00, amarillo #ffcc00)
+- ✅ Responsive sizing para tablet/mobile
+
+**Archivos:**
+- `src/components/hardware/CoinOverlay.tsx` (70 líneas)
+- `src/components/hardware/CoinOverlay.css` (140 líneas)
+
+### Task 4.4: Hardware Calibration Wizard 🔄 75% DONE
+- ✅ Hardware type selector (None/GPIO/Arduino)
+- ✅ GPIO configuration panel con sliders
+- ✅ Arduino configuration panel con baud rate
+- ✅ GPIO pin detection via list_gpio_pins
+- ✅ Serial port detection via list_serial_ports
+- ✅ Test buttons con result display
+- ✅ Hardware status checking
+- [ ] CoinManager integration (pendiente)
+- [ ] Setup wizard persistence (pendiente)
+
+**Archivos:**
+- `src/components/hardware/HardwareCalibration.tsx` (330 líneas)
+- `src/components/hardware/HardwareCalibration.css` (250 líneas)
+
+### Backend Integration
+- ✅ Hardware Tauri commands: `src-tauri/src/commands/hardware.rs` (140 líneas)
+  - list_gpio_pins, list_serial_ports
+  - test_gpio_pin, test_arduino_connection
+  - calibrate_coin_detection, get_hardware_status
+- ✅ Module exports en core/mod.rs y commands/mod.rs
+- ✅ Commands registered en lib.rs invoke_handler
+- ✅ React useHardware hook: `src/hooks/useHardware.ts` (150 líneas)
+
+### Documentation
+- ✅ PHASE4_HARDWARE.md (400 líneas) - Implementación detallada
+- ✅ PHASE4_SESSION_SUMMARY.md (250 líneas) - Resumen sesión
+- ✅ README.md actualizado con Hardware features
+- ✅ ROADMAP.md actualizado con Phase 4 status
+
+### Statistics
+| Métrica | Valor |
+|---------|-------|
+| Archivos creados | 15 |
+| Líneas Rust | ~540 |
+| Líneas React | ~550 |
+| Líneas CSS | ~390 |
+| Líneas docs | ~650 |
+| **Total líneas** | **~2,130** |
+| Horas invertidas | 15-20h |
+| Fase completada | 60% |
 
 ---
 

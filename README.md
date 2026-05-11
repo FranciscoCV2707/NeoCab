@@ -2,7 +2,7 @@
 
 Professional arcade cabinet OS with dual-mode architecture (Modern + Legacy), 15+ emulators, coin management, operator panel, and customizable themes. Built with Tauri 2.x, React 19, Rust, and SDL2.
 
-**Status**: Phase 3 COMPLETE - 29% of v3.0 plan (125-155 hours invested)
+**Status**: Phase 4 IN PROGRESS (60% complete) - 33% of v3.0 plan (140-175 hours invested)
 
 ## ✨ Features
 
@@ -29,6 +29,13 @@ Professional arcade cabinet OS with dual-mode architecture (Modern + Legacy), 15
 - **Input Polling**: Real-time SDL2 event handling (keyboard, joystick, D-pad)
 - **Media System**: HyperSpin-compatible image caching (wheels, box art, backgrounds)
 - **Game State Manager**: Pause/resume with state tracking
+
+### Hardware Integration (Phase 4 - In Progress)
+- **GPIO Coin Detection**: Raspberry Pi GPIO monitoring with debouncing (Linux)
+- **Arduino Serial Interface**: Coin counter + solenoid control via serial
+- **Coin Overlay UI**: Real-time coin display with progress bar and animations
+- **Hardware Calibration**: Multi-step wizard for GPIO/Arduino setup
+- **Auto-Detection**: Hardware status checks and port enumeration
 
 ## 🚀 Quick Start
 
@@ -186,6 +193,14 @@ npm run tauri build     # Platform-specific installer
 - `get_operator_stats()` - Earnings stats
 - `get_session_stats()` - Session info
 - `change_operator_pin(old, new)` - Update PIN
+
+### Hardware
+- `list_gpio_pins()` - Get available GPIO pins (RPi)
+- `list_serial_ports()` - Get available serial ports (Arduino)
+- `test_gpio_pin(pin)` - Test GPIO pin accessibility
+- `test_arduino_connection(port, baud_rate)` - Test Arduino connection
+- `calibrate_coin_detection(debounce_ms, pulse_threshold_ms)` - Calibrate sensors
+- `get_hardware_status()` - Check hardware feature status
 
 ### System
 - `enable_autoboot()` - Enable autostart
