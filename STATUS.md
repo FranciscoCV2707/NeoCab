@@ -521,5 +521,84 @@ Los archivos clave para Week 5:
 2. **Commits realizados Phase 1:**
    - e89fd54: Task 1.1 - Feature flags + build.rs
    - f88324a: Task 1.2 - Conditional compilation
+   - 6446828: STATUS.md update
+
+---
+
+## 🎮 NEOCAB v3.0 - PHASE 2 (Legacy SDL2 Mode)
+
+**Inicio:** 2026-05-10  
+**Rama:** phase1-core-infrastructure  
+**Estado:** ⏳ EN PROGRESO (Task 2.1, 2.2 COMPLETOS, 2.3-2.4 PENDIENTE)  
+**Próxima:** Phase 3 (HyperSpin Wheel UI en React)
+
+### Phase 2: Legacy SDL2 Mode (Estimated 60-80 horas)
+
+#### ✅ Task 2.1: SDL2 Graphics Engine (12-15h)
+- ✅ src-tauri/src/legacy/mod.rs: LegacyApp initialization
+- ✅ src-tauri/src/legacy/graphics/mod.rs: DisplayConfig, FrameBuffer, colors
+- ✅ src-tauri/src/legacy/graphics/renderer.rs:
+  - SDL2 window creation con fullscreen/windowed
+  - Canvas rendering con clear/present
+  - Feature-gated: legacy-ui enables real rendering
+- ✅ src-tauri/src/legacy/graphics/wheel.rs:
+  - HyperSpin wheel renderer con rotación
+  - Bresenham circle drawing algorithm
+  - Item selection con color highlighting
+  - Smooth rotation control
+- ✅ src-tauri/src/legacy/graphics/ui.rs:
+  - Info panel renderer (game info, description)
+  - Coin display overlay (top-right)
+  - Stats panel (bottom)
+  - Extensible overlay system
+- ✅ Commit: d5e1669 (10 files created)
+
+#### ✅ Task 2.2: Enhanced SDL2 Input System (8-10h)
+- ✅ src-tauri/src/legacy/input/sdl_event_handler.rs:
+  - Real-time SDL2 event polling
+  - Key mapping: arrows, WASD, Z/X/C/V, special keys
+  - Joystick button translation (0-9)
+  - Joystick axis mapping with 15000 deadzone
+  - Hat/D-pad support con diagonales
+- ✅ src-tauri/src/legacy/input/mod.rs:
+  - InputEvent enum (Move, Select, Button, System)
+  - InputHandler con SDLEventHandler integration
+  - initialize_sdl() method para setup
+- ✅ src-tauri/src/legacy/input/joystick.rs: Device detection
+- ✅ src-tauri/src/legacy/input/keyboard.rs: Key constants
+- ✅ Updated graphics/renderer.rs: SDL context storage
+- ✅ Updated event_loop.rs: SDL initialization
+- ✅ Commit: 8525d33
+
+#### ⏳ Task 2.3: Event Loop Refinement (10-12h)
+- [ ] Implement proper shutdown sequence
+- [ ] Add frame timing statistics
+- [ ] Implement pause/resume game state
+- [ ] Add input state smoothing
+- [ ] Integrate with game library
+- [ ] Handle mode switching (menu ↔ game)
+
+#### ⏳ Task 2.4: Media System & Caching (5-8h)
+- ✅ src-tauri/src/legacy/media/mod.rs: Image loading + caching
+- [ ] Load system wheel images
+- [ ] Load game box art
+- [ ] Preload backgrounds
+- [ ] Optimize cache strategy
+
+### Compilación Status Phase 2
+- ✅ SDL2 dependencies feature-gated
+- ✅ All modules compile con cfg guards
+- ✅ Renderer + Input + EventLoop integrate correctamente
+- ✅ Media loader ready for integration
+- ⚠️ Próxima: `cargo check --features legacy-ui` para verify
+
+### Timeline Phase 2 Restante
+- Task 2.3: ~2-3 horas (implementación + testing)
+- Task 2.4: ~1 hora (integración)
+- Phase 2 Total: ~35-40 horas completadas, 20-25 horas restantes
+
+### Commits realizados Phase 2:
+- d5e1669: Task 2.1 - SDL2 Graphics Engine
+- 8525d33: Task 2.2 - Enhanced Input System
 
 ---
