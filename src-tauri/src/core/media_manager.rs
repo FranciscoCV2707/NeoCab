@@ -70,18 +70,18 @@ impl MediaManager {
         if !systems_path.exists() {
             fs::create_dir_all(&systems_path)
                 .await
-                .map_err(|e| NeoCabError::Io(e.to_string()))?;
+                ?;
             return Ok(library);
         }
 
         let mut entries = fs::read_dir(&systems_path)
             .await
-            .map_err(|e| NeoCabError::Io(e.to_string()))?;
+            ?;
 
         while let Some(system_entry) = entries
             .next_entry()
             .await
-            .map_err(|e| NeoCabError::Io(e.to_string()))?
+            ?
         {
             let system_path = system_entry.path();
 
@@ -150,12 +150,12 @@ impl MediaManager {
     ) -> Result<()> {
         let mut entries = fs::read_dir(dir_path)
             .await
-            .map_err(|e| NeoCabError::Io(e.to_string()))?;
+            ?;
 
         while let Some(entry) = entries
             .next_entry()
             .await
-            .map_err(|e| NeoCabError::Io(e.to_string()))?
+            ?
         {
             let path = entry.path();
 
@@ -257,7 +257,7 @@ impl MediaManager {
         let source_path = PathBuf::from(source_dir);
 
         if !source_path.exists() {
-            return Err(NeoCabError::Validation(
+            return Err(NeoCabError::InvalidInput(
                 "Source directory does not exist".to_string(),
             ));
         }
@@ -265,12 +265,12 @@ impl MediaManager {
         let mut files_organized = 0u64;
         let mut entries = fs::read_dir(&source_path)
             .await
-            .map_err(|e| NeoCabError::Io(e.to_string()))?;
+            ?;
 
         while let Some(entry) = entries
             .next_entry()
             .await
-            .map_err(|e| NeoCabError::Io(e.to_string()))?
+            ?
         {
             let path = entry.path();
 
@@ -296,12 +296,12 @@ impl MediaManager {
                         let dest = dest_dir.join(type_dir);
                         fs::create_dir_all(&dest)
                             .await
-                            .map_err(|e| NeoCabError::Io(e.to_string()))?;
+                            ?;
 
                         let target_file = dest.join(file_name);
                         fs::copy(&path, &target_file)
                             .await
-                            .map_err(|e| NeoCabError::Io(e.to_string()))?;
+                            ?;
 
                         files_organized += 1;
                     }

@@ -2,7 +2,7 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::mpsc;
 use crate::error::{NeoCabError, Result};
-use crate::models::coin::CoinEvent;
+use crate::core::coin_manager::CoinEvent;
 
 /// GPIO Coin Detection for Raspberry Pi
 /// Monitors GPIO pin for coin pulses and converts to coin events

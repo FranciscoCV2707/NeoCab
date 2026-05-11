@@ -142,13 +142,11 @@ impl ShaderManager {
         // Scan for custom shaders
         if self.shaders_path.exists() {
             let mut entries = fs::read_dir(&self.shaders_path)
-                .await
-                .map_err(|e| NeoCabError::Io(e.to_string()))?;
+                .await?;
 
             while let Some(entry) = entries
                 .next_entry()
-                .await
-                .map_err(|e| NeoCabError::Io(e.to_string()))?
+                .await?
             {
                 let path = entry.path();
                 if path.extension().map_or(false, |ext| ext == "glsl") {
@@ -211,7 +209,7 @@ impl ShaderManager {
                 .collect(),
             },
             _ => {
-                return Err(NeoCabError::Validation(format!(
+                return Err(NeoCabError::InvalidInput(format!(
                     "Unknown preset: {}",
                     preset_name
                 )))
