@@ -114,6 +114,12 @@ pub fn run() {
             commands::get_current_theme,
             commands::get_theme_css,
             commands::list_available_themes,
+            commands::list_gpio_pins,
+            commands::list_serial_ports,
+            commands::test_gpio_pin,
+            commands::test_arduino_connection,
+            commands::calibrate_coin_detection,
+            commands::get_hardware_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

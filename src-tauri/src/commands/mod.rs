@@ -7,6 +7,7 @@ pub mod timer;
 pub mod input;
 pub mod operator;
 pub mod theme;
+pub mod hardware;
 
 pub use system::*;
 pub use games::*;
@@ -17,3 +18,4 @@ pub use timer::*;
 pub use input::*;
 pub use operator::*;
 pub use theme::*;
+pub use hardware::*;

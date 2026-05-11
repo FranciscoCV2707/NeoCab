@@ -7,6 +7,8 @@ pub mod operator_panel;
 pub mod autoboot;
 pub mod theme_manager;
 pub mod game_state;
+pub mod gpio_coins;
+pub mod arduino_serial;
 
 pub use emulator_manager::EmulatorManager;
 pub use game_library::GameLibrary;
@@ -17,3 +19,5 @@ pub use operator_panel::{OperatorPanel, AuthLevel, SessionStats, OperatorStats, 
 pub use autoboot::AutobootManager;
 pub use theme_manager::{ThemeManager, Theme, ThemeConfig};
 pub use game_state::{GameStateManager, AppState};
+pub use gpio_coins::{GPIOCoinDetector, GPIOConfig};
+pub use arduino_serial::{ArduinoInterface, ArduinoConfig};
