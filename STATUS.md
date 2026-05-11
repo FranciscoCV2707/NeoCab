@@ -313,6 +313,96 @@
 | Horas invertidas | 15-18h |
 | **Phase 5 Week 2 Progress** | **100%** |
 
+### Phase 5 Week 3: Installers & Build System ✅ 100% DONE (12-15h)
+
+#### Task 5.3a: Windows NSIS Installer ✅ DONE
+- ✅ build-nsis.ps1 script (PowerShell)
+  - Checks Tauri release build
+  - Verifies NSIS installation
+  - Generates NSIS script
+  - Builds MSI installer
+  - Optional code signing support
+  - Progress indicators
+  
+- ✅ NeoCab-installer.nsi (NSIS configuration)
+  - Product metadata (name, version, publisher)
+  - WebView2 runtime check
+  - File structure copying (data, config, public, docs)
+  - Start Menu shortcuts
+  - Desktop shortcut creation
+  - Registry entries for uninstall
+  - Graceful uninstall process
+  - Version information
+
+**Features:**
+- Admin elevation support
+- WebView2 validation
+- File size calculation
+- Full uninstall cleanup
+- Documentation access from shortcuts
+
+#### Task 5.3b: Linux AppImage Builder ✅ DONE
+- ✅ build-appimage.sh script (Bash)
+  - Prerequisite validation
+  - AppDir structure creation
+  - Executable copying
+  - Data file organization
+  - .desktop file generation
+  - Metadata JSON creation
+  - AppImage compilation
+  - Verification & chmod
+
+**Features:**
+- Automated AppDir generation
+- HyperSpin media structure integration
+- Desktop entry support
+- File permission management
+- Post-build verification
+
+#### Task 5.3c: Master Build Script ✅ DONE
+- ✅ build-all.sh (Bash master script)
+  - Cross-platform support
+  - Platform selection (all/windows/linux)
+  - Sequential build coordination
+  - Error handling
+  - Status reporting
+  - Colored output
+
+#### Task 5.3d: Build Documentation ✅ DONE
+- ✅ BUILD.md comprehensive guide
+  - Windows prerequisites
+  - Linux prerequisites
+  - Step-by-step build instructions
+  - Feature configuration
+  - Development builds
+  - Production builds
+  - Code signing guides
+  - Troubleshooting section
+  - Size reference table
+  - Performance optimization info
+
+**Sections:**
+- Prerequisites per platform
+- Installation from source
+- Build commands (Windows/Linux)
+- Feature flags explanation
+- Development with hot-reload
+- Signing procedures
+- Troubleshooting common errors
+- CI/CD information
+
+### Phase 5 Week 3 Statistics
+| Métrica | Valor |
+|---------|-------|
+| Build Scripts | 4 files |
+| PowerShell Script | 1 (150 líneas) |
+| Bash Scripts | 2 (120 + 85 líneas) |
+| NSIS Config | 1 (150 líneas) |
+| Build Documentation | 1 (350 líneas) |
+| **Total nuevas líneas** | **~855** |
+| Horas invertidas | 12-15h |
+| **Phase 5 Week 3 Progress** | **100%** |
+
 ### Features Implementadas
 1. **Color Customization**: 7 colores (primary, secondary, accent, text, background, success, error)
 2. **Wheel Configuration**: Size, spacing, animation duration, item colors
@@ -863,9 +953,10 @@ Los archivos clave para Week 5:
 | Phase 4 | ✅ 100% | 50-60h | 175-215h |
 | Phase 5 Week 1 | ✅ 100% | 28-32h | 203-247h |
 | Phase 5 Week 2 | ✅ 100% | 15-18h | 218-265h |
-| Phase 5 Weeks 3-4 | ⏳ 0% | 50-65h | 268-330h |
-| Phase 6-8 | ⏳ 0% | 100-150h | 368-480h |
-| **TOTAL v3.0** | **~44-48%** | **463-480h** | **463-480h** |
+| Phase 5 Week 3 | ✅ 100% | 12-15h | 230-280h |
+| Phase 5 Week 4 | ⏳ 0% | 25-35h | 255-315h |
+| Phase 6-8 | ⏳ 0% | 100-150h | 355-465h |
+| **TOTAL v3.0** | **~50-54%** | **355-465h** | **355-465h** |
 
 ### Commits totales sesión: 9
 - Phase 1: 3 commits (e89fd54, f88324a, 6446828)
