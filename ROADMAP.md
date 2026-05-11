@@ -171,8 +171,44 @@ impl ArduinoInterface {
 
 ---
 
-### ⏳ Phase 5: Extended Emulators (60-120h)
-**Status**: NOT STARTED
+### 🎨 Phase 5: Advanced Customization & Themes (60-80h)
+**Status**: DESIGNED (architecture + UI specs complete), READY TO BUILD
+
+#### Task 5.1: Theme System & Editor (20h)
+- [x] Theme JSON schema designed
+- [x] CSS variable injection system designed
+- [x] UI mockups created
+- [ ] 5+ built-in themes implementation
+- [ ] Theme editor component with live preview
+- [ ] Color picker + font selector
+- [ ] Save/export custom themes
+
+#### Task 5.2: Media Management (15h)
+- [x] Media folder structure designed
+- [x] Asset organization strategy planned
+- [ ] Media browser UI component
+- [ ] HyperSpin import tool
+- [ ] Thumbnail generation + caching
+- [ ] Metadata indexing system
+
+#### Task 5.3: Bundled Installer (15h)
+- [x] Installer architecture designed (NSIS + AppImage)
+- [x] First-run wizard flow planned
+- [ ] NSIS Windows installer script
+- [ ] Linux AppImage builder
+- [ ] Auto-update system
+- [ ] Dependency bundling
+
+#### Task 5.4: Polish & Testing (10h)
+- [ ] Full QA across themes
+- [ ] Performance optimization
+- [ ] Documentation guides
+- [ ] Community beta testing
+
+---
+
+### ⏳ Phase 5B: Extended Emulators (60-120h)
+**Status**: DESIGNED, QUEUED FOR PHASE 6+
 
 #### Task 5.1-5.30: Emulator Adapters (2-4h each)
 
@@ -354,23 +390,30 @@ const steps = [
 ## 📊 SUMMARY
 
 ```
-Phase 1: ✅ Core Infrastructure     (30-40h)   - DONE
-Phase 2: ✅ Legacy SDL2 Mode       (55-65h)   - DONE
-Phase 3: ✅ Wheel UI (React)       (40-50h)   - DONE
-Phase 4: 🔄 Hardware Integration    (50-60h)   - 60% DONE (15-20h invested)
-Phase 5: ⏳ Extended Emulators      (60-120h)  - NEXT
-Phase 6: ⏳ CRT Shaders             (25-30h)
-Phase 7: ⏳ Setup Wizard            (15-20h)
-Phase 8: ⏳ Testing & Docs          (40-50h)
+Phase 1: ✅ Core Infrastructure       (30-40h)   - DONE
+Phase 2: ✅ Legacy SDL2 Mode         (55-65h)   - DONE
+Phase 3: ✅ Wheel UI (React)         (40-50h)   - DONE
+Phase 4: 🔄 Hardware Integration      (50-60h)   - 60% DONE (15-20h)
+Phase 5: 🎨 Customization & Themes   (60-80h)   - DESIGNED, READY TO BUILD
+Phase 6: ⏳ Extended Emulators        (60-120h)  - QUEUED
+Phase 7: ⏳ CRT Shaders               (25-30h)
+Phase 8: ⏳ Setup Wizard              (15-20h)
+Phase 9: ⏳ Testing & Docs            (40-50h)
 ─────────────────────────────────────────────────
-TOTAL:  ~340-470 hours | Completed: 140-175h (33%)
+TOTAL:  ~340-500 hours | Completed: 140-175h (33%)
 ```
 
-**Phase 4 Progress:**
+**Phase 4 Progress (Hardware):**
 - ✅ Task 4.1: GPIO Coin Detection (DONE)
 - ✅ Task 4.2: Arduino Serial Interface (DONE)
 - ✅ Task 4.3: Coin Overlay UI (DONE)
-- 🔄 Task 4.4: Hardware Calibration Wizard (IN PROGRESS - 75% complete)
+- 🔄 Task 4.4: Hardware Calibration Wizard (75% - needs CoinManager integration)
+
+**Phase 5 Progress (Customization) - DESIGNED:**
+- ✅ Task 5.1: Theme System & Editor (Architecture complete)
+- ✅ Task 5.2: Media Management (Design complete)
+- ✅ Task 5.3: Bundled Installer (Specs complete)
+- 🔄 Task 5.4: Polish & Testing (Queued after 5.1-5.3)
 
 ---
 

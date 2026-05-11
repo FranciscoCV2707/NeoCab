@@ -2,7 +2,8 @@
 
 Professional arcade cabinet OS with dual-mode architecture (Modern + Legacy), 15+ emulators, coin management, operator panel, and customizable themes. Built with Tauri 2.x, React 19, Rust, and SDL2.
 
-**Status**: Phase 4 IN PROGRESS (60% complete) - 33% of v3.0 plan (140-175 hours invested)
+**Status**: Phase 4 (60% Hardware Done) + Phase 5 Planning Complete - 33% of v3.0 (140-175h invested)
+**Next**: Complete Phase 4.4 + Phase 5 (Themes, Media, Installer) - 3-4 weeks
 
 ## ✨ Features
 
@@ -30,12 +31,22 @@ Professional arcade cabinet OS with dual-mode architecture (Modern + Legacy), 15
 - **Media System**: HyperSpin-compatible image caching (wheels, box art, backgrounds)
 - **Game State Manager**: Pause/resume with state tracking
 
-### Hardware Integration (Phase 4 - In Progress)
+### Hardware Integration (Phase 4 - 60% In Progress)
 - **GPIO Coin Detection**: Raspberry Pi GPIO monitoring with debouncing (Linux)
 - **Arduino Serial Interface**: Coin counter + solenoid control via serial
 - **Coin Overlay UI**: Real-time coin display with progress bar and animations
 - **Hardware Calibration**: Multi-step wizard for GPIO/Arduino setup
 - **Auto-Detection**: Hardware status checks and port enumeration
+
+### Advanced Customization (Phase 5 - Designed, Ready to Build)
+- **Professional Theme System**: JSON-based themes with live CSS variable injection
+- **5+ Built-in Themes**: Classic, Neon, Cyberpunk, Retro Arcade, Custom
+- **Theme Editor UI**: Real-time preview, color picker, animations, font selection
+- **Media Management**: Browser for wheels, boxes, backgrounds, marquee artwork
+- **HyperSpin Import**: One-click import from HyperSpin installation
+- **Bundled Installers**: Windows NSIS (.exe), Linux AppImage, standalone deployment
+- **Asset Organization**: Auto-organize media by system, detect missing artwork
+- **Theme Sharing**: Export/import custom themes, community marketplace
 
 ## 🚀 Quick Start
 
