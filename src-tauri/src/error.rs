@@ -26,6 +26,9 @@ pub enum NeoCabError {
     #[error("System error: {0}")]
     System(String),
 
+    #[error("Legacy SDL2 error: {0}")]
+    Legacy(String),
+
     #[error("Unknown error")]
     Unknown,
 }

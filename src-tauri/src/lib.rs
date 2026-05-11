@@ -7,6 +7,9 @@ pub mod input;
 pub mod adapters;
 pub mod utils;
 
+#[cfg(feature = "legacy-ui")]
+pub mod legacy;
+
 pub use error::{NeoCabError, Result};
 use tauri::Manager;
 
