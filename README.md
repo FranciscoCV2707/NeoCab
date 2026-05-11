@@ -1,9 +1,12 @@
-# 🎮 NeoCab - Arcade Cabinet Operating System v1.0
+# 🎮 NeoCab - Arcade Cabinet Operating System v3.0
 
-Professional arcade cabinet OS with 15+ emulators, coin management, operator panel, and customizable themes. Built with Tauri 2.x, React 19, and Rust.
+Professional arcade cabinet OS with dual-mode architecture (Modern + Legacy), 15+ emulators, coin management, operator panel, and customizable themes. Built with Tauri 2.x, React 19, Rust, and SDL2.
+
+**Status**: Phase 3 COMPLETE - 29% of v3.0 plan (125-155 hours invested)
 
 ## ✨ Features
 
+### Core Features (v1.0 - Production Ready)
 - **15+ Emulators**: MAME, RetroArch (6 cores), PCSX-Redux, Mupen64Plus, Gambatte
 - **Coin System**: Automatic coin tracking, earnings analytics, balance management
 - **Timer Management**: Game session timers with pause/resume, overtime detection
@@ -11,7 +14,21 @@ Professional arcade cabinet OS with 15+ emulators, coin management, operator pan
 - **Input System**: Universal device mapping with deadzone handling (16 buttons + analog)
 - **Theme System**: 3 arcade-style themes (Classic, Neon, Cyberpunk) with CSS customization
 - **Autoboot**: Windows Registry + Linux autostart support, kiosk mode enforcement
-- **Cross-Platform**: Windows 10+ and Linux support
+- **Cross-Platform**: Windows 10-11 and Linux support
+
+### Modern Mode (Phase 3 - In Development)
+- **HyperSpin Wheel UI**: Canvas-based 60FPS system/game selection
+- **React Frontend**: Full responsive arcade UI (desktop, tablet, mobile)
+- **Smart Platform Detection**: Auto-detect Windows XP vs Win7+ and WebView2
+- **Game List Panel**: Metadata-rich game selection with box art
+- **Global State Management**: Context API for arcade state
+
+### Legacy Mode (Phase 2 - In Development)
+- **SDL2 Rendering**: Native graphics for Windows XP SP2+
+- **Event Loop**: Frame-timing statistics and performance monitoring
+- **Input Polling**: Real-time SDL2 event handling (keyboard, joystick, D-pad)
+- **Media System**: HyperSpin-compatible image caching (wheels, box art, backgrounds)
+- **Game State Manager**: Pause/resume with state tracking
 
 ## 🚀 Quick Start
 
