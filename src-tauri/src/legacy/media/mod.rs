@@ -1,7 +1,11 @@
+pub mod hyperspin;
+
+pub use hyperspin::HyperSpinMedia;
+
 use std::path::PathBuf;
 use std::collections::HashMap;
 
-/// Media system for legacy mode (images, backgrounds, etc.)
+/// Generic media loader for legacy mode
 pub struct MediaLoader {
     cache: HashMap<String, Vec<u8>>,
     media_root: PathBuf,
