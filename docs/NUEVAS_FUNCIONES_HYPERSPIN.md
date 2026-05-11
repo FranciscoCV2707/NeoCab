@@ -1,185 +1,429 @@
 # Nuevas Funciones - HyperSpin/RocketLauncher Integration
 
-**Objetivo:** Agregar funcionalidades avanzadas de HyperSpin que faltan en NeoCab v3.0  
-**Prioridad:** CRÍTICA (créditos/temporizador) → ALTA (lanzamiento) → MEDIA (auditoría)
+**Versión simplificada:** Reutilizar managers existentes + agregar solo UI intuitiva  
+**Total código:** ~900 líneas (no 4,650)  
+**Enfoque:** Usabilidad extrema + Configuración sencilla
 
 ---
 
-## 📊 Análisis: Qué Ya Existe vs Qué Falta
+## 🎯 Estrategia
 
-### ✅ YA EXISTE EN NEOCAB
-- GameLibrary (escaneo de ROMs)
-- EmulatorManager (lanzamiento básico)
-- InputManager (mapeo de controles)
-- CoinManager (balance de monedas)
-- TimerManager (temporizador)
-- MediaManager (importar/organizar media)
-- ThemeManager (temas)
-- OperatorPanel (PIN, stats)
+### ✅ NO MODIFICAR (Ya funciona)
+- **CoinManager** - monedas, balance, eventos
+- **TimerManager** - temporizador, pausar/reanudar
+- **EmulatorManager** - lanzar juegos
+- **GameLibrary** - escanear ROMs
 
-### ❌ FALTA (NUEVO A AGREGAR)
+### 🔧 MEJORAR (Pequeños cambios)
+- **ConfigManager** - agregar persistencia de `SystemGameConfig`
+- **GameScreen** - conectar CoinManager + TimerManager para mostrar overlay
 
-| Función | Categoría | Prioridad | Ubicación |
-|---------|-----------|-----------|-----------|
-| **GameMetadataManager** | Config | MEDIA | src-tauri/src/core/game_metadata.rs |
-| **AuditManager** | Config | MEDIA | src-tauri/src/core/audit_manager.rs |
-| **LaunchParametersManager** | Lanzamiento | ALTA | src-tauri/src/core/launch_params.rs |
-| **ProcessMonitor** | Lanzamiento | ALTA | src-tauri/src/core/process_monitor.rs |
-| **ArcadeCreditMode** | Créditos | CRÍTICA | src-tauri/src/core/arcade_credit_mode.rs |
-| **LogManager** | Auditoría | MEDIA | src-tauri/src/core/log_manager.rs |
-| **GameMetadataEditor UI** | UI | MEDIA | src/components/customization/GameMetadataEditor.tsx |
-| **AuditPanel UI** | UI | MEDIA | src/components/customization/AuditPanel.tsx |
-| **LaunchConfig UI** | UI | ALTA | src/components/customization/LaunchConfigPanel.tsx |
-| **CreditMode UI** | UI | CRÍTICA | src/components/arcade/CreditModeOverlay.tsx |
-| **LogViewer UI** | UI | MEDIA | src/components/settings/LogViewer.tsx |
+### ✨ AGREGAR (Solo UI/configuración)
+1. **SystemGameConfig** struct (~50 líneas) - guardar config por sistema
+2. **CoinConfigPanel** (~250 líneas) - UI para configurar
+3. **CreditOverlay mejorado** (~150 líneas) - mostrar créditos/tiempo
+4. **GameLaunchConnector** (~100 líneas) - lógica de cuando time=0, salir
 
 ---
 
-## 🔴 FASE 1: CRÍTICA - Modo Créditos Arcade (4-6h)
+## 📋 FASE 1: Configuración de Sistemas (CRÍTICA) - 2h
 
-### 1.1 Backend: ArcadeCreditMode Manager
+### 1.1 Struct para persistencia
 
-**Archivo:** `src-tauri/src/core/arcade_credit_mode.rs` (~250 líneas)
+**Actualizar:** `src-tauri/src/core/config_manager.rs`
 
 ```rust
-pub struct ArcadeCreditMode {
-    credits: i32,
-    current_game: Option<String>,
-    credit_value: f32, // coins per credit
-    coin_counter: f32,
-    system_configs: HashMap<String, SystemCreditConfig>,
-    listeners: Vec<CreditModeListener>,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SystemGameConfig {
+    pub system: String,
+    pub mode: GameMode, // Arcade | Console | TimedFree
+    pub coins_per_time: u32, // monedas = X segundos (ej: 1 moneda = 180 seg)
+    pub max_time: u32, // máximo tiempo permitido (segundos)
+    pub show_overlay: bool,
+    pub warn_before: u32, // advertencia con X segundos restantes
+    pub auto_exit: bool, // cerrar emulador cuando time=0
 }
 
-pub struct SystemCreditConfig {
-    system: String,
-    credits_per_coin: i32,
-    time_per_credit: u32, // segundos
-    show_credits: bool,
-    show_timer: bool,
+pub enum GameMode {
+    Arcade,    // 1 moneda = 3 minutos, sale cuando se acaba
+    Console,   // 1 moneda = 5 minutos, sale cuando se acaba
+    TimedFree, // sin monedas, tiempo fijo, sale cuando se acaba
 }
 
-impl ArcadeCreditMode {
-    pub fn new() -> Self;
-    
-    pub fn insert_coin(&mut self, amount: f32) -> (i32, bool) {
-        // Retorna (nuevos_créditos, game_started)
-    }
-    
-    pub fn add_coins_for_game(&mut self, system: &str, coins: i32) -> Result<()>;
-    
-    pub fn start_game(&mut self, system: &str, game_id: &str) -> Result<()>;
-    
-    pub fn end_game(&mut self) -> (i32, u32) {
-        // Retorna (credits_remaining, time_played)
-    }
-    
-    pub fn get_credit_display(&self) -> CreditDisplay {
-        // { credits: 2, time_remaining: 300, is_running: true }
-    }
-    
-    pub fn set_system_config(&mut self, config: SystemCreditConfig) -> Result<()>;
-    
-    pub fn get_system_config(&self, system: &str) -> Option<SystemCreditConfig>;
-}
-
-pub struct CreditDisplay {
-    pub credits: i32,
-    pub time_remaining: Option<u32>, // segundos
-    pub is_running: bool,
-    pub current_game: Option<String>,
+impl ConfigManager {
+    pub async fn save_system_config(&mut self, config: SystemGameConfig) -> Result<()>;
+    pub async fn load_system_config(&self, system: &str) -> Result<SystemGameConfig>;
+    pub async fn get_all_system_configs(&self) -> Result<Vec<SystemGameConfig>>;
 }
 ```
 
-**Tauri Commands:** `src-tauri/src/commands/arcade_credit_mode.rs` (~150 líneas)
+### 1.2 Tauri commands (100 líneas)
+
+**Crear/actualizar:** `src-tauri/src/commands/config.rs`
 
 ```rust
 #[tauri::command]
-async fn insert_coin(
-    amount: f32,
-    arcade_credit_mode: State<'_, ArcadeCreditMode>,
-) -> Result<CreditDisplay, String>
-
-#[tauri::command]
-async fn get_credit_display(
-    arcade_credit_mode: State<'_, ArcadeCreditMode>,
-) -> Result<CreditDisplay, String>
-
-#[tauri::command]
-async fn start_game_with_credits(
+async fn save_system_config(
     system: String,
-    game_id: String,
-    arcade_credit_mode: State<'_, ArcadeCreditMode>,
+    config: SystemGameConfig,
+    config_manager: State<'_, ConfigManager>,
 ) -> Result<(), String>
 
 #[tauri::command]
-async fn end_game_session(
-    arcade_credit_mode: State<'_, ArcadeCreditMode>,
-) -> Result<SessionStats, String>
+async fn load_system_config(
+    system: String,
+    config_manager: State<'_, ConfigManager>,
+) -> Result<SystemGameConfig, String>
 
 #[tauri::command]
-async fn set_system_credit_config(
-    system: String,
-    config: SystemCreditConfig,
-    arcade_credit_mode: State<'_, ArcadeCreditMode>,
-) -> Result<(), String>
-
-#[tauri::command]
-async fn get_system_credit_config(
-    system: String,
-    arcade_credit_mode: State<'_, ArcadeCreditMode>,
-) -> Result<SystemCreditConfig, String>
+async fn get_all_system_configs(
+    config_manager: State<'_, ConfigManager>,
+) -> Result<Vec<SystemGameConfig>, String>
 ```
 
-### 1.2 Frontend: CreditModeOverlay Component
+---
 
-**Archivo:** `src/components/arcade/CreditModeOverlay.tsx` (~200 líneas)
+## 🎨 FASE 2: UI de Configuración (CRÍTICA) - 2-3h
+
+### 2.1 CoinConfigPanel Component (250 líneas)
+
+**Archivo:** `src/components/customization/CoinConfigPanel.tsx`
 
 ```typescript
-interface CreditModeOverlayProps {
-  visible: boolean;
-  creditDisplay: CreditDisplay;
-  onCreditWarning?: () => void;
-  onGameEnd?: () => void;
+interface CoinConfigPanelProps {
+  systems: string[];
+  onSave?: () => void;
 }
 
-export const CreditModeOverlay: React.FC<CreditModeOverlayProps> = ({
-  visible,
-  creditDisplay,
-}) => {
-  const [warningActive, setWarningActive] = useState(false);
+export const CoinConfigPanel: React.FC<CoinConfigPanelProps> = ({ systems }) => {
+  const [selectedSystem, setSelectedSystem] = useState(systems[0]);
+  const [config, setConfig] = useState<SystemGameConfig | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    // Mostrar advertencia cuando time_remaining < 30 segundos
-    if (creditDisplay.time_remaining && creditDisplay.time_remaining < 30) {
-      setWarningActive(true);
+    loadConfig(selectedSystem);
+  }, [selectedSystem]);
+
+  const loadConfig = async (system: string) => {
+    try {
+      const cfg = await invoke('load_system_config', { system });
+      setConfig(cfg);
+    } catch (err) {
+      console.error('Error loading config:', err);
     }
-  }, [creditDisplay.time_remaining]);
+  };
+
+  const handleSave = async () => {
+    if (!config) return;
+    setIsSaving(true);
+    try {
+      await invoke('save_system_config', {
+        system: selectedSystem,
+        config,
+      });
+      // Toast: "Configuración guardada"
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (!config) return <div>Cargando...</div>;
+
+  return (
+    <div className="coin-config-panel">
+      <h2>Configurar Créditos/Monedas</h2>
+
+      {/* System selector */}
+      <div className="system-selector">
+        <label>Sistema:</label>
+        <select value={selectedSystem} onChange={(e) => setSelectedSystem(e.target.value)}>
+          {systems.map((sys) => (
+            <option key={sys} value={sys}>
+              {sys}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Mode selector */}
+      <div className="mode-section">
+        <h3>Tipo de Máquina</h3>
+        <div className="mode-options">
+          <label>
+            <input
+              type="radio"
+              name="mode"
+              value="Arcade"
+              checked={config.mode === 'Arcade'}
+              onChange={(e) => setConfig({ ...config, mode: e.target.value as GameMode })}
+            />
+            <span>Arcade (Monedas = Tiempo)</span>
+            <small>1 moneda = 3 minutos, sale cuando se acaba</small>
+          </label>
+
+          <label>
+            <input
+              type="radio"
+              name="mode"
+              value="Console"
+              checked={config.mode === 'Console'}
+              onChange={(e) => setConfig({ ...config, mode: e.target.value as GameMode })}
+            />
+            <span>Consola (Monedas = Créditos)</span>
+            <small>1 moneda = 5 minutos, sale cuando se acaba</small>
+          </label>
+
+          <label>
+            <input
+              type="radio"
+              name="mode"
+              value="TimedFree"
+              checked={config.mode === 'TimedFree'}
+              onChange={(e) => setConfig({ ...config, mode: e.target.value as GameMode })}
+            />
+            <span>Tiempo Libre (Sin Monedas)</span>
+            <small>Tiempo fijo, sale cuando se acaba</small>
+          </label>
+        </div>
+      </div>
+
+      {/* Time configuration */}
+      <div className="time-section">
+        <h3>Configuración de Tiempo</h3>
+        
+        <label>
+          Tiempo por Moneda (segundos):
+          <input
+            type="number"
+            value={config.coins_per_time}
+            onChange={(e) => setConfig({ ...config, coins_per_time: parseInt(e.target.value) })}
+            min="30"
+            max="600"
+            step="30"
+          />
+          <small>Default: Arcade=180, Console=300</small>
+        </label>
+
+        <label>
+          Tiempo Máximo (segundos):
+          <input
+            type="number"
+            value={config.max_time}
+            onChange={(e) => setConfig({ ...config, max_time: parseInt(e.target.value) })}
+            min="60"
+            max="3600"
+            step="60"
+          />
+        </label>
+
+        <label>
+          Advertencia con (segundos restantes):
+          <input
+            type="number"
+            value={config.warn_before}
+            onChange={(e) => setConfig({ ...config, warn_before: parseInt(e.target.value) })}
+            min="10"
+            max="120"
+            step="10"
+          />
+        </label>
+      </div>
+
+      {/* Behavior options */}
+      <div className="behavior-section">
+        <h3>Comportamiento</h3>
+        
+        <label>
+          <input
+            type="checkbox"
+            checked={config.show_overlay}
+            onChange={(e) => setConfig({ ...config, show_overlay: e.target.checked })}
+          />
+          Mostrar overlay de créditos/tiempo
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={config.auto_exit}
+            onChange={(e) => setConfig({ ...config, auto_exit: e.target.checked })}
+          />
+          Salir automáticamente cuando termina el tiempo
+        </label>
+      </div>
+
+      {/* Save button */}
+      <button onClick={handleSave} disabled={isSaving} className="save-btn">
+        {isSaving ? 'Guardando...' : 'Guardar Configuración'}
+      </button>
+    </div>
+  );
+};
+```
+
+### 2.2 CSS para CoinConfigPanel (150 líneas)
+
+```css
+.coin-config-panel {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #FF6400;
+  border-radius: 8px;
+  padding: 24px;
+  color: #ffffff;
+  max-width: 600px;
+}
+
+.coin-config-panel h2 {
+  color: #FFCC00;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.coin-config-panel h3 {
+  color: #FF6400;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.system-selector,
+.time-section label,
+.behavior-section label {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.system-selector select,
+.time-section input {
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #404040;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.mode-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mode-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: rgba(255, 100, 0, 0.1);
+  border: 1px solid #FF6400;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-options label:hover {
+  background: rgba(255, 100, 0, 0.15);
+}
+
+.mode-options small {
+  display: block;
+  color: #999999;
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.save-btn {
+  margin-top: 24px;
+  padding: 12px 24px;
+  background: #FF6400;
+  color: #000000;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: #FFCC00;
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+```
+
+---
+
+## 📺 FASE 3: Overlay Mejorado (CRÍTICA) - 2h
+
+### 3.1 CreditOverlay Component (150 líneas)
+
+**Actualizar/crear:** `src/components/arcade/CreditOverlay.tsx`
+
+```typescript
+interface CreditOverlayProps {
+  visible: boolean;
+  credits: number;
+  timeRemaining?: number; // segundos
+  isRunning: boolean;
+  warningThreshold?: number;
+  gameTitle?: string;
+}
+
+export const CreditOverlay: React.FC<CreditOverlayProps> = ({
+  visible,
+  credits,
+  timeRemaining,
+  isRunning,
+  warningThreshold = 30,
+  gameTitle,
+}) => {
+  const [isWarning, setIsWarning] = useState(false);
+
+  useEffect(() => {
+    setIsWarning(timeRemaining ? timeRemaining < warningThreshold : false);
+  }, [timeRemaining, warningThreshold]);
 
   if (!visible) return null;
 
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   return (
-    <div className="credit-mode-overlay">
-      {/* Créditos */}
-      <div className={`credits-display ${warningActive ? 'warning' : ''}`}>
-        <span className="label">CREDITS</span>
-        <span className="value">{creditDisplay.credits}</span>
+    <div className={`credit-overlay ${isWarning ? 'warning' : ''}`}>
+      {/* Esquina superior izquierda: Créditos */}
+      <div className="credits-box">
+        <div className="label">CREDITS</div>
+        <div className="value">{credits}</div>
       </div>
 
-      {/* Timer (si aplica) */}
-      {creditDisplay.time_remaining !== undefined && (
-        <div className={`timer-display ${warningActive ? 'warning' : ''}`}>
-          <span className="label">TIME</span>
-          <span className="value">
-            {formatSeconds(creditDisplay.time_remaining)}
-          </span>
+      {/* Esquina superior derecha: Tiempo */}
+      {timeRemaining !== undefined && (
+        <div className={`time-box ${isRunning ? 'running' : ''}`}>
+          <div className="label">TIME</div>
+          <div className="value">{formatTime(timeRemaining)}</div>
         </div>
       )}
 
-      {/* Advertencia visual */}
-      {warningActive && (
-        <div className="warning-banner">
-          <span>⚠️ TIME RUNNING OUT!</span>
+      {/* Centro: Título del juego (opcional) */}
+      {gameTitle && (
+        <div className="game-title">{gameTitle}</div>
+      )}
+
+      {/* Advertencia en centro-abajo */}
+      {isWarning && isRunning && (
+        <div className="warning-flash">
+          <span className="blink">⚠️ TIME RUNNING OUT! ⚠️</span>
         </div>
       )}
     </div>
@@ -187,277 +431,280 @@ export const CreditModeOverlay: React.FC<CreditModeOverlayProps> = ({
 };
 ```
 
-### 1.3 Integration
+### 3.2 CSS para Overlay (100 líneas)
 
-- Agregar `ArcadeCreditMode` al `initialize_app()` en lib.rs
-- Conectar `CoinManager` ↔ `ArcadeCreditMode` (insert_coin trigger)
-- Conectar `TimerManager` ↔ `ArcadeCreditMode` (time updates)
-- Renderizar `CreditModeOverlay` en `GameScreen.tsx`
-
----
-
-## 🟠 FASE 2: ALTA - Lanzamiento Mejorado (6-8h)
-
-### 2.1 LaunchParametersManager
-
-**Archivo:** `src-tauri/src/core/launch_params.rs` (~300 líneas)
-
-```rust
-pub struct LaunchParametersManager {
-    system_params: HashMap<String, SystemLaunchConfig>,
-    pre_launch_scripts: HashMap<String, String>,
-    post_launch_scripts: HashMap<String, String>,
+```css
+.credit-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  font-family: 'Courier New', monospace;
+  z-index: 1000;
 }
 
-pub struct SystemLaunchConfig {
-    system: String,
-    extra_args: Vec<String>, // parámetros por sistema
-    working_dir: Option<PathBuf>,
-    env_vars: HashMap<String, String>,
-    pre_script: Option<String>,
-    post_script: Option<String>,
+.credit-overlay.warning .credits-box,
+.credit-overlay.warning .time-box {
+  animation: pulse 0.5s infinite;
 }
 
-impl LaunchParametersManager {
-    pub fn get_launch_args(&self, system: &str, game_id: &str) -> Vec<String>;
-    pub fn add_system_config(&mut self, config: SystemLaunchConfig) -> Result<()>;
-    pub fn run_pre_launch_script(&self, system: &str) -> Result<()>;
-    pub fn run_post_launch_script(&self, system: &str) -> Result<()>;
-}
-```
-
-### 2.2 ProcessMonitor
-
-**Archivo:** `src-tauri/src/core/process_monitor.rs` (~250 líneas)
-
-```rust
-pub struct ProcessMonitor {
-    watched_processes: HashMap<u32, ProcessInfo>,
+.credits-box,
+.time-box {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid #FF6400;
+  border-radius: 8px;
+  padding: 12px 16px;
+  text-align: center;
 }
 
-pub struct ProcessInfo {
-    pid: u32,
-    exe_name: String,
-    system: String,
-    game_id: String,
-    start_time: SystemTime,
+.credits-box {
+  top: 20px;
+  left: 20px;
 }
 
-impl ProcessMonitor {
-    pub fn watch_process(&mut self, pid: u32, info: ProcessInfo) -> Result<()>;
-    pub fn is_process_running(&self, pid: u32) -> bool;
-    pub fn wait_for_process_exit(&self, pid: u32, timeout: u32) -> Result<()>;
-    pub fn get_process_info(&self, pid: u32) -> Option<ProcessInfo>;
-    pub fn kill_process(&mut self, pid: u32) -> Result<()>;
-}
-```
-
-### 2.3 Mejorar EmulatorManager
-
-**Actualizar:** `src-tauri/src/core/emulator_manager.rs`
-
-```rust
-pub async fn launch_game_with_params(
-    &self,
-    system: &str,
-    game_id: &str,
-    launch_params: &SystemLaunchConfig,
-) -> Result<u32> {
-    // 1. Run pre-launch script
-    // 2. Get launch args from LaunchParametersManager
-    // 3. Start process
-    // 4. Monitor with ProcessMonitor
-    // 5. Return PID
+.time-box {
+  top: 20px;
+  right: 20px;
 }
 
-pub async fn stop_game_with_cleanup(
-    &self,
-    pid: u32,
-    run_post_script: bool,
-) -> Result<()> {
-    // 1. Kill process
-    // 2. Run post-launch script if enabled
-    // 3. Clean up resources
-}
-```
-
----
-
-## 🟡 FASE 3: MEDIA - Auditoría & Metadata (4-6h)
-
-### 3.1 GameMetadataManager
-
-**Archivo:** `src-tauri/src/core/game_metadata.rs` (~200 líneas)
-
-```rust
-pub struct GameMetadataManager {
-    metadata_db: HashMap<String, GameMetadata>,
+.credits-box .label,
+.time-box .label {
+  color: #FFCC00;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
 }
 
-pub struct GameMetadata {
-    pub game_id: String,
-    pub system: String,
-    pub title: String,
-    pub description: String,
-    pub genre: Vec<String>,
-    pub year: Option<i32>,
-    pub developer: Option<String>,
-    pub rating: Option<f32>,
-    pub playtime: u32, // horas
-    pub last_played: Option<SystemTime>,
-    pub custom_fields: HashMap<String, String>,
+.credits-box .value,
+.time-box .value {
+  color: #00FF64;
+  font-size: 36px;
+  font-weight: bold;
+  min-width: 60px;
 }
 
-impl GameMetadataManager {
-    pub fn get_metadata(&self, game_id: &str, system: &str) -> Option<GameMetadata>;
-    pub fn update_metadata(&mut self, metadata: GameMetadata) -> Result<()>;
-    pub fn auto_fetch_metadata(&self, system: &str, game_id: &str) -> Result<GameMetadata>;
-    pub fn bulk_import_metadata(&mut self, system: &str) -> Result<u32>; // count imported
-}
-```
-
-### 3.2 AuditManager
-
-**Archivo:** `src-tauri/src/core/audit_manager.rs` (~250 líneas)
-
-```rust
-pub struct AuditManager {
-    rom_index: HashMap<String, Vec<GameInfo>>,
-    media_index: HashMap<String, MediaAuditReport>,
+.time-box.running .value {
+  color: #FFFFFF;
 }
 
-pub struct AuditReport {
-    pub system: String,
-    pub total_roms: u32,
-    pub found_roms: u32,
-    pub missing_roms: Vec<String>,
-    pub missing_wheels: Vec<String>,
-    pub missing_boxes: Vec<String>,
-    pub missing_backgrounds: Vec<String>,
-    pub validation_errors: Vec<String>,
+.game-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #FFCC00;
+  font-size: 24px;
+  text-transform: uppercase;
+  text-align: center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  max-width: 80%;
 }
 
-impl AuditManager {
-    pub async fn audit_system(&self, system: &str) -> Result<AuditReport>;
-    pub fn validate_rom_paths(&self, system: &str) -> Result<ValidationReport>;
-    pub fn get_missing_media(&self, system: &str) -> Result<Vec<String>>;
-    pub fn check_path_validity(&self, path: &Path) -> Result<()>;
-}
-```
-
-### 3.3 LogManager
-
-**Archivo:** `src-tauri/src/core/log_manager.rs` (~200 líneas)
-
-```rust
-pub struct LogManager {
-    logs: Vec<LogEntry>,
-    log_file: PathBuf,
+.warning-flash {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
 }
 
-pub struct LogEntry {
-    pub timestamp: SystemTime,
-    pub level: LogLevel, // Info, Warning, Error
-    pub category: String, // "emulator", "media", "hardware"
-    pub message: String,
-    pub details: Option<String>,
+.warning-flash .blink {
+  color: #FF3333;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  animation: blink 0.3s infinite;
 }
 
-impl LogManager {
-    pub fn log_game_launch(&mut self, system: &str, game_id: &str) -> Result<()>;
-    pub fn log_game_exit(&mut self, system: &str, game_id: &str, playtime: u32) -> Result<()>;
-    pub fn log_error(&mut self, category: &str, message: String) -> Result<()>;
-    pub fn get_logs(&self, limit: u32) -> Vec<LogEntry>;
-    pub fn get_session_history(&self) -> Vec<GameSessionLog>;
-    pub fn clear_logs(&mut self) -> Result<()>;
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.3; }
 }
 ```
 
 ---
 
-## 📋 Tareas por Fase
+## 🔗 FASE 4: Conectar Todo (ALTA) - 1-2h
 
-### FASE 1: Créditos (CRÍTICA) - 4-6h
+### 4.1 Hook useCoinGame (100 líneas)
 
-**Backend:**
-- [ ] ArcadeCreditMode struct (250 líneas)
-- [ ] Logic de insert_coin, start_game, end_game
-- [ ] Tauri commands (150 líneas)
-- [ ] Integration con lib.rs
+**Archivo:** `src/hooks/useCoinGame.ts`
 
-**Frontend:**
-- [ ] CreditModeOverlay.tsx (200 líneas)
-- [ ] CreditModeOverlay.css (150 líneas)
-- [ ] Hook useCreditMode.ts (100 líneas)
-- [ ] Integración en GameScreen.tsx
+```typescript
+interface UseCoinGameReturn {
+  credits: number;
+  timeRemaining: number | null;
+  isPlaying: boolean;
+  insertCoin: (amount: number) => Promise<void>;
+  startGame: (system: string, gameId: string) => Promise<void>;
+  endGame: () => Promise<void>;
+  systemConfig: SystemGameConfig | null;
+}
 
-**Testing:**
-- [ ] Unit tests para ArcadeCreditMode
-- [ ] Manual testing con monedas
+export const useCoinGame = (system: string): UseCoinGameReturn => {
+  const [credits, setCredits] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [systemConfig, setSystemConfig] = useState<SystemGameConfig | null>(null);
 
-**Commits:**
-- feat: arcade credit mode manager (backend)
-- feat: credit mode overlay UI (frontend)
+  // Load config on mount
+  useEffect(() => {
+    loadConfig();
+  }, [system]);
 
-### FASE 2: Lanzamiento (ALTA) - 6-8h
+  // Timer effect
+  useEffect(() => {
+    if (!isPlaying || timeRemaining === null) return;
 
-**Backend:**
-- [ ] LaunchParametersManager (300 líneas)
-- [ ] ProcessMonitor (250 líneas)
-- [ ] Actualizar EmulatorManager.launch_game_with_params
-- [ ] Tauri commands (200 líneas)
+    const timer = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev! <= 1) {
+          // Time's up - exit game
+          invoke('end_game_session', { system }).catch(console.error);
+          setIsPlaying(false);
+          return null;
+        }
+        return prev! - 1;
+      });
+    }, 1000);
 
-**Frontend:**
-- [ ] LaunchConfigPanel.tsx (300 líneas)
-- [ ] Sistema de configuración por sistema
-- [ ] CSS styling (200 líneas)
+    return () => clearInterval(timer);
+  }, [isPlaying, timeRemaining, system]);
 
-**Commits:**
-- feat: launch parameters & process monitoring
-- feat: launch configuration UI
+  const loadConfig = async () => {
+    try {
+      const cfg = await invoke('load_system_config', { system });
+      setSystemConfig(cfg);
+    } catch (err) {
+      console.error('Error loading config:', err);
+    }
+  };
 
-### FASE 3: Auditoría (MEDIA) - 4-6h
+  const insertCoin = async (amount: number) => {
+    try {
+      const state = await invoke('add_coins', { amount });
+      setCredits(state.total_balance);
+    } catch (err) {
+      console.error('Error inserting coin:', err);
+    }
+  };
 
-**Backend:**
-- [ ] GameMetadataManager (200 líneas)
-- [ ] AuditManager (250 líneas)
-- [ ] LogManager (200 líneas)
-- [ ] Tauri commands (300 líneas)
+  const startGame = async (systemStr: string, gameId: string) => {
+    if (!systemConfig) return;
 
-**Frontend:**
-- [ ] GameMetadataEditor.tsx (300 líneas)
-- [ ] AuditPanel.tsx (250 líneas)
-- [ ] LogViewer.tsx (200 líneas)
-- [ ] CSS styling (300 líneas)
+    try {
+      const timeSeconds = systemConfig.coins_per_time;
+      setTimeRemaining(timeSeconds);
+      setIsPlaying(true);
+      // Start timer on backend
+      await invoke('start_timer', { duration_seconds: timeSeconds });
+    } catch (err) {
+      console.error('Error starting game:', err);
+    }
+  };
 
-**Commits:**
-- feat: game metadata & audit managers
-- feat: audit & metadata UI panels
+  const endGame = async () => {
+    try {
+      await invoke('stop_timer', {});
+      setIsPlaying(false);
+      setTimeRemaining(null);
+    } catch (err) {
+      console.error('Error ending game:', err);
+    }
+  };
 
----
-
-## 🎯 Resumen Total
-
-| Fase | Horas | Prioridad | Status |
-|------|-------|-----------|--------|
-| 1: Créditos | 4-6h | CRÍTICA | ⏳ |
-| 2: Lanzamiento | 6-8h | ALTA | ⏳ |
-| 3: Auditoría | 4-6h | MEDIA | ⏳ |
-| **TOTAL** | **14-20h** | - | - |
-
----
-
-## 📊 Código Total a Agregar
-
+  return {
+    credits,
+    timeRemaining,
+    isPlaying,
+    insertCoin,
+    startGame,
+    endGame,
+    systemConfig,
+  };
+};
 ```
-Backend Rust:      ~2,000 líneas
-Frontend React:    ~1,500 líneas
-CSS:               ~650 líneas
-Tauri Commands:    ~500 líneas
-─────────────────────────────
-TOTAL:             ~4,650 líneas
+
+### 4.2 Integración en GameScreen
+
+**Actualizar:** `src/components/arcade/GameScreen.tsx`
+
+```typescript
+import { CreditOverlay } from './CreditOverlay';
+import { useCoinGame } from '../../hooks/useCoinGame';
+
+export const GameScreen: React.FC<GameScreenProps> = ({ system, gameId }) => {
+  const { credits, timeRemaining, isPlaying, systemConfig } = useCoinGame(system);
+
+  return (
+    <div className="game-screen">
+      {/* Game render area */}
+      <div className="game-canvas">
+        {/* emulator renders here */}
+      </div>
+
+      {/* Overlay */}
+      {systemConfig?.show_overlay && (
+        <CreditOverlay
+          visible={true}
+          credits={credits}
+          timeRemaining={timeRemaining || undefined}
+          isRunning={isPlaying}
+          warningThreshold={systemConfig.warn_before}
+          gameTitle={gameId}
+        />
+      )}
+    </div>
+  );
+};
 ```
 
 ---
 
-**Listo para comenzar cuando digas. ¿Empezamos por Fase 1 (Créditos)?**
+## 📋 Tareas Totales
+
+### FASE 1: Config (2h)
+- [ ] SystemGameConfig struct
+- [ ] ConfigManager methods
+- [ ] Tauri commands
+
+### FASE 2: UI Config (2-3h)
+- [ ] CoinConfigPanel component
+- [ ] CSS styling
+- [ ] Form validación
+
+### FASE 3: Overlay (2h)
+- [ ] CreditOverlay mejorado
+- [ ] CSS animations
+- [ ] Integración en GameScreen
+
+### FASE 4: Conectar (1-2h)
+- [ ] useCoinGame hook
+- [ ] Persistencia de config
+- [ ] Testing manual
+
+**TOTAL: 7-9 horas**
+
+---
+
+## 🎨 Principios de Diseño
+
+✅ **Intuitivo:** Radio buttons para modos, sliders para tiempos  
+✅ **Visual:** Overlay arcade retro con animaciones  
+✅ **Configurable:** Cada sistema puede ser diferente  
+✅ **Robusto:** Persistencia en DB, sin perder config  
+✅ **Usable:** SIN requiere tocar código, todo desde UI  
+
+---
+
+**¿Empezamos por Fase 1?**
