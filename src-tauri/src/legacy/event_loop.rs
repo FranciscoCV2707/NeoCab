@@ -1,22 +1,77 @@
 use crate::Result;
 use super::{Renderer, InputHandler};
 use std::time::{Duration, Instant};
+use std::collections::VecDeque;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LegacyGameState {
+    Menu,
+    SystemSelect,
+    GameSelect,
+    Playing,
+    Paused,
+    Shutdown,
+}
+
+#[derive(Debug)]
+pub struct FrameStats {
+    frame_count: u64,
+    avg_frame_time_ms: f32,
+    current_fps: f32,
+    frame_times: VecDeque<Duration>,
+}
+
+impl FrameStats {
+    pub fn new() -> Self {
+        Self {
+            frame_count: 0,
+            avg_frame_time_ms: 0.0,
+            current_fps: 0.0,
+            frame_times: VecDeque::with_capacity(60),
+        }
+    }
+
+    pub fn record_frame(&mut self, elapsed: Duration) {
+        self.frame_count += 1;
+        self.frame_times.push_back(elapsed);
+
+        if self.frame_times.len() > 60 {
+            self.frame_times.pop_front();
+        }
+
+        if !self.frame_times.is_empty() {
+            let total: Duration = self.frame_times.iter().sum();
+            self.avg_frame_time_ms = total.as_secs_f32() * 1000.0 / self.frame_times.len() as f32;
+            self.current_fps = 1000.0 / self.avg_frame_time_ms;
+        }
+    }
+
+    pub fn get_stats(&self) -> (u64, f32, f32) {
+        (self.frame_count, self.avg_frame_time_ms, self.current_fps)
+    }
+}
 
 /// Legacy SDL2 event loop (Windows XP)
 pub struct EventLoop {
     running: bool,
+    paused: bool,
+    current_state: GameState,
     fps: u32,
     frame_time: Duration,
     last_frame: Instant,
+    stats: FrameStats,
 }
 
 impl EventLoop {
     pub fn new() -> Self {
         Self {
             running: true,
+            paused: false,
+            current_state: GameState::Menu,
             fps: 60,
             frame_time: Duration::from_millis(1000 / 60),
             last_frame: Instant::now(),
+            stats: FrameStats::new(),
         }
     }
 
@@ -35,6 +90,10 @@ impl EventLoop {
             let sdl_ctx = renderer.get_sdl_context();
             input_handler.initialize_sdl(sdl_ctx)?;
 
+            tracing::info!("Event loop: Starting game state = {:?}", self.current_state);
+
+            let mut last_stats_report = Instant::now();
+
             while self.running {
                 let frame_start = Instant::now();
 
@@ -44,17 +103,35 @@ impl EventLoop {
                     self.handle_input_event(event);
                 }
 
-                // Render frame
-                renderer.render_frame()?;
+                // Render frame (skip if paused but still render for visual feedback)
+                if !self.paused {
+                    renderer.render_frame()?;
+                } else {
+                    renderer.clear();
+                    renderer.present();
+                }
+
+                // Record frame timing
+                let frame_elapsed = frame_start.elapsed();
+                self.stats.record_frame(frame_elapsed);
 
                 // Frame rate limiting
-                let elapsed = frame_start.elapsed();
-                if elapsed < self.frame_time {
-                    std::thread::sleep(self.frame_time - elapsed);
+                if frame_elapsed < self.frame_time {
+                    std::thread::sleep(self.frame_time - frame_elapsed);
                 }
 
                 self.last_frame = frame_start;
+
+                // Log performance stats every 5 seconds
+                if last_stats_report.elapsed() > Duration::from_secs(5) {
+                    let (frames, avg_ms, fps) = self.stats.get_stats();
+                    tracing::debug!("Event loop stats: {} frames, {:.2}ms/frame, {:.1} FPS",
+                        frames, avg_ms, fps);
+                    last_stats_report = Instant::now();
+                }
             }
+
+            self.shutdown().await?;
         }
 
         #[cfg(not(feature = "legacy-ui"))]
@@ -71,25 +148,39 @@ impl EventLoop {
 
         match event {
             InputEvent::MoveUp => {
-                tracing::trace!("Input: Move Up");
+                tracing::trace!("Input: Move Up (state: {:?})", self.current_state);
             }
             InputEvent::MoveDown => {
-                tracing::trace!("Input: Move Down");
+                tracing::trace!("Input: Move Down (state: {:?})", self.current_state);
             }
             InputEvent::MoveLeft => {
-                tracing::trace!("Input: Move Left");
+                tracing::trace!("Input: Move Left (state: {:?})", self.current_state);
             }
             InputEvent::MoveRight => {
-                tracing::trace!("Input: Move Right");
+                tracing::trace!("Input: Move Right (state: {:?})", self.current_state);
             }
             InputEvent::Select => {
-                tracing::info!("Input: Select");
+                tracing::info!("Input: Select (state: {:?})", self.current_state);
+                match self.current_state {
+                    GameState::Playing => self.change_state(GameState::Playing),
+                    GameState::SystemSelect => self.change_state(GameState::GameSelect),
+                    GameState::GameSelect => self.change_state(GameState::Playing),
+                    _ => {}
+                }
             }
             InputEvent::Back => {
-                tracing::info!("Input: Back");
+                tracing::info!("Input: Back (state: {:?})", self.current_state);
+                match self.current_state {
+                    GameState::Playing => self.change_state(GameState::GameSelect),
+                    GameState::GameSelect => self.change_state(GameState::SystemSelect),
+                    GameState::SystemSelect => self.change_state(GameState::Menu),
+                    GameState::Paused => self.change_state(GameState::Playing),
+                    _ => {}
+                }
             }
             InputEvent::Menu => {
-                tracing::info!("Input: Menu");
+                tracing::info!("Input: Menu pressed (state: {:?})", self.current_state);
+                self.change_state(GameState::Menu);
             }
             InputEvent::Button1 => {
                 tracing::trace!("Input: Button 1");
@@ -104,12 +195,28 @@ impl EventLoop {
                 tracing::trace!("Input: Button 4");
             }
             InputEvent::Pause => {
-                tracing::info!("Input: Pause");
+                tracing::info!("Input: Pause toggled (currently: {})", if self.paused { "paused" } else { "playing" });
+                match self.current_state {
+                    GameState::Playing => {
+                        self.paused = !self.paused;
+                        let new_state = if self.paused { GameState::Paused } else { GameState::Playing };
+                        self.change_state(new_state);
+                    }
+                    _ => {}
+                }
             }
             InputEvent::Quit => {
                 tracing::info!("Input: Quit requested");
+                self.change_state(GameState::Shutdown);
                 self.running = false;
             }
+        }
+    }
+
+    fn change_state(&mut self, new_state: GameState) {
+        if std::mem::discriminant(&self.current_state) != std::mem::discriminant(&new_state) {
+            tracing::info!("State transition: {:?} -> {:?}", self.current_state, new_state);
+            self.current_state = new_state;
         }
     }
 
@@ -119,8 +226,39 @@ impl EventLoop {
         tracing::info!("Event loop FPS set to {}", self.fps);
     }
 
+    pub fn pause(&mut self) {
+        if matches!(self.current_state, GameState::Playing) {
+            self.paused = true;
+            self.change_state(GameState::Paused);
+        }
+    }
+
+    pub fn resume(&mut self) {
+        if matches!(self.current_state, GameState::Paused) {
+            self.paused = false;
+            self.change_state(GameState::Playing);
+        }
+    }
+
+    pub fn get_state(&self) -> GameState {
+        self.current_state
+    }
+
+    pub fn get_stats(&self) -> (u64, f32, f32) {
+        self.stats.get_stats()
+    }
+
     pub fn stop(&mut self) {
         self.running = false;
+    }
+
+    async fn shutdown(&mut self) -> Result<()> {
+        tracing::info!("Event loop shutting down...");
+        let (frames, avg_ms, fps) = self.stats.get_stats();
+        tracing::info!("Final stats: {} frames, {:.2}ms/frame, {:.1} FPS",
+            frames, avg_ms, fps);
+        tracing::info!("Legacy application shutdown complete");
+        Ok(())
     }
 }
 

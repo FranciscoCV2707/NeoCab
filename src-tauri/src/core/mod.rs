@@ -6,6 +6,7 @@ pub mod timer_manager;
 pub mod operator_panel;
 pub mod autoboot;
 pub mod theme_manager;
+pub mod game_state;
 
 pub use emulator_manager::EmulatorManager;
 pub use game_library::GameLibrary;
@@ -15,3 +16,4 @@ pub use timer_manager::{TimerManager, TimerStatus, TimerState};
 pub use operator_panel::{OperatorPanel, AuthLevel, SessionStats, OperatorStats, SystemHealth};
 pub use autoboot::AutobootManager;
 pub use theme_manager::{ThemeManager, Theme, ThemeConfig};
+pub use game_state::{GameStateManager, AppState};
