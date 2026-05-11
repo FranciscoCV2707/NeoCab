@@ -7,8 +7,8 @@ pub async fn set_theme(
     theme_name: String,
     theme_manager: State<'_, ThemeManager>,
 ) -> Result<String, String> {
-    match Theme::from_str(&theme_name) {
-        Some(theme) => {
+    match theme_manager.load_theme(&theme_name).await {
+        Ok(theme) => {
             match theme_manager.set_theme(theme).await {
                 Ok(_) => {
                     let result = json!({
@@ -27,10 +27,10 @@ pub async fn set_theme(
                 }
             }
         }
-        None => {
+        Err(e) => {
             let error = json!({
                 "success": false,
-                "error": format!("Unknown theme: {}", theme_name)
+                "error": format!("Failed to load theme: {}", e)
             });
             Err(error.to_string())
         }
@@ -41,19 +41,24 @@ pub async fn set_theme(
 pub async fn get_current_theme(
     theme_manager: State<'_, ThemeManager>,
 ) -> Result<String, String> {
-    let theme_name = theme_manager.get_theme_name().await;
-    let theme_config = theme_manager.get_current_theme().await;
+    let theme = theme_manager.get_current_theme().await;
 
     let result = json!({
         "success": true,
-        "theme": theme_name,
-        "config": {
-            "primary_color": theme_config.primary_color,
-            "secondary_color": theme_config.secondary_color,
-            "accent_color": theme_config.accent_color,
-            "background_color": theme_config.background_color,
-            "text_color": theme_config.text_color,
-            "font_family": theme_config.font_family,
+        "name": theme.name,
+        "author": theme.author,
+        "version": theme.version,
+        "colors": {
+            "primary": theme.colors.primary,
+            "secondary": theme.colors.secondary,
+            "accent": theme.colors.accent,
+            "text": theme.colors.text,
+            "background": theme.colors.background,
+        },
+        "fonts": {
+            "ui": theme.fonts.ui,
+            "display": theme.fonts.display,
+            "menu": theme.fonts.menu,
         }
     });
     Ok(result.to_string())
@@ -63,7 +68,18 @@ pub async fn get_current_theme(
 pub async fn get_theme_css(
     theme_manager: State<'_, ThemeManager>,
 ) -> Result<String, String> {
-    let css = theme_manager.get_css_variables().await;
+    let theme = theme_manager.get_current_theme().await;
+
+    // Generate CSS variables from theme
+    let css = format!(
+        ":root {{\n  --primary: {};\n  --secondary: {};\n  --accent: {};\n  --text: {};\n  --background: {};\n}}",
+        theme.colors.primary,
+        theme.colors.secondary,
+        theme.colors.accent,
+        theme.colors.text,
+        theme.colors.background
+    );
+
     let result = json!({
         "success": true,
         "css": css

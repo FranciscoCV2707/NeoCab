@@ -170,7 +170,7 @@ async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, c
     let input_manager = input::InputManager::new();
     let operator_panel = core::OperatorPanel::new("0000".to_string());
     let autoboot_manager = core::AutobootManager::default();
-    let theme_manager = core::ThemeManager::default();
+    let theme_manager = core::ThemeManager::new("./data/themes".into());
     let media_manager = core::MediaManager::new("./data".into(), 256 * 1024 * 1024);
     let shader_manager = core::ShaderManager::new("./public/shaders".into());
     let config_manager = core::ConfigManager::new("./data/config.yml", db).await?;
