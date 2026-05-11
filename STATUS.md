@@ -178,6 +178,91 @@
 
 ---
 
+## 🎨 PHASE 5: CUSTOMIZATION & ADVANCED FEATURES (Session 3)
+
+### Phase 5 Week 1: Theme System Backend + React Editor ✅ 100% DONE
+
+#### Task 5.1: Advanced Theme Manager Backend ✅ DONE (16-18h)
+- ✅ ThemeManager con JSON schema support
+- ✅ ThemeColors (7 colores customizables)
+- ✅ WheelSettings (size, spacing, animation, colors)
+- ✅ OverlaySettings (coin/timer position, opacity)
+- ✅ TransitionSettings (animation types, duration)
+- ✅ MediaSettings (wheels, boxes, backgrounds, opacity)
+- ✅ Default Classic Arcade theme
+- ✅ 7 Tauri commands: list_themes, get_current_theme, load_theme, save_custom_theme, export_theme, import_theme, apply_theme
+
+**Archivo:** `src-tauri/src/core/theme_manager.rs` (380 líneas)
+**Archivo:** `src-tauri/src/commands/theme_commands.rs` (160 líneas)
+
+#### Task 5.2: React Theme Editor Components ✅ DONE (12-14h)
+- ✅ ThemeEditor.tsx (main component con 360 líneas)
+  - Color picker section para colores principales
+  - Slider section para wheel settings
+  - Color settings para wheel selected/unselected
+  - Media settings section (toggles + sliders)
+  - Live theme preview integration
+  - Theme metadata editor (name, author, version)
+  - Save/Cancel buttons con loading state
+  
+- ✅ ColorPickerSection.tsx (80 líneas)
+  - Color grid layout
+  - Color picker input + hex input
+  - Color preview
+  - Hover effects
+  
+- ✅ SliderSection.tsx (80 líneas)
+  - Dynamic slider list
+  - Value display con units
+  - Range validation
+  - Smooth range input styling
+  
+- ✅ MediaSettingsSection.tsx (60 líneas)
+  - Toggle checkboxes para media display
+  - Background opacity slider
+  - Wheel size slider
+  
+- ✅ ThemePreview.tsx (100 líneas)
+  - Live preview con CSS variables
+  - Sample UI preview (system, buttons, status)
+  - Real-time color injection via documentElement.style
+  
+- ✅ useTheme.ts hook (180 líneas)
+  - Tauri command wrappers para todos los theme commands
+  - State management (themes, currentTheme, loading, error)
+  - Full error handling
+  - Auto-load current theme on mount
+
+**Archivos CSS:**
+- `src/components/customization/ThemeEditor.css` (180 líneas) - Arcade aesthetic
+- `src/components/customization/ColorPickerSection.css` (80 líneas)
+- `src/components/customization/SliderSection.css` (120 líneas) - Slider styling
+- `src/components/customization/MediaSettingsSection.css` (140 líneas)
+- `src/components/customization/ThemePreview.css` (140 líneas)
+
+### Phase 5 Week 1 Statistics
+| Métrica | Valor |
+|---------|-------|
+| React Components | 5 |
+| CSS Styling | 5 |
+| React Hook | 1 |
+| Líneas React/TS | ~960 |
+| Líneas CSS | ~660 |
+| Líneas Rust | ~540 |
+| **Total nuevas líneas** | **~2,160** |
+| Horas invertidas | 28-32h |
+| **Phase 5 Week 1 Progress** | **100%** |
+
+### Features Implementadas
+1. **Color Customization**: 7 colores (primary, secondary, accent, text, background, success, error)
+2. **Wheel Configuration**: Size, spacing, animation duration, item colors
+3. **Media Management**: Toggle wheels/boxes/backgrounds, opacity, size
+4. **Live Preview**: CSS variables injection, real-time UI preview
+5. **Theme Persistence**: Save/export/import custom themes
+6. **Responsive Design**: Desktop + tablet + mobile layouts
+
+---
+
 ## 🔄 PHASE 4: HARDWARE INTEGRATION (Session 2)
 
 ### Task 4.1: GPIO Coin Detection ✅ DONE
@@ -714,10 +799,12 @@ Los archivos clave para Week 5:
 |------|--------|-------|-------|
 | Phase 1 | ✅ 100% | 30-40h | 30-40h |
 | Phase 2 | ✅ 100% | 55-65h | 85-105h |
-| Phase 3 | ⏳ 0% | 40-50h | 125-155h |
-| Phase 4 | ⏳ 0% | 50-60h | 175-215h |
-| Phase 5+ | ⏳ 0% | 200+h | 375+h |
-| **TOTAL v3.0** | **23%** | **340-470h** | **340-470h** |
+| Phase 3 | ✅ 100% | 40-50h | 125-155h |
+| Phase 4 | ✅ 100% | 50-60h | 175-215h |
+| Phase 5 Week 1 | ✅ 100% | 28-32h | 203-247h |
+| Phase 5 Weeks 2-4 | ⏳ 0% | 60-80h | 263-327h |
+| Phase 6-8 | ⏳ 0% | 100-150h | 363-477h |
+| **TOTAL v3.0** | **~40-44%** | **463-477h** | **463-477h** |
 
 ### Commits totales sesión: 9
 - Phase 1: 3 commits (e89fd54, f88324a, 6446828)
