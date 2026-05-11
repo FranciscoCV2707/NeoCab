@@ -12,6 +12,32 @@ use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Initialize logging
+    init_logging();
+
+    // Detect runtime mode (Modern or Legacy)
+    let runtime_mode = utils::detect_mode();
+    let system_info = utils::get_system_info();
+
+    tracing::info!("================================================");
+    tracing::info!("NeoCab v3.0 Starting");
+    tracing::info!("Runtime Mode: {}", runtime_mode);
+    tracing::info!("Platform: {} ({})", system_info.os, system_info.arch);
+    tracing::info!("Family: {}", system_info.family);
+    tracing::info!("================================================");
+
+    #[cfg(feature = "modern-ui")]
+    tracing::info!("Feature: modern-ui enabled (Tauri+React)");
+
+    #[cfg(feature = "legacy-ui")]
+    tracing::info!("Feature: legacy-ui enabled (SDL2+OpenGL)");
+
+    #[cfg(feature = "hardware-gpio")]
+    tracing::info!("Feature: hardware-gpio enabled (RPi GPIO)");
+
+    #[cfg(feature = "hardware-arduino")]
+    tracing::info!("Feature: hardware-arduino enabled (Arduino serial)");
+
     tauri::Builder::default()
         .setup(|app| {
             let rt = tokio::runtime::Handle::current();
@@ -88,6 +114,18 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+fn init_logging() {
+    use tracing_subscriber;
+
+    let _ = tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::from_default_env()
+                .add_directive("neocab=debug".parse().unwrap()),
+        )
+        .with_writer(std::io::stderr)
+        .try_init();
 }
 
 async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager, core::TimerManager, input::InputManager, core::OperatorPanel, core::AutobootManager, core::ThemeManager)> {

@@ -1,0 +1,64 @@
+# NeoCab Platform-Specific Build Configuration
+
+# Default target for development (current platform)
+[build]
+jobs = 4
+
+# Windows XP (i686 MSVC) - 32-bit support
+[target.i686-pc-windows-msvc]
+linker = "link.exe"
+ar = "lib.exe"
+rustflags = [
+    "-C", "link-arg=/SUBSYSTEM:WINDOWS,5.01",
+    "-C", "target-cpu=pentium4",
+    "-C", "opt-level=3"
+]
+
+# Windows XP (x86_64 MSVC) - 64-bit support
+[target.x86_64-pc-windows-msvc]
+rustflags = [
+    "-C", "opt-level=3",
+    "-C", "target-cpu=core2"
+]
+
+# Windows GNU 32-bit
+[target.i686-pc-windows-gnu]
+rustflags = [
+    "-C", "link-arg=-Wl,--subsystem,windows",
+    "-C", "target-cpu=pentium4",
+    "-C", "opt-level=3"
+]
+
+# Linux x86_64
+[target.x86_64-unknown-linux-gnu]
+rustflags = ["-C", "opt-level=3"]
+
+# Linux ARM (Raspberry Pi 32-bit)
+[target.armv7-unknown-linux-gnueabihf]
+linker = "arm-linux-gnueabihf-gcc"
+rustflags = [
+    "-C", "link-arg=-mfpu=neon",
+    "-C", "target-cpu=cortex-a7",
+    "-C", "opt-level=3"
+]
+
+# Linux ARM64 (Raspberry Pi 4/5 64-bit)
+[target.aarch64-unknown-linux-gnu]
+rustflags = [
+    "-C", "target-cpu=cortex-a72",
+    "-C", "opt-level=3"
+]
+
+# Profile settings
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 1
+
+# Feature flags during build
+[env]
+RUSTFLAGS = "-D warnings"
