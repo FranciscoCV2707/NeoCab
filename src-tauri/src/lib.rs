@@ -50,7 +50,7 @@ pub fn run() {
             });
 
             match result {
-                Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager, media_manager)) => {
+                Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager, media_manager, shader_manager)) => {
                     app.manage(game_library);
                     app.manage(emulator_manager);
                     app.manage(coin_manager);
@@ -60,6 +60,7 @@ pub fn run() {
                     app.manage(autoboot_manager);
                     app.manage(theme_manager);
                     app.manage(media_manager);
+                    app.manage(shader_manager);
                     Ok(())
                 }
                 Err(e) => {
@@ -136,6 +137,11 @@ pub fn run() {
             commands::organize_media,
             commands::get_media,
             commands::import_media,
+            commands::list_shaders,
+            commands::get_shader,
+            commands::list_shader_presets,
+            commands::get_shader_preset,
+            commands::get_default_shader,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -153,7 +159,7 @@ fn init_logging() {
         .try_init();
 }
 
-async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager, core::TimerManager, input::InputManager, core::OperatorPanel, core::AutobootManager, core::ThemeManager, core::MediaManager)> {
+async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager, core::TimerManager, input::InputManager, core::OperatorPanel, core::AutobootManager, core::ThemeManager, core::MediaManager, core::ShaderManager)> {
     let db = std::sync::Arc::new(db::Database::new("./data/neocab.db").await?);
     db.init_default_systems().await?;
 
@@ -169,6 +175,7 @@ async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, c
     let autoboot_manager = core::AutobootManager::default();
     let theme_manager = core::ThemeManager::default();
     let media_manager = core::MediaManager::new("./data".into(), 256 * 1024 * 1024);
+    let shader_manager = core::ShaderManager::new("./public/shaders".into());
 
-    Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager, media_manager))
+    Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager, media_manager, shader_manager))
 }
