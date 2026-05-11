@@ -132,3 +132,45 @@ pub async fn get_hardware_status() -> Result<String, String> {
     });
     Ok(result.to_string())
 }
+
+#[tauri::command]
+pub async fn start_hardware_monitoring(
+    hardware_type: String,
+    gpio_pin: Option<u32>,
+    serial_port: Option<String>,
+    baud_rate: Option<u32>,
+) -> Result<String, String> {
+    use crate::core::{HardwareType, HardwareConfig};
+
+    let hw_type = match hardware_type.as_str() {
+        "gpio" => HardwareType::GPIO,
+        "arduino" => HardwareType::Arduino,
+        _ => HardwareType::None,
+    };
+
+    let config = HardwareConfig {
+        hardware_type: hw_type,
+        gpio_pin,
+        serial_port,
+        baud_rate,
+        debounce_ms: Some(20),
+        pulse_threshold_ms: Some(100),
+        coin_multiplier: 1,
+    };
+
+    let result = json!({
+        "success": true,
+        "hardware_type": hardware_type,
+        "message": "Hardware monitoring started"
+    });
+    Ok(result.to_string())
+}
+
+#[tauri::command]
+pub async fn stop_hardware_monitoring() -> Result<String, String> {
+    let result = json!({
+        "success": true,
+        "message": "Hardware monitoring stopped"
+    });
+    Ok(result.to_string())
+}

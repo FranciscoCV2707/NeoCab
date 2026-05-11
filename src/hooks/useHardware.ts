@@ -13,11 +13,14 @@ export interface UseHardwareReturn {
   error: string | null;
   gpioPins: number[];
   serialPorts: string[];
+  isMonitoring: boolean;
   listGpioPins: () => Promise<void>;
   listSerialPorts: () => Promise<void>;
   testGpioPin: (pin: number) => Promise<boolean>;
   testArduino: (port: string, baudRate: number) => Promise<boolean>;
   calibrateCoinDetection: (debounceMs: number, pulseThresholdMs: number) => Promise<boolean>;
+  startHardwareMonitoring: (type: 'gpio' | 'arduino', config: any) => Promise<boolean>;
+  stopHardwareMonitoring: () => Promise<boolean>;
   loadHardwareStatus: () => Promise<void>;
 }
 
@@ -27,6 +30,7 @@ export const useHardware = (): UseHardwareReturn => {
   const [serialPorts, setSerialPorts] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isMonitoring, setIsMonitoring] = useState(false);
 
   const loadHardwareStatus = useCallback(async () => {
     setLoading(true);
@@ -145,17 +149,60 @@ export const useHardware = (): UseHardwareReturn => {
     []
   );
 
+  const startHardwareMonitoring = useCallback(
+    async (type: 'gpio' | 'arduino', config: any): Promise<boolean> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        await invoke('start_hardware_monitoring', {
+          hardware_type: type,
+          gpio_pin: config.gpioPin,
+          serial_port: config.serialPort,
+          baud_rate: config.baudRate,
+        });
+        setIsMonitoring(true);
+        return true;
+      } catch (err) {
+        setError(`Failed to start monitoring: ${err}`);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  const stopHardwareMonitoring = useCallback(async (): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      await invoke('stop_hardware_monitoring');
+      setIsMonitoring(false);
+      return true;
+    } catch (err) {
+      setError(`Failed to stop monitoring: ${err}`);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     hardwareStatus,
     loading,
     error,
     gpioPins,
     serialPorts,
+    isMonitoring,
     listGpioPins,
     listSerialPorts,
     testGpioPin,
     testArduino,
     calibrateCoinDetection,
+    startHardwareMonitoring,
+    stopHardwareMonitoring,
     loadHardwareStatus,
   };
 };

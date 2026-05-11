@@ -120,6 +120,8 @@ pub fn run() {
             commands::test_arduino_connection,
             commands::calibrate_coin_detection,
             commands::get_hardware_status,
+            commands::start_hardware_monitoring,
+            commands::stop_hardware_monitoring,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
