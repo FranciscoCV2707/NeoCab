@@ -1,9 +1,49 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-12 (Session 9 - Critical Features)  
-**Fase actual:** 🔄 Phase 7 SEMANA 2-3 (Critical Features & Revenue Sync) EN PROGRESO  
-**Progreso:** Session 9 completada 75%: Auto-close timeout, Keyboard coin input, Logs to file + viewer integrado. Pendiente: Audit panel.  
-**Build Status:** ✅ `cargo check` OK | ✅ `npm run build` OK  
+**Última actualización:** 2026-05-12 (Session 7 - Installer System)  
+**Fase actual:** 🔄 Phase 7 SEMANA 3+ (Installer System & Configuration) EN PROGRESO  
+**Progreso:** Session 7 completada 100%: Smart emulator detection, Multi-path shaders, Build script improvements  
+**Build Status:** ✅ `cargo check` OK (27 warnings, 0 errors) | ✅ App compiling successfully  
+
+---
+
+## SESSION 7 - INSTALLER SYSTEM - ✅ COMPLETA 100%
+
+**Objetivo:** Crear un instalable one-click que bundlee WebView2, shaders, y detecte emuladores inteligentemente.
+
+**TASK 1: Build Scripts Improvement - ✅ COMPLETADA**
+- ✅ `build-appimage.sh` ahora copia icono real desde src-tauri/icons/128x128.png
+- ✅ `build-appimage.sh` bundlea shaders explícitamente en config/shaders/
+- ✅ `build-nsis.ps1` mejorado con creación condicional de directorios
+- ✅ Shaders se copian a `$INSTDIR\config\shaders\` en instalador Windows
+- ✅ Shaders se copian a `$APPDIR/usr/share/neocab/config/shaders/` en Linux AppImage
+
+**TASK 2: Emulator Detection System - ✅ COMPLETADA**
+- ✅ Creado `emulator_detector.rs` con detección inteligente de paths
+- ✅ Detecta en: Program Files, PATH env, /usr/bin, directorio de instalación
+- ✅ Soporta: MAME, RetroArch, PCSX2, Dolphin, Cemu, RPCS3
+- ✅ Incluye URLs de descarga para emuladores faltantes
+- ✅ Comando `detect_emulators` registrado en Tauri
+- ✅ Manejo robusto de paths con fallbacks multiplataforma
+
+**TASK 3: Frontend Hook for Emulator Detection - ✅ COMPLETADA**
+- ✅ Creado `useEmulatorDetection.ts` hook personalizado
+- ✅ Auto-detección en mount, filtrado helpers
+- ✅ Métodos: getInstalledEmulators(), getMissingEmulators(), getDownloadUrl()
+- ✅ Listo para integración en SetupWizard durante configuración inicial
+
+**TASK 4: Multi-path Shader Support - ✅ COMPLETADA**
+- ✅ `ShaderManager` ahora soporta múltiples paths de shaders
+- ✅ Detección automática de rutas post-instalación (Windows y Linux)
+- ✅ Fallback a ./config/shaders para desarrollo
+- ✅ Prevención de duplicados en carga de shaders
+- ✅ Manejo seguro de directorios faltantes
+
+**Pendiente (próximas sesiones):**
+- Integración de emulator detection en SetupWizard UI
+- Windows XP Legacy Mode (Session 8)
+- Fase 8: Configurator completo (per-system ROM paths, etc.)
+- CI/CD GitHub Actions (opcional)
 
 ---
 
