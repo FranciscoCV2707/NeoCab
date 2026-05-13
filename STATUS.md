@@ -1,9 +1,35 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-12 (Session 11 - Launcher Complete)  
-**Fase actual:** 🔄 Phase 8+ (Polish & Final Features) EN PROGRESO  
-**Progreso:** Sessions 7, 10, 11 completadas (3 sesiones en 1 día): 100% en cada una  
+**Última actualización:** 2026-05-12 (Session 12 - Polish Complete)  
+**Fase actual:** 🔄 Phase 8+ (Final Features & Optimization) EN PROGRESO  
+**Progreso:** Sessions 7, 10, 11, 12 completadas (4 sesiones en 1 día): 100% en cada una  
 **Build Status:** ✅ `cargo check` OK (27 warnings, 0 errors) | ✅ All systems compiling  
+
+---
+
+## SESSION 12 - POLISH: TEMAS ZIP Y PER-SYSTEM - ✅ COMPLETA 100%
+
+**Objetivo:** Soporte de temas ZIP y temas específicos por sistema.
+
+**TASK 1: ZIP Theme Export/Import - ✅ COMPLETADA**
+- ✅ `export_theme()`: Crea .neotheme ZIP con compression
+- ✅ `import_theme()`: Extrae ZIP automáticamente
+- ✅ Soporta theme.json y preview.png en ZIP
+- ✅ Validación de archivos y error handling robusto
+- ✅ Async/await con tokio
+
+**TASK 2: Per-system Theme Support - ✅ COMPLETADA**
+- ✅ `ThemeManager.system_themes`: HashMap<String, Theme>
+- ✅ `set_system_theme(system, theme)`: asignar tema a sistema
+- ✅ `get_system_theme(system)`: obtener con fallback a global
+- ✅ `list_system_themes()`: listar todas las asignaciones
+- ✅ `remove_system_theme(system)`: remover asignación
+- ✅ Fallback automático al tema global
+
+**Pendiente (próximas sesiones):**
+- Integración de per-system themes en ThemeEditor UI
+- Media folder watching con notify watcher
+- Configuración persistente de system themes
 
 ---
 
