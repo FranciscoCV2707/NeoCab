@@ -75,7 +75,7 @@ pub fn run() {
     let system_info = utils::get_system_info();
 
     tracing::info!("================================================");
-    tracing::info!("NeoCab v3.0 Starting");
+    tracing::info!("NeoCab v1.0 Starting");
     tracing::info!("Runtime Mode: {}", runtime_mode);
     tracing::info!("Platform: {} ({})", system_info.os, system_info.arch);
     tracing::info!("Family: {}", system_info.family);
@@ -85,7 +85,7 @@ pub fn run() {
     tracing::info!("Feature: modern-ui enabled (Tauri+React)");
 
     #[cfg(feature = "legacy-ui")]
-    tracing::info!("Feature: legacy-ui enabled (SDL2+OpenGL)");
+    tracing::info!("Feature: legacy-ui enabled (SDL2)");
 
     #[cfg(feature = "hardware-gpio")]
     tracing::info!("Feature: hardware-gpio enabled (RPi GPIO)");
@@ -93,7 +93,70 @@ pub fn run() {
     #[cfg(feature = "hardware-arduino")]
     tracing::info!("Feature: hardware-arduino enabled (Arduino serial)");
 
-    tauri::Builder::default()
+    // Execute legacy mode if detected and compiled with legacy-ui feature
+    #[cfg(feature = "legacy-ui")]
+    {
+        use utils::RuntimeMode;
+        if matches!(runtime_mode, RuntimeMode::Legacy) {
+            tracing::info!("Legacy mode activated - running SDL2 application");
+            run_legacy_app();
+            return;
+        }
+    }
+
+    // Otherwise, run modern Tauri app
+    run_modern_app();
+}
+
+/// Run legacy SDL2 application (Windows XP compatible)
+#[cfg(feature = "legacy-ui")]
+fn run_legacy_app() {
+    use tauri::async_runtime;
+
+    let result = async_runtime::block_on(async {
+        match legacy::LegacyApp::new().await {
+            Ok(mut app) => {
+                tracing::info!("Legacy application created successfully");
+                match app.run().await {
+                    Ok(_) => {
+                        tracing::info!("Legacy application exited normally");
+                        Ok(())
+                    }
+                    Err(e) => {
+                        tracing::error!("Legacy application error: {}", e);
+                        Err(e)
+                    }
+                }
+            }
+            Err(e) => {
+                tracing::error!("Failed to create legacy application: {}", e);
+                Err(e)
+            }
+        }
+    });
+
+    match result {
+        Ok(_) => {
+            tracing::info!("NeoCab legacy mode shutdown complete");
+            std::process::exit(0);
+        }
+        Err(e) => {
+            eprintln!("NeoCab legacy mode failed: {}", e);
+            std::process::exit(1);
+        }
+    }
+}
+
+#[cfg(not(feature = "legacy-ui"))]
+fn run_legacy_app() {
+    eprintln!("Legacy mode requested but legacy-ui feature not enabled");
+    eprintln!("Rebuild with: cargo build --features legacy-ui");
+    std::process::exit(1);
+}
+
+/// Run modern Tauri application
+fn run_modern_app() {
+    let _ = tauri::Builder::default()
         .setup(|app| {
             let result = tauri::async_runtime::block_on(initialize_app());
 

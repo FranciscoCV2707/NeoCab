@@ -213,7 +213,7 @@ impl EventLoop {
         }
     }
 
-    fn change_state(&mut self, new_state: GameState) {
+    fn change_state(&mut self, new_state: LegacyGameState) {
         if std::mem::discriminant(&self.current_state) != std::mem::discriminant(&new_state) {
             tracing::info!("State transition: {:?} -> {:?}", self.current_state, new_state);
             self.current_state = new_state;
