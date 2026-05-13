@@ -1,9 +1,45 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-12 (Session 14 - Testing & Verification)  
-**Fase actual:** 🔄 Phase 8+ (Testing & Final Features) EN PROGRESO  
-**Progreso:** 8+ sesiones completadas de 16 (50%)  
+**Última actualización:** 2026-05-12 (Session 15 - Feature Implementation Complete)  
+**Fase actual:** 🔄 Phase 8+ (Session 15 Complete - Session 16 Ready) EN PROGRESO  
+**Progreso:** 9+ sesiones completadas de 16 (56%)  
 **Build Status:** ✅ Rust: `cargo check` CLEAN | ✅ React: `npm run build` success (146.93 kB → 47.19 kB gzip)  
+
+---
+
+## SESSION 15 - ADDITIONAL FEATURES & OPTIMIZATIONS - ✅ COMPLETA 100%
+
+**Objetivo:** Implementar callbacks finales, persistencia, y documentación antes del release.
+
+**TASK 1: Media Watcher Callback Integration - ✅ COMPLETADA**
+- ✅ `invalidate_and_rescan()` method en MediaManager
+- ✅ Media folder changes trigger automatic rescans
+- ✅ `trigger_media_rescan` command para rescans manuales
+- ✅ start_auto_watch() en initialize_app()
+- ✅ Cache invalidation on media changes
+
+**TASK 2: Per-system Configuration Persistence - ✅ COMPLETADA**
+- ✅ New table: system_theme_assignments en DB
+- ✅ Methods: set_system_theme, get_system_theme, remove_system_theme
+- ✅ Commands: set_system_theme, remove_system_theme, list_system_themes
+- ✅ Database Arc managed en app
+- ✅ Theme assignments persist across restarts
+
+**TASK 3: Build Environment Setup - ✅ COMPLETADA**
+- ✅ Comprehensive BUILD.md with platform-specific instructions
+- ✅ Windows XP legacy mode setup (CMake + SDL2)
+- ✅ Linux x86_64 build guide
+- ✅ ARM cross-compilation guide
+- ✅ Troubleshooting section
+
+**TASK 4: Performance Optimization - ✅ COMPLETADA**
+- ✅ PERFORMANCE.md with profiling strategies
+- ✅ Baseline metrics established (500-800ms startup)
+- ✅ Optimization checklist for all components
+- ✅ Tools and methods documentation
+- ✅ Current optimization status documented
+
+**Pendiente:** Session 16 - Release v1.0
 
 ---
 
