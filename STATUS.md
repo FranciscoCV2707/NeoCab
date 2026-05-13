@@ -1,9 +1,46 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-12 (Session 8 Part 2 - Windows XP Legacy)  
+**Última actualización:** 2026-05-12 (Session 13 - Component Integrations)  
 **Fase actual:** 🔄 Phase 8+ (Final Features & Optimization) EN PROGRESO  
-**Progreso:** Sessions 7, 10, 11, 12, 8 (Parts 1-2) en progress  
-**Build Status:** ✅ `cargo check` OK (0 errors) | ✅ Legacy module compiles  
+**Progreso:** Sessions 7, 8 (Parts 1-2), 10, 11, 12 completas | Session 13 en progress  
+**Build Status:** ✅ `npm run build` success (147 kB → 47 kB gzip) | ✅ No TypeScript errors  
+
+---
+
+## SESSION 13 - COMPONENT INTEGRATIONS - ✅ COMPLETA 75%
+
+**Objetivo:** Integrar componentes completados en Sessions 10-12 a la UI principal.
+
+**TASK 1: SystemManager Integration - ✅ COMPLETADA**
+- ✅ Import SystemManager en OperatorPanel
+- ✅ Reemplazar SettingsTab placeholder con SystemManager
+- ✅ Permite agregar/editar/eliminar sistemas sin reiniciar app
+- ✅ Accesible desde pestaña "⚙️ Configuración" del Operator Panel
+
+**TASK 2: GameMetadataEditor Integration - ✅ COMPLETADA**
+- ✅ Agregar edit buttons (✎) a cada game item
+- ✅ Modal overlay con GameMetadataEditor
+- ✅ Click en edit abre modal, click outside cierra
+- ✅ Save/Cancel handlers integrados
+- ✅ CSS styling arcade-themed
+
+**TASK 3: FadeOverlay Integration - ✅ COMPLETADA**
+- ✅ Importar FadeOverlay y useLaunchOverlay en GameScreen
+- ✅ Mostrar overlay al llamar handleLaunchGame
+- ✅ Autocomplete after 3s
+- ✅ Props: isVisible, gameName, duration, onFadeComplete
+- ✅ Smooth fade in/out animation
+
+**PENDIENTE - TASK 4: Per-system Themes UI**
+- ⏳ Agregar selector de tema por sistema en ThemeEditor
+- ⏳ UI para assign/remove per-system themes
+- ⏳ Dropdown con lista de sistemas y temas disponibles
+
+**Pendiente (próximas sesiones):**
+- Media folder auto-watching con notify
+- End-to-end testing de CRUD operations
+- Per-system themes UI finalization
+- Build environment setup (SDL2 CMake para Windows)
 
 ---
 
