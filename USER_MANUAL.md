@@ -1,86 +1,109 @@
-# 🎮 Manual del Usuario Maestro - NeoCab v1.0 🚀
+# 📖 NeoCab Master User Manual v1.0 🎮
 
-Bienvenido a **NeoCab**, el sistema operativo definitivo para gabinetes arcade. Este manual te guiará a través de todas las potentes herramientas integradas que hacen de NeoCab el sustituto moderno y ligero de HyperSpin y RocketLauncher.
-
----
-
-## 🕹️ 1. Conceptos Básicos e Interfaz
-NeoCab está diseñado para ser operado exclusivamente con palancas y botones arcade (aunque el ratón y teclado funcionan para la configuración).
-
-*   **Rueda de Sistemas:** Navega entre tus consolas y máquinas arcade (MAME, NES, SNES, etc.).
-*   **Lista de Juegos:** Visualiza tus juegos con arte original, videos y descripciones.
-*   **Favoritos:** Pulsa el botón asignado a "Favorito" (normalmente Botón 4) para añadir juegos a tu colección rápida.
+This manual provides a comprehensive, step-by-step guide to mastering your **NeoCab** installation. From basic navigation to advanced theme creation and input engineering, everything is covered here.
 
 ---
 
-## 👨‍💼 2. Panel de Operador (Tu Centro de Mando)
-Para acceder al Panel de Operador, pulsa la combinación de teclas/botones configurada (por defecto `Ctrl+Alt+O` o la tecla asignada en el JoyMapper). Requiere un **PIN de seguridad** (Default: `0000`).
-
-### Pestañas Principales:
-*   **Estadísticas:** Mira cuántas monedas has recaudado, tiempo total de juego y salud del sistema.
-*   **Controles:** Accede al **Input Wizard** para configurar tus palancas.
-*   **Studio:** Edita visualmente el aspecto de tu sistema.
-*   **Auditoría:** Revisa qué juegos no tienen video o carátula y soluciónalo con un clic.
-
----
-
-## 🎨 3. NeoCab Studio (Diseño Visual)
-¡Olvida editar archivos de texto o usar programas externos!
-1.  Entra en la pestaña **Studio**.
-2.  **Mueve elementos:** Usa el ratón para arrastrar la rueda de juegos o la ventana de video.
-3.  **Ajusta Propiedades:** Usa los sliders laterales para cambiar el tamaño, rotación y opacidad.
-4.  **Pantalla de Carga (Fade):** Personaliza el texto y el tiempo que dura la transición antes de que empiece un juego.
-5.  **Guardar:** Pulsa el botón de Guardar y los cambios se aplicarán instantáneamente a todo el sistema.
+## 📑 Table of Contents
+1.  [The NeoCab Philosophy](#-the-neocab-philosophy)
+2.  [Interface & Navigation](#-interface--navigation)
+3.  [Operator Panel (The Hub)](#-operator-panel-the-hub)
+4.  [NeoCab Studio (Design Mode)](#-neocab-studio-design-mode)
+5.  [JoyMapper (Control Engineering)](#-joymapper-control-engineering)
+6.  [Media & Scraping (The Library)](#-media--scraping-the-library)
+7.  [Launcher Pro (Transitions & Bezels)](#-launcher-pro-transitions--bezels)
+8.  [Advanced Configuration](#-advanced-configuration)
+9.  [Troubleshooting & FAQ](#-troubleshooting--faq)
 
 ---
 
-## 🕹️ 4. JoyMapper (Controles Profesionales)
-NeoCab no necesita drivers externos (como ViGEm o x360ce). El motor **JoyMapper** nativo lo hace todo:
-1.  Ve a **Controles** -> **Input Wizard**.
-2.  Sigue las instrucciones en pantalla: pulsa Arriba, Abajo, Botón 1, etc.
-3.  **Curvas de Respuesta:** Si usas un stick analógico, puedes configurar curvas "Exponenciales" para mayor precisión en juegos de lucha o disparos.
-4.  **Anti-Deadzone:** Si tu palanca está un poco vieja y se mueve sola, ajusta el Deadzone para que el sistema ignore esos pequeños movimientos.
+## 🏛️ The NeoCab Philosophy
+NeoCab was built to solve the "Fragmented Arcade" problem. Instead of running 5 different programs (frontend, launcher, key-mapper, config, and media manager), NeoCab does it all in a single executable. It is designed to be:
+- **Fast**: Boots in seconds.
+- **Stable**: Rust-powered core that never crashes.
+- **Beautiful**: High-fidelity graphics on any screen.
 
 ---
 
-## 🚀 5. Launcher Pro (Fades & Bezels)
-La experiencia de lanzamiento es lo que separa a un arcade barato de uno profesional.
-*   **Fades:** NeoCab muestra una pantalla de carga elegante que oculta el inicio del emulador. Puedes personalizarla en el Studio.
-*   **Bezels (Marcos):** Para juegos clásicos en 4:3, NeoCab busca automáticamente un marco (bezel) en `data/media/bezels` para llenar los bordes negros de tu pantalla moderna.
+## 🕹️ Interface & Navigation
+The main interface is designed for **Arcade Controls**.
+- **The Wheel**: Rotate through systems using your Joystick (Up/Down).
+- **Game List**: Select a game with **Button 1 (Start/Confirm)**.
+- **Favorites**: Mark a game as favorite with **Button 4**.
+- **Exit Game**: Hold **Start + Select** for 2 seconds to trigger the Pause Menu or exit.
 
 ---
 
-## 🔍 6. Smart Scraper (Sincronización de Medios)
-NeoCab está conectado a **ScreenScraper.fr**.
-1.  En el Panel de Operador, selecciona un juego que no tenga imagen.
-2.  Pulsa **"Scrapear Juego"**.
-3.  El sistema buscará automáticamente en la nube y descargará:
-    *   Logo (Wheel)
-    *   Caja (Box Art)
-    *   Video de preview
-    *   Información del desarrollador y año.
+## 👨‍💼 Operator Panel (The Hub)
+The Operator Panel is the "Brain" of your machine. Access it by pressing `Ctrl + Alt + O` (Keyboard) or your assigned Operator Button.
+- **PIN Security**: Default is `0000`. You can change this in the Settings tab.
+- **Dashboard**: View real-time CPU/RAM usage, coin count, and session duration.
+- **System Health**: Check if emulators are correctly installed and paths are valid.
 
 ---
 
-## 📊 7. Auditoría y Mantenimiento
-Usa la pestaña de **Auditoría** para mantener tu máquina impecable.
-*   **Limpieza de ROMs:** Detecta archivos que no son juegos válidos.
-*   **Media Check:** Te muestra una lista de qué juegos están "huérfanos" (sin arte).
-*   **Logs:** Si un emulador no arranca, revisa la pestaña de **Registros** para ver el error exacto en tiempo real.
+## 🎨 NeoCab Studio (Design Mode)
+NeoCab Studio is a built-in WYSIWYG (What You See Is What You Get) theme editor.
+1.  **Access**: Go to Operator Panel -> **Studio**.
+2.  **Element Selection**: Click on any element (Game Wheel, Video Window, Background) to select it.
+3.  **Transformation**:
+    - **Position**: Drag and drop anywhere on the screen.
+    - **Scale**: Use the slider to make elements larger or smaller.
+    - **Opacity**: Create subtle overlays by adjusting transparency.
+4.  **Transitions (Fades)**:
+    - Set the **Duration** of the loading screen.
+    - Change the **Loading Text** (e.g., "Now Loading", "Get Ready!").
+5.  **Save**: Always click **Save Config** to apply changes.
 
 ---
 
-## 💻 8. Soporte Legacy (Windows XP)
-Si estás instalando esto en un PC antiguo con **Windows XP**:
-*   NeoCab detectará automáticamente el sistema y activará el **Modo SDL2**.
-*   No intentes usar Shaders pesados; mantén el diseño en el Studio lo más limpio posible para asegurar 60 FPS constantes.
+## 🕹️ JoyMapper (Control Engineering)
+NeoCab features a professional-grade input engine. **No drivers required.**
+### The Input Wizard
+1.  Go to Operator Panel -> **Controles**.
+2.  Follow the prompts: The system will ask you to press specific directions and buttons.
+3.  **Deadzone Adjustment**: If your joystick is old and has "ghost movement", increase the deadzone (0.1 to 0.3) until the red dot stays centered when idle.
+4.  **Response Curves**:
+    - **Linear**: 1:1 movement.
+    - **Exponential**: Slower near the center, faster at the edges (Perfect for precise aiming).
 
 ---
 
-## ❓ 9. Preguntas Frecuentes
-*   **¿Cómo cambio el PIN?** En la pestaña de Configuración del Panel de Operador.
-*   **¿Puedo usar mi mando de PS5/Xbox?** Sí, NeoCab los detecta nativamente. Solo pásalos por el Input Wizard.
-*   **¿Dónde pongo mis juegos?** En la carpeta `data/games/[sistema]`.
+## 🔍 Media & Scraping (The Library)
+A great arcade needs great art. NeoCab automates this.
+- **Audit Tool**: Found in the **Audit** tab. It will list games missing Wheels, Videos, or Box Art.
+- **Scraping**:
+    1. Select a game in the list.
+    2. Click **Scrape Game**.
+    3. NeoCab connects to **ScreenScraper.fr**, downloads the highest quality assets, and organizes them in `data/media/[system]`.
 
 ---
-**NeoCab v1.0 - El futuro del Arcade, hoy.**
+
+## 🚀 Launcher Pro (Transitions & Bezels)
+### Automatic Bezels
+When playing a 4:3 game (like Pac-Man or SNES) on a 16:9 widescreen, NeoCab fills the black bars with decorative frames.
+- **Location**: Place your images in `data/media/bezels/`.
+- **Naming**: `[system_id].png` or `[game_filename].png`.
+
+### Universal Pause Menu
+Press the Pause button (assigned in JoyMapper) to bring up the **Glassmorphism Pause Menu**.
+- **Save/Load**: Manage your game states visually.
+- **Shaders**: Change visual styles (Scanlines, CRT, Smooth) without quitting.
+
+---
+
+## ⚙️ Advanced Configuration
+For power users, everything is stored in `config/`:
+- `config.yml`: Global settings.
+- `themes/current_theme.json`: Studio output.
+- `joy_profiles/`: Button mapping files.
+
+---
+
+## ❓ Troubleshooting & FAQ
+- **My emulator won't start**: Check the **Logs** tab in the Operator Panel. It shows exactly why it failed.
+- **Input is lagging**: Ensure your monitor is in "Game Mode" and check that no other background processes are running.
+- **Assets are missing**: Run a **Full Audit** and use the **Smart Scraper**.
+
+---
+**NeoCab - Engineering the Perfect Arcade Experience.**
