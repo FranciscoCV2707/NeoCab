@@ -1,9 +1,43 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-12 (Session 10 - Configurator Complete)  
-**Fase actual:** 🔄 Phase 8+ (Launcher Improvements & Polish) EN PROGRESO  
-**Progreso:** Session 7+10 completadas: Installer system (100%), Configurator (100%)  
-**Build Status:** ✅ `cargo check` OK (27 warnings, 0 errors) | ✅ TypeScript compiling  
+**Última actualización:** 2026-05-12 (Session 11 - Launcher Complete)  
+**Fase actual:** 🔄 Phase 8+ (Polish & Final Features) EN PROGRESO  
+**Progreso:** Sessions 7, 10, 11 completadas (3 sesiones en 1 día): 100% en cada una  
+**Build Status:** ✅ `cargo check` OK (27 warnings, 0 errors) | ✅ All systems compiling  
+
+---
+
+## SESSION 11 - LAUNCHER MEJORADO - ✅ COMPLETA 100%
+
+**Objetivo:** Experiencia profesional de lanzamiento con fade overlay y detección de crashes.
+
+**TASK 1: Fade Overlay Component - ✅ COMPLETADA**
+- ✅ `FadeOverlay.tsx` con animaciones suaves (fade-in/out)
+- ✅ Auto fade-out después de duración configurable (default 3s)
+- ✅ Spinner animado + progress bar arcade-style
+- ✅ CRT scanlines effect para autenticidad retro
+- ✅ Responsive diseño para mobile/tablet
+- ✅ Callback al completarse animación
+
+**TASK 2: Launch Overlay Hook - ✅ COMPLETADA**
+- ✅ `useLaunchOverlay.ts` hook personalizado
+- ✅ Métodos: showLaunchOverlay(), hideLaunchOverlay(), completeLaunch()
+- ✅ Manejo de estado compartido y duración
+- ✅ Listo para integración en GameScreen
+
+**TASK 3: Emulator Crash Detection - ✅ COMPLETADA**
+- ✅ `emulator_monitor.rs` module con background monitoring
+- ✅ Polling cada 500ms para status del proceso
+- ✅ Callback automático al detectar salida/crash
+- ✅ Non-blocking process checking
+- ✅ Graceful shutdown con `kill()`
+- ✅ PID tracking para debugging
+- ✅ Tests unitarios incluidos
+
+**Pendiente (próximas sesiones):**
+- Integración de FadeOverlay en GameScreen
+- Integración de crash detection en emulator_manager
+- Pre/post-launch script execution
 
 ---
 
