@@ -1,27 +1,47 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-12 (Session 5 - Network Infrastructure)  
-**Fase actual:** 🔄 Phase 7 SEMANA 1 (Network & Multi-Cabinet) EN PROGRESO  
-**Progreso:** Infraestructura de red base completa (mDNS discovery/advertising, API Server con Axum, NetworkManager Rust, useNetwork hook, NetworkPanel UI).  
+**Última actualización:** 2026-05-12 (Session 9 - Critical Features)  
+**Fase actual:** 🔄 Phase 7 SEMANA 2-3 (Critical Features & Revenue Sync) EN PROGRESO  
+**Progreso:** Session 9 completada 75%: Auto-close timeout, Keyboard coin input, Logs to file + viewer integrado. Pendiente: Audit panel.  
 **Build Status:** ✅ `cargo check` OK | ✅ `npm run build` OK  
 
 ---
 
-## SESSION 5 - PHASE 7 WEEK 1 NETWORK INFRASTRUCTURE (EN PROGRESO)
+## SESSION 9 - CRITICAL FEATURES (EN PROGRESO)
 
-**Objetivo:** Implementar la base de red para descubrimiento de gabinetes y panel remoto.
+**Objetivo:** Implementar features críticas faltantes: auto-close on timeout, keyboard coin input, logs a archivo y panel de auditoría.
 
-**Completado:**
-- ✅ **mDNS Discovery/Advertising**: Implementado con `mdns-sd`. Los gabinetes se ven entre sí en la red local.
-- ✅ **API Server**: Servidor `axum` integrado en el backend para servir estadísticas e información de estado.
-- ✅ **NetworkManager**: Nuevo God Node para orquestar todas las operaciones de red.
-- ✅ **Frontend Network UI**: Componente `NetworkPanel` y hook `useNetwork` para gestión desde el Operator Panel.
-- ✅ **Database Integration**: Método `get_earnings_summary` para facilitar la sincronización de recaudación.
+**TASK 1: Auto-close on Timeout - ✅ COMPLETADA**
+- ✅ `useTimer` hook con state management y monitoreo periódico
+- ✅ `GameRunningOverlay` component integrando CoinOverlay durante juego
+- ✅ `CoinOverlay` actualizado con tiempo restante y warning indicator
+- ✅ Checks periódicos de timeout que cierran el juego automáticamente
+- ✅ Comando `check_timer_timeout` registrado en Tauri
 
-**Pendiente:**
-- Implementación de sincronización real de recaudación (push de Client a Master).
-- Dashboard consolidado en el modo Master.
-- UI remota para dispositivos móviles.
+**TASK 2: Keyboard Coin Input - ✅ COMPLETADA**
+- ✅ `useKeyboardCoinInput` hook para escuchar eventos de teclado
+- ✅ Comando `add_coins_via_key` en coin.rs
+- ✅ `KeyboardCoinSettings` component para configurar tecla y cantidad
+- ✅ Debouncing para evitar múltiples adiciones rápidas
+- ✅ Soporte para cantidad configurable y mapeo de teclas
+
+**TASK 3: Logs to File + Log Viewer - ✅ COMPLETADA**
+- ✅ `init_logging()` modificado para escribir a `./data/logs/` con rotación diaria
+- ✅ Módulo `logs.rs` con comandos: `read_log_file`, `list_log_files`, `clear_logs`, `get_log_tail`
+- ✅ Componente `LogViewer` con selección de archivos, modo tail/full, auto-refresh
+- ✅ Integración en `OperatorPanel` como nueva pestaña "Registros"
+- ✅ Soporte para tamaño/timestamp de archivos y filtrado
+
+**TASK 4: Audit Panel - Missing ROMs/Media - ⏳ PENDIENTE**
+- ⏳ Crear `audit.rs` con funciones para detectar ROMs/media faltantes
+- ⏳ Crear `AuditPanel.tsx` component
+- ⏳ Integrar en OperatorPanel
+
+**Pendiente (próximas sesiones):**
+- Audit panel completo (comparación game list vs disco)
+- Windows XP Legacy Mode (bootstrap final)
+- CI/CD GitHub Actions (opcional)
+- Completar fases 8-16 del roadmap
 
 ---
 

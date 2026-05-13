@@ -13,41 +13,49 @@
 
 ---
 
-## 🎯 Objetivos para la Sesión 9 (Critical Features)
+## 🎯 Session 9 - COMPLETADA 75% (3/4 Tasks)
 
-### 1. Auto-close on Timeout (Créditos/Temporizador)
-- [ ] Modificar `TimerManager` para emitir evento `timer_expired` vía Tauri
-- [ ] En `emulator_manager.rs`: escuchar evento y llamar `stop_game()`
-- [ ] UI: CoinOverlay muestra warning animado cuando quedan `warn_before` segundos
-- [ ] Lógica: Si `auto_exit: true`, cierra emulador automáticamente
+### 1. Auto-close on Timeout (Créditos/Temporizador) - ✅ DONE
+- [x] Crear `useTimer` hook con state y monitoreo
+- [x] Crear `GameRunningOverlay` component que integra CoinOverlay
+- [x] CoinOverlay muestra warning cuando quedan `warn_before` segundos
+- [x] Auto-close cuando timeout con `check_timer_timeout` command
 
-**Archivos:**
-- `src-tauri/src/core/timer_manager.rs`
-- `src-tauri/src/commands/emulator.rs`
-- `src/components/hardware/CoinOverlay.tsx`
+**Archivos creados/modificados:**
+- `src/hooks/useTimer.ts` (NEW)
+- `src/components/game/GameRunningOverlay.tsx` (NEW)
+- `src/components/game/GameRunningOverlay.css` (NEW)
+- `src-tauri/src/commands/timer.rs` (modificado)
+- `src-tauri/src/commands/emulator.rs` (modificado)
+- `src/components/hardware/CoinOverlay.tsx` (modificado)
 
-### 2. Keyboard Coin Input
-- [ ] Crear mapeo configurable (ej: tecla '5' = coin)
-- [ ] Escuchar eventos de teclado en `InputManager`
-- [ ] Pasar a `CoinManager.add_coins()`
-- [ ] UI: Configurar tecla en Settings
+### 2. Keyboard Coin Input - ✅ DONE
+- [x] Crear `useKeyboardCoinInput` hook con debouncing
+- [x] Comando `add_coins_via_key` en coin.rs
+- [x] `KeyboardCoinSettings` component con UI para configurar tecla
+- [x] Integración de la configuración en settings
 
-**Archivos:**
-- `src-tauri/src/input/keyboard.rs` (si no existe, crear)
-- `src-tauri/src/commands/coin.rs`
+**Archivos creados/modificados:**
+- `src/hooks/useKeyboardCoinInput.ts` (NEW)
+- `src-tauri/src/commands/coin.rs` (modificado)
+- `src/components/settings/KeyboardCoinSettings.tsx` (NEW)
+- `src/components/settings/KeyboardCoinSettings.css` (NEW)
 
-### 3. Logs a Archivo + Log Viewer
-- [ ] `tracing_subscriber` con file appender en `~/NeoCab/logs/`
-- [ ] Crear `src-tauri/src/commands/logs.rs` (read_log_file, clear_logs)
-- [ ] Crear `src/components/operator/LogViewer.tsx` (NEW)
-- [ ] Integrar en OperatorPanel como nuevo tab
+### 3. Logs a Archivo + Log Viewer - ✅ DONE
+- [x] `init_logging()` con file appender a `./data/logs/`
+- [x] Crear `src-tauri/src/commands/logs.rs` con 4 funciones
+- [x] Crear `LogViewer.tsx` con tail/full view, auto-refresh
+- [x] Integrar en OperatorPanel como pestaña "Registros"
 
-**Archivos:**
-- `src-tauri/src/lib.rs` (init_logging)
+**Archivos creados/modificados:**
+- `src-tauri/src/lib.rs` (modificado - init_logging)
 - `src-tauri/src/commands/logs.rs` (NEW)
+- `src-tauri/src/commands/mod.rs` (modificado)
 - `src/components/operator/LogViewer.tsx` (NEW)
+- `src/components/operator/LogViewer.css` (NEW)
+- `src/components/operator/OperatorPanel.tsx` (modificado)
 
-### 4. Audit Panel - Missing ROMs/Media
+### 4. Audit Panel - Missing ROMs/Media - ⏳ PENDIENTE
 - [ ] Crear `src-tauri/src/commands/audit.rs` (audit_roms, audit_media)
 - [ ] Comparar game list vs archivos en disco
 - [ ] Reportar qué ROMs/media faltan por gabinete
