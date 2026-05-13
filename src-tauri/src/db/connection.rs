@@ -274,6 +274,18 @@ impl Database {
         .execute(pool)
         .await?;
 
+        // System theme assignments table
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS system_theme_assignments (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                system_name TEXT NOT NULL UNIQUE,
+                theme_name  TEXT NOT NULL,
+                updated_at  TEXT DEFAULT (datetime('now'))
+            )",
+        )
+        .execute(pool)
+        .await?;
+
         // Analytics table
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS analytics (
@@ -356,6 +368,51 @@ impl Database {
                 .await?;
 
         Ok(rows)
+    }
+
+    // System theme assignment methods
+    pub async fn set_system_theme(&self, system_name: &str, theme_name: &str) -> Result<()> {
+        sqlx::query(
+            "INSERT INTO system_theme_assignments (system_name, theme_name)
+             VALUES (?, ?)
+             ON CONFLICT(system_name) DO UPDATE SET theme_name = excluded.theme_name",
+        )
+        .bind(system_name)
+        .bind(theme_name)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn get_system_theme(&self, system_name: &str) -> Result<Option<String>> {
+        let theme = sqlx::query_scalar::<_, String>(
+            "SELECT theme_name FROM system_theme_assignments WHERE system_name = ?",
+        )
+        .bind(system_name)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(theme)
+    }
+
+    pub async fn get_all_system_themes(&self) -> Result<Vec<(String, String)>> {
+        let rows = sqlx::query_as::<_, (String, String)>(
+            "SELECT system_name, theme_name FROM system_theme_assignments ORDER BY system_name",
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(rows)
+    }
+
+    pub async fn remove_system_theme(&self, system_name: &str) -> Result<()> {
+        sqlx::query("DELETE FROM system_theme_assignments WHERE system_name = ?")
+            .bind(system_name)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(())
     }
 
     // Game library methods

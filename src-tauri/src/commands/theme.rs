@@ -1,6 +1,8 @@
 use tauri::State;
 use serde_json::json;
 use crate::core::{ThemeManager, Theme};
+use crate::db::Database;
+use std::sync::Arc;
 
 #[tauri::command]
 pub async fn set_theme(
@@ -94,4 +96,85 @@ pub fn list_available_themes() -> Result<String, String> {
         "themes": ["classic", "neon", "cyberpunk"]
     });
     Ok(result.to_string())
+}
+
+#[tauri::command]
+pub async fn set_system_theme(
+    system: String,
+    theme: serde_json::Value,
+    db: State<'_, Arc<Database>>,
+) -> Result<String, String> {
+    let theme_name = theme.get("name")
+        .and_then(|v| v.as_str())
+        .unwrap_or("default")
+        .to_string();
+
+    match db.set_system_theme(&system, &theme_name).await {
+        Ok(_) => {
+            let result = json!({
+                "success": true,
+                "message": format!("Theme assigned to {}", system),
+                "system": system,
+                "theme": theme_name
+            });
+            Ok(result.to_string())
+        }
+        Err(e) => {
+            let error = json!({
+                "success": false,
+                "error": e.to_string()
+            });
+            Err(error.to_string())
+        }
+    }
+}
+
+#[tauri::command]
+pub async fn remove_system_theme(
+    system: String,
+    db: State<'_, Arc<Database>>,
+) -> Result<String, String> {
+    match db.remove_system_theme(&system).await {
+        Ok(_) => {
+            let result = json!({
+                "success": true,
+                "message": format!("Theme assignment removed for {}", system),
+                "system": system
+            });
+            Ok(result.to_string())
+        }
+        Err(e) => {
+            let error = json!({
+                "success": false,
+                "error": e.to_string()
+            });
+            Err(error.to_string())
+        }
+    }
+}
+
+#[tauri::command]
+pub async fn list_system_themes(
+    db: State<'_, Arc<Database>>,
+) -> Result<String, String> {
+    match db.get_all_system_themes().await {
+        Ok(themes) => {
+            let theme_vec: Vec<Vec<String>> = themes.into_iter()
+                .map(|(system, theme)| vec![system, theme])
+                .collect();
+
+            let result = json!({
+                "success": true,
+                "themes": theme_vec
+            });
+            Ok(result.to_string())
+        }
+        Err(e) => {
+            let error = json!({
+                "success": false,
+                "error": e.to_string()
+            });
+            Err(error.to_string())
+        }
+    }
 }

@@ -99,6 +99,7 @@ pub fn run() {
 
             match result {
                 Ok((
+                    db,
                     game_library,
                     emulator_manager,
                     coin_manager,
@@ -112,6 +113,7 @@ pub fn run() {
                     config_manager,
                     network_manager,
                 )) => {
+                    app.manage(db);
                     app.manage(game_library);
                     app.manage(emulator_manager);
                     app.manage(coin_manager);
@@ -183,6 +185,9 @@ pub fn run() {
             commands::get_current_theme,
             commands::get_theme_css,
             commands::list_available_themes,
+            commands::set_system_theme,
+            commands::remove_system_theme,
+            commands::list_system_themes,
             commands::list_gpio_pins,
             commands::list_serial_ports,
             commands::test_gpio_pin,
@@ -258,6 +263,7 @@ fn init_logging() {
 }
 
 async fn initialize_app() -> Result<(
+    std::sync::Arc<db::Database>,
     core::GameLibrary,
     core::EmulatorManager,
     core::CoinManager,
@@ -317,6 +323,7 @@ async fn initialize_app() -> Result<(
     let _ = network_manager.start_discovery();
 
     Ok((
+        db,
         game_library,
         emulator_manager,
         coin_manager,
