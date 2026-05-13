@@ -2,7 +2,11 @@ use crate::error::{NeoCabError, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use tokio::fs;
+use tokio::sync::RwLock;
+use notify::{Watcher, RecommendedWatcher, RecursiveMode};
+use notify::EventKind;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MediaFile {
@@ -44,6 +48,7 @@ pub struct MediaStats {
 pub struct MediaManager {
     media_path: PathBuf,
     cache_max_size: u64,
+    is_watching: Arc<RwLock<bool>>,
 }
 
 impl MediaManager {
@@ -51,6 +56,7 @@ impl MediaManager {
         Self {
             media_path,
             cache_max_size,
+            is_watching: Arc::new(RwLock::new(false)),
         }
     }
 
@@ -139,6 +145,71 @@ impl MediaManager {
         }
 
         Ok(())
+    }
+
+    /// Start watching media directory for changes (auto-rescan on modifications)
+    pub async fn start_watching<F>(&self, on_change: F) -> Result<()>
+    where
+        F: Fn() + Send + Sync + 'static,
+    {
+        let media_path = self.media_path.clone();
+        let is_watching = self.is_watching.clone();
+        let on_change = Arc::new(on_change);
+
+        // Mark as watching
+        {
+            let mut watching = is_watching.write().await;
+            *watching = true;
+        }
+
+        // Spawn watcher in background
+        tokio::spawn(async move {
+            let on_change_clone = on_change.clone();
+            let (tx, rx) = std::sync::mpsc::channel::<notify::Result<notify::Event>>();
+
+            let handler = move |res: notify::Result<notify::Event>| {
+                let _ = tx.send(res);
+            };
+
+            if let Ok(mut watcher) = RecommendedWatcher::new(handler, Default::default()) {
+                if watcher.watch(&media_path, RecursiveMode::Recursive).is_ok() {
+                    tracing::info!("Media folder watcher started: {:?}", media_path);
+
+                    // Process events
+                    for res in rx {
+                        if let Ok(event) = res {
+                            match event.kind {
+                                EventKind::Create(_)
+                                | EventKind::Modify(_)
+                                | EventKind::Remove(_) => {
+                                    tracing::debug!("Media folder change detected");
+                                    on_change_clone();
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Mark as no longer watching
+            let mut watching = is_watching.write().await;
+            *watching = false;
+            tracing::info!("Media folder watcher stopped");
+        });
+
+        Ok(())
+    }
+
+    /// Stop watching media directory
+    pub async fn stop_watching(&self) {
+        let mut watching = self.is_watching.write().await;
+        *watching = false;
+    }
+
+    /// Check if media directory is being watched
+    pub async fn is_watching(&self) -> bool {
+        *self.is_watching.read().await
     }
 
     async fn scan_directory(
