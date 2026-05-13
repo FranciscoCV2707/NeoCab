@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { listen } from '@tauri-apps/api/core';
 import { CoinOverlay } from '../hardware/CoinOverlay';
 import { useTimer } from '../../hooks/useTimer';
+import { useGameSession } from '../../hooks/useGameSession';
 import './GameRunningOverlay.css';
 
 interface GameRunningOverlayProps {
@@ -13,6 +15,7 @@ interface GameRunningOverlayProps {
   autoExit?: boolean;
   warnBeforeSeconds?: number;
   onGameEnded?: () => void;
+  emulatorPID?: number | null;
 }
 
 export const GameRunningOverlay: React.FC<GameRunningOverlayProps> = ({
@@ -25,9 +28,11 @@ export const GameRunningOverlay: React.FC<GameRunningOverlayProps> = ({
   autoExit = true,
   warnBeforeSeconds = 30,
   onGameEnded,
+  emulatorPID: _emulatorPID,
 }) => {
   const { status, startTimer, stopTimer, checkTimeout, isGameRunning } =
     useTimer();
+  const { endCurrentSession } = useGameSession();
   const [gameStopped, setGameStopped] = useState(false);
 
   // Start timer when game is running
@@ -36,6 +41,39 @@ export const GameRunningOverlay: React.FC<GameRunningOverlayProps> = ({
       startTimer(durationSeconds);
     }
   }, [isRunning, isGameRunning, durationSeconds, startTimer]);
+
+  // Setup emulator exit listener (crash detection)
+  useEffect(() => {
+    if (!isRunning || gameStopped) {
+      return;
+    }
+
+    let unlistenFn: (() => void) | null = null;
+
+    const setupListener = async () => {
+      try {
+        unlistenFn = await listen('emulator_exited', async (event: any) => {
+          console.log('Emulator crash detected:', event.payload);
+          setGameStopped(true);
+          await stopTimer();
+          await endCurrentSession();
+          if (onGameEnded) {
+            onGameEnded();
+          }
+        });
+      } catch (err) {
+        console.error('Failed to setup emulator exit listener:', err);
+      }
+    };
+
+    setupListener();
+
+    return () => {
+      if (unlistenFn) {
+        unlistenFn();
+      }
+    };
+  }, [isRunning, gameStopped, stopTimer, onGameEnded, endCurrentSession]);
 
   // Check timeout periodically while game is running
   useEffect(() => {
@@ -51,6 +89,7 @@ export const GameRunningOverlay: React.FC<GameRunningOverlayProps> = ({
         if (stopped) {
           setGameStopped(true);
           await stopTimer();
+          await endCurrentSession();
           if (onGameEnded) {
             onGameEnded();
           }
@@ -69,6 +108,7 @@ export const GameRunningOverlay: React.FC<GameRunningOverlayProps> = ({
     checkTimeout,
     stopTimer,
     onGameEnded,
+    endCurrentSession,
   ]);
 
   if (!isRunning) return null;

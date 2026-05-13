@@ -93,6 +93,28 @@ export const useTauri = () => {
     return invoke<any>('get_system_info');
   }, []);
 
+  // Session management
+  const createGameSession = useCallback(async (gameId: number, coinsUsed: number) => {
+    return invoke<number>('create_game_session', { game_id: gameId, coins_used: coinsUsed });
+  }, []);
+
+  const endGameSession = useCallback(async (sessionId: number, durationSec: number, completed: boolean) => {
+    return invoke<string>('end_game_session', { session_id: sessionId, duration_sec: durationSec, completed });
+  }, []);
+
+  const getRecentSessions = useCallback(async (limit: number = 10) => {
+    return invoke<string>('get_recent_sessions', { limit });
+  }, []);
+
+  // Launch monitoring with crash detection
+  const launchGameWithMonitoring = useCallback(async (gameId: number, emulatorName: string) => {
+    return invoke<string>('launch_game_with_monitoring', { game_id: gameId, emulator_name: emulatorName });
+  }, []);
+
+  const stopGameWithMonitoring = useCallback(async () => {
+    return invoke<string>('stop_game_with_monitoring');
+  }, []);
+
   return {
     // System
     listEmulators,
@@ -102,6 +124,12 @@ export const useTauri = () => {
     launchGame,
     stopGame,
     getRecommendedEmulator,
+    launchGameWithMonitoring,
+    stopGameWithMonitoring,
+    // Sessions
+    createGameSession,
+    endGameSession,
+    getRecentSessions,
     // Coins
     getCoinBalance,
     addCoins,

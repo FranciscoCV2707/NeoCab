@@ -123,7 +123,7 @@ export const ArcadeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setSelectedGame(game);
   }, []);
 
-  // Launch game
+  // Launch game with session tracking
   const launchGameHandler = useCallback(async () => {
     if (!selectedGame || !selectedSystem) {
       setError('No game selected');
@@ -134,9 +134,18 @@ export const ArcadeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setError(null);
 
     try {
-      // Launch game via Tauri
-      await tauri.launchGame(selectedGame.id, selectedSystem.id);
-      console.log(`Launching ${selectedGame.name} on ${selectedSystem.name}`);
+      // Create game session in database
+      const gameIdNum = parseInt(selectedGame.id, 10);
+      const sessionId = await tauri.createGameSession(gameIdNum, 1);
+
+      // Launch game with monitoring (crash detection, window detection)
+      await tauri.launchGameWithMonitoring(gameIdNum, selectedSystem.name);
+
+      // Store session ID in session storage for later cleanup
+      sessionStorage.setItem('currentGameSessionId', sessionId.toString());
+      sessionStorage.setItem('currentGameStartTime', Date.now().toString());
+
+      console.log(`Launched ${selectedGame.name} on ${selectedSystem.name} (session: ${sessionId})`);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to launch game';
       setError(errorMsg);

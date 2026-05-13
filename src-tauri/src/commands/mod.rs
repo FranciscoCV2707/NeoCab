@@ -14,6 +14,7 @@ pub mod network;
 pub mod logs;
 pub mod audit;
 pub mod sessions;
+pub mod launcher;
 
 pub use system::*;
 pub use games::*;
@@ -31,3 +32,4 @@ pub use network::*;
 pub use logs::*;
 pub use audit::*;
 pub use sessions::*;
+pub use launcher::*;
