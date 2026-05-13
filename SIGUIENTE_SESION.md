@@ -1,49 +1,85 @@
-# 📋 SIGUIENTE SESIÓN - Phase 7 Week 2: Revenue Sync & Remote Dashboard
+# 📋 SIGUIENTE SESIÓN - Session 9: Critical Features & Windows XP Legacy
 
-**Última sesión completada:** 2026-05-12 (Session 6 - Phase 7 Week 1)  
-**Commit:** `5a0410c` — Phase 7 Week 1 network infrastructure  
-**Estado actual:** ✅ Phase 7 Week 1 COMPLETA | Network discovery + API server funcional  
+**Última sesión completada:** 2026-05-12 (Session 8 - Installer & ARM)  
+**Commits completados:**
+- `5a0410c` — Phase 7 Week 1: Network Infrastructure
+- `b05a6b5` — Phase 7 Week 2: Revenue Sync Client  
+- `50ebc78` — NetworkPanel UI Integration
+- `7e20295` — Installer System Core (WebView2 + Shaders)
+- `030bd67` — ARM Cross-Compilation (RPi armv7/aarch64)
 
-## 🎯 Objetivos para la Sesión 7
-
-### 1. Revenue Synchronization (Sincronización de Recaudación)
-- [ ] Implementar cliente HTTP `reqwest` en `NetworkManager` para push periódico de `earnings_summary` al Maestro
-- [ ] Agregar `sync_interval` configurable en `NetworkConfig` (default: 5 minutos)
-- [ ] Lógica de reconciliación en Master: consolidar ingresos de múltiples clientes
-- [ ] Manejo de desconexiones/reconexiones automáticas
-
-**Archivos a modificar:**
-- `src-tauri/src/core/network_manager.rs` — agregar método `sync_revenue_to_master()`
-- `src-tauri/Cargo.toml` — agregar `reqwest` con features `["json", "blocking"]`
-
-### 2. NetworkPanel Integration en Operator Panel
-- [ ] Crear router/tab system en `OperatorPanel.tsx` (Statistics | Network | Settings)
-- [ ] Mostrar lista de gabinetes conectados con estado (online/offline)
-- [ ] Ver earnings por gabinete en tiempo real
-
-**Archivos a crear/modificar:**
-- `src/components/operator/OperatorPanel.tsx` — agregar TabNavigation
-- `src/components/operator/MasterDashboard.tsx` — NEW - vista consolidada de múltiples gabinetes
-
-### 3. Remote Mobile UI (Opcional - Phase 7 Week 2+)
-- [ ] Crear componente React que consuma `/api/status` + `/api/revenue`
-- [ ] Probar acceso desde navegador local (http://cabinet-ip:8000/remote)
+**Estado actual:** ✅ Installer System 75% COMPLETA | Network + Revenue Sync COMPLETA
+**Progreso Global:** 72-74%
 
 ---
 
-## 📊 Status Actual (Post-Commit)
+## 🎯 Objetivos para la Sesión 9 (Critical Features)
 
-✅ **Phase 7 Week 1 COMPLETA:**
-- mDNS Discovery/Advertising
-- Axum API Server (GET /api/status, /api/revenue)
-- NetworkManager God Node
-- useNetwork.ts hook + NetworkPanel.tsx UI
-- Database helpers (`get_earnings_summary()`)
+### 1. Auto-close on Timeout (Créditos/Temporizador)
+- [ ] Modificar `TimerManager` para emitir evento `timer_expired` vía Tauri
+- [ ] En `emulator_manager.rs`: escuchar evento y llamar `stop_game()`
+- [ ] UI: CoinOverlay muestra warning animado cuando quedan `warn_before` segundos
+- [ ] Lógica: Si `auto_exit: true`, cierra emulador automáticamente
 
-⏳ **Phase 7 Week 2 (Esta sesión):**
-- Revenue sync client (push periódico)
-- Master consolidation logic
-- NetworkPanel integrado en Operator Panel
+**Archivos:**
+- `src-tauri/src/core/timer_manager.rs`
+- `src-tauri/src/commands/emulator.rs`
+- `src/components/hardware/CoinOverlay.tsx`
+
+### 2. Keyboard Coin Input
+- [ ] Crear mapeo configurable (ej: tecla '5' = coin)
+- [ ] Escuchar eventos de teclado en `InputManager`
+- [ ] Pasar a `CoinManager.add_coins()`
+- [ ] UI: Configurar tecla en Settings
+
+**Archivos:**
+- `src-tauri/src/input/keyboard.rs` (si no existe, crear)
+- `src-tauri/src/commands/coin.rs`
+
+### 3. Logs a Archivo + Log Viewer
+- [ ] `tracing_subscriber` con file appender en `~/NeoCab/logs/`
+- [ ] Crear `src-tauri/src/commands/logs.rs` (read_log_file, clear_logs)
+- [ ] Crear `src/components/operator/LogViewer.tsx` (NEW)
+- [ ] Integrar en OperatorPanel como nuevo tab
+
+**Archivos:**
+- `src-tauri/src/lib.rs` (init_logging)
+- `src-tauri/src/commands/logs.rs` (NEW)
+- `src/components/operator/LogViewer.tsx` (NEW)
+
+### 4. Audit Panel - Missing ROMs/Media
+- [ ] Crear `src-tauri/src/commands/audit.rs` (audit_roms, audit_media)
+- [ ] Comparar game list vs archivos en disco
+- [ ] Reportar qué ROMs/media faltan por gabinete
+- [ ] Crear `src/components/operator/AuditPanel.tsx` (NEW)
+
+**Archivos:**
+- `src-tauri/src/commands/audit.rs` (NEW)
+- `src/components/operator/AuditPanel.tsx` (NEW)
+
+---
+
+## ⏳ Pendiente de Sessions Anteriores
+
+### Windows XP Legacy Mode (Session 8 - Partial)
+- [ ] Completar bootstrap en `lib.rs` 
+- [ ] Detectar XP y ejecutar `legacy::LegacyApp::run()` en lugar de Tauri
+- [ ] CI/CD GitHub Actions para builds multiplataforma (opcional)
+
+---
+
+## 📊 Status Actual (Fin Session 8)
+
+✅ **Completadas en esta sesión:**
+- Phase 7 Week 1: Network Infrastructure ✅
+- Phase 7 Week 2: Revenue Sync Client ✅
+- NetworkPanel UI Integration ✅
+- Installer System Core (WebView2 + Shaders) ✅
+- ARM Cross-Compilation (RPi 32/64-bit) ✅
+
+⏳ **Pendiente:**
+- Windows XP Legacy Mode Bootstrap (partial)
+- Critical Features (Session 9)
 
 ---
 
