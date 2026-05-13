@@ -9,6 +9,9 @@ pub enum NeoCabError {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
 
+    #[error("HTTP error: {0}")]
+    Http(#[from] reqwest::Error),
+
     #[error("Configuration error: {0}")]
     Config(String),
 

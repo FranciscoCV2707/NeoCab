@@ -122,6 +122,8 @@ pub async fn get_media(
         "box_art" => crate::core::MediaType::BoxArt,
         "background" => crate::core::MediaType::Background,
         "screenshot" => crate::core::MediaType::Screenshot,
+        "video" => crate::core::MediaType::Video,
+        "marquee" => crate::core::MediaType::Marquee,
         _ => crate::core::MediaType::Custom,
     };
 
@@ -198,4 +200,32 @@ pub async fn trigger_media_rescan(
             Err(error.to_string())
         }
     }
+}
+#[tauri::command]
+pub async fn get_all_game_media(
+    system: String,
+    game_name: String,
+    media_manager: State<'_, MediaManager>,
+) -> Result<String, String> {
+    let mut media = json!({});
+    
+    let types = vec![
+        ("wheel", crate::core::MediaType::Wheel),
+        ("box_art", crate::core::MediaType::BoxArt),
+        ("background", crate::core::MediaType::Background),
+        ("screenshot", crate::core::MediaType::Screenshot),
+        ("video", crate::core::MediaType::Video),
+        ("marquee", crate::core::MediaType::Marquee),
+    ];
+
+    for (key, mtype) in types {
+        if let Ok(Some(path)) = media_manager.get_media(&system, &game_name, mtype).await {
+            media[key] = json!(path.to_string_lossy().to_string());
+        }
+    }
+
+    Ok(json!({
+        "success": true,
+        "media": media
+    }).to_string())
 }

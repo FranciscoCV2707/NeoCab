@@ -15,6 +15,10 @@ pub mod arduino_serial;
 pub mod media_manager;
 pub mod shader_manager;
 pub mod network_manager;
+pub mod scraper;
+pub mod importer;
+pub mod steam_importer;
+pub mod hardware_scripting;
 
 pub use emulator_manager::EmulatorManager;
 pub use emulator_monitor::EmulatorMonitor;
@@ -33,3 +37,6 @@ pub use arduino_serial::{ArduinoInterface, ArduinoConfig};
 pub use media_manager::{MediaManager, MediaType, MediaFile, MediaLibrary, MediaStats};
 pub use shader_manager::{ShaderManager, Shader, ShaderType, ShaderPreset};
 pub use network_manager::{NetworkManager, CabinetInfo, NetworkRole};
+pub use scraper::{GameScraper, ScrapedGameInfo};
+pub use importer::UniversalImporter;
+pub use hardware_scripting::{HardwareScriptEngine, HardwareEvent, HardwareAction, HardwareScript};

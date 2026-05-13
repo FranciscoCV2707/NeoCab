@@ -1,6 +1,12 @@
+import { useState } from 'react';
+import { t } from '../i18n';
+import PinPad from './PinPad';
+import './PinPad.css';
+
 interface MainMenuProps {
   onScanROMs: () => void;
   onSelectSystem: () => void;
+  onShowOperator: () => void;
   loading: boolean;
   scanProgress: string;
 }
@@ -8,9 +14,28 @@ interface MainMenuProps {
 export default function MainMenu({
   onScanROMs,
   onSelectSystem,
+  onShowOperator,
   loading,
   scanProgress,
 }: MainMenuProps) {
+  const [showPinPad, setShowPinPad] = useState(false);
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
+
+  const handleProtectedAction = (action: string) => {
+    setPendingAction(action);
+    setShowPinPad(true);
+  };
+
+  const handlePinSuccess = () => {
+    setShowPinPad(false);
+    if (pendingAction === 'settings') {
+      onShowOperator(); // Using operator for settings too for now
+    } else if (pendingAction === 'operator') {
+      onShowOperator();
+    }
+    setPendingAction(null);
+  };
+
   return (
     <div className="menu-container">
       <div className="menu-header">
@@ -31,7 +56,7 @@ export default function MainMenu({
             onClick={onSelectSystem}
             disabled={loading}
           >
-            <span className="button-text">Play Game</span>
+            <span className="button-text">{t('PLAY_ARCADE')}</span>
             <span className="button-icon">▶</span>
           </button>
 
@@ -40,15 +65,21 @@ export default function MainMenu({
             onClick={onScanROMs}
             disabled={loading}
           >
-            {loading ? "Scanning..." : "Scan ROMs"}
+            {loading ? "..." : t('SCAN_ROMS')}
           </button>
 
-          <button className="menu-button">
-            Coin Status: $0.00
+          <button 
+            className="menu-button" 
+            onClick={() => handleProtectedAction('settings')}
+          >
+            {t('SETTINGS')}
           </button>
 
-          <button className="menu-button">
-            Settings
+          <button 
+            className="menu-button"
+            onClick={() => handleProtectedAction('operator')}
+          >
+            {t('OPERATOR_PANEL')}
           </button>
         </div>
       </div>
@@ -56,6 +87,17 @@ export default function MainMenu({
       <div className="menu-footer">
         <p>Ready to play • {new Date().toLocaleTimeString()}</p>
       </div>
+
+      {showPinPad && (
+        <PinPad 
+          expectedPin="1234" 
+          onSuccess={handlePinSuccess}
+          onCancel={() => {
+            setShowPinPad(false);
+            setPendingAction(null);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,0 +1,151 @@
+.save-state-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.save-state-container {
+  background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+  border: 2px solid var(--primary-color);
+  border-radius: 20px;
+  padding: 40px;
+  width: 800px;
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 107, 0, 0.2);
+}
+
+.save-state-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.save-state-header h2 {
+  color: white;
+  font-size: 2.5rem;
+  margin: 0 0 10px 0;
+  text-shadow: 0 2px 10px rgba(255, 107, 0, 0.5);
+}
+
+.save-state-header p {
+  color: var(--primary-color);
+  letter-spacing: 4px;
+  margin: 0;
+  font-weight: bold;
+}
+
+.save-state-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  overflow-y: auto;
+  padding-right: 10px;
+  margin-bottom: 30px;
+}
+
+.save-state-options::-webkit-scrollbar {
+  width: 6px;
+}
+.save-state-options::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 3px;
+}
+
+.save-state-card {
+  background: #222;
+  border: 2px solid #333;
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.save-state-card:hover, .save-state-card:focus {
+  background: #2a2a2a;
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 107, 0, 0.2);
+  outline: none;
+}
+
+.save-state-card.new-game {
+  border-color: #555;
+}
+.save-state-card.new-game:hover {
+  border-color: var(--primary-color);
+}
+
+.state-thumb {
+  width: 100px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #444;
+}
+
+.state-thumb-placeholder {
+  width: 100px;
+  height: 75px;
+  background: #111;
+  border-radius: 6px;
+  border: 1px solid #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #666;
+}
+
+.state-info h3 {
+  color: white;
+  margin: 0 0 5px 0;
+  font-size: 1.2rem;
+}
+
+.state-info p {
+  color: #aaa;
+  margin: 0 0 5px 0;
+  font-size: 0.9rem;
+}
+
+.play-time {
+  background: rgba(255, 107, 0, 0.2);
+  color: var(--primary-color);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.save-state-cancel {
+  background: transparent;
+  color: #888;
+  border: 1px solid #444;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.save-state-cancel:hover {
+  background: #333;
+  color: white;
+  border-color: #666;
+}

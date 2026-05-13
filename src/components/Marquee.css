@@ -1,0 +1,39 @@
+/* Marquee View Styles */
+.marquee-container {
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.marquee-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.5));
+}
+
+.marquee-text-fallback {
+  text-align: center;
+  color: white;
+  text-transform: uppercase;
+}
+
+.marquee-system {
+  font-size: 2rem;
+  color: var(--primary-color);
+  letter-spacing: 10px;
+  margin-bottom: 20px;
+  text-shadow: 0 0 20px rgba(255, 107, 0, 0.8);
+}
+
+.marquee-title {
+  font-size: 6rem;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: 5px;
+  text-shadow: 0 5px 20px rgba(0,0,0,0.8), 0 0 40px rgba(255, 255, 255, 0.2);
+}

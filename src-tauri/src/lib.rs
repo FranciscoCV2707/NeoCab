@@ -81,6 +81,10 @@ pub fn run() {
     let runtime_mode = utils::detect_mode();
     let system_info = utils::get_system_info();
 
+    use std::sync::Arc;
+    use tauri::Manager;
+    use tracing::info;
+
     tracing::info!("================================================");
     tracing::info!("NeoCab v1.0 Starting");
     tracing::info!("Runtime Mode: {}", runtime_mode);
@@ -195,11 +199,17 @@ fn run_modern_app() {
                     app.manage(shader_manager);
                     app.manage(config_manager);
                     app.manage(network_manager);
+
+                    // Show marquee window on start if it exists
+                    if let Some(marquee) = app.get_webview_window("marquee") {
+                        let _ = marquee.show();
+                    }
+
                     Ok(())
                 }
                 Err(e) => {
-                    eprintln!("Failed to initialize app: {}", e);
-                    Err(Box::new(e) as Box<dyn std::error::Error>)
+                    tracing::error!("Application initialization failed: {}", e);
+                    Err(Box::new(e))
                 }
             }
         })
@@ -214,7 +224,14 @@ fn run_modern_app() {
             commands::get_default_operator_pin,
             // System commands
             commands::get_system_info,
+            commands::list_systems,
             commands::list_games,
+            commands::toggle_favorite,
+            commands::update_game_metadata,
+            commands::import_external_library,
+            commands::import_steam_games,
+            commands::get_save_states,
+            commands::get_high_scores,
             commands::scan_roms,
             commands::list_emulators,
             commands::launch_game,
@@ -232,6 +249,12 @@ fn run_modern_app() {
             commands::resume_timer,
             commands::stop_timer,
             commands::get_timer_status,
+            // Shader commands
+            commands::list_shaders,
+            commands::get_shader_params,
+            commands::set_shader_param,
+            commands::list_shader_presets,
+            commands::get_shader_preset,
             commands::add_timer_time,
             commands::is_time_up,
             commands::get_input_devices,
@@ -256,6 +279,11 @@ fn run_modern_app() {
             commands::enable_autoboot,
             commands::disable_autoboot,
             commands::is_autoboot_enabled,
+            // Audit commands
+            commands::audit_roms,
+            commands::audit_media,
+            commands::audit_full,
+            commands::get_logs,
             commands::enable_kiosk_mode,
             commands::disable_kiosk_mode,
             commands::is_kiosk_mode_enabled,
@@ -281,6 +309,8 @@ fn run_modern_app() {
             commands::get_media,
             commands::import_media,
             commands::trigger_media_rescan,
+            commands::get_all_game_media,
+            commands::get_network_info,
             commands::list_shaders,
             commands::rescan_shaders,
             commands::get_shader,
@@ -311,6 +341,9 @@ fn run_modern_app() {
             commands::audit_media,
             commands::audit_full,
             commands::detect_emulators,
+            // Scraping and play stats
+            commands::scrape_game,
+            commands::update_play_stats,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

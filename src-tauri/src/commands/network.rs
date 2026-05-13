@@ -69,3 +69,14 @@ pub async fn get_master_ip(
 ) -> Result<Option<String>> {
     Ok(network_manager.get_master_ip())
 }
+
+#[tauri::command]
+pub async fn get_network_info(
+    network_manager: State<'_, NetworkManager>
+) -> Result<serde_json::Value> {
+    Ok(serde_json::json!({
+        "role": network_manager.get_role(),
+        "master_ip": network_manager.get_master_ip(),
+        "discovered_count": network_manager.get_discovered_cabinets().len()
+    }))
+}
