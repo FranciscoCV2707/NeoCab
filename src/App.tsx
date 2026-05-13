@@ -1,16 +1,39 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen, emit } from "@tauri-apps/api/event";
+import { useGamepad, GamepadAction } from "./hooks/useGamepad";
+import { useAudio } from "./hooks/useAudio";
+// t import removed as it is no longer used here
 import GameList from "./components/GameList";
 import SystemSelect from "./components/SystemSelect";
 import MainMenu from "./components/MainMenu";
+import AttractMode from "./components/AttractMode";
+import SaveStateModal, { SaveState } from "./components/SaveStateModal";
+import OperatorPanel from "./components/OperatorPanel";
 import "./App.css";
 
-interface Game {
+export interface Game {
   id: number;
   title: string;
   system_id: number;
   rom_path: string;
+  filename?: string;
   crc32?: string;
+  is_favorite: number;
+  video_path?: string;
+  image_path?: string;
+  wheel_path?: string;
+  marquee_path?: string;
+  description?: string;
+  developer?: string;
+  publisher?: string;
+  year?: number;
+  players?: number;
+  genre?: string;
+  play_count?: number;
+  total_play_time?: number;
+  last_played?: string;
+  rating?: number;
 }
 
 interface System {
@@ -20,36 +43,134 @@ interface System {
   extensions: string;
 }
 
+interface ScanProgressPayload {
+  current: number;
+  total: number;
+  filename: string;
+}
+
+type View = "menu" | "systems" | "games" | "operator";
+
 export default function App() {
-  const [currentView, setCurrentView] = useState<"menu" | "systems" | "games">(
-    "menu"
-  );
+  const [currentView, setCurrentView] = useState<View>("menu");
   const [systems, setSystems] = useState<System[]>([]);
   const [selectedSystem, setSelectedSystem] = useState<System | null>(null);
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(false);
   const [scanProgress, setScanProgress] = useState("");
+  const { playSound, playBGM, stopBGM } = useAudio();
+
+  // Try playing BGM on initial load, but might need user interaction first
+  useEffect(() => {
+    // Only play BGM on the menu/system screens, stop during gameplay
+    if (currentView !== "games") {
+      playBGM();
+    }
+  }, [currentView, playBGM]);
 
   useEffect(() => {
     loadSystems();
+
+    // Listen for real-time scan progress
+    const unlisten = listen<ScanProgressPayload>("scan_progress", (event) => {
+      const { current, total, filename } = event.payload;
+      const percentage = Math.round((current / total) * 100);
+      setScanProgress(`Scanning: ${percentage}% - ${filename}`);
+    });
+
+    return () => {
+      unlisten.then((f) => f());
+    };
   }, []);
+
+  const [focusedIndex, setFocusedIndex] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isAttractMode, setIsAttractMode] = useState(false);
+  
+  // Save State Modal
+  const [showSaveStateModal, setShowSaveStateModal] = useState(false);
+  const [pendingGame, setPendingGame] = useState<Game | null>(null);
+  const [saveStatesList, setSaveStatesList] = useState<SaveState[]>([]);
+
+  const attractTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetAttractTimer = useCallback(() => {
+    if (attractTimer.current) clearTimeout(attractTimer.current);
+    if (isAttractMode) setIsAttractMode(false);
+    
+    attractTimer.current = setTimeout(() => {
+      if (currentView === "games" && games.length > 0) {
+        setIsAttractMode(true);
+      }
+    }, 60000); // 1 minute of inactivity
+  }, [currentView, games.length, isAttractMode]);
+
+  useEffect(() => {
+    const handleActivity = () => resetAttractTimer();
+    window.addEventListener("mousemove", handleActivity);
+    window.addEventListener("keydown", handleActivity);
+    resetAttractTimer();
+    return () => {
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      if (attractTimer.current) clearTimeout(attractTimer.current);
+    };
+  }, [resetAttractTimer]);
+
+  // Interval logic moved to AttractMode component
 
   const loadSystems = async () => {
     setLoading(true);
     try {
-      // In a real app, this would call a get_systems command
-      // For now, we'll initialize with defaults
-      setSystems([
-        { id: 1, name: "nes", display_name: "NES", extensions: "nes,zip" },
-        { id: 2, name: "snes", display_name: "SNES", extensions: "smc,sfc,zip" },
-        { id: 3, name: "genesis", display_name: "Genesis", extensions: "md,bin,zip" },
-        { id: 4, name: "mame", display_name: "MAME", extensions: "zip,7z" },
-        { id: 5, name: "gb", display_name: "Game Boy", extensions: "gb,gbc,zip" },
-        { id: 6, name: "psx", display_name: "PlayStation 1", extensions: "iso,cue,bin,zip" },
-        { id: 7, name: "n64", display_name: "Nintendo 64", extensions: "z64,n64,zip" },
-      ]);
+      const dbSystems = await invoke<System[]>("list_systems");
+      
+      const virtualSystems: System[] = [
+        { id: 9991, name: "virtual-all", display_name: "All Games", extensions: "" },
+        { id: 9992, name: "virtual-favorites", display_name: "Favorites", extensions: "" },
+        { id: 9993, name: "virtual-recent", display_name: "Recently Played", extensions: "" }
+      ];
+      
+      setSystems([...virtualSystems, ...dbSystems]);
     } catch (error) {
       console.error("Failed to load systems:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadGames = async (systemName: string, search?: string) => {
+    setLoading(true);
+    try {
+      const dbGames = await invoke<Game[]>("list_games", { 
+        system: systemName,
+        search: search || undefined
+      });
+      
+      // Enrich with media
+      const enrichedGames = await Promise.all(dbGames.map(async (game) => {
+        try {
+          const gameName = (game.filename || game.title || "").replace(/\.[^/.]+$/, "");
+          const mediaResult = await invoke<string>("get_all_game_media", {
+            system: systemName,
+            gameName
+          });
+          const media = JSON.parse(mediaResult).media;
+          return {
+            ...game,
+            image_path: media.box_art || media.screenshot || game.image_path,
+            video_path: media.video || game.video_path,
+            wheel_path: media.wheel || game.wheel_path,
+            marquee_path: media.marquee || game.marquee_path
+          };
+        } catch (e) {
+          return game;
+        }
+      }));
+
+      setGames(enrichedGames);
+      setFocusedIndex(0);
+    } catch (error) {
+      console.error("Failed to load games:", error);
     } finally {
       setLoading(false);
     }
@@ -66,9 +187,8 @@ export default function App() {
       setScanProgress(
         `Found ${parsed.games_found} new games!`
       );
-      // Refresh games list after scan
       setTimeout(() => {
-        setCurrentView("games");
+        loadSystems();
         setScanProgress("");
       }, 2000);
     } catch (error) {
@@ -79,73 +199,189 @@ export default function App() {
     }
   };
 
-  const handleSelectSystem = (system: System) => {
+  const handleSelectSystem = async (system: System) => {
+    playSound('select');
     setSelectedSystem(system);
     setCurrentView("games");
-    // In a real app, load games for this system from database
-    setGames([
-      {
-        id: 1,
-        title: "Game 1",
-        system_id: system.id,
-        rom_path: "./roms/game1.zip",
-      },
-      {
-        id: 2,
-        title: "Game 2",
-        system_id: system.id,
-        rom_path: "./roms/game2.zip",
-      },
-    ]);
+    await loadGames(system.name);
   };
 
   const handlePlayGame = async (game: Game) => {
+    playSound('select');
+    try {
+      const states = await invoke<SaveState[]>("get_save_states", { gameId: game.id });
+      if (states && states.length > 0) {
+        setSaveStatesList(states);
+        setPendingGame(game);
+        setShowSaveStateModal(true);
+      } else {
+        executeLaunch(game, null);
+      }
+    } catch (e) {
+      // If error, just launch normally
+      executeLaunch(game, null);
+    }
+  };
+
+  const executeLaunch = async (game: Game, saveState: SaveState | null) => {
+    setShowSaveStateModal(false);
+    playSound('start');
+    stopBGM(); // Stop music when playing
+    
     try {
       const emulator = selectedSystem?.name || "mame";
+      const startTime = Date.now();
+      
+      // We pass the save state slot if selected, assuming backend supports it (optional)
       await invoke("launch_game", {
-        gameId: game.id,
+        gameId: game.id.toString(),
         emulator: emulator,
+        // stateSlot: saveState ? saveState.slot : null
       });
+
+      // Simple pseudo-tracking for now
+      setTimeout(async () => {
+        const durationSeconds = Math.floor((Date.now() - startTime) / 1000) + 60; // Mock 60 seconds
+        await invoke("update_play_stats", { gameId: game.id, playTimeSeconds: durationSeconds });
+        playBGM(); // Resume BGM when returned
+      }, 5000);
+      
     } catch (error) {
+      playSound('error');
       console.error("Failed to launch game:", error);
+      playBGM();
     }
   };
 
   const handleBack = () => {
+    playSound('back');
     if (currentView === "games") {
       setCurrentView("systems");
+      setFocusedIndex(0);
     } else if (currentView === "systems") {
       setCurrentView("menu");
+      setFocusedIndex(0);
     }
   };
 
+  const handleGamepadAction = useCallback((action: GamepadAction) => {
+    resetAttractTimer();
+    
+    if (action === "UP" || action === "DOWN" || action === "LEFT" || action === "RIGHT") {
+      playSound('navigate');
+    }
+
+    if (currentView === "menu") {
+      if (action === "CONFIRM") {
+        playSound('select');
+        setCurrentView("systems");
+      }
+    } else if (currentView === "systems") {
+      if (action === "UP" || action === "LEFT") setFocusedIndex(prev => Math.max(0, prev - 1));
+      if (action === "DOWN" || action === "RIGHT") setFocusedIndex(prev => Math.min(systems.length - 1, prev + 1));
+      if (action === "CONFIRM") handleSelectSystem(systems[focusedIndex]);
+      if (action === "BACK") handleBack();
+    } else if (currentView === "games") {
+      if (action === "UP") setFocusedIndex(prev => Math.max(0, prev - 1));
+      if (action === "DOWN") setFocusedIndex(prev => Math.min(games.length - 1, prev + 1));
+      if (action === "CONFIRM") handlePlayGame(games[focusedIndex]);
+      if (action === "BACK") handleBack();
+    }
+  }, [currentView, focusedIndex, systems, games, handleSelectSystem, handlePlayGame, handleBack, playSound]);
+
+  useGamepad({ onAction: handleGamepadAction });
+
+  useEffect(() => {
+    if (currentView === "games" && games[focusedIndex]) {
+      const game = games[focusedIndex];
+      emit("update_marquee", {
+        title: game.title,
+        marquee_path: game.marquee_path,
+        wheel_path: game.wheel_path,
+        system: selectedSystem?.display_name || selectedSystem?.name
+      });
+    }
+  }, [focusedIndex, games, currentView, selectedSystem]);
+
   return (
     <div className="app">
-      {currentView === "menu" && (
-        <MainMenu
-          onScanROMs={handleScanROMs}
-          onSelectSystem={() => setCurrentView("systems")}
-          loading={loading}
-          scanProgress={scanProgress}
+      {isAttractMode && (
+        <AttractMode 
+          games={games} 
+          onPlayGame={(game) => {
+            setIsAttractMode(false);
+            handlePlayGame(game);
+          }} 
+          onExit={() => setIsAttractMode(false)} 
         />
+      )}
+      
+      <div className="search-overlay">
+        {currentView !== "menu" && (
+          <input 
+            type="text" 
+            placeholder="🔍 Search..." 
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              if (selectedSystem) loadGames(selectedSystem.name, e.target.value);
+            }}
+            className="search-input"
+          />
+        )}
+      </div>
+
+      {currentView === "menu" && (
+        <div className="view-transition">
+          <MainMenu
+            onScanROMs={handleScanROMs}
+            onSelectSystem={() => setCurrentView("systems")}
+            onShowOperator={() => setCurrentView("operator")}
+            loading={loading}
+            scanProgress={scanProgress}
+          />
+        </div>
       )}
 
       {currentView === "systems" && (
-        <SystemSelect
-          systems={systems}
-          onSelectSystem={handleSelectSystem}
-          onBack={handleBack}
-          loading={loading}
-        />
+        <div className="view-transition">
+          <SystemSelect
+            systems={systems}
+            onSelectSystem={handleSelectSystem}
+            onBack={handleBack}
+            loading={loading}
+            focusedIndex={focusedIndex}
+          />
+        </div>
       )}
 
       {currentView === "games" && selectedSystem && (
-        <GameList
-          system={selectedSystem}
-          games={games}
-          onPlayGame={handlePlayGame}
-          onBack={handleBack}
-          loading={loading}
+        <div className="view-transition">
+          <GameList
+            system={selectedSystem}
+            games={games}
+            onPlayGame={handlePlayGame}
+            onBack={handleBack}
+            loading={loading}
+            focusedIndex={focusedIndex}
+          />
+        </div>
+      )}
+
+      {currentView === "operator" && (
+        <OperatorPanel onBack={() => setCurrentView("menu")} />
+      )}
+
+      {showSaveStateModal && pendingGame && (
+        <SaveStateModal
+          game={pendingGame}
+          saveStates={saveStatesList}
+          onPlayNew={() => executeLaunch(pendingGame, null)}
+          onPlayState={(state) => executeLaunch(pendingGame, state)}
+          onCancel={() => {
+            setShowSaveStateModal(false);
+            setPendingGame(null);
+          }}
         />
       )}
     </div>

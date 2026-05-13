@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { GameMetadataEditor, GameMetadata } from './GameMetadataEditor';
 import './GameListPanel.css';
 
@@ -11,6 +12,8 @@ export interface GameItem {
   rating?: number;
   description?: string;
   boxArtUrl?: string;
+  videoUrl?: string;
+  isFavorite?: boolean;
 }
 
 interface GameListPanelProps {
@@ -105,8 +108,28 @@ export const GameListPanel: React.FC<GameListPanelProps> = ({
 
   const handleSaveMetadata = async (_metadata: GameMetadata) => {
     setEditingGameIndex(null);
-    // TODO: Implement backend call to save game metadata
-    // await invoke('update_game_metadata', { gameId: _metadata.game_id, ..._metadata });
+    try {
+      await invoke('update_game_metadata', { 
+        gameId: parseInt(_metadata.game_id), 
+        title: _metadata.title,
+        description: _metadata.description,
+        year: _metadata.year,
+        players: _metadata.players,
+        rating: _metadata.rating
+      });
+    } catch (e) {
+      console.error("Failed to save metadata", e);
+    }
+  };
+
+  const handleToggleFavorite = async (e: React.MouseEvent, game: GameItem) => {
+    e.stopPropagation();
+    try {
+      await invoke('toggle_favorite', { gameId: parseInt(game.id) });
+      // In a real app, we'd update the local state or trigger a reload
+    } catch (e) {
+      console.error("Failed to toggle favorite", e);
+    }
   };
 
   const editingGame = editingGameIndex !== null ? games[editingGameIndex] : null;
@@ -167,15 +190,39 @@ export const GameListPanel: React.FC<GameListPanelProps> = ({
       {games[selectedIndex] && (
         <div className="game-info-panel">
           <div className="game-detail">
-            {games[selectedIndex].boxArtUrl && (
-              <img
-                src={games[selectedIndex].boxArtUrl}
-                alt={games[selectedIndex].name}
-                className="game-artwork"
-              />
-            )}
+            <div className="game-preview-container">
+              {games[selectedIndex].videoUrl ? (
+                <video 
+                  key={games[selectedIndex].videoUrl}
+                  src={games[selectedIndex].videoUrl} 
+                  autoPlay 
+                  loop 
+                  muted 
+                  className="game-preview-video"
+                />
+              ) : games[selectedIndex].boxArtUrl ? (
+                <img 
+                  src={games[selectedIndex].boxArtUrl} 
+                  alt={games[selectedIndex].name} 
+                  className="game-artwork" 
+                />
+              ) : (
+                <div className="game-artwork-placeholder">
+                  {games[selectedIndex].name[0]}
+                </div>
+              )}
+            </div>
             <div className="game-metadata">
-              <h4 className="game-full-name">{games[selectedIndex].name}</h4>
+              <div className="title-row">
+                <h4 className="game-full-name">{games[selectedIndex].name}</h4>
+                <button 
+                  className={`favorite-btn ${games[selectedIndex].isFavorite ? 'active' : ''}`}
+                  onClick={(e) => handleToggleFavorite(e, games[selectedIndex])}
+                  title={games[selectedIndex].isFavorite ? "Remove from favorites" : "Add to favorites"}
+                >
+                  {games[selectedIndex].isFavorite ? '★' : '☆'}
+                </button>
+              </div>
               {games[selectedIndex].year && (
                 <p className="metadata-item">
                   <span className="metadata-label">Year:</span>
@@ -210,7 +257,10 @@ export const GameListPanel: React.FC<GameListPanelProps> = ({
           )}
 
           <div className="game-actions">
-            <button className="action-button primary">
+            <button 
+              className="action-button primary"
+              onClick={() => games[selectedIndex] && onConfirm(games[selectedIndex])}
+            >
               ▶ START GAME
             </button>
             <button className="action-button secondary">

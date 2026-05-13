@@ -1,0 +1,88 @@
+.operator-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #050505;
+  z-index: 11000;
+  display: flex;
+}
+
+.operator-panel {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.operator-sidebar {
+  width: 300px;
+  background: #111;
+  border-right: 1px solid #333;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.operator-sidebar h2 {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  margin-bottom: 40px;
+  text-align: center;
+  letter-spacing: 4px;
+}
+
+.operator-sidebar button {
+  background: transparent;
+  border: none;
+  color: #888;
+  padding: 15px;
+  text-align: left;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.operator-sidebar button:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.operator-sidebar button.active {
+  background: var(--primary-color);
+  color: white;
+  font-weight: bold;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+}
+
+.back-btn {
+  width: 100%;
+  border: 1px solid #444 !important;
+}
+
+.back-btn:hover {
+  background: #444 !important;
+}
+
+.operator-content {
+  flex-grow: 1;
+  padding: 60px;
+  overflow-y: auto;
+}
+
+.settings-group h3 {
+  color: white;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.settings-group p {
+  color: #aaa;
+  margin: 10px 0;
+}

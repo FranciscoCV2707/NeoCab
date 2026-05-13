@@ -19,6 +19,16 @@
         "minHeight": 600,
         "fullscreen": false,
         "resizable": true
+      },
+      {
+        "label": "marquee",
+        "title": "NeoCab Marquee",
+        "width": 1280,
+        "height": 400,
+        "url": "/?marquee=1",
+        "decorations": false,
+        "alwaysOnTop": true,
+        "visible": false
       }
     ],
     "security": {
