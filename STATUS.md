@@ -1,9 +1,54 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-13 (Session 17 - Phase 10 Complete)  
-**Fase actual:** 🔄 Phase 7 ✅ | Phase 8 ✅ | Phase 9 ✅ | Phase 10 ✅ | Phase 11 (ZIP Themes) READY  
-**Progreso:** 12 sesiones completadas de 16 (75%)  
+**Última actualización:** 2026-05-13 (Session 18 - Phase 11 Complete)  
+**Fase actual:** 🔄 Phase 7 ✅ | Phase 8 ✅ | Phase 9 ✅ | Phase 10 ✅ | Phase 11 ✅ | Phase 12 (Release) READY  
+**Progreso:** 13 sesiones completadas de 16 (81%)  
 **Build Status:** ✅ Rust: `cargo check` CLEAN | ✅ React: `npm run build` success (146.93 kB → 47.19 kB gzip)  
+
+---
+
+## SESSION 18 - PHASE 11 LAUNCHER POLISH - ✅ COMPLETA 100%
+
+**Objetivo:** Completar launcher con soporte completo para pre/post launch scripts.
+
+**TASK 1: Pre/Post Launch Script Integration - ✅ COMPLETADA**
+- ✅ `EmulatorManager.launch_game_with_scripts()` método implementado
+- ✅ Pre-launch scripts ejecutan antes del lanzamiento
+- ✅ Post-launch scripts ejecutan en background después de salida
+- ✅ ROM_PATH available como environment variable
+- ✅ Windows CMD y Bash syntax soportados
+
+**TASK 2: LaunchScriptEditor Component - ✅ COMPLETADA**
+- ✅ Componente React para editar scripts pre/post
+- ✅ Help system con ejemplos de sintaxis
+- ✅ Arcade-themed UI con CRT scanline effects
+- ✅ Detección automática de OS (Windows/Linux)
+- ✅ Dark mode styling con cyan/green accents
+
+**TASK 3: SystemManager Integration - ✅ COMPLETADA**
+- ✅ Botón "⚙️ Scripts" agregado a cada sistema
+- ✅ LaunchScriptEditor modal integrado
+- ✅ Scripts guardados en configuración del sistema
+- ✅ Indicador visual cuando scripts están configurados
+
+**TASK 4: Frontend Backend Sync - ✅ COMPLETADA**
+- ✅ `launchGameWithScripts` comando en Tauri
+- ✅ SystemConfig extendido con pre_launch_script y post_launch_script
+- ✅ ArcadeContext mejorado para pasar scripts en launch
+- ✅ Full TypeScript strict mode compliance
+
+**Cambios técnicos:**
+- ✅ `src-tauri/src/core/emulator_manager.rs`: launch_game_with_scripts method
+- ✅ `src/components/settings/LaunchScriptEditor.tsx`: NEW
+- ✅ `src/components/settings/LaunchScriptEditor.css`: NEW
+- ✅ `src/components/settings/SystemManager.tsx`: Script button integration
+- ✅ `src/context/ArcadeContext.tsx`: Script support in launch flow
+- ✅ Compilación: Rust `cargo check` CLEAN, React `npm run build` success
+
+**Pendiente (próximas sesiones):**
+- Phase 12: Final polish y release v1.0
+- End-to-end testing de scripts
+- Documentation y user manual
 
 ---
 
