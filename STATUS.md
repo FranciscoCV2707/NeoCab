@@ -1,9 +1,9 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-12 (Session 13 - Component Integrations COMPLETE)  
+**Última actualización:** 2026-05-12 (Session 12 Polish - Media Watching)  
 **Fase actual:** 🔄 Phase 8+ (Final Features & Optimization) EN PROGRESO  
-**Progreso:** Sessions 7, 8 (Parts 1-2), 10, 11, 12, 13 completas | 8 sesiones de 16  
-**Build Status:** ✅ `npm run build` success (147 kB → 47 kB gzip) | ✅ Zero TypeScript errors  
+**Progreso:** Sessions 7, 8 (Parts 1-2), 10, 11, 12, 13 completas | 8+ sesiones de 16  
+**Build Status:** ✅ Rust: `cargo check` OK | ✅ React: `npm run build` success (147 kB → 47 kB gzip)  
 
 ---
 
@@ -110,7 +110,7 @@
 
 ## SESSION 12 - POLISH: TEMAS ZIP Y PER-SYSTEM - ✅ COMPLETA 100%
 
-**Objetivo:** Soporte de temas ZIP y temas específicos por sistema.
+**Objetivo:** Soporte de temas ZIP, temas específicos por sistema, y media folder watching.
 
 **TASK 1: ZIP Theme Export/Import - ✅ COMPLETADA**
 - ✅ `export_theme()`: Crea .neotheme ZIP con compression
@@ -127,10 +127,17 @@
 - ✅ `remove_system_theme(system)`: remover asignación
 - ✅ Fallback automático al tema global
 
+**TASK 3: Media Folder Auto-watching - ✅ COMPLETADA**
+- ✅ `RecommendedWatcher` monitoring media directory recursively
+- ✅ `start_watching()` con callback on Create/Modify/Remove events
+- ✅ `stop_watching()` y `is_watching()` state management
+- ✅ Background task with Arc<RwLock<bool>> for thread safety
+- ✅ Integration with notify crate (already in dependencies)
+
 **Pendiente (próximas sesiones):**
-- Integración de per-system themes en ThemeEditor UI
-- Media folder watching con notify watcher
+- Integración de media watcher en game initialization
 - Configuración persistente de system themes
+- Cache invalidation on media folder changes
 
 ---
 
