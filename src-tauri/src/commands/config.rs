@@ -2,6 +2,7 @@ use serde_json::json;
 use tauri::State;
 use crate::core::ConfigManager;
 use crate::core::config_manager::SystemGameConfig;
+use crate::utils::EmulatorDetector;
 
 #[tauri::command]
 pub fn get_config() -> String {
@@ -66,4 +67,11 @@ pub async fn get_all_system_configs(
         .get_all_system_configs()
         .await
         .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn detect_emulators() -> Result<String, String> {
+    let emulators = EmulatorDetector::detect_all();
+    serde_json::to_string(&emulators)
+        .map_err(|e| format!("Failed to serialize emulator detection: {}", e))
 }

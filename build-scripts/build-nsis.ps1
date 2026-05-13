@@ -73,13 +73,18 @@ Section "Install"
     SetOutPath "`$INSTDIR\config"
     File /r "./config/*"
 
+    ; Ensure shaders directory exists
+    CreateDirectory "`$INSTDIR\config\shaders"
+
+    ; Copy shaders if available
+    ${If} ${FileExists} "./config/shaders"
+        SetOutPath "`$INSTDIR\config\shaders"
+        File /r "./config/shaders/*"
+    ${EndIf}
+
     ; Copy public assets
     SetOutPath "`$INSTDIR\public"
     File /r "./public/*"
-
-    ; Copy shaders
-    SetOutPath "`$INSTDIR\config\shaders"
-    File /r "./config/shaders/*"
 
     ; Create Start Menu shortcuts
     CreateDirectory "`$SMPROGRAMS\NeoCab"

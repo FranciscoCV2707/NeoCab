@@ -226,6 +226,7 @@ pub fn run() {
             commands::audit_roms,
             commands::audit_media,
             commands::audit_full,
+            commands::detect_emulators,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

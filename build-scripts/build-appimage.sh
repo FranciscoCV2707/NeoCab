@@ -55,6 +55,20 @@ cp -r "./data" "$APPDIR/usr/share/neocab"
 cp -r "./config" "$APPDIR/usr/share/neocab"
 cp -r "./public" "$APPDIR/usr/share/neocab"
 
+# Copy shaders (ensure it's bundled)
+mkdir -p "$APPDIR/usr/share/neocab/config/shaders"
+if [ -d "./config/shaders" ]; then
+    cp -r "./config/shaders/"* "$APPDIR/usr/share/neocab/config/shaders/" 2>/dev/null || true
+fi
+
+# Copy icon
+if [ -f "./src-tauri/icons/128x128.png" ]; then
+    cp "./src-tauri/icons/128x128.png" "$APPDIR/usr/share/pixmaps/neocab.png"
+else
+    echo "Warning: Icon not found at ./src-tauri/icons/128x128.png"
+    touch "$APPDIR/usr/share/pixmaps/neocab.png"
+fi
+
 # Create .desktop file
 cat > "$APPDIR/usr/share/applications/neocab.desktop" << 'EOF'
 [Desktop Entry]
@@ -83,9 +97,6 @@ sed -i "s/VERSION_PLACEHOLDER/$VERSION/g" "$APPDIR/AppImageMetadata.json"
 
 # Create AppRun symlink
 ln -sf "usr/bin/NeoCab" "$APPDIR/AppRun"
-
-# Create icon placeholder
-touch "$APPDIR/usr/share/pixmaps/neocab.png"
 
 # Build AppImage
 echo "Generating AppImage..."

@@ -62,6 +62,7 @@ pub struct ShaderScanStats {
 pub struct ShaderManager {
     shaders_path: PathBuf,
     custom_shaders_path: PathBuf,
+    installation_shaders_path: Option<PathBuf>,
     active_parameters: RwLock<HashMap<String, f32>>,
     shader_watcher: RwLock<Option<RecommendedWatcher>>,
     shader_cache: Arc<RwLock<Option<Vec<Shader>>>>,
@@ -73,6 +74,7 @@ impl ShaderManager {
         Self {
             shaders_path,
             custom_shaders_path: PathBuf::from("./config/shaders"),
+            installation_shaders_path: Self::detect_installation_path(),
             active_parameters: RwLock::new(Self::default_parameters()),
             shader_watcher: RwLock::new(None),
             shader_cache: Arc::new(RwLock::new(None)),
@@ -84,11 +86,47 @@ impl ShaderManager {
         Self {
             shaders_path,
             custom_shaders_path,
+            installation_shaders_path: Self::detect_installation_path(),
             active_parameters: RwLock::new(Self::default_parameters()),
             shader_watcher: RwLock::new(None),
             shader_cache: Arc::new(RwLock::new(None)),
             scan_stats_cache: Arc::new(RwLock::new(None)),
         }
+    }
+
+    fn detect_installation_path() -> Option<PathBuf> {
+        // Try to find shaders in installation directory (e.g., /usr/share/neocab/config/shaders on Linux)
+        if let Ok(exe_path) = std::env::current_exe() {
+            if let Some(exe_dir) = exe_path.parent() {
+                // Check for Windows installation path
+                let win_path = exe_dir.join("config").join("shaders");
+                if win_path.exists() {
+                    return Some(win_path);
+                }
+
+                // Check for Linux installation path
+                if let Some(parent) = exe_dir.parent() {
+                    let linux_path = parent.join("usr").join("share").join("neocab").join("config").join("shaders");
+                    if linux_path.exists() {
+                        return Some(linux_path);
+                    }
+                }
+            }
+        }
+
+        // Check common Linux installation paths
+        let common_paths = vec![
+            PathBuf::from("/usr/share/neocab/config/shaders"),
+            PathBuf::from("/opt/neocab/config/shaders"),
+        ];
+
+        for path in common_paths {
+            if path.exists() {
+                return Some(path);
+            }
+        }
+
+        None
     }
 
     fn default_parameters() -> HashMap<String, f32> {
@@ -402,21 +440,52 @@ impl ShaderManager {
             self.get_phosphor_shader(),
         ];
 
-        fs::create_dir_all(&self.custom_shaders_path).await?;
+        fs::create_dir_all(&self.custom_shaders_path).await.ok();
 
+        // Scan custom shaders from installation path first (if it exists)
+        if let Some(install_path) = &self.installation_shaders_path {
+            if install_path.exists() {
+                let mut custom_paths = Vec::new();
+                if let Ok(mut entries) = fs::read_dir(install_path).await {
+                    while let Ok(Some(entry)) = entries.next_entry().await {
+                        let path = entry.path();
+                        if path.extension().map_or(false, |ext| ext == "glsl") {
+                            custom_paths.push(path);
+                        }
+                    }
+                }
+
+                custom_paths.sort();
+                for path in custom_paths {
+                    if let Ok(shader) = self.custom_shader_from_path(path).await {
+                        if !shaders.iter().any(|s| s.path == shader.path) {
+                            shaders.push(shader);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Then scan from custom shaders path
         if self.custom_shaders_path.exists() {
             let mut custom_paths = Vec::new();
-            let mut entries = fs::read_dir(&self.custom_shaders_path).await?;
-            while let Some(entry) = entries.next_entry().await? {
-                let path = entry.path();
-                if path.extension().map_or(false, |ext| ext == "glsl") {
-                    custom_paths.push(path);
+            if let Ok(mut entries) = fs::read_dir(&self.custom_shaders_path).await {
+                while let Ok(Some(entry)) = entries.next_entry().await {
+                    let path = entry.path();
+                    if path.extension().map_or(false, |ext| ext == "glsl") {
+                        custom_paths.push(path);
+                    }
                 }
             }
 
             custom_paths.sort();
             for path in custom_paths {
-                shaders.push(self.custom_shader_from_path(path).await?);
+                if let Ok(shader) = self.custom_shader_from_path(path).await {
+                    // Avoid duplicates
+                    if !shaders.iter().any(|s| s.path == shader.path) {
+                        shaders.push(shader);
+                    }
+                }
             }
         }
 
