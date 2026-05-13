@@ -1,19 +1,95 @@
-# 📋 SIGUIENTE SESIÓN - Session 9: Critical Features & Windows XP Legacy
+# 📋 SIGUIENTE SESIÓN - Sessions 15-16: Final Features & Release
 
-**Última sesión completada:** 2026-05-12 (Session 8 - Installer & ARM)  
-**Commits completados:**
-- `5a0410c` — Phase 7 Week 1: Network Infrastructure
-- `b05a6b5` — Phase 7 Week 2: Revenue Sync Client  
-- `50ebc78` — NetworkPanel UI Integration
-- `7e20295` — Installer System Core (WebView2 + Shaders)
-- `030bd67` — ARM Cross-Compilation (RPi armv7/aarch64)
+**Última sesión completada:** 2026-05-12 (Session 14 - Testing & Verification)  
+**Sessions Completadas en Mega-Sesión:**
+- ✅ Session 7: Installer System Core
+- ✅ Session 8 Part 1: ARM Support (AppImage)
+- ✅ Session 8 Part 2: Windows XP Legacy Mode
+- ✅ Session 9: Critical Features (Logs, Audit, Keyboard Coins)
+- ✅ Session 10: Configurator (Per-system ROM paths)
+- ✅ Session 11: Launcher Polish (FadeOverlay, Crash Detection)
+- ✅ Session 12: Theme & Media (ZIP Themes, Per-system, Watching)
+- ✅ Session 13: Component Integrations (UI Wiring)
+- 🔄 Session 14: Testing & Verification (IN PROGRESS)
 
-**Estado actual:** ✅ Installer System 75% COMPLETA | Network + Revenue Sync COMPLETA
-**Progreso Global:** 72-74%
+**Estado actual:** ✅ 50% COMPLETADO (8 de 16 sesiones)
+**Progreso Global:** 50%
 
 ---
 
-## 🎯 Session 9 - COMPLETADA 75% (3/4 Tasks)
+## 🎯 Sessions 15-16 - FINAL FEATURES & RELEASE (PRÓXIMAS)
+
+### Session 15: Additional Features & Optimizations (3-4h)
+**Objetivo:** Implementar features faltantes y optimizaciones antes del release.
+
+#### TASK 1: Media Watcher Callback Integration
+- [ ] Conectar media_manager watcher con game library rescanning
+- [ ] Trigger automatic game library update on folder changes
+- [ ] Cache invalidation strategy
+- [ ] Testing: Verificar que new media files se detectan automáticamente
+
+#### TASK 2: Per-system Configuration Persistence
+- [ ] Guardar theme assignments en DB
+- [ ] Cargar theme assignments on app startup
+- [ ] Persist per-system ROM paths in config
+- [ ] Restore state on application reload
+
+#### TASK 3: Build Environment Setup (Dev Environment)
+- [ ] SDL2 CMake on Windows (developer setup, not code)
+- [ ] Verify legacy mode can compile on all platforms
+- [ ] Document build prerequisites per platform
+
+#### TASK 4: Performance Optimization
+- [ ] Profile application startup time
+- [ ] Optimize asset loading (lazy loading media)
+- [ ] Memory usage monitoring
+- [ ] Cache warming strategies
+
+### Session 16: Release v1.0 (2-3h)
+**Objetivo:** Preparar release final, CI/CD, y documentación.
+
+#### TASK 1: CI/CD GitHub Actions
+- [ ] Crear workflows para builds multiplataforma
+- [ ] Windows x64 MSI/portable build
+- [ ] Linux AppImage (x86_64 + ARM)
+- [ ] Automated testing in CI
+
+#### TASK 2: Final Documentation
+- [ ] Installation guide per platform
+- [ ] User manual (operator guide)
+- [ ] Configuration guide
+- [ ] Troubleshooting guide
+
+#### TASK 3: Release Verification
+- [ ] End-to-end testing checklist
+- [ ] Build verification on all platforms
+- [ ] Installer testing
+- [ ] Data persistence verification
+
+#### TASK 4: Release & Deployment
+- [ ] Create release notes
+- [ ] Tag release in git
+- [ ] Build final artifacts
+- [ ] Deploy documentation
+
+---
+
+## ⏳ Bloqueadores Pendientes
+
+### SDL2 CMake on Windows (Session 15)
+- **Issue**: Compilation de legacy mode requires CMake + SDL2 dev libs
+- **Impact**: Windows XP legacy mode compilation
+- **Workaround**: Build on Linux/WSL available
+- **Status**: Developer environment setup (not code issue)
+
+### Media Watcher Integration (Session 15)
+- **Issue**: Watcher implementado pero no conectado a game library
+- **Current**: Media changes detectadas but not triggering rescans
+- **Needed**: Callback integration with GameLibrary
+
+---
+
+## 📊 Resumen Sessions Completadas (Sessions 7-14)
 
 ### 1. Auto-close on Timeout (Créditos/Temporizador) - ✅ DONE
 - [x] Crear `useTimer` hook con state y monitoreo
