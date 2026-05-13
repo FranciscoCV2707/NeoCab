@@ -1,9 +1,53 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-13 (Session 16 - Phase 7-9 Complete)  
-**Fase actual:** 🔄 Phase 7 ✅ | Phase 8 ✅ (90%) | Phase 9 ✅ | Phase 10 (Launcher) READY  
-**Progreso:** 11 sesiones completadas de 16 (69%)  
+**Última actualización:** 2026-05-13 (Session 17 - Phase 10 Complete)  
+**Fase actual:** 🔄 Phase 7 ✅ | Phase 8 ✅ | Phase 9 ✅ | Phase 10 ✅ | Phase 11 (ZIP Themes) READY  
+**Progreso:** 12 sesiones completadas de 16 (75%)  
 **Build Status:** ✅ Rust: `cargo check` CLEAN | ✅ React: `npm run build` success (146.93 kB → 47.19 kB gzip)  
+
+---
+
+## SESSION 17 - PHASE 10 LAUNCHER IMPROVEMENTS - ✅ COMPLETA 100%
+
+**Objetivo:** Completar launcher con detección de crashes y session tracking integrado.
+
+**TASK 1: Fixed Duplicate Command Definitions - ✅ COMPLETADA**
+- ✅ Resolvido conflicto entre launcher.rs y sessions.rs
+- ✅ Refactorizado launcher.rs para contener solo comandos específicos del launcher
+- ✅ launcher.rs ahora contiene: launch_game_with_monitoring, stop_game_with_monitoring
+
+**TASK 2: Emulator Crash Detection Integration - ✅ COMPLETADA**
+- ✅ GameRunningOverlay escucha evento 'emulator_exited' vía Tauri
+- ✅ Crash detection dispara automáticamente end_game_session
+- ✅ Event listener setup en useEffect con cleanup adecuado
+- ✅ Logging de crashes para debugging
+
+**TASK 3: Session Lifecycle Management - ✅ COMPLETADA**
+- ✅ Creado hook useGameSession para gestionar ciclo de sesiones
+- ✅ createGameSession llamado al lanzar juego (ArcadeContext)
+- ✅ endGameSession llamado cuando: timeout, crash, o salida manual
+- ✅ SessionStorage para trackear session_id y start_time durante partida
+- ✅ Duración automáticamente calculada en segundos
+
+**TASK 4: Frontend-Backend Integration - ✅ COMPLETADA**
+- ✅ Extendido useTauri con métodos de sesión
+- ✅ ArcadeContext mejorado para crear sesiones en launch_game
+- ✅ GameRunningOverlay integrado con crash detection
+- ✅ Session cleanup en beforeunload y componente unmount
+- ✅ Window detection hooks (useWindowDetection) lista para futura integración
+
+**Cambios técnicos:**
+- ✅ `launcher.rs`: Simplificado para comandos específicos del launcher
+- ✅ `GameRunningOverlay.tsx`: + event listener para emulator_exited
+- ✅ `ArcadeContext.tsx`: Integración de createGameSession en launchGameHandler
+- ✅ `useTauri.ts`: + createGameSession, endGameSession, getRecentSessions, launch/stop monitoring
+- ✅ `useGameSession.ts`: Nuevo hook para lifecycle management
+- ✅ Compilación: Rust `cargo check` CLEAN, React TypeScript strict mode CLEAN
+
+**Pendiente (próximas sesiones):**
+- Phase 11: Themes ZIP y per-system improvements
+- Phase 12: Polish final y release v1.0
+- Integration testing end-to-end de session tracking
 
 ---
 

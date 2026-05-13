@@ -1,6 +1,6 @@
-# 📋 SIGUIENTE SESIÓN - Session 16: Release v1.0
+# 📋 SIGUIENTE SESIÓN - Session 18: Phase 11 Launcher Improvements (ZIP Themes)
 
-**Última sesión completada:** 2026-05-12 (Session 15 - Additional Features & Optimizations)  
+**Última sesión completada:** 2026-05-13 (Session 17 - Phase 10 Launcher Complete)  
 **Sessions Completadas:**
 - ✅ Session 7: Installer System Core
 - ✅ Session 8 Part 1: ARM Support (AppImage)
@@ -12,14 +12,93 @@
 - ✅ Session 13: Component Integrations (UI Wiring)
 - ✅ Session 14: Testing & Verification
 - ✅ Session 15: Additional Features & Optimizations
-- 🔄 Session 16: Release v1.0 (PRÓXIMA)
+- ✅ Session 16: Release v1.0 (Skipped - features still in progress)
+- ✅ Session 17: Phase 10 Launcher (Crash Detection + Session Tracking)
+- 🔄 Session 18: Phase 11 Polish (ZIP Themes, Per-system themes) (PRÓXIMA)
 
-**Estado actual:** ✅ 56% COMPLETADO (9 de 16 sesiones)
-**Progreso Global:** 56%
+**Estado actual:** ✅ 75% COMPLETADO (12 de 16 sesiones)
+**Progreso Global:** 75%
 
 ---
 
-## 🎯 Sessions 15-16 - FINAL FEATURES & RELEASE (PRÓXIMAS)
+## 🎯 Session 18 - PHASE 11 LAUNCHER IMPROVEMENTS (PRÓXIMA) (2-3h)
+
+**Objetivo:** Completar Phase 11 con soporte completo para themes ZIP y per-system themes mejorado.
+
+### ✅ TASK 1: Pre/Post-Launch Scripts Integration
+- [x] Ya implementado en `emulator_manager.rs` (execute_script method)
+- [x] Scripts ejecutables antes/después del lanzamiento
+- [x] Soporte para environment variables (ROM_PATH)
+- [x] Error handling y logging
+
+**Status:** COMPLETO (en Session 10)
+
+### TASK 2: Themes ZIP Enhancement (Ya implementado)
+- [x] ZIP theme import/export en `theme_manager.rs`
+- [x] `export_theme()` crea .neotheme ZIP con compression
+- [x] `import_theme()` extrae ZIP automáticamente
+- [x] Validación de archivos y error handling
+
+**Status:** COMPLETO (en Session 12)
+
+### TASK 3: Per-system Themes UI Enhancement
+- [x] ThemeEditor ya tiene selector de sistema
+- [x] Botones "Set for System" y "Use Global Theme"
+- [x] Backend integration con set_system_theme, remove_system_theme
+- [x] Persistencia en DB (system_theme_assignments table)
+
+**Status:** COMPLETO (en Sessions 12-13)
+
+### TASK 4: Advanced Launcher Features (PENDIENTE - Opcional para Phase 11)
+- [ ] Fade screen overlays (ya implementado en FadeOverlay.tsx)
+- [ ] Bezel management (configuration only, no rendering yet)
+- [ ] In-game pause menu (future phase)
+- [ ] Window detection optimization (useWindowDetection hook ready)
+
+**Status:** PARCIAL - Fade overlay completo, otros deferred
+
+**Archivos creados/modificados (Phase 12-13):**
+- `src-tauri/src/core/theme_manager.rs` (ZIP export/import, per-system)
+- `src/components/customization/ThemeEditor.tsx` (per-system selector)
+- `src-tauri/src/db/connection.rs` (system_theme_assignments)
+- `src/components/operator/OperatorPanel.tsx` (theme UI integration)
+
+---
+
+## 🎯 Session 19 - PHASE 12 FINAL POLISH & RELEASE (DESPUÉS) (2-3h)
+
+**Objetivo:** Completar el proyecto con QA, documentación y release final.
+
+### TASK 1: Full End-to-End Testing
+- [ ] Test game launch → play → crash detection → session ended
+- [ ] Test timeout → auto-close → session recorded with duration
+- [ ] Test keyboard coin input and balance tracking
+- [ ] Test theme switching (global and per-system)
+- [ ] Test operator panel features (logs, audit, stats)
+
+### TASK 2: Performance Optimization (if needed)
+- [ ] Profile startup time
+- [ ] Optimize media loading
+- [ ] Memory usage monitoring
+- [ ] Cache warming strategies
+
+### TASK 3: Final Documentation
+- [ ] Installation guide per platform
+- [ ] User manual (operator guide)
+- [ ] Configuration reference
+- [ ] Troubleshooting guide
+- [ ] Developer setup guide
+
+### TASK 4: Release Preparation
+- [ ] Create release notes (v1.0)
+- [ ] Build final artifacts (Windows, Linux, ARM)
+- [ ] Verify all installers work
+- [ ] Tag release in git
+- [ ] Documentation deployment
+
+---
+
+## 🎯 Sessions 15-16 - FINAL FEATURES & RELEASE (SKIPPED)
 
 ### Session 15: Additional Features & Optimizations (3-4h)
 **Objetivo:** Implementar features faltantes y optimizaciones antes del release.
