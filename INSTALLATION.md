@@ -1,486 +1,211 @@
-# 🎮 NeoCab Installation Guide
+# 🎮 NeoCab - Installation Guide
 
-Complete installation instructions for all platforms.
+**Version:** 1.0  
+**Last Updated:** 2026-05-13
 
-**Version:** 1.0.0  
-**Last Updated:** 2026-05-12
-
----
-
-## 📋 System Requirements
-
-### Minimum Requirements
-- **CPU:** Dual-core 2.0 GHz or faster
-- **RAM:** 2 GB minimum (4 GB recommended)
-- **Storage:** 500 MB free space
-- **Display:** 1280x720 or higher
-
-### Recommended Requirements
-- **CPU:** Quad-core 2.5 GHz or faster
-- **RAM:** 4 GB or more
-- **Storage:** 1 GB free space (for ROMs and media)
-- **Display:** 1920x1080 or higher
-- **Network:** Gigabit Ethernet (for arcade cabinets)
+## Table of Contents
+1. [Windows Installation](#windows-installation)
+2. [Linux Installation](#linux-installation)
+3. [Raspberry Pi Installation](#raspberry-pi-installation)
+4. [Initial Setup](#initial-setup)
+5. [Emulator Setup](#emulator-setup)
+6. [Troubleshooting](#troubleshooting)
 
 ---
 
-## 🪟 Windows Installation
+## Windows Installation
 
-### Windows 10 / 11 (Recommended)
+### Prerequisites
+- Windows 7 SP1 or later (Windows 10/11 recommended)
+- 2GB RAM minimum (4GB recommended)
+- 500MB free disk space (1GB with ROMs)
+- Administrator privileges for installation
 
-#### Option 1: MSI Installer (Easiest)
-```
-1. Download: NeoCab_1.0.0_x64_en-US.msi
-2. Double-click to run installer
-3. Follow wizard steps
-4. Click "Install"
-5. Installer creates:
-   - Start Menu shortcuts
-   - Desktop shortcut
-   - Uninstall option in Control Panel
-```
+### Installation Steps
 
-**Installation Location:** `C:\Program Files\NeoCab\`
+1. **Download** `neocab-1.0-x64.msi` from releases
+2. **Run installer** with administrator rights
+3. **Choose installation directory** (default: `C:\Program Files\NeoCab`)
+4. **WebView2 runtime** installs automatically if missing
+5. **Data directory** created at `C:\Users\<YourUsername>\AppData\Local\NeoCab\`
 
-**After Installation:**
-- Run from Start Menu → NeoCab
-- Or click Desktop shortcut
-- App opens to Setup Wizard
-
-#### Option 2: Portable EXE
-```
-1. Download: NeoCab.exe (portable version)
-2. Place in desired location (e.g., D:\Games\NeoCab\)
-3. Double-click NeoCab.exe to run
-4. No installation required - runs directly
-```
-
-**Advantages:** No installer, works from USB drive, easy to move
-
-### Windows 7
-
-**Requirements:** Windows 7 SP1 or later
-
-**Installation:** Same as Windows 10/11
-
-**Note:** WebView2 might need separate installation:
-- Download from: https://developer.microsoft.com/en-us/microsoft-edge/webview2/
-- Choose "Evergreen Standalone Installer"
-
-### Windows XP / Vista
-
-**Legacy Mode Required:** Windows XP needs SDL2-based mode
-
-See: [BUILD.md - Windows XP Legacy Mode](BUILD.md#windows-xp-legacy-mode-important---requires-setup)
+### Post-Installation Setup
+- Launch NeoCab
+- Follow Setup Wizard (systems, ROM paths, emulator config)
+- Scan ROMs (Operator Panel → Config)
+- Test launch a game
 
 ---
 
-## 🐧 Linux Installation
+## Linux Installation
 
-### Ubuntu / Debian
+### Prerequisites
+- Ubuntu 20.04+ or Debian 11+
+- 2GB RAM minimum
 
-#### From AppImage (Easiest)
-```bash
-# Download NeoCab.AppImage
-wget https://github.com/yourusername/neocab/releases/download/v1.0.0/NeoCab.AppImage
-
-# Make executable
-chmod +x NeoCab.AppImage
-
-# Run directly
-./NeoCab.AppImage
-```
-
-#### Install System-Wide
-```bash
-# Copy to /opt
-sudo cp NeoCab.AppImage /opt/neocab
-
-# Create symlink in PATH
-sudo ln -s /opt/neocab /usr/local/bin/neocab
-
-# Create desktop launcher
-sudo tee /usr/share/applications/neocab.desktop > /dev/null <<EOF
-[Desktop Entry]
-Type=Application
-Name=NeoCab
-Exec=/opt/neocab
-Icon=neocab
-Categories=Games;
-EOF
-
-# Run from anywhere
-neocab
-```
-
-#### From Package (if available)
-```bash
-# For distributions with repos
-sudo apt install neocab
-
-# Or
-sudo dnf install neocab
-```
-
-### Fedora / RHEL / CentOS
+### Installation Steps
 
 ```bash
-# Download and make executable
-chmod +x NeoCab.AppImage
+# Download AppImage
+wget https://github.com/neocab/neocab/releases/download/v1.0/neocab-1.0-x86_64.AppImage
+chmod +x neocab-1.0-x86_64.AppImage
 
-# Install AppImage support (optional)
-sudo dnf install fuse
+# Create NeoCab directory
+mkdir -p ~/NeoCab && cd ~/NeoCab
 
 # Run
-./NeoCab.AppImage
+./neocab-1.0-x86_64.AppImage
 ```
 
-### Arch Linux
-
+### Install Emulators
 ```bash
-# If available in community repo
-sudo pacman -S neocab
-
-# Or use AppImage
-chmod +x NeoCab.AppImage
-./NeoCab.AppImage
+sudo apt install retroarch retroarch-cores mame libpcsx2-dev
 ```
 
 ---
 
-## 🔴 Raspberry Pi / ARM Linux
+## Raspberry Pi Installation
 
-### Pi 3 / 4 (32-bit ARM)
+### Prerequisites
+- Raspberry Pi 4 recommended (8GB RAM ideal)
+- Raspberry Pi OS 64-bit
+- 16GB+ SD card or USB SSD
+
+### Installation Steps
 
 ```bash
-# Download ARM32 AppImage
-wget https://github.com/yourusername/neocab/releases/download/v1.0.0/NeoCab-Linux-ARM32.AppImage
+# Update system
+sudo apt update && sudo apt upgrade -y
 
-# Make executable and run
-chmod +x NeoCab-Linux-ARM32.AppImage
-./NeoCab-Linux-ARM32.AppImage
+# Install dependencies
+sudo apt install -y libwebkit2gtk-4.0-dev curl wget \
+  retroarch retroarch-cores
 
-# Optionally install system-wide
-sudo cp NeoCab-Linux-ARM32.AppImage /opt/neocab
-sudo chmod +x /opt/neocab
+# Download ARM AppImage
+wget https://github.com/neocab/neocab/releases/download/v1.0/neocab-1.0-armv7.AppImage
+chmod +x neocab-1.0-armv7.AppImage
+
+# Run
+./neocab-1.0-armv7.AppImage
 ```
 
-### Pi 5 (64-bit ARM)
+### Performance Tips
+- Use 2D emulators (SNES, NES, Genesis) for best results
+- Enable heatsink + fan for sustained gaming
+- Use external USB SSD for game library
+- Disable heavy shaders if needed
 
-```bash
-# Download ARM64 AppImage
-wget https://github.com/yourusername/neocab/releases/download/v1.0.0/NeoCab-Linux-ARM64.AppImage
+---
 
-# Make executable and run
-chmod +x NeoCab-Linux-ARM64.AppImage
-./NeoCab-Linux-ARM64.AppImage
+## Initial Setup
+
+### First Launch
+1. **Welcome** - Choose language & mode
+2. **Systems** - Select enabled systems
+3. **ROM Paths** - Specify directory for each system
+4. **ROM Scan** - Discover games (2-5 minutes)
+5. **Operator PIN** - Set access code (default: 0000)
+6. **Display** - Configure resolution
+7. **Input** - Configure gamepad/joystick
+8. **Complete** - Ready to play!
+
+### ROM Directory Structure
 ```
-
-### Pi Display Setup
-
-```bash
-# If using HDMI output
-# Edit /boot/config.txt to match your TV:
-# hdmi_group=1    # For CEA (HDMI-A, most TVs)
-# hdmi_mode=16    # 1920x1080 60Hz
-
-# Restart
-sudo reboot
-
-# Full screen mode
-# In NeoCab Settings → Display → Fullscreen
+~/.local/share/NeoCab/roms/
+├── mame/          (MAME ROMs)
+├── snes/          (SNES ROMs)
+├── nes/           (NES ROMs)
+├── genesis/       (Mega Drive)
+├── gameboy/       (Game Boy)
+├── ps1/           (PlayStation 1)
+└── n64/           (Nintendo 64)
 ```
 
 ---
 
-## 🍎 macOS
+## Emulator Setup
 
-**Status:** Not yet tested on macOS
+### MAME
+- Place .zip files in `roms/mame/`
+- No additional setup needed
+- 300+ games supported
 
-To build for macOS:
-```bash
-git clone https://github.com/yourusername/neocab
-cd neocab
-npm install
-npm run tauri build
-```
+### RetroArch
+- Install cores via RetroArch menu
+- Common cores: Snes9x, Nestopia, Genesis-Plus, Gambatte, Pcsx, Mupen64
+- Place ROMs in system-specific folders
 
-See [BUILD.md](BUILD.md) for macOS prerequisites.
-
----
-
-## 📦 Post-Installation Setup
-
-### 1. Create ROMs Directory
-
-**Windows:**
-```
-C:\Users\YourUsername\Documents\NeoCab\roms\
-```
-
-**Linux:**
-```
-~/NeoCab/roms/
-```
-
-**Structure (example):**
-```
-roms/
-├── mame/
-│   ├── pacman.zip
-│   ├── donkeykong.zip
-│   └── ...
-├── nes/
-│   ├── mario.nes
-│   ├── zelda.nes
-│   └── ...
-└── snes/
-    ├── mario-world.smc
-    └── ...
-```
-
-### 2. Setup Emulators
-
-NeoCab autodetects emulators from your system:
-- MAME (https://www.mamedev.org/)
-- RetroArch (https://www.retroarch.com/)
-- PCSX2 (https://pcsx2.net/)
-- Dolphin (https://dolphin-emu.org/)
-
-**Windows:** Installers typically add to PATH automatically
-
-**Linux:**
-```bash
-# Debian/Ubuntu
-sudo apt install mame retroarch pcsx2
-
-# Fedora
-sudo dnf install mame retroarch pcsx2
-```
-
-### 3. Create Media Directory (Optional)
-
-For game artwork (wheels, box art, backgrounds):
-
-**Windows:**
-```
-C:\Users\YourUsername\Documents\NeoCab\media\
-```
-
-**Linux:**
-```
-~/NeoCab/media/
-```
-
-Structure:
-```
-media/
-├── mame/
-│   └── Images/
-│       ├── Wheel/        (game logos)
-│       ├── Boxes/        (box art)
-│       ├── Backgrounds/  (marquees)
-│       └── Screenshots/
-└── nes/
-    └── Images/
-        ├── Wheel/
-        ├── Boxes/
-        └── ...
-```
-
-### 4. First Launch
-
-On first run, NeoCab shows Setup Wizard:
-
-1. **Select Systems** - Choose which systems to enable
-2. **Configure ROMs** - Point to your ROMs directory
-3. **Emulator Detection** - Verify installed emulators
-4. **Customize Theme** - Choose arcade theme
-5. **Done** - Ready to play!
+### PCSX Redux (PS1)
+- Copy PS1 BIOS files to `bios/ps1/`
+- Place game files (.cue/.bin or .iso) in `roms/ps1/`
+- BIOS required: scph1001.bin
 
 ---
 
-## 🔄 Updating NeoCab
+## Troubleshooting
+
+### Games Won't Launch
+1. Verify ROM format matches system
+2. Check ROM file exists in correct directory
+3. Operator Panel → "Registros" for error logs
+4. Rescan ROMs: Settings → "Scan ROMs"
+
+### Emulator Not Found
+- **Windows:** Add emulator to PATH environment variable
+- **Linux:** `sudo apt install <emulator-name>`
+- NeoCab auto-detects from PATH
+
+### Controller Issues
+1. Operator Panel → Input Configuration
+2. Click "Detect Gamepad"
+3. Follow prompts to map buttons
+4. Test in game
+
+### Performance Problems
+- Close other applications
+- Reduce display resolution
+- Disable shaders if needed
+- For Raspberry Pi: use 2D emulators only
+
+### View Logs
+- Operator Panel → "Registros" tab
+- Real-time log viewing with filtering
+- Enable debug mode for detailed output
+
+---
+
+## Multi-Cabinet Network
+
+### Master Cabinet
+1. Operator Panel → "Red" (Network)
+2. Click "Start Master Server"
+3. Note displayed IP address
+
+### Client Cabinet
+1. Operator Panel → "Red" (Network)
+2. Enter Master IP
+3. Click "Connect"
+4. Revenue syncs automatically
+
+### Firewall
+- **Windows:** Allow NeoCab in Windows Firewall
+- **Linux:** `sudo ufw allow 8080/tcp`
+- Default port: 8080
+
+---
+
+## Uninstallation
 
 ### Windows
+- Control Panel → Apps & Features → NeoCab → Uninstall
+- Data in AppData not deleted (remove manually if desired)
 
-**MSI Installer:**
-```
-1. Download new NeoCab_1.0.x_x64_en-US.msi
-2. Run installer
-3. Old version is replaced
-4. Settings preserved automatically
-```
-
-**Portable EXE:**
-```
-1. Download new NeoCab.exe
-2. Replace old file
-3. Settings in C:\Users\YourUsername\AppData\Local\NeoCab preserved
-```
-
-### Linux
-
-**AppImage:**
+### Linux/Pi
 ```bash
-# Download new version
-wget https://github.com/yourusername/neocab/releases/download/v1.0.x/NeoCab.AppImage
-
-# Replace old file
-sudo cp NeoCab.AppImage /opt/neocab
-
-# Run
-/opt/neocab
+rm ~/NeoCab/neocab-1.0-*.AppImage
+rm -rf ~/.local/share/NeoCab/
 ```
 
 ---
 
-## 🚀 Optimized Cabinet Setup
-
-### For Arcade Machines
-
-```bash
-# Linux - Kiosk Mode
-1. Edit ~/.config/neocab/config.yml:
-   kiosk_mode: true
-   autoboot_on_startup: true
-   default_system: mame
-
-2. Create systemd service:
-   sudo tee /etc/systemd/system/neocab.service
-   [Unit]
-   Description=NeoCab Arcade
-   After=network.target
-   
-   [Service]
-   Type=simple
-   User=arcade
-   ExecStart=/opt/neocab --kiosk
-   Restart=always
-   
-   [Install]
-   WantedBy=multi-user.target
-
-3. Enable on boot:
-   sudo systemctl enable neocab
-   sudo systemctl start neocab
-```
-
-### Network Setup (Multi-Cabinet)
-
-```bash
-# Cabinet 1 (Master)
-1. Configure as Network Role: Master
-2. Set IP: 192.168.1.100
-
-# Cabinet 2 (Slave)
-1. Configure as Network Role: Slave  
-2. Set Master IP: 192.168.1.100
-
-# Result: Revenue synced centrally, shared game library
-```
-
----
-
-## ⚡ Performance Tuning
-
-### For Slower Machines
-
-**Windows:**
-```
-Settings → Performance → 
-  - Disable CRT Scanlines
-  - Reduce animation duration
-  - Disable background blur
-```
-
-**Linux:**
-```
-Edit ~/.config/neocab/config.yml:
-enable_crt_effect: false
-animation_duration_ms: 200
-```
-
-### For Maximal Performance
-
-```
-- Enable V-sync: ON
-- Frame rate cap: 60 FPS
-- Resolution: Native (avoid scaling)
-- Media preload: ON
-```
-
----
-
-## 🔐 Security Setup
-
-### Operator PIN
-
-On first run, set operator PIN (default: 0000):
-
-```
-Settings → Security → Operator PIN
-1. Enter current PIN (0000)
-2. Enter new PIN
-3. Confirm new PIN
-```
-
-PIN protects:
-- Settings changes
-- System configuration
-- Revenue reports
-- Emulator selection
-
-### User Profiles (Planned v1.1)
-
-```
-Settings → Profiles →
-  - Create player profile
-  - Set play limits
-  - Track statistics per player
-```
-
----
-
-## 📞 Troubleshooting
-
-### App won't start
-See [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-
-### Emulator not found
-See [TROUBLESHOOTING.md - Emulator Detection](TROUBLESHOOTING.md#emulator-not-found)
-
-### ROMs not appearing
-See [TROUBLESHOOTING.md - ROM Scanning](TROUBLESHOOTING.md#roms-not-appearing)
-
-### Performance issues
-See [TROUBLESHOOTING.md - Performance](TROUBLESHOOTING.md#performance)
-
----
-
-## 📞 Getting Help
-
-- **FAQ:** [FAQ.md](FAQ.md)
-- **Troubleshooting:** [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-- **Configuration:** [CONFIGURATION.md](CONFIGURATION.md)
-- **GitHub Issues:** https://github.com/yourusername/neocab/issues
-
----
-
-## ✅ Installation Checklist
-
-- [ ] Downloaded NeoCab for your platform
-- [ ] Installed or extracted NeoCab
-- [ ] Created roms/ directory
-- [ ] Created media/ directory (optional)
-- [ ] Installed emulators (MAME, RetroArch, etc.)
-- [ ] Ran Setup Wizard on first launch
-- [ ] Added at least one ROM file
-- [ ] Tested launching a game
-- [ ] Customized theme (optional)
-- [ ] Set operator PIN (recommended)
-- [ ] Enabled network sync (multi-cabinet only)
-
----
-
-**Installation complete! Proceed to [USER_MANUAL.md](USER_MANUAL.md) for usage instructions.**
+**For more help, see USER_MANUAL.md or visit github.com/neocab/neocab**
