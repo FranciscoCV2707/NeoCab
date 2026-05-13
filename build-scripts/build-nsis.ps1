@@ -77,6 +77,10 @@ Section "Install"
     SetOutPath "`$INSTDIR\public"
     File /r "./public/*"
 
+    ; Copy shaders
+    SetOutPath "`$INSTDIR\config\shaders"
+    File /r "./config/shaders/*"
+
     ; Create Start Menu shortcuts
     CreateDirectory "`$SMPROGRAMS\NeoCab"
     CreateShortCut "`$SMPROGRAMS\NeoCab\NeoCab.lnk" "`$INSTDIR\NeoCab.exe"
@@ -103,6 +107,7 @@ Section "Uninstall"
     RMDir /r "`$INSTDIR\data"
     RMDir /r "`$INSTDIR\config"
     RMDir /r "`$INSTDIR\public"
+    RMDir /r "`$INSTDIR\config\shaders"
     Delete "`$INSTDIR\uninstall.exe"
     RMDir "`$INSTDIR"
 

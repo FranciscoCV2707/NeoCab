@@ -12,6 +12,58 @@ pub mod legacy;
 
 pub use error::{NeoCabError, Result};
 use tauri::Manager;
+use std::path::PathBuf;
+
+fn determine_shader_path() -> PathBuf {
+    use std::path::Path;
+
+    // Priority order for shader discovery:
+    // 1. Bundled installation paths (Windows/Linux post-install)
+    // 2. Development paths
+
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(exe_path) = std::env::current_exe() {
+            if let Some(parent) = exe_path.parent() {
+                let bundled = parent.join("config").join("shaders");
+                if bundled.exists() {
+                    tracing::info!("Using bundled shaders from: {}", bundled.display());
+                    return bundled;
+                }
+            }
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        let paths = vec![
+            "/usr/local/share/neocab/config/shaders".into(),
+            "/usr/share/neocab/config/shaders".into(),
+        ];
+        for path in paths {
+            if Path::new(&path).exists() {
+                tracing::info!("Using bundled shaders from: {}", path);
+                return path;
+            }
+        }
+    }
+
+    // Fallback to development paths
+    let dev_paths = vec![
+        PathBuf::from("./config/shaders"),
+        PathBuf::from("./public/shaders"),
+    ];
+
+    for path in dev_paths {
+        if path.exists() {
+            tracing::info!("Using development shaders from: {}", path.display());
+            return path;
+        }
+    }
+
+    tracing::warn!("No shader directory found, using default: ./config/shaders");
+    PathBuf::from("./config/shaders")
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -207,7 +259,13 @@ async fn initialize_app() -> Result<(
     let autoboot_manager = core::AutobootManager::default();
     let theme_manager = core::ThemeManager::new("./data/themes".into());
     let media_manager = core::MediaManager::new("./data".into(), 256 * 1024 * 1024);
-    let shader_manager = core::ShaderManager::new("./public/shaders".into());
+
+    // Determine shader path: bundled first, then fallback to development paths
+    let shader_path = determine_shader_path();
+    let shader_manager = core::ShaderManager::with_custom_path(
+        shader_path.clone(),
+        shader_path.clone(),
+    );
     let config_manager = core::ConfigManager::new("./data/config.yml", db.clone()).await?;
 
     // Phase 7: Network Manager

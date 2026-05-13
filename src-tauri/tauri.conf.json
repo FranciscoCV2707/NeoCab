@@ -36,6 +36,12 @@
       "icons/icon.ico"
     ],
     "category": "Game",
-    "shortDescription": "Professional arcade cabinet OS"
+    "shortDescription": "Professional arcade cabinet OS",
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper",
+        "silent": true
+      }
+    }
   }
 }
