@@ -1,6 +1,8 @@
 use std::path::PathBuf;
 use std::fs;
 use std::sync::Arc;
+use std::collections::HashMap;
+use std::io::Write;
 use tokio::sync::RwLock;
 use serde_json::{json, Value};
 use tracing::{info, error, debug};
@@ -136,6 +138,7 @@ impl Default for Theme {
 pub struct ThemeManager {
     themes_dir: PathBuf,
     current_theme: Arc<RwLock<Theme>>,
+    system_themes: Arc<RwLock<HashMap<String, Theme>>>,
 }
 
 impl ThemeManager {
@@ -143,6 +146,7 @@ impl ThemeManager {
         Self {
             themes_dir,
             current_theme: Arc::new(RwLock::new(Theme::default())),
+            system_themes: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 
@@ -273,7 +277,7 @@ impl ThemeManager {
         Ok(theme.name)
     }
 
-    /// Export theme as .neotheme file
+    /// Export theme as .neotheme ZIP file
     pub async fn export_theme(&self, name: &str) -> Result<String> {
         let theme_dir = self.themes_dir.join(name);
 
@@ -283,17 +287,56 @@ impl ThemeManager {
             ));
         }
 
-        // In production, would create ZIP file
-        // For now, return path
-        let export_path = theme_dir.to_str().unwrap_or("").to_string();
-        info!("Exported theme to: {}", export_path);
-        Ok(export_path)
+        let export_path = self.themes_dir.join(format!("{}.neotheme", name));
+
+        // Create ZIP file with theme contents
+        let file = fs::File::create(&export_path).map_err(|e| {
+            crate::error::NeoCabError::System(format!("Failed to create ZIP: {}", e))
+        })?;
+
+        let mut zip = zip::ZipWriter::new(file);
+
+        // Add theme.json
+        let theme_json_path = theme_dir.join("theme.json");
+        if theme_json_path.exists() {
+            let content = fs::read_to_string(&theme_json_path).map_err(|e| {
+                crate::error::NeoCabError::System(format!("Failed to read theme.json: {}", e))
+            })?;
+
+            zip.start_file("theme.json", Default::default()).map_err(|e| {
+                crate::error::NeoCabError::System(format!("Failed to add to ZIP: {}", e))
+            })?;
+            zip.write_all(content.as_bytes()).map_err(|e| {
+                crate::error::NeoCabError::System(format!("Failed to write ZIP: {}", e))
+            })?;
+        }
+
+        // Add preview.png if exists
+        let preview_path = theme_dir.join("preview.png");
+        if preview_path.exists() {
+            let preview_data = fs::read(&preview_path).map_err(|e| {
+                crate::error::NeoCabError::System(format!("Failed to read preview: {}", e))
+            })?;
+
+            zip.start_file("preview.png", Default::default()).map_err(|e| {
+                crate::error::NeoCabError::System(format!("Failed to add preview to ZIP: {}", e))
+            })?;
+            zip.write_all(&preview_data).map_err(|e| {
+                crate::error::NeoCabError::System(format!("Failed to write preview ZIP: {}", e))
+            })?;
+        }
+
+        zip.finish().map_err(|e| {
+            crate::error::NeoCabError::System(format!("Failed to finalize ZIP: {}", e))
+        })?;
+
+        let export_str = export_path.to_str().unwrap_or("").to_string();
+        info!("Exported theme to: {}", export_str);
+        Ok(export_str)
     }
 
-    /// Import theme from path (typically a .neotheme file)
+    /// Import theme from .neotheme ZIP file
     pub async fn import_theme(&self, source_path: &str) -> Result<String> {
-        // In production, would extract ZIP and validate
-        // For now, accept the path and copy
         let source = PathBuf::from(source_path);
 
         if !source.exists() {
@@ -302,15 +345,89 @@ impl ThemeManager {
             ));
         }
 
-        // Extract theme name from path
+        // Extract theme name from ZIP filename
         let theme_name = source
             .file_stem()
             .and_then(|n| n.to_str())
             .unwrap_or("imported_theme")
             .to_string();
 
-        info!("Imported theme: {}", theme_name);
+        let theme_dir = self.themes_dir.join(&theme_name);
+        fs::create_dir_all(&theme_dir).map_err(|e| {
+            crate::error::NeoCabError::System(format!("Failed to create theme dir: {}", e))
+        })?;
+
+        // Extract ZIP contents
+        let file = fs::File::open(&source).map_err(|e| {
+            crate::error::NeoCabError::System(format!("Failed to open ZIP: {}", e))
+        })?;
+
+        let mut archive = zip::ZipArchive::new(file).map_err(|e| {
+            crate::error::NeoCabError::System(format!("Failed to read ZIP: {}", e))
+        })?;
+
+        for i in 0..archive.len() {
+            let mut file = archive.by_index(i).map_err(|e| {
+                crate::error::NeoCabError::System(format!("Failed to extract file: {}", e))
+            })?;
+
+            let outpath = theme_dir.join(file.name());
+
+            if file.is_dir() {
+                fs::create_dir_all(&outpath).ok();
+            } else {
+                if let Some(parent) = outpath.parent() {
+                    fs::create_dir_all(parent).ok();
+                }
+
+                let mut outfile = fs::File::create(&outpath).map_err(|e| {
+                    crate::error::NeoCabError::System(format!("Failed to create file: {}", e))
+                })?;
+
+                std::io::copy(&mut file, &mut outfile).map_err(|e| {
+                    crate::error::NeoCabError::System(format!("Failed to extract: {}", e))
+                })?;
+            }
+        }
+
+        info!("Imported theme from ZIP: {}", theme_name);
         Ok(theme_name)
+    }
+
+    /// Set theme for a specific system
+    pub async fn set_system_theme(&self, system: &str, theme: Theme) -> Result<()> {
+        let mut system_themes = self.system_themes.write().await;
+        system_themes.insert(system.to_string(), theme.clone());
+        info!("Set theme '{}' for system '{}'", theme.name, system);
+        Ok(())
+    }
+
+    /// Get theme for a specific system (falls back to global theme)
+    pub async fn get_system_theme(&self, system: &str) -> Theme {
+        let system_themes = self.system_themes.read().await;
+        if let Some(theme) = system_themes.get(system) {
+            theme.clone()
+        } else {
+            self.current_theme.read().await.clone()
+        }
+    }
+
+    /// List all system-specific theme assignments
+    pub async fn list_system_themes(&self) -> Result<Vec<(String, String)>> {
+        let system_themes = self.system_themes.read().await;
+        let assignments: Vec<(String, String)> = system_themes
+            .iter()
+            .map(|(system, theme)| (system.clone(), theme.name.clone()))
+            .collect();
+        Ok(assignments)
+    }
+
+    /// Remove theme assignment for a system (will use global theme)
+    pub async fn remove_system_theme(&self, system: &str) -> Result<()> {
+        let mut system_themes = self.system_themes.write().await;
+        system_themes.remove(system);
+        info!("Removed theme assignment for system '{}'", system);
+        Ok(())
     }
 
     /// Validate theme JSON against schema
