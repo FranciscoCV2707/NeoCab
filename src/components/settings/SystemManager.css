@@ -1,0 +1,362 @@
+.system-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background: #0f0f0f;
+  border-radius: 8px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.system-manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #ff6b35;
+}
+
+.system-manager-header h3 {
+  margin: 0;
+  color: #ff6b35;
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.btn-add-system {
+  padding: 10px 20px;
+  background: #ff6b35;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-add-system:hover:not(:disabled) {
+  background: #ff8c52;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.btn-add-system:disabled {
+  background: #999;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.add-system-form {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid #333;
+  border-radius: 6px;
+}
+
+.add-system-form input {
+  flex: 1;
+  padding: 8px 12px;
+  background: #1a1a1a;
+  color: #e0e0e0;
+  border: 1px solid #444;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.add-system-form input:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 4px rgba(255, 107, 53, 0.3);
+}
+
+.add-system-form button {
+  padding: 8px 16px;
+  background: #ff6b35;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.add-system-form button:hover:not(:disabled) {
+  background: #ff8c52;
+}
+
+.add-system-form button:disabled {
+  background: #999;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.system-error {
+  padding: 12px;
+  background: rgba(244, 67, 54, 0.2);
+  border-left: 3px solid #f44336;
+  color: #ff9999;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.system-loading {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
+.systems-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.no-systems {
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
+.system-card {
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: rgba(255, 107, 53, 0.05);
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.system-card:hover {
+  border-color: #ff6b35;
+  box-shadow: 0 0 8px rgba(255, 107, 53, 0.2);
+}
+
+.system-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255, 107, 53, 0.1);
+  border-bottom: 1px solid #333;
+}
+
+.system-card-header h4 {
+  margin: 0;
+  color: #ff6b35;
+  font-weight: 600;
+}
+
+.system-mode-badge {
+  padding: 4px 8px;
+  background: #333;
+  color: #e0e0e0;
+  border-radius: 3px;
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.system-mode-badge.mode-arcade {
+  background: rgba(244, 67, 54, 0.3);
+  color: #ff9999;
+}
+
+.system-mode-badge.mode-console {
+  background: rgba(33, 150, 243, 0.3);
+  color: #b3e5fc;
+}
+
+.system-mode-badge.mode-timed_free {
+  background: rgba(76, 175, 80, 0.3);
+  color: #b4e7b4;
+}
+
+.system-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.system-stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 107, 53, 0.1);
+}
+
+.system-stat label {
+  color: #999;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.system-stat span {
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.system-path {
+  font-family: monospace;
+  font-size: 0.8em;
+  color: #ff6b35;
+  word-break: break-all;
+}
+
+.system-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-edit,
+.btn-delete {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85em;
+  transition: all 0.2s;
+}
+
+.btn-edit {
+  background: rgba(33, 150, 243, 0.2);
+  color: #b3e5fc;
+  border: 1px solid #2196f3;
+}
+
+.btn-edit:hover:not(:disabled) {
+  background: rgba(33, 150, 243, 0.3);
+  box-shadow: 0 0 8px rgba(33, 150, 243, 0.2);
+}
+
+.btn-delete {
+  background: rgba(244, 67, 54, 0.2);
+  color: #ff9999;
+  border: 1px solid #f44336;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: rgba(244, 67, 54, 0.3);
+  box-shadow: 0 0 8px rgba(244, 67, 54, 0.2);
+}
+
+.btn-edit:disabled,
+.btn-delete:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.system-config-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid #333;
+}
+
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.config-section label {
+  color: #ff6b35;
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.config-section input[type='text'],
+.config-section select {
+  padding: 8px;
+  background: #1a1a1a;
+  color: #e0e0e0;
+  border: 1px solid #444;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.config-section input[type='text']:focus,
+.config-section select:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 4px rgba(255, 107, 53, 0.3);
+}
+
+.config-section input[type='checkbox'] {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.config-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-save,
+.btn-cancel {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-save {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+  border: 1px solid #4caf50;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: rgba(76, 175, 80, 0.3);
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.2);
+}
+
+.btn-cancel {
+  background: rgba(158, 158, 158, 0.2);
+  color: #999;
+  border: 1px solid #666;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: rgba(158, 158, 158, 0.3);
+}
+
+.btn-save:disabled,
+.btn-cancel:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Scrollbar styling */
+.systems-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.systems-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.systems-list::-webkit-scrollbar-thumb {
+  background: #ff6b35;
+  border-radius: 4px;
+}
+
+.systems-list::-webkit-scrollbar-thumb:hover {
+  background: #ff8c52;
+}

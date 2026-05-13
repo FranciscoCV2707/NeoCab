@@ -34,6 +34,14 @@ pub struct SystemGameConfig {
     pub show_overlay: bool,
     pub warn_before: u32,
     pub auto_exit: bool,
+    #[serde(default)]
+    pub rom_path: Option<PathBuf>,
+    #[serde(default)]
+    pub bios_path: Option<PathBuf>,
+    #[serde(default)]
+    pub pre_launch_script: Option<String>,
+    #[serde(default)]
+    pub post_launch_script: Option<String>,
 }
 
 impl SystemGameConfig {
@@ -47,6 +55,10 @@ impl SystemGameConfig {
             show_overlay: true,
             warn_before: 30,
             auto_exit: true,
+            rom_path: None,
+            bios_path: None,
+            pre_launch_script: None,
+            post_launch_script: None,
         }
     }
 }

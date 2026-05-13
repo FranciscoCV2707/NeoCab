@@ -1,0 +1,169 @@
+.game-metadata-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.editor-header {
+  padding: 16px;
+  background: rgba(255, 107, 53, 0.1);
+  border-bottom: 2px solid #ff6b35;
+  flex-shrink: 0;
+}
+
+.editor-header h3 {
+  margin: 0;
+  color: #ff6b35;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.editor-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.metadata-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metadata-section label {
+  color: #ff6b35;
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.metadata-section input,
+.metadata-section textarea {
+  padding: 10px;
+  background: #0f0f0f;
+  color: #e0e0e0;
+  border: 1px solid #333;
+  border-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 0.9em;
+  transition: all 0.2s;
+}
+
+.metadata-section input:focus,
+.metadata-section textarea:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 8px rgba(255, 107, 53, 0.2);
+  background: #1a1a1a;
+}
+
+.metadata-section textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.metadata-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .metadata-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.editor-actions {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid #333;
+  flex-shrink: 0;
+}
+
+.btn-save,
+.btn-cancel {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9em;
+  transition: all 0.2s;
+}
+
+.btn-save {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+  border: 1px solid #4caf50;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: rgba(76, 175, 80, 0.3);
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.2);
+}
+
+.btn-cancel {
+  background: rgba(158, 158, 158, 0.2);
+  color: #999;
+  border: 1px solid #666;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: rgba(158, 158, 158, 0.3);
+  color: #bbb;
+}
+
+.btn-save:disabled,
+.btn-cancel:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Scrollbar styling */
+.editor-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.editor-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.editor-content::-webkit-scrollbar-thumb {
+  background: #ff6b35;
+  border-radius: 4px;
+}
+
+.editor-content::-webkit-scrollbar-thumb:hover {
+  background: #ff8c52;
+}
+
+.game-metadata-editor::-webkit-scrollbar {
+  width: 8px;
+}
+
+.game-metadata-editor::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.game-metadata-editor::-webkit-scrollbar-thumb {
+  background: #ff6b35;
+  border-radius: 4px;
+}
+
+.game-metadata-editor::-webkit-scrollbar-thumb:hover {
+  background: #ff8c52;
+}
