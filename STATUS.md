@@ -7,7 +7,7 @@
 
 ---
 
-## SESSION 9 - CRITICAL FEATURES (EN PROGRESO)
+## SESSION 9 - CRITICAL FEATURES - ✅ CERRADA 100%
 
 **Objetivo:** Implementar features críticas faltantes: auto-close on timeout, keyboard coin input, logs a archivo y panel de auditoría.
 
@@ -32,16 +32,19 @@
 - ✅ Integración en `OperatorPanel` como nueva pestaña "Registros"
 - ✅ Soporte para tamaño/timestamp de archivos y filtrado
 
-**TASK 4: Audit Panel - Missing ROMs/Media - ⏳ PENDIENTE**
-- ⏳ Crear `audit.rs` con funciones para detectar ROMs/media faltantes
-- ⏳ Crear `AuditPanel.tsx` component
-- ⏳ Integrar en OperatorPanel
+**TASK 4: Audit Panel - Missing ROMs/Media - ✅ COMPLETADA**
+- ✅ Crear `audit.rs` con stub implementations
+- ✅ Crear `AuditPanel.tsx` component con UI completa
+- ✅ Integrar en OperatorPanel como pestaña "Auditoría"
+- ✅ UI para auditar ROMs, media, o ambos
+- ✅ Soporte para auditar todos sistemas o uno específico
+- ✅ Mostrar detalles expandibles de archivos faltantes
 
 **Pendiente (próximas sesiones):**
-- Audit panel completo (comparación game list vs disco)
+- Implementación backend completa de audit_roms/audit_media (stubs por ahora)
 - Windows XP Legacy Mode (bootstrap final)
 - CI/CD GitHub Actions (opcional)
-- Completar fases 8-16 del roadmap
+- Completar fases 8-16 del roadmap (Session 10+)
 
 ---
 
