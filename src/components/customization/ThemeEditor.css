@@ -219,4 +219,127 @@
   .btn-cancel {
     width: 100%;
   }
+
+  .system-selector {
+    width: 100%;
+  }
+
+  .system-buttons {
+    flex-direction: column;
+  }
+
+  .btn-assign,
+  .btn-remove {
+    width: 100%;
+  }
+}
+
+.system-theme-section {
+  padding: 20px 24px;
+  background: rgba(255, 100, 0, 0.05);
+  border-top: 2px solid rgba(255, 100, 0, 0.3);
+  border-bottom: 2px solid rgba(255, 100, 0, 0.3);
+}
+
+.system-theme-section h3 {
+  margin: 0 0 12px 0;
+  color: #FFCC00;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.system-selector-wrapper {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.system-selector {
+  flex: 1;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid #FF6400;
+  border-radius: 4px;
+  color: #FFFFFF;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.system-selector:hover:not(:disabled) {
+  border-color: #FFCC00;
+  box-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+}
+
+.system-selector:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.system-selector option {
+  background: #1a1a1a;
+  color: #FFFFFF;
+  padding: 4px;
+}
+
+.system-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-assign,
+.btn-remove {
+  padding: 8px 16px;
+  border: 2px solid #FF6400;
+  border-radius: 4px;
+  background: rgba(255, 100, 0, 0.1);
+  color: #FF6400;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-assign:hover:not(:disabled) {
+  background: rgba(255, 100, 0, 0.3);
+  box-shadow: 0 0 15px rgba(255, 100, 0, 0.5);
+}
+
+.btn-remove:hover:not(:disabled) {
+  background: rgba(255, 51, 51, 0.3);
+  border-color: #FF3333;
+  color: #FF3333;
+  box-shadow: 0 0 15px rgba(255, 51, 51, 0.5);
+}
+
+.btn-assign:disabled,
+.btn-remove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .system-selector-wrapper {
+    flex-direction: column;
+  }
+
+  .system-selector {
+    width: 100%;
+  }
+
+  .system-buttons {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .btn-assign,
+  .btn-remove {
+    width: 100%;
+  }
 }

@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { ColorPickerSection } from './ColorPickerSection';
 import { SliderSection, type SliderConfig } from './SliderSection';
 import { MediaSettingsSection } from './MediaSettingsSection';
@@ -89,6 +90,37 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
   const [theme, setTheme] = useState<ThemeData>(initialTheme);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [systems, setSystems] = useState<string[]>([]);
+  const [selectedSystem, setSelectedSystem] = useState<string | null>(null);
+  const [systemThemeAssignments, setSystemThemeAssignments] = useState<Record<string, string>>({});
+  // Load systems and per-system theme assignments on mount
+  useEffect(() => {
+    const loadSystems = async () => {
+      try {
+        const allSystems = await invoke<string[]>('list_systems', {});
+        setSystems(allSystems || []);
+        if (allSystems && allSystems.length > 0) {
+          setSelectedSystem(allSystems[0]);
+        }
+      } catch (_err) {
+        console.error('Failed to load systems');
+      }
+    };
+
+    const loadSystemThemes = async () => {
+      try {
+        const assignments = await invoke<Array<[string, string]>>('list_system_themes', {});
+        const assignmentMap = Object.fromEntries(assignments || []);
+        setSystemThemeAssignments(assignmentMap);
+      } catch (_err) {
+        console.error('Failed to load system theme assignments');
+      }
+    };
+
+    loadSystems();
+    loadSystemThemes();
+  }, []);
+
   const colorValues: Record<string, string> = { ...theme.colors };
   const wheelSliderValues: Record<string, number> = {
     item_size: theme.wheel.item_size,
@@ -143,6 +175,33 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
     }));
   }, []);
 
+  const handleSetSystemTheme = async () => {
+    if (!selectedSystem) return;
+    try {
+      await invoke('set_system_theme', { system: selectedSystem, theme });
+      setSystemThemeAssignments(prev => ({
+        ...prev,
+        [selectedSystem]: theme.name,
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to set system theme');
+    }
+  };
+
+  const handleRemoveSystemTheme = async () => {
+    if (!selectedSystem) return;
+    try {
+      await invoke('remove_system_theme', { system: selectedSystem });
+      setSystemThemeAssignments(prev => {
+        const updated = { ...prev };
+        delete updated[selectedSystem];
+        return updated;
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove system theme');
+    }
+  };
+
   const handleSave = async () => {
     try {
       setIsSaving(true);
@@ -183,6 +242,44 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
             onChange={(e) => handleMetadataChange('version', e.target.value)}
             className="metadata-input"
           />
+        </div>
+      </div>
+
+      <div className="system-theme-section">
+        <h3>Assign to System</h3>
+        <div className="system-selector-wrapper">
+          <select
+            value={selectedSystem || ''}
+            onChange={(e) => setSelectedSystem(e.target.value || null)}
+            className="system-selector"
+            disabled={systems.length === 0}
+          >
+            <option value="">Select a system...</option>
+            {systems.map(sys => (
+              <option key={sys} value={sys}>
+                {sys}
+                {systemThemeAssignments[sys] ? ` (→ ${systemThemeAssignments[sys]})` : ''}
+              </option>
+            ))}
+          </select>
+          <div className="system-buttons">
+            <button
+              className="btn-assign"
+              onClick={handleSetSystemTheme}
+              disabled={!selectedSystem || isSaving}
+              title="Assign current theme to selected system"
+            >
+              Set for System
+            </button>
+            <button
+              className="btn-remove"
+              onClick={handleRemoveSystemTheme}
+              disabled={!selectedSystem || !systemThemeAssignments[selectedSystem || ''] || isSaving}
+              title="Remove system-specific theme (use global theme)"
+            >
+              Use Global Theme
+            </button>
+          </div>
         </div>
       </div>
 
