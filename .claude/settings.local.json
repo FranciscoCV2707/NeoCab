@@ -16,7 +16,8 @@
       "Bash(git -C /c/Users/Pako/Desktop/arcade/NeoCab add -A)",
       "Bash(git -C /c/Users/Pako/Desktop/arcade/NeoCab commit -m 'feat: add automatic setup wizard and directory initialization *)",
       "Bash(grep -E \"^\\\\\\\\[|files changed\")",
-      "Bash(git -C /c/Users/Pako/Desktop/arcade/NeoCab commit -m 'docs: update all markdown files for v1.0.0 final release *)"
+      "Bash(git -C /c/Users/Pako/Desktop/arcade/NeoCab commit -m 'docs: update all markdown files for v1.0.0 final release *)",
+      "PowerShell(Test-Path \"C:\\\\Users\\\\Pako\\\\Desktop\\\\arcade\\\\NeoCab\\\\docs\"; Get-ChildItem \"C:\\\\Users\\\\Pako\\\\Desktop\\\\arcade\\\\NeoCab\\\\docs\" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })"
     ]
   }
 }
