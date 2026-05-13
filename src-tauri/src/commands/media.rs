@@ -177,3 +177,25 @@ pub async fn import_media(
         }
     }
 }
+
+#[tauri::command]
+pub async fn trigger_media_rescan(
+    media_manager: State<'_, MediaManager>,
+) -> Result<String, String> {
+    match media_manager.invalidate_and_rescan().await {
+        Ok(_) => {
+            let result = json!({
+                "success": true,
+                "message": "Media library rescanned successfully"
+            });
+            Ok(result.to_string())
+        }
+        Err(e) => {
+            let error = json!({
+                "success": false,
+                "error": e.to_string()
+            });
+            Err(error.to_string())
+        }
+    }
+}

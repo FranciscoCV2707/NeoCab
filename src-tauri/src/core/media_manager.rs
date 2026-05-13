@@ -49,6 +49,7 @@ pub struct MediaManager {
     media_path: PathBuf,
     cache_max_size: u64,
     is_watching: Arc<RwLock<bool>>,
+    cache: Arc<RwLock<Option<MediaLibrary>>>,
 }
 
 impl MediaManager {
@@ -57,10 +58,11 @@ impl MediaManager {
             media_path,
             cache_max_size,
             is_watching: Arc::new(RwLock::new(false)),
+            cache: Arc::new(RwLock::new(None)),
         }
     }
 
-    /// Scan media directory and build media library
+    /// Scan media directory and build media library (with caching)
     pub async fn scan_media(&self) -> Result<MediaLibrary> {
         let mut library = MediaLibrary {
             wheels: HashMap::new(),
@@ -101,6 +103,12 @@ impl MediaManager {
                 self.scan_system_media(&system_path, &system_name, &mut library)
                     .await?;
             }
+        }
+
+        // Cache the library
+        {
+            let mut cache = self.cache.write().await;
+            *cache = Some(library.clone());
         }
 
         Ok(library)
@@ -201,6 +209,27 @@ impl MediaManager {
         Ok(())
     }
 
+    /// Start watching media directory with automatic rescan callback
+    pub async fn start_auto_watch(&self) -> Result<()> {
+        let self_path = self.media_path.clone();
+        let self_cache = self.cache.clone();
+
+        self.start_watching(move || {
+            // Spawn async task to handle rescan
+            let path = self_path.clone();
+            let cache = self_cache.clone();
+
+            tokio::spawn(async move {
+                // Invalidate cache
+                {
+                    let mut c = cache.write().await;
+                    *c = None;
+                }
+                tracing::info!("Media folder changed - cache invalidated");
+            });
+        }).await
+    }
+
     /// Stop watching media directory
     pub async fn stop_watching(&self) {
         let mut watching = self.is_watching.write().await;
@@ -211,6 +240,24 @@ impl MediaManager {
     pub async fn is_watching(&self) -> bool {
         *self.is_watching.read().await
     }
+
+    /// Invalidate cache and trigger a rescan of media directory
+    /// Called when media folder changes are detected
+    pub async fn invalidate_and_rescan(&self) -> Result<()> {
+        // Invalidate cache
+        {
+            let mut cache = self.cache.write().await;
+            *cache = None;
+        }
+
+        // Rescan media directory to rebuild cache
+        tracing::info!("Media folder changed - rescanning media library");
+        self.scan_media().await?;
+        tracing::info!("Media library rescan complete");
+
+        Ok(())
+    }
+
 
     async fn scan_directory(
         &self,

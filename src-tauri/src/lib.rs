@@ -197,6 +197,7 @@ pub fn run() {
             commands::organize_media,
             commands::get_media,
             commands::import_media,
+            commands::trigger_media_rescan,
             commands::list_shaders,
             commands::rescan_shaders,
             commands::get_shader,
@@ -285,6 +286,13 @@ async fn initialize_app() -> Result<(
     let autoboot_manager = core::AutobootManager::default();
     let theme_manager = core::ThemeManager::new("./data/themes".into());
     let media_manager = core::MediaManager::new("./data".into(), 256 * 1024 * 1024);
+
+    // Start media folder watching for automatic rescans
+    if let Err(e) = media_manager.start_auto_watch().await {
+        tracing::warn!("Failed to start media folder watching: {}", e);
+    } else {
+        tracing::info!("Media folder watching started - rescans will trigger on media changes");
+    }
 
     // Determine shader path: bundled first, then fallback to development paths
     let shader_path = determine_shader_path();
