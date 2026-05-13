@@ -18,6 +18,9 @@ pub async fn initialize_app_directories() -> Result<()> {
         "config",
         "config/shaders",
         "config/themes",
+        "config/joy_profiles",
+        "data/media/marquees",
+        "data/media/bezels",
     ];
 
     for subdir in subdirs {

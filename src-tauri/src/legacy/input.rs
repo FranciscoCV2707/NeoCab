@@ -27,6 +27,8 @@ pub enum InputEvent {
 pub struct InputHandler {
     event_pump: Option<EventPump>,
     event_queue: VecDeque<InputEvent>,
+    joy_mapper: Option<crate::input::joy_mapper::JoyMapper>,
+    injector: Option<Box<dyn crate::input::joy_mapper::KeyInjector>>,
 }
 
 impl InputHandler {
@@ -35,6 +37,11 @@ impl InputHandler {
         Ok(Self {
             event_pump: None,
             event_queue: VecDeque::with_capacity(10),
+            joy_mapper: Some(crate::input::joy_mapper::JoyMapper::new()),
+            #[cfg(target_os = "windows")]
+            injector: Some(Box::new(crate::input::joy_mapper::WindowsInjector)),
+            #[cfg(not(target_os = "windows"))]
+            injector: None,
         })
     }
 
@@ -46,7 +53,7 @@ impl InputHandler {
         self.event_pump = Some(event_subsystem.event_pump()
             .map_err(|e| crate::error::NeoCabError::Custom(format!("Event pump creation failed: {}", e)))?);
 
-        tracing::info!("SDL2 Input Handler initialized");
+        tracing::info!("SDL2 Input Handler initialized with JoyMapper (XP Ready)");
         Ok(())
     }
 
@@ -56,6 +63,25 @@ impl InputHandler {
 
         if let Some(ref mut event_pump) = self.event_pump {
             for event in event_pump.poll_iter() {
+                // Pass to JoyMapper for key injection
+                if let Some(mapper) = &mut self.joy_mapper {
+                    let actions = match event {
+                        Event::JoyButtonDown { button, .. } => mapper.handle_button(button, true),
+                        Event::JoyButtonUp { button, .. } => mapper.handle_button(button, false),
+                        Event::JoyAxisMotion { axis, value, .. } => mapper.handle_axis(axis, value as f32 / 32768.0),
+                        _ => Vec::new(),
+                    };
+
+                    // Execute injected keys
+                    if let Some(injector) = &self.injector {
+                        for action in actions {
+                            if let crate::input::joy_mapper::MappedAction::Key(k) = action {
+                                injector.type_key(&k);
+                            }
+                        }
+                    }
+                }
+
                 if let Some(input_event) = self.map_sdl_event(event) {
                     events.push(input_event);
                 }

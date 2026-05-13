@@ -7,8 +7,21 @@ import { AuditPanel } from './AuditPanel';
 import { MasterDashboard } from './MasterDashboard';
 import { SystemManager } from '../settings/SystemManager';
 import './OperatorPanel.css';
+import { ThemeEditor } from '../studio/ThemeEditor';
 
-type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'settings';
+type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'settings' | 'input' | 'studio';
+
+const TABS: { id: TabType; label: string; icon: string }[] = [
+    { id: 'statistics', label: 'Estadísticas', icon: '📊' },
+    { id: 'input', label: 'Controles', icon: '🕹️' },
+    { id: 'network', label: 'Red', icon: '🌐' },
+    { id: 'studio', label: 'Studio', icon: '🎨' },
+    { id: 'logs', label: 'Registros', icon: '📋' },
+    { id: 'audit', label: 'Auditoría', icon: '🔍' },
+    { id: 'settings', label: 'Configuración', icon: '⚙️' },
+];
+
+import { InputWizard } from './InputWizard';
 
 export const OperatorPanel: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('statistics');
@@ -25,10 +38,22 @@ export const OperatorPanel: React.FC = () => {
                     📊 {isMaster ? 'Panel Maestro' : 'Estadísticas'}
                 </button>
                 <button
+                    className={`tab-button ${activeTab === 'input' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('input')}
+                >
+                    🕹️ Controles
+                </button>
+                <button
                     className={`tab-button ${activeTab === 'network' ? 'active' : ''}`}
                     onClick={() => setActiveTab('network')}
                 >
                     🌐 Red
+                </button>
+                <button
+                    className={`tab-button ${activeTab === 'studio' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('studio')}
+                >
+                    🎨 Studio
                 </button>
                 <button
                     className={`tab-button ${activeTab === 'logs' ? 'active' : ''}`}
@@ -48,11 +73,19 @@ export const OperatorPanel: React.FC = () => {
                 >
                     ⚙️ Configuración
                 </button>
+                <button
+                    className="tab-button manual-button"
+                    onClick={() => window.open('https://github.com/PakoCaballero/NeoCab/wiki', '_blank')}
+                >
+                    📖 Manual
+                </button>
             </nav>
 
             <div className="tab-content">
                 {activeTab === 'statistics' && (isMaster ? <MasterDashboard /> : <StatisticsTab />)}
+                {activeTab === 'input' && <InputWizard />}
                 {activeTab === 'network' && <NetworkPanel />}
+                {activeTab === 'studio' && <ThemeEditor />}
                 {activeTab === 'logs' && <LogViewer />}
                 {activeTab === 'audit' && <AuditPanel />}
                 {activeTab === 'settings' && <SettingsTab />}

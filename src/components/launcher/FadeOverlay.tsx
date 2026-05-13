@@ -1,55 +1,49 @@
 import React, { useEffect, useState } from 'react';
 import './FadeOverlay.css';
 
-export interface FadeOverlayProps {
-  isVisible: boolean;
-  gameName?: string;
-  message?: string;
-  duration?: number;
-  onFadeComplete?: () => void;
+interface FadeOverlayProps {
+    visible: boolean;
+    gameName?: string;
+    systemName?: string;
+    config?: {
+        duration_ms: number;
+        background_image: string;
+        loading_text: string;
+        show_logo: bool;
+    };
 }
 
-export const FadeOverlay: React.FC<FadeOverlayProps> = ({
-  isVisible,
-  gameName,
-  message = 'Iniciando juego...',
-  duration = 3000,
-  onFadeComplete,
-}) => {
-  const [fadeOut, setFadeOut] = useState(false);
+export const FadeOverlay: React.FC<FadeOverlayProps> = ({ visible, gameName, systemName, config }) => {
+    const [shouldRender, setShouldRender] = useState(visible);
 
-  useEffect(() => {
-    if (isVisible) {
-      setFadeOut(false);
-
-      // Auto fade out after duration
-      const timer = setTimeout(() => {
-        setFadeOut(true);
-        if (onFadeComplete) {
-          setTimeout(onFadeComplete, 500); // Wait for fade animation
+    useEffect(() => {
+        if (visible) {
+            setShouldRender(true);
+        } else {
+            const timer = setTimeout(() => setShouldRender(false), 500); // Wait for CSS transition
+            return () => clearTimeout(timer);
         }
-      }, duration);
+    }, [visible]);
 
-      return () => clearTimeout(timer);
-    }
-  }, [isVisible, duration, onFadeComplete]);
+    if (!shouldRender) return null;
 
-  if (!isVisible) {
-    return null;
-  }
+    return (
+        <div className={`fade-overlay ${visible ? 'visible' : 'hidden'}`} style={{ 
+            backgroundImage: config?.background_image ? `url(${config.background_image})` : 'none' 
+        }}>
+            <div className="fade-content">
+                {config?.show_logo && <div className="fade-logo">NEOCAB</div>}
+                
+                <div className="fade-info">
+                    <h2 className="game-name">{gameName ?? 'Iniciando Juego'}</h2>
+                    <h3 className="system-name">{systemName ?? 'Arcade System'}</h3>
+                </div>
 
-  return (
-    <div className={`fade-overlay ${fadeOut ? 'fade-out' : 'fade-in'}`}>
-      <div className="fade-content">
-        <div className="spinner"></div>
-        <h2>{gameName || 'NeoCab'}</h2>
-        <p>{message}</p>
-        <div className="loading-bar">
-          <div className="loading-progress"></div>
+                <div className="loading-container">
+                    <div className="loading-bar"></div>
+                    <p className="loading-text">{config?.loading_text ?? 'CARGANDO...'}</p>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
-
-export default FadeOverlay;

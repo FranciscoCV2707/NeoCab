@@ -15,6 +15,8 @@ pub mod logs;
 pub mod audit;
 pub mod sessions;
 pub mod launcher;
+pub mod studio;
+pub mod pause;
 pub mod setup;
 
 pub use system::*;
@@ -34,4 +36,6 @@ pub use logs::*;
 pub use audit::*;
 pub use sessions::*;
 pub use launcher::*;
+pub use studio::*;
+pub use pause::*;
 pub use setup::*;

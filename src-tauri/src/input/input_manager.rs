@@ -71,15 +71,31 @@ pub struct InputManager {
     mappings: Arc<RwLock<Vec<InputMapping>>>,
     enabled: Arc<RwLock<bool>>,
     deadzone: Arc<RwLock<f32>>,
+    joy_mapper: Arc<RwLock<crate::input::joy_mapper::JoyMapper>>,
+    injector: Arc<Box<dyn crate::input::joy_mapper::KeyInjector>>,
 }
 
 impl InputManager {
     pub fn new() -> Self {
+        #[cfg(target_os = "windows")]
+        let injector: Box<dyn crate::input::joy_mapper::KeyInjector> = Box::new(crate::input::joy_mapper::WindowsInjector);
+        
+        #[cfg(target_os = "linux")]
+        let injector: Box<dyn crate::input::joy_mapper::KeyInjector> = match crate::input::joy_mapper::LinuxInjector::new() {
+            Ok(i) => Box::new(i),
+            Err(_) => Box::new(crate::input::joy_mapper::LinuxInjectorStub), // Fallback if uinput fails
+        };
+
+        #[cfg(not(any(target_os = "windows", target_os = "linux")))]
+        let injector: Box<dyn crate::input::joy_mapper::KeyInjector> = Box::new(crate::input::joy_mapper::StubInjector);
+
         Self {
             devices: Arc::new(RwLock::new(HashMap::new())),
             mappings: Arc::new(RwLock::new(Vec::new())),
             enabled: Arc::new(RwLock::new(true)),
             deadzone: Arc::new(RwLock::new(0.1)),
+            joy_mapper: Arc::new(RwLock::new(crate::input::joy_mapper::JoyMapper::new())),
+            injector: Arc::new(injector),
         }
     }
 
@@ -145,6 +161,21 @@ impl InputManager {
         Ok(())
     }
 
+    pub async fn load_profile_for_system(&self, system: &str) -> Result<()> {
+        let mut mapper = self.joy_mapper.write().await;
+        let profile_path = std::path::PathBuf::from(format!("config/joy_profiles/{}.yml", system));
+        
+        if profile_path.exists() {
+            mapper.load_profile_from_file(&profile_path)
+                .map_err(|e| crate::error::NeoCabError::Config(e))?;
+            
+            info!("Auto-loaded JoyMapper profile for system: {}", system);
+        } else {
+            info!("No specific JoyMapper profile found for system: {}. Using default.", system);
+        }
+        Ok(())
+    }
+
     pub async fn get_deadzone(&self) -> f32 {
         *self.deadzone.read().await
     }
@@ -179,7 +210,34 @@ impl InputManager {
             return Ok(None);
         }
 
-        // Find mapping for this input
+        let mut mapper = self.joy_mapper.write().await;
+        let mut actions = Vec::new();
+
+        // Pass to JoyMapper
+        match event.input {
+            InputEventType::ButtonPressed(button) => {
+                // Convert InputButton to raw index or mapping
+                let btn_idx = self.button_to_index(button);
+                actions.extend(mapper.handle_button(btn_idx, true));
+            }
+            InputEventType::ButtonReleased(button) => {
+                let btn_idx = self.button_to_index(button);
+                actions.extend(mapper.handle_button(btn_idx, false));
+            }
+            InputEventType::AxisMoved(axis) => {
+                match axis {
+                    AxisInput::LeftStickX(x) => actions.extend(mapper.handle_axis(0, x)),
+                    AxisInput::LeftStickY(y) => actions.extend(mapper.handle_axis(1, y)),
+                    _ => {}
+                }
+            }
+        }
+
+        // Execute mapped actions (Key injection)
+        self.execute_actions(actions).await;
+
+        // Update virtual Xbox controller if active
+        // Fallback to original NeoCab internal mapping logic
         match event.input {
             InputEventType::ButtonPressed(button) => {
                 let mappings = self.mappings.read().await;
@@ -220,6 +278,52 @@ impl InputManager {
                 }
             }
             _ => Ok(None),
+        }
+    }
+
+    fn button_to_index(&self, button: InputButton) -> u8 {
+        match button {
+            InputButton::A => 0, InputButton::B => 1, InputButton::X => 2, InputButton::Y => 3,
+            InputButton::L1 => 4, InputButton::R1 => 5, InputButton::Select => 6, InputButton::Start => 7,
+            _ => 99,
+        }
+    }
+
+    async fn execute_actions(&self, actions: Vec<crate::input::joy_mapper::MappedAction>) {
+        for action in actions {
+            self.execute_single_action(action).await;
+        }
+    }
+
+    #[async_recursion::async_recursion]
+    async fn execute_single_action(&self, action: crate::input::joy_mapper::MappedAction) {
+        match action {
+            crate::input::joy_mapper::MappedAction::Key(k) => {
+                self.injector.type_key(&k);
+                info!("Injected key: {}", k);
+            }
+            crate::input::joy_mapper::MappedAction::Keys(keys) => {
+                for k in &keys { self.injector.press_key(k); }
+                for k in keys.iter().rev() { self.injector.release_key(k); }
+                info!("Injected combo: {:?}", keys);
+            }
+            crate::input::joy_mapper::MappedAction::Macro(steps) => {
+                info!("Executing macro with {} steps", steps.len());
+                for step in steps {
+                    self.execute_single_action(step.action).await;
+                    if step.delay_ms > 0 {
+                        tokio::time::sleep(tokio::time::Duration::from_millis(step.delay_ms)).await;
+                    }
+                }
+            }
+            crate::input::joy_mapper::MappedAction::ArcadeAction(arcade_action) => {
+                info!("Triggered Arcade Action: {:?}", arcade_action);
+                // Implementation for internal actions...
+            }
+            crate::input::joy_mapper::MappedAction::MouseButton(btn) => {
+                // Future mouse implementation
+            }
+            _ => {}
         }
     }
 }

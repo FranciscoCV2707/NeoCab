@@ -125,3 +125,58 @@ pub async fn is_input_enabled(
 
     Ok(result.to_string())
 }
+#[tauri::command]
+pub async fn start_recording_input(
+    action_type: String,
+    action_value: String,
+    input_manager: State<'_, InputManager>,
+) -> Result<(), String> {
+    use crate::input::joy_mapper::MappedAction;
+    
+    let action = match action_type.as_str() {
+        "Key" => MappedAction::Key(action_value),
+        "ArcadeAction" => match action_value.as_str() {
+            "InsertCoin" => MappedAction::ArcadeAction(crate::input::joy_mapper::ArcadeAction::InsertCoin),
+            "StartGame" => MappedAction::ArcadeAction(crate::input::joy_mapper::ArcadeAction::StartGame),
+            _ => return Err("Invalid arcade action".to_string()),
+        },
+        _ => return Err("Invalid action type".to_string()),
+    };
+
+    let mut mapper = input_manager.joy_mapper.write().await;
+    mapper.start_recording(action);
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn get_recorded_input(
+    input_manager: State<'_, InputManager>,
+) -> Result<Option<crate::input::joy_mapper::JoyTrigger>, String> {
+    let mapper = input_manager.joy_mapper.read().await;
+    Ok(mapper.get_recorded_trigger())
+}
+
+#[tauri::command]
+pub async fn save_recorded_profile(
+    profile_name: String,
+    mappings: Vec<crate::input::joy_mapper::JoyMapping>,
+    input_manager: State<'_, InputManager>,
+) -> Result<(), String> {
+    use crate::input::joy_mapper::JoyProfile;
+    
+    let profile = JoyProfile {
+        name: profile_name.clone(),
+        deadzone: 0.15,
+        mappings,
+    };
+
+    let yaml = serde_yaml::to_string(&profile).map_err(|e| e.to_string())?;
+    let path = std::path::PathBuf::from(format!("config/joy_profiles/{}.yml", profile_name));
+    std::fs::write(path, yaml).map_err(|e| e.to_string())?;
+    
+    // Load it immediately
+    let mut mapper = input_manager.joy_mapper.write().await;
+    mapper.set_profile(profile);
+    
+    Ok(())
+}

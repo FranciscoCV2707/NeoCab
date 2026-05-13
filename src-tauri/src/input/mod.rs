@@ -1,6 +1,7 @@
 pub mod sdl_backend;
 pub mod gilrs_backend;
 pub mod input_manager;
+pub mod joy_mapper;
 
 pub use sdl_backend::SDLBackend;
 pub use gilrs_backend::GilrsBackend;

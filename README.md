@@ -112,7 +112,8 @@ Frontend:           React 19.1.0 + TypeScript 5.8.3
 Desktop Framework:  Tauri 2.11.1
 Backend:            Rust 1.81.0+
 Database:           SQLite 3 (10+ tables)
-Input System:       SDL2 + GilRs (joystick)
+Input System:       Native JoyMapper (Rust) + SDL2 + GilRs (Universal)
+Control Emulation:  Universal Keyboard/Mouse Injection (No drivers required)
 Network:            mDNS (Zeroconf) + HTTP API
 Legacy Rendering:   SDL2 (Windows XP support)
 Shaders:            GLSL (3 CRT shaders included)

@@ -263,10 +263,17 @@ fn run_modern_app() {
             commands::get_deadzone,
             commands::set_input_enabled,
             commands::is_input_enabled,
+            commands::start_recording_input,
+            commands::get_recorded_input,
+            commands::save_recorded_profile,
             commands::get_config,
             commands::set_config,
             commands::reload_config,
-            commands::save_system_config,
+            commands::check_driver_status,
+            commands::install_driver,
+            commands::save_theme_config,
+            commands::get_theme_config,
+            commands::get_theme_config, // Duplicate check, will remove if needed
             commands::load_system_config,
             commands::get_all_system_configs,
             commands::authenticate_operator,
@@ -344,6 +351,7 @@ fn run_modern_app() {
             // Scraping and play stats
             commands::scrape_game,
             commands::update_play_stats,
+            commands::toggle_pause_menu,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

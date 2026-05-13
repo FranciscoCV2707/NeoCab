@@ -1,0 +1,23 @@
+name: "MAME Arcade"
+deadzone: 0.15
+mappings:
+  - trigger: { kind: "Button", button: 0 } # Button 1 (A)
+    action: { type: "Key", value: "LCTRL" }
+  - trigger: { kind: "Button", button: 1 } # Button 2 (B)
+    action: { type: "Key", value: "LALT" }
+  - trigger: { kind: "Button", button: 2 } # Button 3 (X)
+    action: { type: "Key", value: "SPACE" }
+  - trigger: { kind: "Button", button: 3 } # Button 4 (Y)
+    action: { type: "Key", value: "LSHIFT" }
+  - trigger: { kind: "Button", button: 6 } # Select
+    action: { type: "Key", value: "5" } # Coin
+  - trigger: { kind: "Button", button: 7 } # Start
+    action: { type: "Key", value: "1" } # Start P1
+  - trigger: { kind: "Axis", axis: 0, direction: "Positive" }
+    action: { type: "Key", value: "RIGHT" }
+  - trigger: { kind: "Axis", axis: 0, direction: "Negative" }
+    action: { type: "Key", value: "LEFT" }
+  - trigger: { kind: "Axis", axis: 1, direction: "Positive" }
+    action: { type: "Key", value: "DOWN" }
+  - trigger: { kind: "Axis", axis: 1, direction: "Negative" }
+    action: { type: "Key", value: "UP" }
