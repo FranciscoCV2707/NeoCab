@@ -1,9 +1,50 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-12 (Session 7 - Installer System)  
-**Fase actual:** 🔄 Phase 7 SEMANA 3+ (Installer System & Configuration) EN PROGRESO  
-**Progreso:** Session 7 completada 100%: Smart emulator detection, Multi-path shaders, Build script improvements  
-**Build Status:** ✅ `cargo check` OK (27 warnings, 0 errors) | ✅ App compiling successfully  
+**Última actualización:** 2026-05-12 (Session 10 - Configurator Complete)  
+**Fase actual:** 🔄 Phase 8+ (Launcher Improvements & Polish) EN PROGRESO  
+**Progreso:** Session 7+10 completadas: Installer system (100%), Configurator (100%)  
+**Build Status:** ✅ `cargo check` OK (27 warnings, 0 errors) | ✅ TypeScript compiling  
+
+---
+
+## SESSION 10 - CONFIGURATOR COMPLETO - ✅ COMPLETA 100%
+
+**Objetivo:** Gestión dinámica de sistemas y paths. Configuración post-setup sin reiniciar.
+
+**TASK 1: Per-system ROM Paths - ✅ COMPLETADA**
+- ✅ `SystemGameConfig` extendido con `rom_path` y `bios_path` opcionales
+- ✅ Soporte para `pre_launch_script` y `post_launch_script` por sistema
+- ✅ Backward compatible con `#[serde(default)]` para configuraciones existentes
+- ✅ Cada sistema puede tener su propio directorio de ROMs y BIOS
+
+**TASK 2: Dynamic System Management UI - ✅ COMPLETADA**
+- ✅ Componente `SystemManager.tsx` (290 líneas)
+- ✅ CRUD completo: agregar, editar, eliminar sistemas
+- ✅ Agregar sistemas post-setup sin reiniciar la app
+- ✅ Editor inline para configuración de sistema
+- ✅ Selector de modo de juego: Arcade, Console, TimedFree
+- ✅ Validación de campos y manejo de errores
+- ✅ Auto-carga de sistemas desde la base de datos
+
+**TASK 3: System Configuration Editor - ✅ COMPLETADA**
+- ✅ `SystemConfigEditor` integrado en `SystemManager`
+- ✅ Editar ruta ROM/BIOS por sistema
+- ✅ Toggle auto-close on emulator exit
+- ✅ Visual feedback con estados de guardado
+- ✅ Cancelar sin guardar cambios
+
+**TASK 4: Game Metadata Editor - ✅ COMPLETADA**
+- ✅ Componente `GameMetadataEditor.tsx` (160 líneas)
+- ✅ Editable fields: title, description, year, dev, publisher, genre, players, rating
+- ✅ Textarea para descripciones largas
+- ✅ Validación de números (año, jugadores, calificación)
+- ✅ Interfaz accesible y responsive
+- ✅ Listo para integración en vistas de juegos
+
+**Pendiente (próximas sesiones):**
+- Integración de SystemManager en SettingsPanel
+- Integración de GameMetadataEditor en GameListPanel
+- Pruebas end-to-end de CRUD
 
 ---
 
