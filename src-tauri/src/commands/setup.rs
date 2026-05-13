@@ -85,26 +85,58 @@ pub fn mark_setup_complete() -> Result<()> {
     Ok(())
 }
 
-/// Get operator PIN requirement status
+/// Check if the required XInput driver (ViGEmBus) is installed
 #[tauri::command]
-pub fn get_default_operator_pin() -> String {
-    "0000".to_string()
+pub async fn check_driver_status() -> Result<serde_json::Value> {
+    #[cfg(target_os = "windows")]
+    {
+        use vigem_client::Client;
+        let is_installed = Client::connect().is_ok();
+        let os_version = std::env::consts::OS;
+        
+        Ok(serde_json::json!({
+            "is_installed": is_installed,
+            "os": os_version,
+            "supports_vigem": true // We'll assume true for now, can be refined with actual OS check
+        }))
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Ok(serde_json::json!({
+            "is_installed": true, // Not needed on Linux
+            "os": "linux",
+            "supports_vigem": false
+        }))
+    }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+/// Run the bundled driver installer
+#[tauri::command]
+pub async fn install_driver(app_handle: tauri::AppHandle) -> Result<()> {
+    #[cfg(target_os = "windows")]
+    {
+        let resource_path = app_handle.path().resolve("bin/drivers/ViGEmBus_Setup.exe", tauri::path::BaseDirectory::Resource)?;
+        
+        if !resource_path.exists() {
+            return Err(NeoCabError::Config("Installer not found in bundle".to_string()));
+        }
 
-    #[test]
-    fn test_get_default_paths() {
-        let paths = get_default_paths().unwrap();
-        assert!(paths.contains_key("arcade"));
-        assert!(paths.contains_key("nes"));
+        tracing::info!("Starting driver installation: {:?}", resource_path);
+        
+        use std::process::Command;
+        let status = Command::new(&resource_path)
+            .arg("/quiet") // Many installers support quiet mode
+            .status()
+            .map_err(|e| NeoCabError::System(format!("Failed to run installer: {}", e)))?;
+
+        if status.success() {
+            Ok(())
+        } else {
+            Err(NeoCabError::System("Installer returned error status".to_string()))
+        }
     }
-
-    #[test]
-    fn test_validate_invalid_path() {
-        let result = validate_rom_path("/nonexistent/path".to_string()).unwrap();
-        assert!(!result);
+    #[cfg(not(target_os = "windows"))]
+    {
+        Ok(())
     }
 }

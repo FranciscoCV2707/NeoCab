@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen, emit } from "@tauri-apps/api/event";
 import { useGamepad, GamepadAction } from "./hooks/useGamepad";
 import { useAudio } from "./hooks/useAudio";
+import { FadeOverlay } from "./components/launcher/FadeOverlay";
 // t import removed as it is no longer used here
 import GameList from "./components/GameList";
 import SystemSelect from "./components/SystemSelect";
@@ -58,7 +59,35 @@ export default function App() {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(false);
   const [scanProgress, setScanProgress] = useState("");
+  const [fadeVisible, setFadeVisible] = useState(false);
+  const [pauseVisible, setPauseVisible] = useState(false);
+  const [fadeInfo, setFadeInfo] = useState({ game: "", system: "" });
+  const [fadeConfig, setFadeConfig] = useState<any>(null);
   const { playSound, playBGM, stopBGM } = useAudio();
+
+  useEffect(() => {
+    // Listen for pause toggle
+    const unlistenPause = listen("toggle_pause_menu", () => {
+      setPauseVisible(prev => !prev);
+    });
+
+    // Listen for game launch events
+    const unlistenStart = listen("game_launch_start", (event: any) => {
+      setFadeInfo({ game: event.payload.game, system: event.payload.system });
+      setFadeVisible(true);
+      setPauseVisible(false);
+    });
+
+    const unlistenReady = listen("game_launch_ready", () => {
+      setTimeout(() => setFadeVisible(false), 1000);
+    });
+
+    return () => {
+      unlistenPause.then(f => f());
+      unlistenStart.then(f => f());
+      unlistenReady.then(f => f());
+    };
+  }, []);
 
   // Try playing BGM on initial load, but might need user interaction first
   useEffect(() => {
@@ -304,8 +333,26 @@ export default function App() {
   }, [focusedIndex, games, currentView, selectedSystem]);
 
   return (
-    <div className="app">
-      {isAttractMode && (
+    <div className="app-container">
+      <FadeOverlay 
+        visible={fadeVisible} 
+        gameName={fadeInfo.game} 
+        systemName={fadeInfo.system} 
+        config={fadeConfig}
+      />
+      
+      {pauseVisible && (
+        <PauseMenu 
+          gameName={fadeInfo.game} 
+          onClose={() => setPauseVisible(false)}
+          onExitGame={() => {
+            setPauseVisible(false);
+            invoke('stop_game', { emulator: selectedSystem?.name || 'mame' });
+          }}
+        />
+      )}
+
+      {view === 'systems' && (
         <AttractMode 
           games={games} 
           onPlayGame={(game) => {

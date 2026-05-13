@@ -1,5 +1,7 @@
 use tauri::State;
 use serde_json::json;
+use std::sync::Arc;
+use crate::db::Database;
 use crate::core::{EmulatorManager, TimerManager};
 
 #[tauri::command]
@@ -21,9 +23,19 @@ pub async fn launch_game(
     game_id: i64,
     emulator: Option<String>,
     system: Option<String>,
+    app_handle: tauri::AppHandle,
     emulator_manager: State<'_, EmulatorManager>,
+    input_manager: State<'_, crate::input::InputManager>,
+    db: State<'_, Arc<Database>>,
 ) -> Result<String, String> {
-    // Determine which emulator to use
+    // 1. Get game from DB
+    let game = match db.get_game_by_id(game_id).await {
+        Ok(Some(g)) => g,
+        Ok(None) => return Err("Game not found".to_string()),
+        Err(e) => return Err(e.to_string()),
+    };
+
+    // 2. Determine which emulator to use
     let emu = if let Some(e) = emulator {
         e
     } else if let Some(sys) = system {
@@ -34,14 +46,35 @@ pub async fn launch_game(
         "mame".to_string()
     };
 
-    let result = json!({
-        "success": true,
-        "game_id": game_id,
-        "emulator": emu,
-        "message": format!("Game launched with {}", emu)
-    });
+    // 3. Emit start event for Fade Overlay
+    let _ = app_handle.emit("game_launch_start", json!({
+        "game": game.title,
+        "system": game.system_id
+    }));
 
-    Ok(result.to_string())
+    // 4. Load JoyMapper profile automatically
+    let _ = input_manager.load_profile_for_system(&emu).await;
+
+    // 5. Launch the game via EmulatorManager
+    match emulator_manager.launch_game(&game, &emu).await {
+        Ok(_) => {
+            // Wait a bit or detect window focus (simple delay for now)
+            let app_clone = app_handle.clone();
+            tokio::spawn(async move {
+                tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
+                let _ = app_clone.emit("game_launch_ready", ());
+            });
+
+            let result = json!({
+                "success": true,
+                "game_id": game_id,
+                "emulator": emu,
+                "message": format!("Game launched with {}", emu)
+            });
+            Ok(result.to_string())
+        }
+        Err(e) => Err(e.to_string()),
+    }
 }
 
 #[tauri::command]

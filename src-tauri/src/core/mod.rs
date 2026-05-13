@@ -19,7 +19,9 @@ pub mod scraper;
 pub mod importer;
 pub mod steam_importer;
 pub mod hardware_scripting;
+pub mod bezel_manager;
 
+pub use bezel_manager::BezelManager;
 pub use emulator_manager::EmulatorManager;
 pub use emulator_monitor::EmulatorMonitor;
 pub use emulator_detector::{EmulatorDetector, EmulatorInfo};
