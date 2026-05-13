@@ -1,13 +1,13 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-12 (Session 13 - Component Integrations)  
+**Última actualización:** 2026-05-12 (Session 13 - Component Integrations COMPLETE)  
 **Fase actual:** 🔄 Phase 8+ (Final Features & Optimization) EN PROGRESO  
-**Progreso:** Sessions 7, 8 (Parts 1-2), 10, 11, 12 completas | Session 13 en progress  
-**Build Status:** ✅ `npm run build` success (147 kB → 47 kB gzip) | ✅ No TypeScript errors  
+**Progreso:** Sessions 7, 8 (Parts 1-2), 10, 11, 12, 13 completas | 8 sesiones de 16  
+**Build Status:** ✅ `npm run build` success (147 kB → 47 kB gzip) | ✅ Zero TypeScript errors  
 
 ---
 
-## SESSION 13 - COMPONENT INTEGRATIONS - ✅ COMPLETA 75%
+## SESSION 13 - COMPONENT INTEGRATIONS - ✅ COMPLETA 100%
 
 **Objetivo:** Integrar componentes completados en Sessions 10-12 a la UI principal.
 
@@ -31,16 +31,19 @@
 - ✅ Props: isVisible, gameName, duration, onFadeComplete
 - ✅ Smooth fade in/out animation
 
-**PENDIENTE - TASK 4: Per-system Themes UI**
-- ⏳ Agregar selector de tema por sistema en ThemeEditor
-- ⏳ UI para assign/remove per-system themes
-- ⏳ Dropdown con lista de sistemas y temas disponibles
+**TASK 4: Per-system Themes UI - ✅ COMPLETADA**
+- ✅ Agregar selector de tema por sistema en ThemeEditor
+- ✅ Cargar lista de sistemas en mount
+- ✅ Botón "Set for System" para asignar tema
+- ✅ Botón "Use Global Theme" para remover asignación
+- ✅ Mostrar asignaciones actuales en dropdown
+- ✅ Backend integration: set_system_theme, remove_system_theme
 
 **Pendiente (próximas sesiones):**
-- Media folder auto-watching con notify
+- Media folder auto-watching con notify watcher
 - End-to-end testing de CRUD operations
-- Per-system themes UI finalization
 - Build environment setup (SDL2 CMake para Windows)
+- Sessions 14+: Nuevas features según roadmap
 
 ---
 
