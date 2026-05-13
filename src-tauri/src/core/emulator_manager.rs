@@ -5,6 +5,7 @@ use crate::error::{Result, NeoCabError};
 use crate::adapters::{EmulatorAdapter, MameAdapter};
 use crate::db::Database;
 use crate::models::Game;
+use std::process::Command;
 
 pub struct EmulatorManager {
     adapters: HashMap<String, Arc<dyn EmulatorAdapter>>,
@@ -50,6 +51,42 @@ impl EmulatorManager {
         adapter.launch(&game.rom_path).await?;
 
         info!("Game {} launched successfully", game.title);
+        Ok(())
+    }
+
+    pub fn execute_script(&self, script: &str, rom_path: &str) -> Result<()> {
+        if script.trim().is_empty() {
+            return Ok(());
+        }
+
+        info!("Executing script: {}", script);
+
+        #[cfg(target_os = "windows")]
+        {
+            let status = Command::new("cmd")
+                .args(&["/C", script])
+                .env("ROM_PATH", rom_path)
+                .status()
+                .map_err(|e| NeoCabError::System(format!("Failed to execute script: {}", e)))?;
+
+            if !status.success() {
+                warn!("Script failed with status: {:?}", status.code());
+            }
+        }
+
+        #[cfg(target_os = "linux")]
+        {
+            let status = Command::new("bash")
+                .args(&["-c", script])
+                .env("ROM_PATH", rom_path)
+                .status()
+                .map_err(|e| NeoCabError::System(format!("Failed to execute script: {}", e)))?;
+
+            if !status.success() {
+                warn!("Script failed with status: {:?}", status.code());
+            }
+        }
+
         Ok(())
     }
 
