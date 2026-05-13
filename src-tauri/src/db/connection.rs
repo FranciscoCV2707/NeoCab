@@ -664,4 +664,62 @@ impl Database {
             "timestamp": chrono::Utc::now().to_rfc3339()
         }))
     }
+
+    pub async fn create_game_session(&self, game_id: i64, coins_used: i64) -> Result<i64> {
+        let now = chrono::Utc::now().to_rfc3339();
+
+        let result = sqlx::query(
+            "INSERT INTO sessions (game_id, started_at, coins_used, coins_inserted)
+             VALUES (?, ?, ?, ?)"
+        )
+        .bind(game_id)
+        .bind(&now)
+        .bind(coins_used)
+        .bind(0)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(result.last_insert_rowid())
+    }
+
+    pub async fn end_game_session(&self, session_id: i64, duration_sec: i64, completed: bool) -> Result<()> {
+        let now = chrono::Utc::now().to_rfc3339();
+        let completed_int = if completed { 1 } else { 0 };
+
+        sqlx::query(
+            "UPDATE sessions SET ended_at = ?, duration_sec = ?, completed = ? WHERE id = ?"
+        )
+        .bind(&now)
+        .bind(duration_sec)
+        .bind(completed_int)
+        .bind(session_id)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn get_recent_sessions(&self, limit: i64) -> Result<serde_json::Value> {
+        let sessions = sqlx::query_as::<_, (i64, i64, String, Option<String>, i64, i64, i32)>(
+            "SELECT id, game_id, started_at, ended_at, duration_sec, coins_used, completed
+             FROM sessions ORDER BY started_at DESC LIMIT ?"
+        )
+        .bind(limit)
+        .fetch_all(&self.pool)
+        .await?;
+
+        let data: Vec<_> = sessions.iter().map(|s| {
+            serde_json::json!({
+                "id": s.0,
+                "game_id": s.1,
+                "started_at": s.2,
+                "ended_at": s.3,
+                "duration_sec": s.4,
+                "coins_used": s.5,
+                "completed": s.6 != 0
+            })
+        }).collect();
+
+        Ok(serde_json::json!(data))
+    }
 }

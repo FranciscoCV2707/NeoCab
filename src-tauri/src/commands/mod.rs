@@ -13,6 +13,7 @@ pub mod shader;
 pub mod network;
 pub mod logs;
 pub mod audit;
+pub mod sessions;
 
 pub use system::*;
 pub use games::*;
@@ -29,3 +30,4 @@ pub use shader::*;
 pub use network::*;
 pub use logs::*;
 pub use audit::*;
+pub use sessions::*;
