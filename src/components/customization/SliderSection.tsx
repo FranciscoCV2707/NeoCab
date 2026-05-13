@@ -1,7 +1,7 @@
 import React from 'react';
 import './SliderSection.css';
 
-interface SliderConfig {
+export interface SliderConfig {
   key: string;
   label: string;
   min: number;

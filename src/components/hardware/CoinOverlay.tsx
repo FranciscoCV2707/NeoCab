@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './CoinOverlay.css';
-import { useArcade } from '../../context/ArcadeContext';
 
 export interface CoinOverlayProps {
   visible: boolean;

@@ -1,6 +1,7 @@
-use sqlx::sqlite::{SqlitePool, SqliteConnectOptions};
-use std::str::FromStr;
 use crate::error::Result;
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePool};
+use std::path::Path;
+use std::str::FromStr;
 
 pub struct Database {
     pool: SqlitePool,
@@ -8,15 +9,21 @@ pub struct Database {
 
 impl Database {
     pub async fn new(db_path: &str) -> Result<Self> {
+        if let Some(parent) = Path::new(db_path)
+            .parent()
+            .filter(|path| !path.as_os_str().is_empty())
+        {
+            tokio::fs::create_dir_all(parent).await?;
+        }
+
         // Create database connection with WAL mode enabled
-        let options = SqliteConnectOptions::from_str(db_path)?
-            .create_if_missing(true);
+        let options = SqliteConnectOptions::from_str(db_path)?.create_if_missing(true);
 
         let pool = SqlitePool::connect_with(options).await?;
 
         // Initialize schema on first run
         let result = sqlx::query_scalar::<_, i64>(
-            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='systems'"
+            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='systems'",
         )
         .fetch_one(&pool)
         .await
@@ -71,7 +78,7 @@ impl Database {
                 enabled     INTEGER DEFAULT 1,
                 sort_order  INTEGER DEFAULT 999,
                 created_at  TEXT DEFAULT (datetime('now'))
-            )"
+            )",
         )
         .execute(pool)
         .await?;
@@ -93,7 +100,7 @@ impl Database {
                 version         TEXT,
                 enabled         INTEGER DEFAULT 1,
                 created_at      TEXT DEFAULT (datetime('now'))
-            )"
+            )",
         )
         .execute(pool)
         .await?;
@@ -134,7 +141,7 @@ impl Database {
                 language        TEXT DEFAULT 'en',
                 created_at      TEXT DEFAULT (datetime('now')),
                 updated_at      TEXT DEFAULT (datetime('now'))
-            )"
+            )",
         )
         .execute(pool)
         .await?;
@@ -152,7 +159,7 @@ impl Database {
                 coins_inserted  INTEGER DEFAULT 0,
                 completed       INTEGER DEFAULT 0,
                 notes           TEXT
-            )"
+            )",
         )
         .execute(pool)
         .await?;
@@ -167,7 +174,7 @@ impl Database {
                 game_id     INTEGER REFERENCES games(id),
                 session_id  INTEGER REFERENCES sessions(id),
                 timestamp   TEXT DEFAULT (datetime('now'))
-            )"
+            )",
         )
         .execute(pool)
         .await?;
@@ -182,7 +189,7 @@ impl Database {
                 role        TEXT DEFAULT 'player',
                 created_at  TEXT DEFAULT (datetime('now')),
                 last_login  TEXT
-            )"
+            )",
         )
         .execute(pool)
         .await?;
@@ -198,7 +205,7 @@ impl Database {
                 device_type TEXT,
                 profile_name TEXT DEFAULT 'default',
                 created_at  TEXT DEFAULT (datetime('now'))
-            )"
+            )",
         )
         .execute(pool)
         .await?;
@@ -215,7 +222,7 @@ impl Database {
                 system_id   INTEGER REFERENCES systems(id),
                 created_at  TEXT DEFAULT (datetime('now')),
                 UNIQUE(profile_name, device_guid, action, game_id, system_id)
-            )"
+            )",
         )
         .execute(pool)
         .await?;
@@ -234,7 +241,7 @@ impl Database {
                 unlocked        INTEGER DEFAULT 0,
                 unlocked_at     TEXT,
                 hardcore        INTEGER DEFAULT 0
-            )"
+            )",
         )
         .execute(pool)
         .await?;
@@ -251,7 +258,7 @@ impl Database {
                 description TEXT,
                 play_time   INTEGER DEFAULT 0,
                 created_at  TEXT DEFAULT (datetime('now'))
-            )"
+            )",
         )
         .execute(pool)
         .await?;
@@ -262,7 +269,7 @@ impl Database {
                 key     TEXT NOT NULL PRIMARY KEY,
                 value   TEXT NOT NULL,
                 updated_at TEXT DEFAULT (datetime('now'))
-            )"
+            )",
         )
         .execute(pool)
         .await?;
@@ -274,7 +281,7 @@ impl Database {
                 event_type  TEXT NOT NULL,
                 payload     TEXT,
                 timestamp   TEXT DEFAULT (datetime('now'))
-            )"
+            )",
         )
         .execute(pool)
         .await?;
@@ -321,12 +328,10 @@ impl Database {
 
     // Config management methods
     pub async fn get_config(&self, key: &str) -> Result<Option<String>> {
-        let value = sqlx::query_scalar::<_, String>(
-            "SELECT value FROM config WHERE key = ?"
-        )
-        .bind(key)
-        .fetch_optional(&self.pool)
-        .await?;
+        let value = sqlx::query_scalar::<_, String>("SELECT value FROM config WHERE key = ?")
+            .bind(key)
+            .fetch_optional(&self.pool)
+            .await?;
 
         Ok(value)
     }
@@ -334,7 +339,7 @@ impl Database {
     pub async fn set_config(&self, key: &str, value: &str) -> Result<()> {
         sqlx::query(
             "INSERT INTO config (key, value) VALUES (?, ?)
-             ON CONFLICT(key) DO UPDATE SET value = excluded.value"
+             ON CONFLICT(key) DO UPDATE SET value = excluded.value",
         )
         .bind(key)
         .bind(value)
@@ -345,11 +350,10 @@ impl Database {
     }
 
     pub async fn get_all_config(&self) -> Result<Vec<(String, String)>> {
-        let rows = sqlx::query_as::<_, (String, String)>(
-            "SELECT key, value FROM config ORDER BY key"
-        )
-        .fetch_all(&self.pool)
-        .await?;
+        let rows =
+            sqlx::query_as::<_, (String, String)>("SELECT key, value FROM config ORDER BY key")
+                .fetch_all(&self.pool)
+                .await?;
 
         Ok(rows)
     }
@@ -357,7 +361,7 @@ impl Database {
     // Game library methods
     pub async fn get_games_by_system(&self, system_id: i64) -> Result<Vec<crate::models::Game>> {
         let games = sqlx::query_as::<_, crate::models::Game>(
-            "SELECT * FROM games WHERE system_id = ? ORDER BY sort_title"
+            "SELECT * FROM games WHERE system_id = ? ORDER BY sort_title",
         )
         .bind(system_id)
         .fetch_all(&self.pool)
@@ -371,7 +375,7 @@ impl Database {
             "INSERT INTO games (title, sort_title, system_id, emulator_id, rom_path,
              filename, file_size, crc32, sha1, md5, description, year, developer,
              publisher, genre, region, language)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         )
         .bind(&game.title)
         .bind(&game.sort_title)
@@ -398,7 +402,7 @@ impl Database {
 
     pub async fn get_systems(&self) -> Result<Vec<crate::models::System>> {
         let systems = sqlx::query_as::<_, crate::models::System>(
-            "SELECT * FROM systems WHERE enabled = 1 ORDER BY sort_order"
+            "SELECT * FROM systems WHERE enabled = 1 ORDER BY sort_order",
         )
         .fetch_all(&self.pool)
         .await?;
@@ -408,7 +412,7 @@ impl Database {
 
     pub async fn get_emulator(&self, name: &str) -> Result<Option<crate::models::Emulator>> {
         let emu = sqlx::query_as::<_, crate::models::Emulator>(
-            "SELECT * FROM emulators WHERE name = ? AND enabled = 1"
+            "SELECT * FROM emulators WHERE name = ? AND enabled = 1",
         )
         .bind(name)
         .fetch_optional(&self.pool)
@@ -418,23 +422,19 @@ impl Database {
     }
 
     pub async fn get_game_by_crc32(&self, crc32: &str) -> Result<Option<crate::models::Game>> {
-        let game = sqlx::query_as::<_, crate::models::Game>(
-            "SELECT * FROM games WHERE crc32 = ?"
-        )
-        .bind(crc32)
-        .fetch_optional(&self.pool)
-        .await?;
+        let game = sqlx::query_as::<_, crate::models::Game>("SELECT * FROM games WHERE crc32 = ?")
+            .bind(crc32)
+            .fetch_optional(&self.pool)
+            .await?;
 
         Ok(game)
     }
 
     pub async fn init_default_systems(&self) -> Result<()> {
         // Check if systems already exist
-        let count = sqlx::query_scalar::<_, i64>(
-            "SELECT COUNT(*) FROM systems"
-        )
-        .fetch_one(&self.pool)
-        .await?;
+        let count = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM systems")
+            .fetch_one(&self.pool)
+            .await?;
 
         if count > 0 {
             return Ok(());
@@ -442,16 +442,81 @@ impl Database {
 
         // Insert default systems
         let systems = vec![
-            ("nes", "Nintendo Entertainment System", "Classic", "Nintendo", 1983, 1995, "nes,zip", 0),
-            ("snes", "Super Nintendo", "Classic", "Nintendo", 1990, 2003, "smc,sfc,zip", 0),
-            ("genesis", "Genesis", "Sega", "Sega", 1988, 1997, "md,bin,zip", 0),
-            ("mame", "Multiple Arcade Machine Emulator", "Arcade", "Multiple", 1996, 2024, "zip,7z", 0),
-            ("gb", "Game Boy", "Handheld", "Nintendo", 1989, 2008, "gb,gbc,zip", 0),
-            ("psx", "PlayStation 1", "Console", "Sony", 1994, 2006, "iso,cue,bin,zip", 0),
-            ("n64", "Nintendo 64", "Console", "Nintendo", 1996, 2002, "z64,n64,zip", 0),
+            (
+                "nes",
+                "Nintendo Entertainment System",
+                "Classic",
+                "Nintendo",
+                1983,
+                1995,
+                "nes,zip",
+                0,
+            ),
+            (
+                "snes",
+                "Super Nintendo",
+                "Classic",
+                "Nintendo",
+                1990,
+                2003,
+                "smc,sfc,zip",
+                0,
+            ),
+            (
+                "genesis",
+                "Genesis",
+                "Sega",
+                "Sega",
+                1988,
+                1997,
+                "md,bin,zip",
+                0,
+            ),
+            (
+                "mame",
+                "Multiple Arcade Machine Emulator",
+                "Arcade",
+                "Multiple",
+                1996,
+                2024,
+                "zip,7z",
+                0,
+            ),
+            (
+                "gb",
+                "Game Boy",
+                "Handheld",
+                "Nintendo",
+                1989,
+                2008,
+                "gb,gbc,zip",
+                0,
+            ),
+            (
+                "psx",
+                "PlayStation 1",
+                "Console",
+                "Sony",
+                1994,
+                2006,
+                "iso,cue,bin,zip",
+                0,
+            ),
+            (
+                "n64",
+                "Nintendo 64",
+                "Console",
+                "Nintendo",
+                1996,
+                2002,
+                "z64,n64,zip",
+                0,
+            ),
         ];
 
-        for (i, (name, display, category, mfr, year_start, year_end, exts, sort_order)) in systems.iter().enumerate() {
+        for (i, (name, display, category, mfr, year_start, year_end, exts, sort_order)) in
+            systems.iter().enumerate()
+        {
             sqlx::query(
                 "INSERT INTO systems (name, display_name, category, manufacturer, year_start, year_end, extensions, sort_order, enabled)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)"
@@ -480,7 +545,7 @@ impl Database {
     ) -> Result<()> {
         sqlx::query(
             "INSERT INTO coin_events (event_type, amount, source, game_id)
-             VALUES (?, ?, ?, ?)"
+             VALUES (?, ?, ?, ?)",
         )
         .bind(event_type)
         .bind(amount)
@@ -494,7 +559,7 @@ impl Database {
 
     pub async fn get_total_coin_earnings(&self) -> Result<i64> {
         let total: i64 = sqlx::query_scalar(
-            "SELECT COALESCE(SUM(amount), 0) FROM coin_events WHERE event_type = 'inserted'"
+            "SELECT COALESCE(SUM(amount), 0) FROM coin_events WHERE event_type = 'inserted'",
         )
         .fetch_one(&self.pool)
         .await?;
@@ -505,7 +570,7 @@ impl Database {
     pub async fn get_coin_events(&self, limit: i64) -> Result<Vec<(String, i64, String)>> {
         let events = sqlx::query_as::<_, (String, i64, String)>(
             "SELECT event_type, amount, timestamp FROM coin_events
-             ORDER BY timestamp DESC LIMIT ?"
+             ORDER BY timestamp DESC LIMIT ?",
         )
         .bind(limit)
         .fetch_all(&self.pool)
@@ -515,22 +580,31 @@ impl Database {
     }
 
     pub async fn get_total_games(&self) -> Result<i64> {
-        let result = sqlx::query_scalar::<_, i64>(
-            "SELECT COUNT(*) FROM games"
-        )
-        .fetch_one(&self.pool)
-        .await?;
+        let result = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM games")
+            .fetch_one(&self.pool)
+            .await?;
 
         Ok(result)
     }
 
     pub async fn get_total_sessions(&self) -> Result<i64> {
-        let result = sqlx::query_scalar::<_, i64>(
-            "SELECT COUNT(*) FROM sessions"
-        )
-        .fetch_one(&self.pool)
-        .await?;
+        let result = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM sessions")
+            .fetch_one(&self.pool)
+            .await?;
 
         Ok(result)
+    }
+
+    pub async fn get_earnings_summary(&self) -> Result<serde_json::Value> {
+        let total_coins: i64 = self.get_total_coin_earnings().await?;
+        let total_sessions: i64 = self.get_total_sessions().await?;
+        let total_games: i64 = self.get_total_games().await?;
+
+        Ok(serde_json::json!({
+            "total_coins": total_coins,
+            "total_sessions": total_sessions,
+            "total_games": total_games,
+            "timestamp": chrono::Utc::now().to_rfc3339()
+        }))
     }
 }

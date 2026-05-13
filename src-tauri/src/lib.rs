@@ -1,10 +1,10 @@
-pub mod error;
-pub mod models;
+pub mod adapters;
 pub mod commands;
 pub mod core;
 pub mod db;
+pub mod error;
 pub mod input;
-pub mod adapters;
+pub mod models;
 pub mod utils;
 
 #[cfg(feature = "legacy-ui")]
@@ -43,14 +43,23 @@ pub fn run() {
 
     tauri::Builder::default()
         .setup(|app| {
-            let rt = tokio::runtime::Handle::current();
-
-            let result = rt.block_on(async {
-                initialize_app().await
-            });
+            let result = tauri::async_runtime::block_on(initialize_app());
 
             match result {
-                Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager, media_manager, shader_manager, config_manager)) => {
+                Ok((
+                    game_library,
+                    emulator_manager,
+                    coin_manager,
+                    timer_manager,
+                    input_manager,
+                    operator_panel,
+                    autoboot_manager,
+                    theme_manager,
+                    media_manager,
+                    shader_manager,
+                    config_manager,
+                    network_manager,
+                )) => {
                     app.manage(game_library);
                     app.manage(emulator_manager);
                     app.manage(coin_manager);
@@ -62,6 +71,7 @@ pub fn run() {
                     app.manage(media_manager);
                     app.manage(shader_manager);
                     app.manage(config_manager);
+                    app.manage(network_manager);
                     Ok(())
                 }
                 Err(e) => {
@@ -135,10 +145,22 @@ pub fn run() {
             commands::get_media,
             commands::import_media,
             commands::list_shaders,
+            commands::rescan_shaders,
             commands::get_shader,
+            commands::validate_shader,
             commands::list_shader_presets,
             commands::get_shader_preset,
             commands::get_default_shader,
+            commands::get_shader_params,
+            commands::set_shader_param,
+            commands::start_shader_watcher,
+            commands::stop_shader_watcher,
+            commands::is_shader_watcher_running,
+            commands::list_discovered_cabinets,
+            commands::get_network_role,
+            commands::set_network_role,
+            commands::start_network_discovery,
+            commands::start_network_advertising,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -156,7 +178,20 @@ fn init_logging() {
         .try_init();
 }
 
-async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, core::CoinManager, core::TimerManager, input::InputManager, core::OperatorPanel, core::AutobootManager, core::ThemeManager, core::MediaManager, core::ShaderManager, core::ConfigManager)> {
+async fn initialize_app() -> Result<(
+    core::GameLibrary,
+    core::EmulatorManager,
+    core::CoinManager,
+    core::TimerManager,
+    input::InputManager,
+    core::OperatorPanel,
+    core::AutobootManager,
+    core::ThemeManager,
+    core::MediaManager,
+    core::ShaderManager,
+    core::ConfigManager,
+    core::NetworkManager,
+)> {
     let db = std::sync::Arc::new(db::Database::new("./data/neocab.db").await?);
     db.init_default_systems().await?;
 
@@ -173,7 +208,34 @@ async fn initialize_app() -> Result<(core::GameLibrary, core::EmulatorManager, c
     let theme_manager = core::ThemeManager::new("./data/themes".into());
     let media_manager = core::MediaManager::new("./data".into(), 256 * 1024 * 1024);
     let shader_manager = core::ShaderManager::new("./public/shaders".into());
-    let config_manager = core::ConfigManager::new("./data/config.yml", db).await?;
+    let config_manager = core::ConfigManager::new("./data/config.yml", db.clone()).await?;
 
-    Ok((game_library, emulator_manager, coin_manager, timer_manager, input_manager, operator_panel, autoboot_manager, theme_manager, media_manager, shader_manager, config_manager))
+    // Phase 7: Network Manager
+    let cabinet_id = uuid::Uuid::new_v4().to_string(); // In a real app, this should be persistent
+    let network_manager = core::NetworkManager::new(
+        cabinet_id,
+        "NeoCab-Gabinete".to_string(),
+        8080,
+        db.clone()
+    )?;
+    
+    // Auto-start discovery, advertising and API server
+    let _ = network_manager.start_server();
+    let _ = network_manager.start_advertising();
+    let _ = network_manager.start_discovery();
+
+    Ok((
+        game_library,
+        emulator_manager,
+        coin_manager,
+        timer_manager,
+        input_manager,
+        operator_panel,
+        autoboot_manager,
+        theme_manager,
+        media_manager,
+        shader_manager,
+        config_manager,
+        network_manager,
+    ))
 }

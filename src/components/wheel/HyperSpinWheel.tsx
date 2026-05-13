@@ -191,7 +191,7 @@ export const HyperSpinWheel: React.FC<HyperSpinWheelProps> = ({
   }, [rotation, selectedIndex, items, radius, itemSize, itemAngle, showLabels]);
 
   return (
-    <div className="hyperspin-wheel-container">
+    <div className={`hyperspin-wheel-container ${isAnimating ? 'is-animating' : ''}`}>
       <canvas
         ref={canvasRef}
         width={600}

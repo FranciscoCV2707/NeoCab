@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './GameListPanel.css';
 
 export interface GameItem {
@@ -36,7 +36,6 @@ export const GameListPanel: React.FC<GameListPanelProps> = ({
   scrollBehavior = 'smooth',
 }) => {
   const listRef = useRef<HTMLDivElement>(null);
-  const [scrollPosition, setScrollPosition] = useState(0);
 
   // Auto-scroll to selected item
   useEffect(() => {
@@ -53,15 +52,16 @@ export const GameListPanel: React.FC<GameListPanelProps> = ({
 
         // Scroll to keep selected item in middle of view
         if (itemTop < containerScrollTop) {
-          container.scrollTop = itemTop - 50;
+          container.scrollTo({ top: itemTop - 50, behavior: scrollBehavior });
         } else if (itemTop + itemHeight > containerScrollTop + containerHeight) {
-          container.scrollTop = itemTop - containerHeight / 2 + itemHeight / 2;
+          container.scrollTo({
+            top: itemTop - containerHeight / 2 + itemHeight / 2,
+            behavior: scrollBehavior,
+          });
         }
-
-        setScrollPosition(container.scrollTop);
       }
     }
-  }, [selectedIndex, games.length]);
+  }, [selectedIndex, games.length, scrollBehavior]);
 
   // Keyboard navigation
   useEffect(() => {

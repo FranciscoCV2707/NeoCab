@@ -10,6 +10,7 @@ pub mod theme;
 pub mod hardware;
 pub mod media;
 pub mod shader;
+pub mod network;
 
 pub use system::*;
 pub use games::*;
@@ -23,3 +24,4 @@ pub use theme::*;
 pub use hardware::*;
 pub use media::*;
 pub use shader::*;
+pub use network::*;

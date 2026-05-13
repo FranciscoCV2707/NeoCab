@@ -12,6 +12,7 @@ pub mod gpio_coins;
 pub mod arduino_serial;
 pub mod media_manager;
 pub mod shader_manager;
+pub mod network_manager;
 
 pub use emulator_manager::EmulatorManager;
 pub use game_library::GameLibrary;
@@ -27,3 +28,4 @@ pub use gpio_coins::{GPIOCoinDetector, GPIOConfig};
 pub use arduino_serial::{ArduinoInterface, ArduinoConfig};
 pub use media_manager::{MediaManager, MediaType, MediaFile, MediaLibrary, MediaStats};
 pub use shader_manager::{ShaderManager, Shader, ShaderType, ShaderPreset};
+pub use network_manager::{NetworkManager, CabinetInfo, NetworkRole};

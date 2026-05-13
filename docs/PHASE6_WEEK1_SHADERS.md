@@ -425,28 +425,38 @@ export const useShaders = (): UseShaderReturn => {
 
 ## 🚀 Próximos Pasos (Weeks 2-4)
 
-### Week 2: RetroArch Integration
-- [ ] RetroArchAdapter enhancement
-- [ ] Shader parameter system
-- [ ] Cores configuration
+### Week 2: Advanced Shaders (Session 4)
+- [x] Shader Parameters UI con sliders.
+- [x] Custom GLSL desde `config/shaders/*.glsl`.
+- [x] Refresh/hot-reload via boton Refresh + watcher nativo `notify`.
+- [x] Estado `ERR` visible para shaders invalidos.
+- [x] Validacion basica con line numbers.
+- [x] Parsing inicial de uniforms escalares (`float`/`int`) para sliders custom.
+- [x] Profiling inicial de scan/refresh.
+- [x] `npm run build` OK.
+- [x] `cargo test shader_manager` OK (17 tests).
+- [x] `npm run tauri:dev` startup smoke OK.
+- [x] Cache de scans de shaders + invalidacion desde watcher
+- [ ] QA visual/manual con `npm run tauri dev`.
+- [ ] GPU optimization real: atlasing, batching, memory pools, VRAM metrics.
 
-### Week 3: Additional Shaders (20+)
+### Week 3: Shader Polish / Additional Shaders
 - [ ] Bloom/Glow effects
 - [ ] Scanline variations
 - [ ] Color correction
 - [ ] Interlace effects
+- [ ] RetroArchAdapter enhancement si sigue siendo prioridad
 
 ### Week 4: Performance & Polish
 - [ ] Shader compilation optimization
 - [ ] GPU memory management
-- [ ] Parameter UI system
 - [ ] Testing & refinement
 
 ---
 
 ## ✅ Métricas de Calidad
 
-- ✅ Compilación exitosa sin warnings
+- ✅ Checks de shader pasan; warnings Rust non-critical existentes
 - ✅ Type-safe (TypeScript + Rust)
 - ✅ Error handling en todas las funciones
 - ✅ Async/await patterns
@@ -456,5 +466,5 @@ export const useShaders = (): UseShaderReturn => {
 ---
 
 **Commit:** 3d13f10  
-**Próximo:** Phase 6 Weeks 2-4 (RetroArch + Additional Shaders)  
+**Próximo:** Cerrar QA de Phase 6 Week 2 y planear Weeks 3-4  
 **Fecha de Completación:** 2026-05-11

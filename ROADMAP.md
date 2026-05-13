@@ -1,7 +1,7 @@
 # 🗺️ NeoCab v3.0 - Complete Roadmap
 
-**Last Updated**: 2026-05-11 (Session 3 - Codebase Mapping Complete)  
-**Current Status**: Phase 6 Week 1 COMPLETE (55-60% progress - 295h / 407h total)  
+**Last Updated**: 2026-05-12 (Session 4 - Advanced Shaders)  
+**Current Status**: Phase 6 Week 2 IN PROGRESS (Advanced Shaders + native watcher + shader scan cache; QA visual pendiente)  
 **Repository**: phase1-core-infrastructure branch  
 **Codebase Intelligence**: 711 nodes, 832 edges, 85 communities (graphify-out/GRAPH_REPORT.md)
 
@@ -317,28 +317,33 @@ void main() {
 ---
 
 ### 🔄 Phase 6 Week 2: Advanced Shader Parameters (30h)
-**Status**: PENDING (NEXT WEEK)
+**Status**: IN PROGRESS (Shader UI + Custom GLSL refresh implemented)
 
 #### Task 6.4: Custom Shader Parameters UI (10h)
 **Planned Deliverables:**
-- [ ] Parameter control UI (sliders, color pickers)
-- [ ] Brightness/contrast/saturation controls
-- [ ] Scanline intensity customization
-- [ ] Phosphor decay tuning
-- [ ] Custom RGB separation values
+- [x] Parameter control UI (sliders)
+- [x] Brightness/contrast controls
+- [x] Scanline intensity customization
+- [x] Phosphor decay tuning
+- [x] Custom scalar uniforms become sliders (including RGB separation when shader declares it)
+- [ ] Built-in RGB separation preset control
 - [ ] Live preview with preset management
 
 #### Task 6.5: Custom GLSL Shader Support (12h)
 **Planned Deliverables:**
-- [ ] Load shaders from `config/shaders/` directory
-- [ ] GLSL syntax validation
-- [ ] Hot-reload capability
-- [ ] Error reporting with line numbers
-- [ ] Fallback to default shader on compilation error
-- [ ] Shader metadata parsing (uniforms, parameters)
+- [x] Load shaders from `config/shaders/` directory
+- [x] GLSL syntax validation with basic line-number errors
+- [x] Hot-reload capability via Refresh action and native `notify` watcher
+- [x] Error reporting with line numbers for basic validation failures
+- [x] Fallback to default shader on compilation error
+- [x] Initial shader metadata parsing for scalar uniforms
 
 #### Task 6.6: GPU Pipeline Optimization (8h)
 **Planned Deliverables:**
+- [x] Basic shader scan profiling metrics
+- [x] Deterministic custom shader scan ordering
+- [x] UI refresh batching scoped to active shader tab
+- [x] Shader scan cache with watcher invalidation
 - [ ] Texture atlasing for batch rendering
 - [ ] Draw call batching optimization
 - [ ] Memory pool pre-allocation

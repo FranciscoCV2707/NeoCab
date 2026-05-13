@@ -119,7 +119,11 @@ export const HardwareCalibration: React.FC<HardwareCalibrationProps> = ({
         gpioPin: config.gpioPin,
       });
       const data = JSON.parse(result);
-      setTestResult('✓ GPIO pin test passed');
+      if (data.success) {
+        setTestResult('GPIO pin test passed');
+      } else {
+        setError(data.message || 'GPIO pin test failed');
+      }
     } catch (err) {
       setError(String(err));
     } finally {
@@ -144,7 +148,7 @@ export const HardwareCalibration: React.FC<HardwareCalibrationProps> = ({
       });
       const data = JSON.parse(result);
       if (data.success) {
-        setTestResult('✓ Arduino connection test passed');
+        setTestResult('Arduino connection test passed');
       } else {
         setError(data.message || 'Arduino test failed');
       }
@@ -293,7 +297,7 @@ export const HardwareCalibration: React.FC<HardwareCalibrationProps> = ({
           )}
 
           {testResult && <div className="test-result success">{testResult}</div>}
-          {error && <div className="test-result error">✗ {error}</div>}
+          {error && <div className="test-result error">{error}</div>}
         </>
       )}
     </div>

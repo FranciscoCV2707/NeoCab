@@ -89,6 +89,12 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
   const [theme, setTheme] = useState<ThemeData>(initialTheme);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const colorValues: Record<string, string> = { ...theme.colors };
+  const wheelSliderValues: Record<string, number> = {
+    item_size: theme.wheel.item_size,
+    item_spacing: theme.wheel.item_spacing,
+    animation_duration: theme.wheel.animation_duration,
+  };
 
   const handleColorChange = useCallback((colorKey: string, value: string) => {
     setTheme(prev => ({
@@ -191,14 +197,14 @@ export const ThemeEditor: React.FC<ThemeEditorProps> = ({
         <div className="editor-panels">
           <ColorPickerSection
             title="Colors"
-            colors={theme.colors}
+            colors={colorValues}
             onChange={handleColorChange}
           />
 
           <SliderSection
             title="Wheel Settings"
             sliders={wheelSliders}
-            values={theme.wheel}
+            values={wheelSliderValues}
             onChange={handleWheelChange}
           />
 

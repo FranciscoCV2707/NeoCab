@@ -1,6 +1,6 @@
 # 🎮 NeoCab v3.0 - Estado del Proyecto
 
-**Última actualización:** 2026-05-11 (Phase 6 Week 1 completo)  
+**Última actualización:** 2026-05-12 (Phase 6 Week 2 en progreso)  
 **Versión:** 3.0.0-alpha  
 **Progreso Global:** ~60-65% (266-329h / 351-459h total)
 
@@ -9,6 +9,7 @@
 ## 📊 Resumen Ejecutivo
 
 NeoCab v3.0 es un **Sistema Operativo Profesional para Gabinetes Arcade** con:
+- ðŸ”„ **Phase 6 Week 2 en progreso**: Shader Parameters UI, Custom GLSL refresh, watcher nativo, line-number validation, uniform parsing inicial y metricas de scan/refresh y cache de scans
 - ✅ **5 fases completadas** (Phase 1-5 + Phase 6 Week 1)
 - ✅ **Arquitectura full-stack** (Rust + React + Tauri)
 - ✅ **300+ emuladores soportados** (MAME, RetroArch, PSX, N64, etc.)
@@ -135,12 +136,23 @@ NeoCab v3.0 es un **Sistema Operativo Profesional para Gabinetes Arcade** con:
 
 ## 🎯 Próximos Pasos (Phase 6-8)
 
-### Phase 6 Weeks 2-4: RetroArch Integration (35-50h)
-- [ ] RetroArchAdapter enhancement
-- [ ] Shader parameter system
+### Phase 6 Week 2: Advanced Shaders (EN PROGRESO)
+- [x] Shader parameter system (brightness, contrast, scanlines, phosphor)
+- [x] Custom GLSL desde `config/shaders/*.glsl`
+- [x] Refresh/hot-reload via Refresh + watcher nativo `notify`
+- [x] Validacion basica con line numbers
+- [x] Parsing inicial de uniforms escalares (`float`/`int`)
+- [x] Profiling inicial de scan/refresh
+- [x] Cache de scans de shaders + invalidacion desde watcher
+- [x] Startup smoke con `npm run tauri:dev`
+- [ ] QA visual/manual con `npm run tauri dev`
+- [ ] GPU optimization real: atlasing, batching, memory pools, VRAM metrics
+
+### Phase 6 Weeks 3-4: Shader Polish / RetroArch Follow-up
 - [ ] More GLSL shaders (20+)
 - [ ] Scanline variations
 - [ ] Bloom/glow effects
+- [ ] RetroArchAdapter enhancement si sigue siendo prioridad
 
 ### Phase 7: Extended Emulators (40-60h)
 - [ ] 20-30 emulator adapters
@@ -158,15 +170,20 @@ NeoCab v3.0 es un **Sistema Operativo Profesional para Gabinetes Arcade** con:
 
 ## 🔧 Compilación Status
 
-✅ **Cargo compila exitosamente**
-- Rust backend: `cargo build --release`
-- Feature flags: `--features "modern-ui,hardware-gpio"`
-- No warnings o errores en compilación
+✅ **Shader checks pasan**
+- `cargo test shader_manager` OK (17 tests)
+- `npm run build` OK
+- `npm run tauri:dev` startup smoke OK
+- Warnings Rust non-critical existentes
 
 ✅ **Frontend ready**
 - React 18+ con TypeScript
 - Vite dev server en :1420
 - HMR (Hot Module Reload) funcionando
+
+🔄 **Tauri visual QA pendiente**
+- Ejecutar `npm run tauri dev`
+- Validar shaders custom validos/invalidos desde UI
 
 ✅ **Tauri integration complete**
 - 50+ Tauri commands registrados
@@ -224,7 +241,7 @@ NeoCab/
 | **AutobootManager** | Windows Registry + .desktop | ✅ Completo |
 | **ThemeManager** | Theme JSON + CSS vars | ✅ Completo |
 | **MediaManager** | HyperSpin media scanning | ✅ Completo |
-| **ShaderManager** | GLSL shaders + presets | ✅ Completo |
+| **ShaderManager** | GLSL shaders, presets, params, custom refresh | 🔄 Week 2 en progreso |
 
 ---
 
@@ -263,8 +280,8 @@ NeoCab/
 ### Media (6)
 - scan_media, get_media_stats, get_system_media, organize_media, get_media, import_media
 
-### Shader (5)
-- list_shaders, get_shader, list_shader_presets, get_shader_preset, get_default_shader
+### Shader (12)
+- list_shaders, rescan_shaders, get_shader, validate_shader, list_shader_presets, get_shader_preset, get_default_shader, get_shader_params, set_shader_param, start_shader_watcher, stop_shader_watcher, is_shader_watcher_running
 
 **Total: 50+ commands**
 
@@ -372,5 +389,4 @@ NeoCab/
 ---
 
 **Last Commit**: 3d13f10 (Phase 6 Week 1)  
-**Next Commit**: Phase 6 Week 2 (RetroArch)
-
+**Next Commit**: Phase 6 Week 2 (Advanced Shaders QA / docs)

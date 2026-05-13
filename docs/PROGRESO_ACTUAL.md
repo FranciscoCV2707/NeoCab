@@ -1,8 +1,8 @@
-# NeoCab v3.0 - Progreso Actual (2026-05-11)
+# NeoCab v3.0 - Progreso Actual (2026-05-12)
 
 **Versión:** 3.0.0-alpha  
-**Progreso Global:** ~60-65% (266-329h / 351-459h estimado)  
-**Última Actualización:** 2026-05-11 - Phase 6 Week 1 COMPLETADO
+**Progreso Global:** ~70% (295-350h / 351-459h estimado)  
+**Última Actualización:** 2026-05-12 - Phase 7 Week 1 EN PROGRESO
 
 ---
 
@@ -10,12 +10,12 @@
 
 | Métrica | Valor |
 |---------|-------|
-| **Fases Completadas** | 5.25 / 8 |
-| **Semanas Completadas** | 21 / 32 |
-| **Horas Invertidas** | 266-329h |
+| **Fases Completadas** | 6 / 8 |
+| **Semanas Completadas** | 22 / 32 |
+| **Horas Invertidas** | 295-350h |
 | **Total Estimado** | 351-459h |
-| **Archivos Creados** | 100+ |
-| **Líneas de Código** | ~19,500+ |
+| **Archivos Creados** | 105+ |
+| **Líneas de Código** | ~20,500+ |
 
 ---
 
@@ -73,25 +73,36 @@
 - 500+ líneas CSS
 - **Commit:** 48f8d14
 
-### Phase 6 Week 1: CRT Shaders ✅
+### Phase 6: CRT Shaders ✅
 - **ShaderManager** backend (450 líneas Rust)
 - 3 GLSL shaders: crt-geom, scanlines, phosphor
 - **ShaderSelector.tsx** component (300 líneas)
 - 5 Tauri commands + presets system
-- **Commit:** 3d13f10
+- **Advanced Shaders**: Sliders para parámetros, Custom GLSL support, Hot-reload nativo con `notify`, GPU profiling inicial.
+- **Commit:** 3d13f10, Session 4 final status.
+
+### Phase 7 Week 1: Network Infrastructure 🔄
+- **NetworkManager** backend (nuevo God Node en Rust)
+- Descubrimiento automático de gabinetes vía **mDNS (Zeroconf)** con `mdns-sd`.
+- Servidor **API REST (Axum)** integrado para monitoreo remoto y sincronización.
+- **NetworkPanel.tsx** UI para gestión de red desde el Operator Panel.
+- **useNetwork.ts** hook para integración frontend.
+- Endpoint `/api/revenue` para sincronización de recaudación.
+- **Commit:** Session 5 initial network push.
 
 ---
 
 ## 💾 COMPONENTES & MANAGERS
 
-### React Components (30+)
+### React Components (35+)
 - Theme Editor (5 sub-components)
 - Media Manager (1)
 - Setup Wizard (8 steps)
 - Shader Selector (1)
-- Custom Hooks (3): useTheme, useMedia, useShaders
+- **Network Panel (1) - NUEVO**
+- Custom Hooks (4): useTheme, useMedia, useShaders, **useNetwork - NUEVO**
 
-### Rust Managers (10)
+### Rust Managers (11)
 | Manager | Commands |
 |---------|----------|
 | GameLibrary | list_games, scan_roms |
@@ -103,9 +114,10 @@
 | AutobootManager | enable_autoboot, disable_autoboot, is_autoboot_enabled, enable_kiosk_mode, disable_kiosk_mode, is_kiosk_mode_enabled |
 | ThemeManager | list_themes, get_current_theme, load_theme, save_custom_theme, export_theme, import_theme, apply_theme |
 | MediaManager | scan_media, get_media_stats, get_system_media, organize_media, get_media, import_media |
-| ShaderManager | list_shaders, get_shader, list_shader_presets, get_shader_preset, get_default_shader |
+| ShaderManager | list_shaders, get_shader, list_shader_presets, get_shader_preset, get_default_shader, get_shader_params, set_shader_param, start_shader_watcher, stop_shader_watcher |
+| **NetworkManager** | list_discovered_cabinets, get_network_role, set_network_role, start_network_discovery, start_network_advertising |
 
-**Total: 50+ Tauri commands**
+**Total: 60+ Tauri commands**
 
 ---
 
@@ -113,9 +125,9 @@
 
 | Tech | Archivos | Líneas | Estado |
 |------|----------|--------|--------|
-| React/TypeScript | 30+ | ~4,500 | ✅ |
-| Rust | 20+ | ~5,500 | ✅ |
-| CSS/Styling | 12+ | ~3,200 | ✅ |
+| React/TypeScript | 35+ | ~5,000 | ✅ |
+| Rust | 22+ | ~6,200 | ✅ |
+| CSS/Styling | 13+ | ~3,400 | ✅ |
 | GLSL Shaders | 3 | ~180 | ✅ |
 | Shell Scripts | 4 | ~300 | ✅ |
 | Documentation | 40+ | ~5,000 | ✅ |
@@ -124,21 +136,15 @@
 
 ## 🎯 PRÓXIMAS TAREAS
 
-### Phase 6 Weeks 2-4: RetroArch Integration (35-50h)
-- [ ] RetroArchAdapter enhancement
-- [ ] Shader parameter system
-- [ ] 20+ additional GLSL shaders
-- [ ] Scanline variations
-- [ ] Bloom/glow effects
-- [ ] Performance optimization
+### Phase 7: Network & Multi-Cabinet (En progreso)
+- [x] mDNS Discovery & Advertising
+- [x] REST API Server (Axum)
+- [x] Frontend Network Panel
+- [ ] Revenue Synchronization logic (Push client to master)
+- [ ] Consolidated Master Dashboard
+- [ ] Remote Mobile UI
 
-### Phase 7: Extended Emulators (40-60h)
-- [ ] 20-30 emulator adapters
-- [ ] Sega Saturn, Dreamcast, Atari ST
-- [ ] SCUMMVM, Dosbox
-- [ ] Tier 1 + Tier 2 systems
-
-### Phase 8: Final Polish (15-25h)
+### Phase 8: Final Polish
 - [ ] Full system testing
 - [ ] Performance optimization
 - [ ] Documentation finalization
@@ -150,24 +156,20 @@
 
 | Fase | Semanas | Horas | Status |
 |------|---------|-------|--------|
-| 1-5 | 20 | 248-307h | ✅ |
-| 6 W1 | 1 | 18-22h | ✅ |
-| 6 W2-4 | 3 | 35-50h | ⏳ |
-| 7 | 4 | 40-60h | ⏳ |
+| 1-6 | 21 | 280-330h | ✅ |
+| 7 | 4 | 40-60h | 🔄 |
 | 8 | 2 | 15-25h | ⏳ |
-| **TOTAL** | **30** | **351-464h** | **~60%** |
+| **TOTAL** | **27** | **335-415h** | **~70%** |
 
 ---
 
 ## ✅ VERIFICACIÓN DE COMPILACIÓN
 
 ```
-✅ Cargo compila exitosamente (sin warnings)
-✅ React/TypeScript type-safe
+✅ `cargo check` OK (Networking deps verified)
+✅ `npm run build` OK
 ✅ Vite dev server en :1420
-✅ HMR funcionando
-✅ 50+ Tauri commands registrados
-✅ Full async/await support
+✅ 60+ Tauri commands registrados
 ```
 
 ---
@@ -176,25 +178,11 @@
 
 - **STATUS.md** - Estado detallado actual
 - **INDEX_MAESTRO.md** - Índice de navegación
-- **PHASE5_IMPLEMENTATION_PLAN.md** - Plan Phase 5
-- **INTEGRATION_COMPLETE.md** - Arquitectura integral
+- **SIGUIENTE_SESION.md** - Próximos pasos inmediatos
 - **BUILD.md** - Guía de compilación
-- **35+ archivos de referencia** - Emuladores, hardware, etc.
-
----
-
-## 🚀 PRÓXIMOS PASOS
-
-**Próxima sesión:**
-1. Comenzar Phase 6 Weeks 2-4 (RetroArch + shaders)
-2. Crear 20+ GLSL shaders adicionales
-3. Implementar shader parameter system
-4. Optimizar performance
-
-**Tiempo estimado:** 35-50 horas
 
 ---
 
 **Proyecto:** NeoCab v3.0 Arcade Cabinet OS  
 **Status:** En desarrollo activo 🚀  
-**Última revisión:** 2026-05-11
+**Última revisión:** 2026-05-12
