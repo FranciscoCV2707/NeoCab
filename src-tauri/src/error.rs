@@ -30,6 +30,9 @@ pub enum NeoCabError {
     #[error("Legacy SDL2 error: {0}")]
     Legacy(String),
 
+    #[error("Network error: {0}")]
+    Network(String),
+
     #[error("Unknown error")]
     Unknown,
 }

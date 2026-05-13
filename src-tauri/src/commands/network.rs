@@ -38,3 +38,34 @@ pub async fn start_network_advertising(
 ) -> Result<()> {
     network_manager.start_advertising()
 }
+
+#[tauri::command]
+pub async fn start_revenue_sync(
+    network_manager: State<'_, NetworkManager>
+) -> Result<()> {
+    network_manager.start_sync_task();
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn sync_revenue_now(
+    network_manager: State<'_, NetworkManager>
+) -> Result<()> {
+    network_manager.sync_revenue_to_master().await
+}
+
+#[tauri::command]
+pub async fn set_master_ip(
+    ip: String,
+    network_manager: State<'_, NetworkManager>
+) -> Result<()> {
+    network_manager.set_master_ip(ip);
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn get_master_ip(
+    network_manager: State<'_, NetworkManager>
+) -> Result<Option<String>> {
+    Ok(network_manager.get_master_ip())
+}
