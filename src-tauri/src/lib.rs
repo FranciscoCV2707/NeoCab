@@ -223,6 +223,9 @@ pub fn run() {
             commands::list_log_files,
             commands::clear_logs,
             commands::get_log_tail,
+            commands::audit_roms,
+            commands::audit_media,
+            commands::audit_full,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

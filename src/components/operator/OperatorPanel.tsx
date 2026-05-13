@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { NetworkPanel } from './NetworkPanel';
 import { LogViewer } from './LogViewer';
+import { AuditPanel } from './AuditPanel';
 import './OperatorPanel.css';
 
-type TabType = 'statistics' | 'network' | 'settings' | 'logs';
+type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'settings';
 
 export const OperatorPanel: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('statistics');
@@ -30,6 +31,12 @@ export const OperatorPanel: React.FC = () => {
                     📋 Registros
                 </button>
                 <button
+                    className={`tab-button ${activeTab === 'audit' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('audit')}
+                >
+                    🔍 Auditoría
+                </button>
+                <button
                     className={`tab-button ${activeTab === 'settings' ? 'active' : ''}`}
                     onClick={() => setActiveTab('settings')}
                 >
@@ -41,6 +48,7 @@ export const OperatorPanel: React.FC = () => {
                 {activeTab === 'statistics' && <StatisticsTab />}
                 {activeTab === 'network' && <NetworkPanel />}
                 {activeTab === 'logs' && <LogViewer />}
+                {activeTab === 'audit' && <AuditPanel />}
                 {activeTab === 'settings' && <SettingsTab />}
             </div>
         </div>
