@@ -187,18 +187,21 @@ Node.js: 20.x+
 **Windows:**
 1. Download `NeoCab_x64_en-US.msi`
 2. Double-click to run installer
-3. Follow wizard (configure ROM paths)
-4. Launch NeoCab from Start Menu
+3. NeoCab auto-creates folder structure on first run
+4. Setup wizard guides initial configuration (ROM paths, PIN)
+5. Launch NeoCab from Start Menu
 
 **Linux:**
 1. Download `NeoCab_1.0.0_x64.AppImage`
 2. `chmod +x NeoCab_1.0.0_x64.AppImage`
 3. `./NeoCab_1.0.0_x64.AppImage`
+4. Setup wizard creates folder structure automatically
 
 **Raspberry Pi:**
 1. Download appropriate AppImage (`armv7` or `aarch64`)
 2. `chmod +x NeoCab_1.0.0_*.AppImage`
 3. `./NeoCab_1.0.0_*.AppImage`
+4. Setup wizard creates folder structure automatically
 
 ### Detailed Setup
 See `INSTALLATION.md` for:

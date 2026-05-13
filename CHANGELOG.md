@@ -2,7 +2,16 @@
 
 All notable changes to this project are documented here.
 
-## [1.0.0] - 2026-05-13 ✅ RELEASED
+## [1.0.0] - 2026-05-13 ✅ RELEASED - PRODUCTION READY
+
+### Added - Session 21: Setup Wizard & Automatic Initialization
+- Auto-creation of required directories (data, config, media)
+- Automatic generation of default config.yml
+- Setup wizard Tauri commands for first-run experience
+- Default system configurations (arcade, nes, snes, genesis, psx, n64, gb)
+- ROM path validation and creation
+- Media folder structure pre-created with README guides
+- Users no longer need to manually create folder structure
 
 ### Added - Phase 7: Network & Multi-Cabinet
 - Cabinet discovery via mDNS (Multicast DNS)

@@ -20,6 +20,13 @@ Runs on everything from **Windows XP** to **Raspberry Pi** with automatic platfo
 
 ## ✨ v1.0 Feature Inventory
 
+### 🚀 First-Run Experience (NEW)
+- ✅ Automatic directory structure creation
+- ✅ Default configuration generation
+- ✅ Setup wizard guides through initial setup
+- ✅ No manual folder creation needed
+- ✅ Pre-configured systems (arcade, NES, SNES, Genesis, PSX, N64, Game Boy)
+
 ### 🕹️ Emulator Support
 - **Native Adapters (6):** MAME, RetroArch, PCSX Redux, Mupen64, Gambatte
 - **Pre-configured Cores (7):** SNES, NES, Genesis, GB, PSX, N64, Custom

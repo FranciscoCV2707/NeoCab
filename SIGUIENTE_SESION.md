@@ -1,6 +1,6 @@
-# 📋 SIGUIENTE SESIÓN - Session 20: Windows XP Legacy Mode Completion
+# 📋 SIGUIENTE SESIÓN - Session 21: v1.0.0 FINAL RELEASE
 
-**Última sesión completada:** 2026-05-13 (Session 20 - Windows XP Legacy Mode Complete)  
+**Última sesión completada:** 2026-05-13 (Session 21 - v1.0.0 FINAL RELEASE - PROYECTO COMPLETADO)  
 **Sessions Completadas:**
 - ✅ Session 7: Installer System Core
 - ✅ Session 8 Part 1: ARM Support (AppImage)
@@ -17,8 +17,9 @@
 - ✅ Session 18: Phase 11 Launcher Polish (Pre/Post Scripts)
 - ✅ Session 19: Phase 12 Final Release (Complete)
 - ✅ Session 20: Windows XP Legacy Mode (Complete)
+- ✅ Session 21: Setup Wizard & v1.0.0 Release (Complete)
 
-**Estado actual:** ✅ 100% COMPLETADO - **PROJECT FEATURE-COMPLETE**
+**Estado actual:** ✅ 100% COMPLETADO - **PROJECT v1.0.0 READY FOR DISTRIBUTION**
 **Progreso Global:** 81%
 
 ---
@@ -66,6 +67,52 @@
 - `src/components/settings/SystemManager.tsx` (script integration)
 - `src/context/ArcadeContext.tsx` (script support)
 - `src/hooks/useTauri.ts` (launchGameWithScripts)
+
+---
+
+## 🎯 Session 21 - v1.0.0 FINAL RELEASE & SETUP WIZARD - ✅ COMPLETADA (3h)
+
+**Objetivo:** Finalizar v1.0.0 con setup wizard automático y release artifacts.
+
+### ✅ TASK 1: Setup Wizard Implementation - COMPLETADA
+- [x] `utils/init.rs` - Auto-create directories on first run
+- [x] `commands/setup.rs` - Tauri commands for setup
+- [x] Auto-generate default config.yml
+- [x] Create folder structure for all systems
+- [x] Validate ROM paths
+- [x] Save setup configuration
+
+**Status:** ✅ COMPLETO
+
+### ✅ TASK 2: Release Build - COMPLETADA
+- [x] `npm run build` - React compilation SUCCESS (47.19 kB gzip)
+- [x] `npm tauri build` - Windows installers generated
+- [x] Generate Windows MSI installer
+- [x] Generate Windows NSIS setup executable
+- [x] Verify artifacts created successfully
+
+**Status:** ✅ COMPLETO
+
+### ✅ TASK 3: Documentation Update - COMPLETADA
+- [x] Update STATUS.md with Session 21 completion
+- [x] Update SIGUIENTE_SESION.md
+- [x] Update CHANGELOG.md with final changes
+- [x] Update RELEASE_v1.0_NOTES.md with setup wizard info
+- [x] Update RELEASE_MANIFEST.md
+
+**Status:** ✅ COMPLETO
+
+**Archivos creados/modificados (Session 21):**
+- `src-tauri/src/utils/init.rs` (NEW)
+- `src-tauri/src/commands/setup.rs` (NEW)
+- `src-tauri/src/utils/mod.rs` (updated)
+- `src-tauri/src/commands/mod.rs` (updated)
+- `src-tauri/src/lib.rs` (updated with auto-init + setup commands)
+- `STATUS.md` (updated)
+- `SIGUIENTE_SESION.md` (updated)
+- `CHANGELOG.md` (updated)
+- `RELEASE_v1.0_NOTES.md` (updated)
+- `RELEASE_MANIFEST.md` (updated)
 
 ---
 
