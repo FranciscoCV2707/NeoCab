@@ -13,6 +13,7 @@ pub mod legacy;
 pub use error::{NeoCabError, Result};
 use tauri::Manager;
 use std::path::PathBuf;
+use utils::RuntimeMode;
 
 fn determine_shader_path() -> PathBuf {
     use std::path::Path;
@@ -70,6 +71,12 @@ pub fn run() {
     // Initialize logging
     init_logging();
 
+    // Initialize application directories and default configs
+    if let Err(e) = tauri::async_runtime::block_on(utils::initialize_app_directories()) {
+        eprintln!("Warning: Failed to initialize directories: {}", e);
+        tracing::warn!("Failed to initialize directories: {}", e);
+    }
+
     // Detect runtime mode (Modern or Legacy)
     let runtime_mode = utils::detect_mode();
     let system_info = utils::get_system_info();
@@ -96,7 +103,6 @@ pub fn run() {
     // Execute legacy mode if detected and compiled with legacy-ui feature
     #[cfg(feature = "legacy-ui")]
     {
-        use utils::RuntimeMode;
         if matches!(runtime_mode, RuntimeMode::Legacy) {
             tracing::info!("Legacy mode activated - running SDL2 application");
             run_legacy_app();
@@ -198,6 +204,15 @@ fn run_modern_app() {
             }
         })
         .invoke_handler(tauri::generate_handler![
+            // Setup wizard
+            commands::needs_setup,
+            commands::get_available_emulators,
+            commands::validate_rom_path,
+            commands::get_default_paths,
+            commands::save_setup_config,
+            commands::mark_setup_complete,
+            commands::get_default_operator_pin,
+            // System commands
             commands::get_system_info,
             commands::list_games,
             commands::scan_roms,

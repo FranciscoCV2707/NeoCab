@@ -7,7 +7,15 @@
       "Bash(ThemeManager.system_themes)",
       "Bash(chmod +x /c/Users/Pako/Desktop/arcade/NeoCab/build-scripts/build-appimage-arm.sh)",
       "mcp__plugin_context-mode_context-mode__ctx_execute_file",
-      "Bash(xargs grep -l \"ThemeEditor\")"
+      "Bash(xargs grep -l \"ThemeEditor\")",
+      "PowerShell(npm tauri *)",
+      "PowerShell(npm run *)",
+      "PowerShell(git *)",
+      "PowerShell(ls -Recurse \"src-tauri/target/release/bundle/\" -ErrorAction SilentlyContinue | Where-Object {$_.Extension -match \"msi|AppImage|exe$\"} | Select-Object FullName, @{N='Size\\(MB\\)';E={'{0:N2}' -f \\($_.Length/1MB\\)}} | Format-Table)",
+      "Bash(grep -E \"\\\\.\\(tsx|ts|rs\\)$\")",
+      "Bash(git -C /c/Users/Pako/Desktop/arcade/NeoCab add -A)",
+      "Bash(git -C /c/Users/Pako/Desktop/arcade/NeoCab commit -m 'feat: add automatic setup wizard and directory initialization *)",
+      "Bash(grep -E \"^\\\\\\\\[|files changed\")"
     ]
   }
 }
