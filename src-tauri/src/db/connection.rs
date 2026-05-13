@@ -1,5 +1,6 @@
 use crate::error::Result;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePool};
+use sqlx::Row;
 use std::path::Path;
 use std::str::FromStr;
 
@@ -298,6 +299,20 @@ impl Database {
         .execute(pool)
         .await?;
 
+        // High scores table
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS high_scores (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                game_id     INTEGER NOT NULL REFERENCES games(id),
+                profile_id  INTEGER REFERENCES profiles(id),
+                score       INTEGER NOT NULL,
+                player_name TEXT NOT NULL,
+                created_at  TEXT DEFAULT (datetime('now'))
+            )",
+        )
+        .execute(pool)
+        .await?;
+
         // Create indexes
         sqlx::query("CREATE INDEX IF NOT EXISTS idx_games_system   ON games(system_id)")
             .execute(pool)
@@ -415,16 +430,89 @@ impl Database {
         Ok(())
     }
 
-    // Game library methods
-    pub async fn get_games_by_system(&self, system_id: i64) -> Result<Vec<crate::models::Game>> {
-        let games = sqlx::query_as::<_, crate::models::Game>(
-            "SELECT * FROM games WHERE system_id = ? ORDER BY sort_title",
+    pub async fn get_system_by_name(&self, name: &str) -> Result<Option<crate::models::System>> {
+        let system = sqlx::query_as::<_, crate::models::System>(
+            "SELECT * FROM systems WHERE name = ? OR display_name = ?"
         )
-        .bind(system_id)
+        .bind(name)
+        .bind(name)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(system)
+    }
+
+    // Game library methods
+    pub async fn get_games_by_system(
+        &self, 
+        system_id: i64,
+        search: Option<&str>,
+        genre: Option<&str>,
+        only_favorites: bool,
+    ) -> Result<Vec<crate::models::Game>> {
+        let mut query = "SELECT * FROM games WHERE 1=1".to_string();
+        
+        if system_id > 0 {
+            query.push_str(" AND system_id = ?");
+        }
+        
+        if search.is_some() {
+            query.push_str(" AND (title LIKE ? OR filename LIKE ?)");
+        }
+        if genre.is_some() {
+            query.push_str(" AND genre = ?");
+        }
+        if only_favorites {
+            query.push_str(" AND is_favorite = 1");
+        }
+        
+        query.push_str(" ORDER BY sort_title");
+
+        let mut sql = sqlx::query_as::<_, crate::models::Game>(&query);
+            
+        if system_id > 0 {
+            sql = sql.bind(system_id);
+        }
+            
+        if let Some(s) = search {
+            let pattern = format!("%{}%", s);
+            sql = sql.bind(pattern.clone()).bind(pattern);
+        }
+        if let Some(g) = genre {
+            sql = sql.bind(g);
+        }
+
+        let games = sql.fetch_all(&self.pool).await?;
+        Ok(games)
+    }
+
+    pub async fn get_save_states(&self, game_id: i64) -> Result<Vec<crate::models::SaveState>> {
+        let states = sqlx::query_as::<_, crate::models::SaveState>(
+            "SELECT * FROM save_states WHERE game_id = ? ORDER BY slot ASC"
+        )
+        .bind(game_id)
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(states)
+    }
+
+    pub async fn get_high_scores(&self, game_id: i64) -> Result<Vec<serde_json::Value>> {
+        let scores = sqlx::query!(
+            "SELECT player_name, score, created_at FROM high_scores WHERE game_id = ? ORDER BY score DESC LIMIT 10"
+        )
+        .bind(game_id)
         .fetch_all(&self.pool)
         .await?;
 
-        Ok(games)
+        let result = scores.into_iter().map(|s| {
+            serde_json::json!({
+                "player": s.player_name,
+                "score": s.score,
+                "date": s.created_at
+            })
+        }).collect();
+
+        Ok(result)
     }
 
     pub async fn insert_game(&self, game: &crate::models::Game) -> Result<i64> {
@@ -457,6 +545,48 @@ impl Database {
         Ok(result.last_insert_rowid())
     }
 
+    pub async fn toggle_game_favorite(&self, game_id: i64) -> Result<bool> {
+        let current: i32 = sqlx::query("SELECT is_favorite FROM games WHERE id = ?")
+            .bind(game_id)
+            .fetch_one(&self.pool)
+            .await?
+            .get("is_favorite");
+
+        let new_val = if current == 1 { 0 } else { 1 };
+        
+        sqlx::query("UPDATE games SET is_favorite = ? WHERE id = ?")
+            .bind(new_val)
+            .bind(game_id)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(new_val == 1)
+    }
+
+    pub async fn update_game_metadata(
+        &self,
+        game_id: i64,
+        title: &str,
+        description: Option<&str>,
+        year: Option<i64>,
+        players: Option<i64>,
+        rating: Option<f64>,
+    ) -> Result<()> {
+        sqlx::query(
+            "UPDATE games SET title = ?, description = ?, year = ?, players = ?, rating = ?, updated_at = datetime('now') WHERE id = ?"
+        )
+        .bind(title)
+        .bind(description)
+        .bind(year)
+        .bind(players)
+        .bind(rating)
+        .bind(game_id)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
     pub async fn get_systems(&self) -> Result<Vec<crate::models::System>> {
         let systems = sqlx::query_as::<_, crate::models::System>(
             "SELECT * FROM systems WHERE enabled = 1 ORDER BY sort_order",
@@ -485,6 +615,32 @@ impl Database {
             .await?;
 
         Ok(game)
+    }
+
+    pub async fn get_game_by_id(&self, game_id: i64) -> Result<Option<crate::models::Game>> {
+        let game = sqlx::query_as::<_, crate::models::Game>("SELECT * FROM games WHERE id = ?")
+            .bind(game_id)
+            .fetch_optional(&self.pool)
+            .await?;
+
+        Ok(game)
+    }
+
+    pub async fn update_play_stats(&self, game_id: i64, play_time_seconds: i64) -> Result<()> {
+        sqlx::query(
+            "UPDATE games SET 
+                play_count = play_count + 1,
+                total_play_time = total_play_time + ?,
+                last_played = datetime('now'),
+                updated_at = datetime('now')
+            WHERE id = ?"
+        )
+        .bind(play_time_seconds)
+        .bind(game_id)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
     }
 
     pub async fn init_default_systems(&self) -> Result<()> {

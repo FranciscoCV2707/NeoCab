@@ -23,6 +23,8 @@ pub enum MediaType {
     BoxArt,
     Background,
     Screenshot,
+    Video,
+    Marquee,
     Custom,
 }
 
@@ -32,6 +34,8 @@ pub struct MediaLibrary {
     pub box_art: HashMap<String, Vec<MediaFile>>,
     pub backgrounds: HashMap<String, Vec<MediaFile>>,
     pub screenshots: HashMap<String, Vec<MediaFile>>,
+    pub videos: HashMap<String, Vec<MediaFile>>,
+    pub marquees: HashMap<String, Vec<MediaFile>>,
     pub total_size: u64,
 }
 
@@ -43,6 +47,8 @@ pub struct MediaStats {
     pub box_art_count: u64,
     pub backgrounds_count: u64,
     pub screenshots_count: u64,
+    pub videos_count: u64,
+    pub marquees_count: u64,
 }
 
 pub struct MediaManager {
@@ -69,6 +75,8 @@ impl MediaManager {
             box_art: HashMap::new(),
             backgrounds: HashMap::new(),
             screenshots: HashMap::new(),
+            videos: HashMap::new(),
+            marquees: HashMap::new(),
             total_size: 0,
         };
 
@@ -150,6 +158,20 @@ impl MediaManager {
                 library,
             )
             .await?;
+        }
+
+        // Scan Videos (HyperSpin structure: media/{system}/Video)
+        let videos_path = system_path.join("Video");
+        if videos_path.exists() {
+            self.scan_directory(&videos_path, MediaType::Video, system_name, library)
+                .await?;
+        }
+
+        // Scan Marquees (HyperSpin structure: media/{system}/Images/Marquee)
+        let marquees_path = images_path.join("Marquee");
+        if marquees_path.exists() {
+            self.scan_directory(&marquees_path, MediaType::Marquee, system_name, library)
+                .await?;
         }
 
         Ok(())
@@ -317,6 +339,16 @@ impl MediaManager {
                             .entry(system_name.to_string())
                             .or_insert_with(Vec::new)
                             .push(media_file),
+                        MediaType::Video => library
+                            .videos
+                            .entry(system_name.to_string())
+                            .or_insert_with(Vec::new)
+                            .push(media_file),
+                        MediaType::Marquee => library
+                            .marquees
+                            .entry(system_name.to_string())
+                            .or_insert_with(Vec::new)
+                            .push(media_file),
                         MediaType::Custom => {}
                     }
                 }
@@ -335,6 +367,8 @@ impl MediaManager {
             MediaType::BoxArt => &library.box_art,
             MediaType::Background => &library.backgrounds,
             MediaType::Screenshot => &library.screenshots,
+            MediaType::Video => &library.videos,
+            MediaType::Marquee => &library.marquees,
             MediaType::Custom => return Ok(None),
         };
 
@@ -357,8 +391,10 @@ impl MediaManager {
         let box_art_count = library.box_art.values().map(|v| v.len()).sum::<usize>() as u64;
         let backgrounds_count = library.backgrounds.values().map(|v| v.len()).sum::<usize>() as u64;
         let screenshots_count = library.screenshots.values().map(|v| v.len()).sum::<usize>() as u64;
+        let videos_count = library.videos.values().map(|v| v.len()).sum::<usize>() as u64;
+        let marquees_count = library.marquees.values().map(|v| v.len()).sum::<usize>() as u64;
 
-        let total_files = wheels_count + box_art_count + backgrounds_count + screenshots_count;
+        let total_files = wheels_count + box_art_count + backgrounds_count + screenshots_count + videos_count + marquees_count;
 
         Ok(MediaStats {
             total_files,
@@ -367,6 +403,8 @@ impl MediaManager {
             box_art_count,
             backgrounds_count,
             screenshots_count,
+            videos_count,
+            marquees_count,
         })
     }
 
@@ -407,11 +445,17 @@ impl MediaManager {
                             MediaType::Wheel => "Wheel",
                             MediaType::BoxArt => "Boxes",
                             MediaType::Background => "Backgrounds",
-                            MediaType::Screenshot => "Screenshots",
+                            MediaType::Screenshot => "Screenshot",
+                            MediaType::Video => "Video",
+                            MediaType::Marquee => "Marquee",
                             MediaType::Custom => "Custom",
                         };
 
-                        let dest = dest_dir.join(type_dir);
+                        let dest = if media_type == MediaType::Video {
+                            self.media_path.join("media").join(system).join("Video")
+                        } else {
+                            dest_dir.join(type_dir)
+                        };
                         fs::create_dir_all(&dest)
                             .await
                             ?;
@@ -442,15 +486,19 @@ impl MediaManager {
             MediaType::Background
         } else if lower.contains("screen") || lower.contains("shot") {
             MediaType::Screenshot
+        } else if lower.contains("video") || lower.contains("preview") || lower.contains("mp4") {
+            MediaType::Video
+        } else if lower.contains("marquee") {
+            MediaType::Marquee
         } else {
             MediaType::Custom
         }
     }
 
-    /// Check if file is a supported image format
+    /// Check if file is a supported image or video format
     fn is_supported_image(&self, path: &Path) -> bool {
         match path.extension().and_then(|e| e.to_str()) {
-            Some("png") | Some("jpg") | Some("jpeg") | Some("gif") | Some("webp") => true,
+            Some("png") | Some("jpg") | Some("jpeg") | Some("gif") | Some("webp") | Some("mp4") | Some("mkv") | Some("avi") => true,
             _ => false,
         }
     }
@@ -464,6 +512,8 @@ impl MediaManager {
             box_art: Default::default(),
             backgrounds: Default::default(),
             screenshots: Default::default(),
+            videos: Default::default(),
+            marquees: Default::default(),
             total_size: 0,
         };
 
@@ -491,6 +541,20 @@ impl MediaManager {
                 .screenshots
                 .insert(system.to_string(), screenshots.clone());
             filtered.total_size += screenshots.iter().map(|f| f.file_size).sum::<u64>();
+        }
+
+        if let Some(videos) = library.videos.get(system) {
+            filtered
+                .videos
+                .insert(system.to_string(), videos.clone());
+            filtered.total_size += videos.iter().map(|f| f.file_size).sum::<u64>();
+        }
+
+        if let Some(marquees) = library.marquees.get(system) {
+            filtered
+                .marquees
+                .insert(system.to_string(), marquees.clone());
+            filtered.total_size += marquees.iter().map(|f| f.file_size).sum::<u64>();
         }
 
         Ok(filtered)

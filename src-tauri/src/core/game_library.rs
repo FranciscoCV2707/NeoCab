@@ -16,7 +16,40 @@ impl GameLibrary {
         Self { db }
     }
 
-    pub async fn scan_roms(&self, roms_dir: &Path) -> Result<usize> {
+    pub async fn get_games(
+        &self, 
+        system_name: &str,
+        search: Option<&str>,
+        genre: Option<&str>,
+        only_favorites: bool,
+    ) -> Result<Vec<crate::models::Game>> {
+        // Handle virtual smart collections
+        match system_name {
+            "virtual-all" => {
+                return self.db.get_games_by_system(0, search, genre, only_favorites).await; // Assumes 0 or some way returns all
+            }
+            "virtual-favorites" => {
+                return self.db.get_games_by_system(0, search, genre, true).await;
+            }
+            "virtual-recent" => {
+                // Return all games sorted by last_played (if we had a specific query, for now just all games)
+                return self.db.get_games_by_system(0, search, genre, only_favorites).await; 
+            }
+            _ => {}
+        }
+
+        let system = self.db.get_system_by_name(system_name).await?;
+        if let Some(sys) = system {
+            self.db.get_games_by_system(sys.id, search, genre, only_favorites).await
+        } else {
+            Ok(vec![])
+        }
+    }
+
+    pub async fn scan_roms<F>(&self, roms_dir: &Path, on_progress: F) -> Result<usize> 
+    where 
+        F: Fn(usize, usize, &str) + Send + Sync 
+    {
         info!("Starting ROM scan in {:?}", roms_dir);
 
         if !roms_dir.exists() {
@@ -37,14 +70,21 @@ impl GameLibrary {
 
         info!("Supported extensions: {:?}", supported_extensions);
 
-        let mut games_found = 0;
-
-        for entry in WalkDir::new(roms_dir)
+        // Count files first for progress
+        let all_files: Vec<_> = WalkDir::new(roms_dir)
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|e| e.file_type().is_file())
-        {
+            .collect();
+        
+        let total_files = all_files.len();
+        let mut games_found = 0;
+
+        for (i, entry) in all_files.iter().enumerate() {
             let path = entry.path();
+            let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+            
+            on_progress(i + 1, total_files, file_name);
 
             let extension = path
                 .extension()

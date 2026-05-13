@@ -1,0 +1,46 @@
+.leaderboard-panel {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 15px;
+  border-radius: 10px;
+  border-left: 3px solid var(--primary-color);
+  margin-top: 20px;
+}
+
+.leaderboard-panel h3 {
+  margin-top: 0;
+  color: var(--primary-color);
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.score-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+}
+
+.rank {
+  color: #555;
+  width: 20px;
+}
+
+.player {
+  color: white;
+  flex-grow: 1;
+  padding-left: 10px;
+}
+
+.score {
+  color: #00ff00;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+}
