@@ -1,0 +1,115 @@
+.slider-section {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #FF6400;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.slider-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.slider-item {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid #404040;
+  border-radius: 6px;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.slider-item:hover {
+  border-color: #FF6400;
+  background: rgba(255, 100, 0, 0.05);
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.slider-header label {
+  font-size: 13px;
+  font-weight: bold;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.slider-value {
+  font-size: 12px;
+  color: #FFCC00;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  min-width: 50px;
+  text-align: right;
+}
+
+.slider-input {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(to right, #404040 0%, #666666 100%);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.slider-input:hover {
+  background: linear-gradient(to right, #555555 0%, #777777 100%);
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, #FF6400, #FFAA00);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #FFCC00;
+  box-shadow: 0 0 8px rgba(255, 100, 0, 0.6);
+  transition: all 0.2s ease;
+}
+
+.slider-input::-webkit-slider-thumb:hover {
+  width: 22px;
+  height: 22px;
+  box-shadow: 0 0 15px rgba(255, 204, 0, 0.8);
+}
+
+/* Firefox */
+.slider-input::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, #FF6400, #FFAA00);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #FFCC00;
+  box-shadow: 0 0 8px rgba(255, 100, 0, 0.6);
+  transition: all 0.2s ease;
+}
+
+.slider-input::-moz-range-thumb:hover {
+  width: 22px;
+  height: 22px;
+  box-shadow: 0 0 15px rgba(255, 204, 0, 0.8);
+}
+
+.slider-input::-moz-range-track {
+  background: transparent;
+  border: none;
+}
+
+.slider-input::-moz-range-progress {
+  background: linear-gradient(to right, #FF6400, #FFAA00);
+  height: 6px;
+  border-radius: 3px;
+}

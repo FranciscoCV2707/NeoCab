@@ -1,0 +1,127 @@
+.coin-overlay {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1000;
+}
+
+.coin-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+  border: 2px solid #ffcc00;
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 120px;
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.4);
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.coin-amount {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.coin-icon {
+  font-size: 24px;
+}
+
+.coin-display.animate-insert {
+  animation: coinInsert 0.6s ease-out;
+}
+
+@keyframes coinInsert {
+  0% {
+    transform: scale(0.5) translateY(-30px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.coin-needed {
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid #ffcc00;
+  border-radius: 6px;
+  padding: 8px 12px;
+  min-width: 140px;
+}
+
+.coin-needed .label {
+  font-size: 12px;
+  color: #ffff00;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  font-family: 'Courier New', monospace;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid #ffcc00;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ff00 0%, #ffff00 100%);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+}
+
+.coin-ready {
+  background: rgba(0, 200, 100, 0.8);
+  border: 2px solid #00ff00;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #00ff00;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(0, 255, 0, 0.8);
+  }
+}
+
+@media (max-width: 768px) {
+  .coin-overlay {
+    top: 10px;
+    right: 10px;
+  }
+
+  .coin-display {
+    padding: 10px 12px;
+    min-width: 100px;
+  }
+
+  .coin-amount {
+    font-size: 24px;
+  }
+
+  .coin-icon {
+    font-size: 20px;
+  }
+}

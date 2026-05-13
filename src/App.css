@@ -349,6 +349,8 @@ body {
 .games-list::-webkit-scrollbar-thumb:hover {
   background: var(--button-hover);
 }
+
+a {
   color: #646cff;
   text-decoration: inherit;
 }

@@ -1,4 +1,5 @@
 use thiserror::Error;
+use serde::Serialize;
 
 #[derive(Error, Debug)]
 pub enum NeoCabError {
@@ -26,8 +27,23 @@ pub enum NeoCabError {
     #[error("System error: {0}")]
     System(String),
 
+    #[error("Legacy SDL2 error: {0}")]
+    Legacy(String),
+
+    #[error("Network error: {0}")]
+    Network(String),
+
     #[error("Unknown error")]
     Unknown,
+}
+
+impl Serialize for NeoCabError {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        serializer.serialize_str(self.to_string().as_ref())
+    }
 }
 
 pub type Result<T> = std::result::Result<T, NeoCabError>;

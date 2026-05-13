@@ -1,6 +1,6 @@
 use tauri::State;
 use serde_json::json;
-use crate::core::EmulatorManager;
+use crate::core::{EmulatorManager, TimerManager};
 
 #[tauri::command]
 pub async fn list_emulators(
@@ -84,4 +84,40 @@ pub async fn stop_game(
             Err(error.to_string())
         }
     }
+}
+
+#[tauri::command]
+pub async fn check_timer_timeout(
+    emulator: String,
+    auto_exit: bool,
+    emulator_manager: State<'_, EmulatorManager>,
+    timer_manager: State<'_, TimerManager>,
+) -> Result<serde_json::Value, String> {
+    let is_time_up = timer_manager.is_time_up().await;
+    let remaining = timer_manager.get_remaining_seconds().await;
+
+    let result = json!({
+        "time_up": is_time_up,
+        "remaining_seconds": remaining,
+        "stopped": false
+    });
+
+    // Auto-stop game if time is up and auto_exit is enabled
+    if is_time_up && auto_exit {
+        match emulator_manager.stop_game(&emulator).await {
+            Ok(_) => {
+                return Ok(json!({
+                    "time_up": true,
+                    "remaining_seconds": remaining,
+                    "stopped": true,
+                    "message": "Game stopped due to timeout"
+                }));
+            }
+            Err(e) => {
+                return Err(format!("Failed to stop game: {}", e));
+            }
+        }
+    }
+
+    Ok(result)
 }

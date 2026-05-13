@@ -11,14 +11,14 @@ name = "neocab_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = "2.0"
+tauri-build = { version = "=2.6.1", features = [] }
 
 [dependencies]
 # Tauri core
-tauri = { version = "2.0" }
-tauri-plugin-shell = "2.0"
-tauri-plugin-fs = "2.0"
-tauri-plugin-dialog = "2.0"
+tauri = { version = "=2.11.1", features = [] }
+tauri-plugin-shell = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-dialog = "2"
 
 # Async runtime
 tokio = { version = "1.35", features = ["full"] }
@@ -62,19 +62,40 @@ sysinfo = "0.30"
 dirs = "5.0"
 
 # HTTP (optional for scrapers)
-reqwest = { version = "0.11", features = ["json", "blocking"], optional = true }
+reqwest = { version = "0.11", features = ["json", "blocking"] }
 
-# Input handling (Semana 10)
-# sdl2 = { version = "0.36", features = ["bundled"] }
-# gilrs = "0.10"
+# Networking (Phase 7)
+mdns-sd = "0.13"
+axum = { version = "0.7", features = ["ws"] }
+tower-http = { version = "0.5", features = ["cors"] }
+
+# Input handling
+# sdl2 and gilrs for legacy mode
+sdl2 = { version = "0.36", features = ["bundled"], optional = true }
+gilrs = { version = "0.10", optional = true }
+
+# Graphics (legacy mode)
+gl = { version = "0.14", optional = true }
+glfw = { version = "0.54", optional = true }
+
+# Hardware integration
+serialport = { version = "4.3", optional = true }
+rppal = { version = "0.14", optional = true }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 winreg = "0.52"
+windows = { version = "0.54", features = ["Win32_Foundation", "Win32_System_SystemInformation"], optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 nix = "0.27"
 
 [features]
-default = []
-scrapers = ["dep:reqwest"]
+default = ["modern-ui"]
+modern-ui = []
+legacy-ui = ["dep:sdl2", "dep:gilrs", "dep:gl"]
+hardware-gpio = ["dep:rppal"]
+hardware-arduino = ["dep:serialport"]
+platform-detection = ["dep:windows"]
+scrapers = []
+all-features = ["legacy-ui", "hardware-gpio", "hardware-arduino", "platform-detection"]
 

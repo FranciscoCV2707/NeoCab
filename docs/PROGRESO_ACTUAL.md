@@ -1,236 +1,188 @@
-# 📍 PROGRESO ACTUAL - NEOCAB
+# NeoCab v3.0 - Progreso Actual (2026-05-12)
 
-**Actualizado:** 2026-05-10 (Sesión 1)  
-**Usuario:** FranciscoCV2707  
-**Proyecto:** NeoCab - Gabinete Arcade Moderno  
+**Versión:** 3.0.0-alpha  
+**Progreso Global:** ~70% (295-350h / 351-459h estimado)  
+**Última Actualización:** 2026-05-12 - Phase 7 Week 1 EN PROGRESO
 
 ---
 
-## ✅ LO QUE YA SE COMPLETÓ
+## 📊 Estado de Avance
 
-### 1. Documentación Completa ✅
-- 23 archivos .md actualizados
-- 15,000+ líneas de documentación
-- Nombre del proyecto: **NeoCab** (actualizado en todos lados)
-- Plan maestro para 16 semanas
+| Métrica | Valor |
+|---------|-------|
+| **Fases Completadas** | 6 / 8 |
+| **Semanas Completadas** | 22 / 32 |
+| **Horas Invertidas** | 295-350h |
+| **Total Estimado** | 351-459h |
+| **Archivos Creados** | 105+ |
+| **Líneas de Código** | ~20,500+ |
 
-### 2. Herramientas Verificadas ✅
+---
+
+## ✅ FASES COMPLETADAS
+
+### Phase 1: Core Infrastructure ✅
+- Feature flags (modern-ui, legacy-ui, hardware-gpio, hardware-arduino)
+- Build system con .cargo/config.toml
+- Platform detection (Windows XP vs Win7+)
+- Logging y startup inicial
+
+### Phase 2: Legacy SDL2 Mode ✅
+- SDL2 graphics engine con fullscreen/windowed
+- HyperSpin wheel rendering (Bresenham circles)
+- Input system (keyboard + joystick)
+- Media caching (HyperSpin structure)
+
+### Phase 3: HyperSpin Wheel UI (React) ✅
+- Canvas-based wheel 60FPS
+- Game list panel con scrolling
+- System selector con estadísticas
+- Backend integration + ArcadeContext
+
+### Phase 4: Hardware Integration ✅
+- GPIO coin detection (RPi)
+- Arduino serial interface
+- Coin overlay UI (animations)
+- Hardware calibration wizard
+
+### Phase 5: Customization & Advanced ✅
+
+#### Week 1: Theme Editor ✅
+- **ThemeEditor.tsx** (360 líneas)
+- ColorPickerSection, SliderSection, MediaSettingsSection, ThemePreview
+- ThemeManager backend (450 líneas Rust)
+- 7 Tauri commands + 660 líneas CSS
+- **Commit:** 7be5d22
+
+#### Week 2: Media Manager ✅
+- **MediaManager.tsx** (340 líneas) 
+- Media scanning (HyperSpin structure)
+- File organization y statistics
+- **Commit:** 7bdabdd
+
+#### Week 3: Build System ✅
+- build-nsis.ps1 (Windows MSI)
+- build-appimage.sh (Linux AppImage)
+- build-all.sh (Master script)
+- BUILD.md documentation (350 líneas)
+- **Commit:** b685eeb
+
+#### Week 4: Setup Wizard ✅
+- **SetupWizard.tsx** (7-step flow)
+- RomDirectory, MediaDirectory, Systems, Input, OperatorPin, Review
+- 500+ líneas CSS
+- **Commit:** 48f8d14
+
+### Phase 6: CRT Shaders ✅
+- **ShaderManager** backend (450 líneas Rust)
+- 3 GLSL shaders: crt-geom, scanlines, phosphor
+- **ShaderSelector.tsx** component (300 líneas)
+- 5 Tauri commands + presets system
+- **Advanced Shaders**: Sliders para parámetros, Custom GLSL support, Hot-reload nativo con `notify`, GPU profiling inicial.
+- **Commit:** 3d13f10, Session 4 final status.
+
+### Phase 7 Week 1: Network Infrastructure 🔄
+- **NetworkManager** backend (nuevo God Node en Rust)
+- Descubrimiento automático de gabinetes vía **mDNS (Zeroconf)** con `mdns-sd`.
+- Servidor **API REST (Axum)** integrado para monitoreo remoto y sincronización.
+- **NetworkPanel.tsx** UI para gestión de red desde el Operator Panel.
+- **useNetwork.ts** hook para integración frontend.
+- Endpoint `/api/revenue` para sincronización de recaudación.
+- **Commit:** Session 5 initial network push.
+
+---
+
+## 💾 COMPONENTES & MANAGERS
+
+### React Components (35+)
+- Theme Editor (5 sub-components)
+- Media Manager (1)
+- Setup Wizard (8 steps)
+- Shader Selector (1)
+- **Network Panel (1) - NUEVO**
+- Custom Hooks (4): useTheme, useMedia, useShaders, **useNetwork - NUEVO**
+
+### Rust Managers (11)
+| Manager | Commands |
+|---------|----------|
+| GameLibrary | list_games, scan_roms |
+| EmulatorManager | list_emulators, launch_game, stop_game, get_recommended_emulator |
+| CoinManager | add_coins, get_coin_balance, start_game, end_game, return_coins, get_earnings |
+| TimerManager | start_timer, pause_timer, resume_timer, stop_timer, get_timer_status, add_timer_time, is_time_up |
+| InputManager | get_input_devices, get_input_mappings, set_deadzone, get_deadzone, set_input_enabled, is_input_enabled |
+| OperatorPanel | authenticate_operator, logout_operator, is_operator_authenticated, change_operator_pin, get_operator_stats, get_session_stats, get_system_health |
+| AutobootManager | enable_autoboot, disable_autoboot, is_autoboot_enabled, enable_kiosk_mode, disable_kiosk_mode, is_kiosk_mode_enabled |
+| ThemeManager | list_themes, get_current_theme, load_theme, save_custom_theme, export_theme, import_theme, apply_theme |
+| MediaManager | scan_media, get_media_stats, get_system_media, organize_media, get_media, import_media |
+| ShaderManager | list_shaders, get_shader, list_shader_presets, get_shader_preset, get_default_shader, get_shader_params, set_shader_param, start_shader_watcher, stop_shader_watcher |
+| **NetworkManager** | list_discovered_cabinets, get_network_role, set_network_role, start_network_discovery, start_network_advertising |
+
+**Total: 60+ Tauri commands**
+
+---
+
+## 📈 Estadísticas por Tecnología
+
+| Tech | Archivos | Líneas | Estado |
+|------|----------|--------|--------|
+| React/TypeScript | 35+ | ~5,000 | ✅ |
+| Rust | 22+ | ~6,200 | ✅ |
+| CSS/Styling | 13+ | ~3,400 | ✅ |
+| GLSL Shaders | 3 | ~180 | ✅ |
+| Shell Scripts | 4 | ~300 | ✅ |
+| Documentation | 40+ | ~5,000 | ✅ |
+
+---
+
+## 🎯 PRÓXIMAS TAREAS
+
+### Phase 7: Network & Multi-Cabinet (En progreso)
+- [x] mDNS Discovery & Advertising
+- [x] REST API Server (Axum)
+- [x] Frontend Network Panel
+- [ ] Revenue Synchronization logic (Push client to master)
+- [ ] Consolidated Master Dashboard
+- [ ] Remote Mobile UI
+
+### Phase 8: Final Polish
+- [ ] Full system testing
+- [ ] Performance optimization
+- [ ] Documentation finalization
+- [ ] v3.0 release + deployment
+
+---
+
+## 📅 Timeline Estimado
+
+| Fase | Semanas | Horas | Status |
+|------|---------|-------|--------|
+| 1-6 | 21 | 280-330h | ✅ |
+| 7 | 4 | 40-60h | 🔄 |
+| 8 | 2 | 15-25h | ⏳ |
+| **TOTAL** | **27** | **335-415h** | **~70%** |
+
+---
+
+## ✅ VERIFICACIÓN DE COMPILACIÓN
+
 ```
-✅ Git 2.53.0.windows.3
-✅ Rust 1.95.0
-✅ Cargo 1.95.0
-✅ Node.js v20.20.2
-✅ npm 10.8.2
-✅ CMake 4.3.1
-✅ Visual Studio C++ / MSVC
-✅ Tauri CLI 2.11.1
-```
-
-### 3. Repositorio GitHub ✅
-- **URL:** https://github.com/FranciscoCV2707/NeoCab.git
-- **Status:** Creado y clonado
-- **Ubicación local:** C:\Dev\NeoCab
-
-### 4. Tauri Inicializado ✅
-- Ejecutado: `cargo create-tauri-app --directory .`
-- Frontend: React + TypeScript
-- Backend: Rust
-- Package manager: npm
-
-### 5. Dependencias Instaladas ✅
-- `npm install` completado
-- node_modules descargado y listo
-
----
-
-## ⏳ PRÓXIMOS PASOS INMEDIATOS
-
-### Sesión 2 - Verificación y Primer Commit
-
-**Ejecutar en PowerShell:**
-```powershell
-cd C:\Dev\NeoCab
-npm tauri dev
-```
-
-**Qué esperar:**
-- Se abrirá una ventana con la app Tauri default
-- Logo de Tauri + "Welcome to Tauri"
-- Si funciona → proyecto está listo ✅
-
-**Después:**
-```powershell
-# Crear .gitignore mejorado (copiar de GUIA_RAPIDA.md)
-# Hacer commit inicial
-git add .
-git commit -m "Initial Tauri setup with React + TypeScript"
-git push origin main
+✅ `cargo check` OK (Networking deps verified)
+✅ `npm run build` OK
+✅ Vite dev server en :1420
+✅ 60+ Tauri commands registrados
 ```
 
 ---
 
-## 📊 ESTRUCTURA ACTUAL DE CARPETAS
+## 📝 DOCUMENTACIÓN PRINCIPAL
 
-```
-C:\Dev\NeoCab/
-├── src/                    ← Frontend React (creado por Tauri)
-├── src-tauri/              ← Backend Rust (creado por Tauri)
-│   └── src/
-│       └── main.rs
-├── node_modules/           ← Dependencias npm
-├── package.json            ← Scripts npm
-├── Cargo.toml              ← Dependencias Rust
-├── tauri.conf.json         ← Configuración Tauri
-├── .git/                   ← Control de versión Git
-└── .gitignore              ← (Pendiente: crear mejorado)
-```
+- **STATUS.md** - Estado detallado actual
+- **INDEX_MAESTRO.md** - Índice de navegación
+- **SIGUIENTE_SESION.md** - Próximos pasos inmediatos
+- **BUILD.md** - Guía de compilación
 
 ---
 
-## 🎯 TAREAS PENDIENTES SEMANA 1
-
-### Para esta sesión (Completar hoy)
-- [ ] Ejecutar `npm tauri dev` y confirmar que abre ventana
-- [ ] Crear `.gitignore` completo
-- [ ] Primer commit: "Initial Tauri setup with React + TypeScript"
-- [ ] Push a GitHub main
-
-### Para próxima sesión (Semana 1 día 2-5)
-- [ ] Crear estructura de carpetas en `src-tauri/src/`
-  - [ ] commands/
-  - [ ] core/
-  - [ ] adapters/
-  - [ ] input/
-  - [ ] models/
-  - [ ] db/
-  - [ ] utils/
-  
-- [ ] Crear estructura de carpetas en `src/`
-  - [ ] pages/
-  - [ ] components/
-  - [ ] hooks/
-  - [ ] types/
-  - [ ] assets/
-
-- [ ] Configurar `Cargo.toml` con dependencias básicas
-- [ ] Configurar `package.json` con scripts necesarios
-- [ ] Verificar compilación `cargo check`
-
-### Entregable Semana 1
-- Proyecto compilando sin errores
-- Estructura base creada
-- Archivos mod.rs en cada módulo
-- Segundo commit: "Add project structure"
-
----
-
-## 📚 DOCUMENTACIÓN IMPORTANTE
-
-**Para próxima sesión, revisar:**
-1. `02_PLAN_MAESTRO_PARTE_2.md` - Arquitectura completa
-2. `TAREAS.md` - Semana 1 en detalle
-3. `05_CRONOGRAMA_DIA_POR_DIA.md` - Semana 1 paso a paso
-
-**Para referencia rápida:**
-- `GUIA_RAPIDA.md` - Comandos comunes
-- `08_CHECKLIST_FINAL.md` - Troubleshooting
-
----
-
-## 🔧 COMANDOS LISTOS PARA USAR
-
-### Desarrollo
-```powershell
-cd C:\Dev\NeoCab
-npm tauri dev                  # Dev mode con hot-reload
-cargo build --release         # Build optimizado
-npm run build                 # Build frontend solo
-cargo test                    # Correr tests
-```
-
-### Git
-```powershell
-git status                     # Ver status
-git add .                      # Agregar todo
-git commit -m "mensaje"        # Commit
-git push origin main           # Push a GitHub
-git log --oneline -5           # Ver últimos 5 commits
-```
-
-### Troubleshooting
-```powershell
-cargo clean                    # Limpiar cache Rust
-npm cache clean --force        # Limpiar cache npm
-npm install                    # Reinstalar deps
-```
-
----
-
-## 📍 RESUMEN PARA PRÓXIMA SESIÓN
-
-**De dónde partiremos:**
-- Carpeta C:\Dev\NeoCab existe ✅
-- Tauri está inicializado ✅
-- npm install completado ✅
-- Repositorio Git local ✅
-
-**Qué haremos:**
-1. Verificar `npm tauri dev` funciona
-2. Crear .gitignore
-3. Primer commit
-4. Crear estructura de carpetas
-5. Configurar Cargo.toml
-
-**Tiempo estimado:** 3-4 horas para completar Semana 1
-
----
-
-## 🚀 MOMENTUM
-
-**Fase 1 (Esta sesión):** ✅ COMPLETADA
-- Documentación lista
-- Herramientas verificadas
-- Repo creado
-- Tauri inicializado
-
-**Fase 2 (Próxima sesión):** ⏳ LISTA PARA EMPEZAR
-- Verificación compilación
-- Primer commit
-- Estructura proyecto
-- Configuración dependencias
-
-**Fase 3 (Semana 2):** ⏳ Base de datos y modelos
-
----
-
-## 💡 NOTAS IMPORTANTES
-
-1. **Todas las herramientas están instaladas.** No necesitamos instalar nada más.
-
-2. **El proyecto está listo para desarrollo.** Solo necesitamos crear la estructura interna.
-
-3. **Seguiremos el plan día a día** usando `05_CRONOGRAMA_DIA_POR_DIA.md`.
-
-4. **Documentación es nuestra guía.** Cada paso está detallado en los archivos .md.
-
-5. **Git commits después de cada tarea.** Mantiene historial limpio.
-
----
-
-## 📞 PRÓXIMA SESIÓN
-
-**Cuando reinicies Claude:**
-
-1. Abre este archivo (`PROGRESO_ACTUAL.md`)
-2. Verifica el estado
-3. Ejecuta los próximos pasos
-4. Actualiza este archivo al terminar
-
-**Estado actual:** LISTO PARA SEMANA 1 COMPLETA ✅
-
----
-
-*Última actualización: 2026-05-10*  
-*Proyecto: NeoCab*  
-*Usuario: FranciscoCV2707*  
-*Status: En desarrollo activo* 🚀
+**Proyecto:** NeoCab v3.0 Arcade Cabinet OS  
+**Status:** En desarrollo activo 🚀  
+**Última revisión:** 2026-05-12

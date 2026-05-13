@@ -138,3 +138,28 @@ pub async fn get_earnings(
         }
     }
 }
+
+#[tauri::command]
+pub async fn add_coins_via_key(
+    amount: i64,
+    coin_manager: State<'_, CoinManager>,
+) -> Result<String, String> {
+    match coin_manager.add_coins(amount).await {
+        Ok(state) => {
+            let result = json!({
+                "success": true,
+                "balance": state.total_balance,
+                "coins_inserted": state.coins_inserted,
+                "message": format!("Added {} coins via keyboard", amount)
+            });
+            Ok(result.to_string())
+        }
+        Err(e) => {
+            let error = json!({
+                "success": false,
+                "error": e.to_string()
+            });
+            Err(error.to_string())
+        }
+    }
+}

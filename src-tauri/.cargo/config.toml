@@ -1,0 +1,33 @@
+[build]
+# Default target for development
+target-dir = "target"
+
+# Compiler settings for different platforms
+[target.i686-pc-windows-msvc]
+rustflags = ["-C", "link-arg=/SUBSYSTEM:WINDOWS,5.01"]
+
+[target.i686-pc-windows-gnu]
+rustflags = ["-C", "link-arg=-lmsvcrt"]
+
+# ARM cross-compilation targets
+[target.armv7-unknown-linux-gnueabihf]
+linker = "arm-linux-gnueabihf-gcc"
+rustflags = [
+    "-C", "target-cpu=cortex-a7",
+    "-C", "target-feature=+neon",
+    "-C", "link-arg=-lc"
+]
+
+[target.aarch64-unknown-linux-gnu]
+linker = "aarch64-linux-gnu-gcc"
+rustflags = [
+    "-C", "target-cpu=cortex-a72",
+    "-C", "link-arg=-lc"
+]
+
+# Profile settings for cross-compilation
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+strip = true

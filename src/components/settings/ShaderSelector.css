@@ -1,0 +1,286 @@
+.shader-selector {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #FF6400;
+  border-radius: 8px;
+  padding: 16px;
+  color: #ffffff;
+  font-family: 'Courier New', monospace;
+}
+
+.shader-selector h3 {
+  margin: 0 0 16px 0;
+  color: #FFCC00;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.error-message {
+  padding: 8px 12px;
+  background: rgba(255, 51, 51, 0.15);
+  border-left: 3px solid #FF3333;
+  color: #FF6666;
+  margin-bottom: 12px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.shader-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #404040;
+}
+
+.tab {
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  color: #999999;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+.tab:hover {
+  color: #FFFFFF;
+}
+
+.tab.active {
+  color: #FFCC00;
+  border-bottom-color: #FF6400;
+}
+
+.shader-refresh-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.refresh-button {
+  padding: 7px 12px;
+  border: 1px solid #FF6400;
+  border-radius: 4px;
+  background: rgba(255, 100, 0, 0.16);
+  color: #FFCC00;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.refresh-button:hover:not(:disabled) {
+  background: rgba(255, 100, 0, 0.28);
+  color: #FFFFFF;
+}
+
+.refresh-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.refresh-meta {
+  color: #999999;
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.presets-list,
+.shaders-list,
+.params-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.presets-list::-webkit-scrollbar,
+.shaders-list::-webkit-scrollbar,
+.params-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.presets-list::-webkit-scrollbar-track,
+.shaders-list::-webkit-scrollbar-track,
+.params-list::-webkit-scrollbar-track {
+  background: rgba(255, 100, 0, 0.1);
+}
+
+.presets-list::-webkit-scrollbar-thumb,
+.shaders-list::-webkit-scrollbar-thumb,
+.params-list::-webkit-scrollbar-thumb {
+  background: #FF6400;
+  border-radius: 3px;
+}
+
+.preset-button,
+.shader-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #404040;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #CCCCCC;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  font-family: 'Courier New', monospace;
+  text-align: left;
+}
+
+.preset-button:hover:not(:disabled),
+.shader-button:hover:not(:disabled) {
+  background: rgba(255, 100, 0, 0.2);
+  border-color: #FF6400;
+  color: #FFFFFF;
+}
+
+.preset-button.active,
+.shader-button.active {
+  background: rgba(0, 255, 100, 0.2);
+  border-color: #00FF64;
+  color: #00FF64;
+}
+
+.preset-button:disabled,
+.shader-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.shader-button.invalid {
+  border-color: #FF3333;
+  background: rgba(255, 51, 51, 0.12);
+}
+
+.preset-name {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.shader-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.shader-name {
+  font-weight: bold;
+  color: #FFFFFF;
+  font-size: 12px;
+}
+
+.shader-desc {
+  color: #999999;
+  font-size: 11px;
+}
+
+.shader-type {
+  color: #FF6400;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.shader-error {
+  color: #FF6666;
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.param-control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #404040;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.param-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.param-name {
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.param-value {
+  color: #00FF64;
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 44px;
+  text-align: right;
+}
+
+.param-control input[type='range'] {
+  width: 100%;
+  accent-color: #FF6400;
+}
+
+.param-range {
+  color: #999999;
+  font-size: 10px;
+}
+
+.status {
+  color: #00FF64;
+  font-weight: bold;
+  font-size: 14px;
+  min-width: 20px;
+  text-align: right;
+}
+
+.loading,
+.no-shaders {
+  padding: 20px;
+  text-align: center;
+  color: #999999;
+  font-size: 12px;
+}
+
+.shader-selector > .shader-info {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid #404040;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.shader-selector > .shader-info p {
+  margin: 0 0 8px 0;
+  color: #CCCCCC;
+}
+
+.shader-selector > .shader-info p:last-child {
+  margin-bottom: 0;
+  color: #999999;
+  line-height: 1.4;
+}
+
+.shader-selector > .shader-info strong {
+  color: #FFCC00;
+}
+
+.info-text {
+  font-size: 10px !important;
+  color: #666666 !important;
+}
