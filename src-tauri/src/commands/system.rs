@@ -1,6 +1,6 @@
 use tauri::State;
 use serde_json::json;
-use crate::core::AutobootManager;
+use crate::core::{AutobootManager, EmulatorDetector, EmulatorInfo};
 
 #[tauri::command]
 pub fn get_system_info() -> String {
@@ -105,4 +105,10 @@ pub async fn is_kiosk_mode_enabled(
         "enabled": enabled
     });
     Ok(result.to_string())
+}
+
+#[tauri::command]
+pub fn detect_emulators() -> Result<Vec<EmulatorInfo>, String> {
+    let emulators = EmulatorDetector::detect_all();
+    Ok(emulators)
 }

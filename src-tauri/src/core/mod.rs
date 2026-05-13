@@ -1,5 +1,6 @@
 pub mod emulator_manager;
 pub mod emulator_monitor;
+pub mod emulator_detector;
 pub mod game_library;
 pub mod config_manager;
 pub mod coin_manager;
@@ -17,6 +18,7 @@ pub mod network_manager;
 
 pub use emulator_manager::EmulatorManager;
 pub use emulator_monitor::EmulatorMonitor;
+pub use emulator_detector::{EmulatorDetector, EmulatorInfo};
 pub use game_library::GameLibrary;
 pub use config_manager::{ConfigManager, SystemGameConfig, GameMode};
 pub use coin_manager::{CoinManager, CoinState, CoinEvent};
