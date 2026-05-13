@@ -160,9 +160,9 @@ impl EmulatorDetector {
             let program_files_x86 = std::env::var("ProgramFiles(x86)").ok();
 
             let common_paths = vec![
-                program_files.map(|p| PathBuf::from(p).join("MAME")),
-                program_files_x86.map(|p| PathBuf::from(p).join("RetroArch")),
-                program_files.map(|p| PathBuf::from(p).join("Dolphin")),
+                program_files.as_ref().map(|p| PathBuf::from(p).join("MAME")),
+                program_files_x86.as_ref().map(|p| PathBuf::from(p).join("RetroArch")),
+                program_files.as_ref().map(|p| PathBuf::from(p).join("Dolphin")),
             ];
 
             for maybe_path in common_paths.into_iter().flatten() {
