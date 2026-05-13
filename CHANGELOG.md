@@ -4,6 +4,18 @@ All notable changes to this project are documented here.
 
 ## [1.0.0] - 2026-05-13 ✅ RELEASED - PRODUCTION READY
 
+### Added - Session 22: Elite Phase (Final Polish)
+- **Active Attract Mode:** Video-based screensaver with random game highlights
+- **Dual Monitor Support:** Dynamic Marquee window for second screen (Image/Video)
+- **PinPad Security:** Protected Operator and Settings areas with numerical PIN
+- **PC Games Importer:** Automatic detection of Steam and Epic Games installations
+- **Virtual Collections:** Smart "Systems" (Favorites, Recent, All Games) without data duplication
+- **Save State Launcher:** Visual interface to choose between New Game or existing slots
+- **Library Audit UI:** Graphical reporting of missing assets (ROMs/Images/Videos)
+- **High Score System:** Local leaderboard per game with persistence
+- **Live Shader Selector:** On-the-fly CRT/Scanline style switching from the UI
+- **Video Marquee Support:** Support for animated .mp4 logos on secondary displays
+
 ### Added - Session 21: Setup Wizard & Automatic Initialization
 - Auto-creation of required directories (data, config, media)
 - Automatic generation of default config.yml

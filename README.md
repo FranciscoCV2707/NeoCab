@@ -10,10 +10,11 @@
 
 ## ✨ Complete Feature Set
 
-### 🎮 Emulator Support
+### 🎮 Emulator & PC Gaming Support
 - **6 Native Adapters**: MAME, RetroArch, PCSX Redux, Mupen64, Gambatte, Custom
 - **100+ RetroArch Cores** pre-configured
-- **300+ Total Emulator Systems** supported (Arcade, Nintendo, Sega, Sony, Atari, Commodore, DOS, etc.)
+- **300+ Total Emulator Systems** supported
+- **PC Games Importer**: Automatic Steam and Epic Games library integration
 - **Auto-detection** of installed emulators with smart fallback
 
 ### 💰 Coin & Credit System
@@ -62,7 +63,8 @@
 - Game popularity metrics
 - Session history access
 - Log viewer (real-time tail + full view)
-- Audit panel (missing ROMs/media detection)
+- Audit panel (Visual library health reporting: missing ROMs/media)
+- High Score Leaderboards (Local persistence per game)
 - Network diagnostics
 
 ### 🌐 Network & Multi-Cabinet
@@ -92,6 +94,14 @@
 - SQLite database (local storage)
 - Optional mDNS (localhost by default)
 - SQL injection prevention
+
+### 🕹️ Elite Arcade Experience (New in v1.0)
+- **Active Attract Mode**: Cinematic video screensaver with instant game return
+- **Dual Monitor Marquee**: Second screen support for dynamic logos and videos
+- **Save State Launcher**: Visual slot selector with thumbnails and play time
+- **Virtual Smart Collections**: Favorites, Recent, and "All Games" dynamic systems
+- **In-Menu Shader Selector**: On-the-fly visual style switching (CRT/Scanlines)
+- **PinPad Security**: Discrete overlay for protecting operator sensitive areas
 
 ---
 

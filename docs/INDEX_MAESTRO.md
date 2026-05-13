@@ -22,7 +22,8 @@
 | **PROGRESO_ACTUAL.md** | Detailed progress report, 21 sessions breakdown | Developers |
 | **RELEASE_MANIFEST.md** | Official release artifacts, system requirements | Users, Operators |
 | **RELEASE_v1.0_NOTES.md** | Release notes & feature inventory | Users |
-| **CHANGELOG.md** | Complete history from Phase 1-13 | Developers |
+| **SESSION_22_ELITE_PHASE.md** | Elite features & final polish details | Developers |
+| **CHANGELOG.md** | Complete history from Phase 1-22 | Developers |
 | **WINDOWS_XP_BUILD_GUIDE.md** | Building legacy SDL2 mode for Windows XP | Developers |
 
 **Quick Links:**
