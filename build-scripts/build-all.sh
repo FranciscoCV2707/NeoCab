@@ -1,19 +1,25 @@
 #!/bin/bash
 
 # NeoCab v3.0 - Master Build Script
-# Builds for all platforms: Windows NSIS, Linux AppImage
-# Usage: ./build-all.sh [version] [platform]
+# Builds for all platforms: Windows NSIS, Linux AppImage (x64), Linux AppImage (ARM)
+# Usage: ./build-all.sh [version] [platform] [arm_arch]
+# Platforms: all, windows, linux, linux-arm
+# ARM architectures: armv7 (default), aarch64
 
 set -e
 
 VERSION="${1:-3.0.0}"
 PLATFORM="${2:-all}"
+ARM_ARCH="${3:-armv7}"
 OUTPUT_DIR="./dist"
 
 echo "================================================"
 echo "NeoCab v3.0 - Multi-Platform Builder"
 echo "Version: $VERSION"
 echo "Platform: $PLATFORM"
+if [[ "$PLATFORM" == "all" || "$PLATFORM" == "linux-arm" ]]; then
+    echo "ARM Architecture: $ARM_ARCH"
+fi
 echo "================================================"
 
 # Create output directory
@@ -74,15 +80,29 @@ fi
 
 if [[ "$PLATFORM" == "all" || "$PLATFORM" == "linux" ]]; then
     echo "================================"
-    print_info "Building Linux AppImage..."
+    print_info "Building Linux AppImage (x86_64)..."
     echo "================================"
 
     if [ -f "./build-scripts/build-appimage.sh" ]; then
         chmod +x "./build-scripts/build-appimage.sh"
         ./build-scripts/build-appimage.sh $VERSION $OUTPUT_DIR
-        print_status "Linux AppImage built"
+        print_status "Linux AppImage (x86_64) built"
     else
         print_error "AppImage build script not found"
+    fi
+fi
+
+if [[ "$PLATFORM" == "all" || "$PLATFORM" == "linux-arm" ]]; then
+    echo "================================"
+    print_info "Building Linux AppImage (ARM - $ARM_ARCH)..."
+    echo "================================"
+
+    if [ -f "./build-scripts/build-appimage-arm.sh" ]; then
+        chmod +x "./build-scripts/build-appimage-arm.sh"
+        ./build-scripts/build-appimage-arm.sh $VERSION $ARM_ARCH $OUTPUT_DIR
+        print_status "Linux AppImage (ARM) built"
+    else
+        print_error "ARM AppImage build script not found"
     fi
 fi
 
