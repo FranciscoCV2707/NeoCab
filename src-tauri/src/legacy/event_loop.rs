@@ -55,7 +55,7 @@ impl FrameStats {
 pub struct EventLoop {
     running: bool,
     paused: bool,
-    current_state: GameState,
+    current_state: LegacyGameState,
     fps: u32,
     frame_time: Duration,
     last_frame: Instant,
@@ -67,7 +67,7 @@ impl EventLoop {
         Self {
             running: true,
             paused: false,
-            current_state: GameState::Menu,
+            current_state: LegacyGameState::Menu,
             fps: 60,
             frame_time: Duration::from_millis(1000 / 60),
             last_frame: Instant::now(),
@@ -162,25 +162,25 @@ impl EventLoop {
             InputEvent::Select => {
                 tracing::info!("Input: Select (state: {:?})", self.current_state);
                 match self.current_state {
-                    GameState::Playing => self.change_state(GameState::Playing),
-                    GameState::SystemSelect => self.change_state(GameState::GameSelect),
-                    GameState::GameSelect => self.change_state(GameState::Playing),
+                    LegacyGameState::Playing => self.change_state(LegacyGameState::Playing),
+                    LegacyGameState::SystemSelect => self.change_state(LegacyGameState::GameSelect),
+                    LegacyGameState::GameSelect => self.change_state(LegacyGameState::Playing),
                     _ => {}
                 }
             }
             InputEvent::Back => {
                 tracing::info!("Input: Back (state: {:?})", self.current_state);
                 match self.current_state {
-                    GameState::Playing => self.change_state(GameState::GameSelect),
-                    GameState::GameSelect => self.change_state(GameState::SystemSelect),
-                    GameState::SystemSelect => self.change_state(GameState::Menu),
-                    GameState::Paused => self.change_state(GameState::Playing),
+                    LegacyGameState::Playing => self.change_state(LegacyGameState::GameSelect),
+                    LegacyGameState::GameSelect => self.change_state(LegacyGameState::SystemSelect),
+                    LegacyGameState::SystemSelect => self.change_state(LegacyGameState::Menu),
+                    LegacyGameState::Paused => self.change_state(LegacyGameState::Playing),
                     _ => {}
                 }
             }
             InputEvent::Menu => {
                 tracing::info!("Input: Menu pressed (state: {:?})", self.current_state);
-                self.change_state(GameState::Menu);
+                self.change_state(LegacyGameState::Menu);
             }
             InputEvent::Button1 => {
                 tracing::trace!("Input: Button 1");
@@ -197,9 +197,9 @@ impl EventLoop {
             InputEvent::Pause => {
                 tracing::info!("Input: Pause toggled (currently: {})", if self.paused { "paused" } else { "playing" });
                 match self.current_state {
-                    GameState::Playing => {
+                    LegacyGameState::Playing => {
                         self.paused = !self.paused;
-                        let new_state = if self.paused { GameState::Paused } else { GameState::Playing };
+                        let new_state = if self.paused { LegacyGameState::Paused } else { LegacyGameState::Playing };
                         self.change_state(new_state);
                     }
                     _ => {}
@@ -207,7 +207,7 @@ impl EventLoop {
             }
             InputEvent::Quit => {
                 tracing::info!("Input: Quit requested");
-                self.change_state(GameState::Shutdown);
+                self.change_state(LegacyGameState::Shutdown);
                 self.running = false;
             }
         }
@@ -227,20 +227,20 @@ impl EventLoop {
     }
 
     pub fn pause(&mut self) {
-        if matches!(self.current_state, GameState::Playing) {
+        if matches!(self.current_state, LegacyGameState::Playing) {
             self.paused = true;
-            self.change_state(GameState::Paused);
+            self.change_state(LegacyGameState::Paused);
         }
     }
 
     pub fn resume(&mut self) {
-        if matches!(self.current_state, GameState::Paused) {
+        if matches!(self.current_state, LegacyGameState::Paused) {
             self.paused = false;
-            self.change_state(GameState::Playing);
+            self.change_state(LegacyGameState::Playing);
         }
     }
 
-    pub fn get_state(&self) -> GameState {
+    pub fn get_state(&self) -> LegacyGameState {
         self.current_state
     }
 

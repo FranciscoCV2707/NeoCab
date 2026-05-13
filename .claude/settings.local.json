@@ -5,7 +5,8 @@
       "mcp__plugin_context-mode_context-mode__ctx_execute",
       "Bash(cargo check *)",
       "Bash(ThemeManager.system_themes)",
-      "Bash(chmod +x /c/Users/Pako/Desktop/arcade/NeoCab/build-scripts/build-appimage-arm.sh)"
+      "Bash(chmod +x /c/Users/Pako/Desktop/arcade/NeoCab/build-scripts/build-appimage-arm.sh)",
+      "mcp__plugin_context-mode_context-mode__ctx_execute_file"
     ]
   }
 }
