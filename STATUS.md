@@ -1,9 +1,37 @@
 # 🎮 NEOCAB - ESTADO DEL PROYECTO
 
-**Última actualización:** 2026-05-12 (Session 12 - Polish Complete)  
+**Última actualización:** 2026-05-12 (Session 8 Part 1 - ARM Support)  
 **Fase actual:** 🔄 Phase 8+ (Final Features & Optimization) EN PROGRESO  
-**Progreso:** Sessions 7, 10, 11, 12 completadas (4 sesiones en 1 día): 100% en cada una  
-**Build Status:** ✅ `cargo check` OK (27 warnings, 0 errors) | ✅ All systems compiling  
+**Progreso:** Sessions 7, 10, 11, 12, 8 (Part 1) completadas (5 en 1 día)  
+**Build Status:** ✅ `cargo check` OK (27 warnings, 0 errors) | ✅ All build scripts working  
+
+---
+
+## SESSION 8 PART 1 - INSTALLER ARM - ✅ COMPLETA 75%
+
+**Objetivo:** Soporte multiplataforma ARM (Raspberry Pi) + Windows XP Legacy.
+
+**TASK 1: ARM AppImage Builder - ✅ COMPLETADA**
+- ✅ `build-appimage-arm.sh` para armv7 y aarch64
+- ✅ Soporta Raspberry Pi 3/4 (armv7) y Pi 5+ (aarch64)
+- ✅ Cross-compilation con cargo --target=
+- ✅ Bundling de shaders y assets para ARM
+
+**TASK 2: Build System Integration - ✅ COMPLETADA**
+- ✅ Actualizado `build-all.sh` con soporte ARM
+- ✅ Nuevas opciones: ./build-all.sh [version] [platform] [arch]
+- ✅ Plataformas: all, windows, linux, linux-arm
+- ✅ Flujo unificado para todas las plataformas
+
+**TASK 3: Cargo Cross-compilation Config - ✅ EXISTENTE**
+- ✅ `.cargo/config.toml` con armv7-unknown-linux-gnueabihf
+- ✅ `.cargo/config.toml` con aarch64-unknown-linux-gnu
+- ✅ Linker y rustflags optimizados
+
+**PENDIENTE - TASK 4: Windows XP Legacy Mode**
+- ⏳ Implementación de SDL2 event loop básico
+- ⏳ Modo legacy sin React/WebView2
+- ⏳ Soporte mínimo para Windows XP (x86 MSVC)
 
 ---
 
