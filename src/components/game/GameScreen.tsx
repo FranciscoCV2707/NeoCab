@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { HyperSpinWheel } from '../wheel';
 import { GameListPanel } from '../game-list';
 import { useArcade } from '../../context/ArcadeContext';
+import { FadeOverlay } from '../launcher/FadeOverlay';
+import { useLaunchOverlay } from '../../hooks/useLaunchOverlay';
 import './GameScreen.css';
 
 interface GameScreenProps {
@@ -28,6 +30,12 @@ export const GameScreen: React.FC<GameScreenProps> = ({ onBack }) => {
   const [systemIndex, setSystemIndex] = useState(0);
   const [gameIndex, setGameIndex] = useState(0);
   const [showError, setShowError] = useState(false);
+  const {
+    isVisible: showLaunchOverlay,
+    gameName: launchGameName,
+    showLaunchOverlay: activateLaunchOverlay,
+    completeLaunch,
+  } = useLaunchOverlay();
 
   // Convert systems to wheel items
   const wheelItems = systems.map((sys) => ({
@@ -58,7 +66,11 @@ export const GameScreen: React.FC<GameScreenProps> = ({ onBack }) => {
   const handleLaunchGame = async () => {
     try {
       setShowError(false);
-      await launchGame();
+      if (selectedGame) {
+        activateLaunchOverlay(selectedGame.name);
+        await launchGame();
+        completeLaunch();
+      }
     } catch (err) {
       setShowError(true);
       console.error('Error launching game:', err);
@@ -87,6 +99,15 @@ export const GameScreen: React.FC<GameScreenProps> = ({ onBack }) => {
 
   return (
     <div className="game-screen">
+      {showLaunchOverlay && (
+        <FadeOverlay
+          isVisible={showLaunchOverlay}
+          gameName={launchGameName}
+          duration={3000}
+          onFadeComplete={completeLaunch}
+        />
+      )}
+
       {error && showError && (
         <div className="error-banner">
           <span className="error-icon">⚠️</span>

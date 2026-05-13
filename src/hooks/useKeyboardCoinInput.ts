@@ -24,7 +24,7 @@ export const useKeyboardCoinInput = (
   const [config, setConfig] = useState<KeyboardCoinConfig>(initialConfig);
   const [lastCoinAdded, setLastCoinAdded] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  const [debounceTimer, setDebounceTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const updateConfig = useCallback((updates: Partial<KeyboardCoinConfig>) => {
     setConfig((prev) => ({ ...prev, ...updates }));

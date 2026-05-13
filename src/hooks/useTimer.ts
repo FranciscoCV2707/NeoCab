@@ -27,7 +27,7 @@ export const useTimer = (): UseTimerReturn => {
   const [status, setStatus] = useState<TimerStatus | null>(null);
   const [isGameRunning, setIsGameRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const timeoutCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutCheckIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const handleError = useCallback((err: any, context: string) => {
     const message = err instanceof Error ? err.message : String(err);

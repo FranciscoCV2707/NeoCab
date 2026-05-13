@@ -18,7 +18,7 @@ export const LogViewer: React.FC = () => {
   const [autoScroll, setAutoScroll] = useState(true);
   const [viewMode, setViewMode] = useState<'tail' | 'full'>('tail');
   const logContainerRef = useRef<HTMLDivElement>(null);
-  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(
+  const [refreshInterval, setRefreshInterval] = useState<ReturnType<typeof setInterval> | null>(
     null
   );
 

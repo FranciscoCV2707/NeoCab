@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NetworkPanel } from './NetworkPanel';
 import { LogViewer } from './LogViewer';
 import { AuditPanel } from './AuditPanel';
+import { SystemManager } from '../settings/SystemManager';
 import './OperatorPanel.css';
 
 type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'settings';
@@ -84,10 +85,8 @@ const StatisticsTab: React.FC = () => {
 const SettingsTab: React.FC = () => {
     return (
         <div className="tab-pane">
-            <h3>Configuración del Operador</h3>
-            <div className="settings-section">
-                <p>Opciones de configuración disponibles próximamente.</p>
-            </div>
+            <h3>Configuración del Sistema</h3>
+            <SystemManager />
         </div>
     );
 };

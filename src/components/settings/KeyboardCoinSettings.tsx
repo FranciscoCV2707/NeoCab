@@ -35,7 +35,6 @@ export const KeyboardCoinSettings: React.FC<KeyboardCoinSettingsProps> = ({
   };
 
   const handleStartListening = () => {
-    setListeningForKey('');
     setTempKey(null);
     setListeningForKey(true);
   };

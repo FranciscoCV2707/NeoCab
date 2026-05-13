@@ -287,3 +287,59 @@
     font-size: 18px;
   }
 }
+
+.game-edit-button {
+  background: none;
+  border: none;
+  color: #FF6400;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-edit-button:hover {
+  background: rgba(255, 100, 0, 0.2);
+  color: #FFFF00;
+  text-shadow: 0 0 10px #FF6400;
+}
+
+.editor-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.editor-modal {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border: 2px solid #FF6400;
+  border-radius: 8px;
+  box-shadow: 0 0 40px rgba(255, 100, 0, 0.6);
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

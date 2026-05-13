@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { GameMetadataEditor, GameMetadata } from './GameMetadataEditor';
 import './GameListPanel.css';
 
 export interface GameItem {
@@ -36,6 +37,7 @@ export const GameListPanel: React.FC<GameListPanelProps> = ({
   scrollBehavior = 'smooth',
 }) => {
   const listRef = useRef<HTMLDivElement>(null);
+  const [editingGameIndex, setEditingGameIndex] = useState<number | null>(null);
 
   // Auto-scroll to selected item
   useEffect(() => {
@@ -97,6 +99,26 @@ export const GameListPanel: React.FC<GameListPanelProps> = ({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [selectedIndex, games, onSelect, onConfirm]);
 
+  const handleEditGame = (index: number) => {
+    setEditingGameIndex(index);
+  };
+
+  const handleSaveMetadata = async (_metadata: GameMetadata) => {
+    setEditingGameIndex(null);
+    // TODO: Implement backend call to save game metadata
+    // await invoke('update_game_metadata', { gameId: _metadata.game_id, ..._metadata });
+  };
+
+  const editingGame = editingGameIndex !== null ? games[editingGameIndex] : null;
+  const editingMetadata: GameMetadata | null = editingGame ? {
+    game_id: editingGame.id,
+    title: editingGame.name,
+    description: editingGame.description || '',
+    year: editingGame.year ? parseInt(editingGame.year) : undefined,
+    players: editingGame.players,
+    rating: editingGame.rating,
+  } : null;
+
   return (
     <div className="game-list-panel">
       <div className="list-header">
@@ -126,6 +148,16 @@ export const GameListPanel: React.FC<GameListPanelProps> = ({
               <div className="game-item-right">
                 {game.year && <span className="game-year">{game.year}</span>}
                 {game.players && <span className="game-players">{game.players}P</span>}
+                <button
+                  className="game-edit-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditGame(index);
+                  }}
+                  title="Edit game metadata"
+                >
+                  ✎
+                </button>
               </div>
             </div>
           ))
@@ -184,6 +216,18 @@ export const GameListPanel: React.FC<GameListPanelProps> = ({
             <button className="action-button secondary">
               ⓘ INFO
             </button>
+          </div>
+        </div>
+      )}
+
+      {editingGameIndex !== null && editingMetadata && (
+        <div className="editor-modal-overlay" onClick={() => setEditingGameIndex(null)}>
+          <div className="editor-modal" onClick={(e) => e.stopPropagation()}>
+            <GameMetadataEditor
+              game={editingMetadata}
+              onSave={handleSaveMetadata}
+              onCancel={() => setEditingGameIndex(null)}
+            />
           </div>
         </div>
       )}

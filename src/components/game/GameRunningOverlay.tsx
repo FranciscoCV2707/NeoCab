@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CoinOverlay } from '../hardware/CoinOverlay';
 import { useTimer } from '../../hooks/useTimer';
-import { invoke } from '@tauri-apps/api/core';
 import './GameRunningOverlay.css';
 
 interface GameRunningOverlayProps {
@@ -18,7 +17,7 @@ interface GameRunningOverlayProps {
 
 export const GameRunningOverlay: React.FC<GameRunningOverlayProps> = ({
   isRunning,
-  gameId = '',
+  gameId: _gameId,
   systemName = 'ARCADE',
   durationSeconds = 180,
   coinsNeeded = 1,
@@ -29,7 +28,6 @@ export const GameRunningOverlay: React.FC<GameRunningOverlayProps> = ({
 }) => {
   const { status, startTimer, stopTimer, checkTimeout, isGameRunning } =
     useTimer();
-  const [lastCheckTimeout, setLastCheckTimeout] = useState(0);
   const [gameStopped, setGameStopped] = useState(false);
 
   // Start timer when game is running
