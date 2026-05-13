@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { LaunchScriptEditor } from './LaunchScriptEditor';
 import './SystemManager.css';
 
 interface SystemConfig {
@@ -12,6 +13,8 @@ interface SystemConfig {
   auto_exit: boolean;
   rom_path?: string;
   bios_path?: string;
+  pre_launch_script?: string;
+  post_launch_script?: string;
 }
 
 export const SystemManager: React.FC = () => {
@@ -19,6 +22,7 @@ export const SystemManager: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingSystem, setEditingSystem] = useState<string | null>(null);
+  const [editingScripts, setEditingScripts] = useState<string | null>(null);
   const [showAddSystem, setShowAddSystem] = useState(false);
   const [newSystemName, setNewSystemName] = useState('');
 
@@ -88,6 +92,8 @@ export const SystemManager: React.FC = () => {
       show_overlay: true,
       warn_before: 30,
       auto_exit: true,
+      pre_launch_script: undefined,
+      post_launch_script: undefined,
     };
 
     try {
@@ -102,6 +108,31 @@ export const SystemManager: React.FC = () => {
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setError(`Failed to add system: ${message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveScripts = async (systemName: string, pre: string, post: string) => {
+    try {
+      setLoading(true);
+      const system = systems.find((s) => s.system === systemName);
+      if (system) {
+        const updated: SystemConfig = {
+          ...system,
+          pre_launch_script: pre || undefined,
+          post_launch_script: post || undefined,
+        };
+        await invoke<string>('save_system_config', {
+          system: systemName,
+          config: updated,
+        });
+        setEditingScripts(null);
+        loadSystems();
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(`Failed to save scripts: ${message}`);
     } finally {
       setLoading(false);
     }
@@ -158,6 +189,14 @@ export const SystemManager: React.FC = () => {
                   onSave={handleSaveSystem}
                   onCancel={() => setEditingSystem(null)}
                 />
+              ) : editingScripts === system.system ? (
+                <LaunchScriptEditor
+                  systemName={system.system}
+                  preScript={system.pre_launch_script}
+                  postScript={system.post_launch_script}
+                  onSave={(pre, post) => handleSaveScripts(system.system, pre, post)}
+                  onCancel={() => setEditingScripts(null)}
+                />
               ) : (
                 <div className="system-card-content">
                   <div className="system-stat">
@@ -172,6 +211,12 @@ export const SystemManager: React.FC = () => {
                     <label>Ruta ROM:</label>
                     <span className="system-path">{system.rom_path || 'No configurada'}</span>
                   </div>
+                  {(system.pre_launch_script || system.post_launch_script) && (
+                    <div className="system-stat scripts-indicator">
+                      <label>Scripts:</label>
+                      <span className="script-badge">⚙️ Configurados</span>
+                    </div>
+                  )}
                   <div className="system-actions">
                     <button
                       className="btn-edit"
@@ -179,6 +224,13 @@ export const SystemManager: React.FC = () => {
                       disabled={loading}
                     >
                       ✏️ Editar
+                    </button>
+                    <button
+                      className="btn-scripts"
+                      onClick={() => setEditingScripts(system.system)}
+                      disabled={loading}
+                    >
+                      ⚙️ Scripts
                     </button>
                     <button
                       className="btn-delete"

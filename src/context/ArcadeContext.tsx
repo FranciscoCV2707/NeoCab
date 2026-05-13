@@ -9,6 +9,8 @@ export interface System {
   gameCount: number;
   lastPlayed?: string;
   totalPlaytime?: number;
+  preScript?: string;
+  postScript?: string;
 }
 
 export interface Game {
@@ -123,7 +125,7 @@ export const ArcadeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setSelectedGame(game);
   }, []);
 
-  // Launch game with session tracking
+  // Launch game with session tracking and scripts
   const launchGameHandler = useCallback(async () => {
     if (!selectedGame || !selectedSystem) {
       setError('No game selected');
@@ -138,8 +140,17 @@ export const ArcadeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const gameIdNum = parseInt(selectedGame.id, 10);
       const sessionId = await tauri.createGameSession(gameIdNum, 1);
 
-      // Launch game with monitoring (crash detection, window detection)
-      await tauri.launchGameWithMonitoring(gameIdNum, selectedSystem.name);
+      // Launch game with monitoring and optional scripts
+      if (selectedSystem.preScript || selectedSystem.postScript) {
+        await tauri.launchGameWithScripts(
+          gameIdNum,
+          selectedSystem.name,
+          selectedSystem.preScript,
+          selectedSystem.postScript
+        );
+      } else {
+        await tauri.launchGameWithMonitoring(gameIdNum, selectedSystem.name);
+      }
 
       // Store session ID in session storage for later cleanup
       sessionStorage.setItem('currentGameSessionId', sessionId.toString());

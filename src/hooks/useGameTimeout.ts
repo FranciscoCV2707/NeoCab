@@ -32,7 +32,7 @@ export const useGameTimeout = (config: UseGameTimeoutConfig = {}) => {
     state: 'idle',
   });
 
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startTimeoutMonitoring = useCallback(async () => {
     if (!enabled) return;

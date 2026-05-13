@@ -111,6 +111,21 @@ export const useTauri = () => {
     return invoke<string>('launch_game_with_monitoring', { game_id: gameId, emulator_name: emulatorName });
   }, []);
 
+  // Launch with pre/post scripts
+  const launchGameWithScripts = useCallback(async (
+    gameId: number,
+    emulatorName: string,
+    preScript?: string,
+    postScript?: string
+  ) => {
+    return invoke<string>('launch_game_with_scripts', {
+      game_id: gameId,
+      emulator_name: emulatorName,
+      pre_script: preScript || null,
+      post_script: postScript || null,
+    });
+  }, []);
+
   const stopGameWithMonitoring = useCallback(async () => {
     return invoke<string>('stop_game_with_monitoring');
   }, []);
@@ -125,6 +140,7 @@ export const useTauri = () => {
     stopGame,
     getRecommendedEmulator,
     launchGameWithMonitoring,
+    launchGameWithScripts,
     stopGameWithMonitoring,
     // Sessions
     createGameSession,

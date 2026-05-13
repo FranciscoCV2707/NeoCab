@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { listen } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import { CoinOverlay } from '../hardware/CoinOverlay';
 import { useTimer } from '../../hooks/useTimer';
 import { useGameSession } from '../../hooks/useGameSession';

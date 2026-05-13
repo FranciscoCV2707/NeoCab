@@ -54,6 +54,48 @@ impl EmulatorManager {
         Ok(())
     }
 
+    pub async fn launch_game_with_scripts(
+        &self,
+        game: &Game,
+        emulator_name: &str,
+        pre_script: Option<&str>,
+        post_script: Option<&str>,
+    ) -> Result<()> {
+        info!("Launching game with scripts: {}", game.title);
+
+        // Execute pre-launch script if provided
+        if let Some(script) = pre_script {
+            info!("Executing pre-launch script");
+            self.execute_script(script, &game.rom_path)?;
+        }
+
+        // Launch the game
+        self.launch_game(game, emulator_name).await?;
+
+        // Execute post-launch script if provided (background task)
+        if let Some(script) = post_script {
+            let script = script.to_string();
+            let rom_path = game.rom_path.clone();
+            let self_clone = Arc::new(self.clone_adapters());
+
+            tokio::spawn(async move {
+                info!("Executing post-launch script");
+                if let Err(e) = self_clone.execute_script(&script, &rom_path) {
+                    warn!("Post-launch script failed: {}", e);
+                }
+            });
+        }
+
+        Ok(())
+    }
+
+    fn clone_adapters(&self) -> Self {
+        Self {
+            adapters: self.adapters.clone(),
+            _db: self._db.clone(),
+        }
+    }
+
     pub fn execute_script(&self, script: &str, rom_path: &str) -> Result<()> {
         if script.trim().is_empty() {
             return Ok(());

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
-import { invoke, listen, UnlistenFn } from '@tauri-apps/api/core';
+import { invoke } from '@tauri-apps/api/core';
+import { listen, UnlistenFn } from '@tauri-apps/api/event';
 
 interface UseLaunchMonitorState {
   isLaunching: boolean;
@@ -57,7 +58,7 @@ export const useLaunchMonitor = () => {
     };
   }, []);
 
-  const startLaunchMonitoring = useCallback(async (gameId: i64, emulatorName: string) => {
+  const startLaunchMonitoring = useCallback(async (gameId: number, emulatorName: string) => {
     setState((prev) => ({
       ...prev,
       isLaunching: true,

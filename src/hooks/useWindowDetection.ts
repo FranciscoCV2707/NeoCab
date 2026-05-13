@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 interface UseWindowDetectionState {
   emulatorWindowDetected: boolean;
@@ -11,7 +11,7 @@ export const useWindowDetection = () => {
     isMonitoring: false,
   });
 
-  const startMonitoringWindow = useCallback((emulatorName: string) => {
+  const startMonitoringWindow = useCallback(() => {
     setState((prev) => ({
       ...prev,
       isMonitoring: true,

@@ -1,11 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useTauri } from './useTauri';
 
-interface GameSessionState {
-  sessionId: number | null;
-  startTime: number | null;
-}
-
 /**
  * Hook to manage game session lifecycle
  * Tracks when game is running and ends session when game closes

@@ -360,3 +360,43 @@
 .systems-list::-webkit-scrollbar-thumb:hover {
   background: #ff8c52;
 }
+
+/* Scripts button */
+.btn-scripts {
+  padding: 8px 16px;
+  background: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-scripts:hover:not(:disabled) {
+  background: #6ba3f5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.btn-scripts:disabled {
+  background: #999;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Scripts indicator */
+.scripts-indicator {
+  background: rgba(74, 144, 226, 0.1);
+  border-left: 3px solid #4a90e2;
+  padding-left: 12px;
+}
+
+.script-badge {
+  background: #4a90e2;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 0.85em;
+  font-weight: bold;
+}
