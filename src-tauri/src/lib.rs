@@ -141,6 +141,7 @@ pub fn run() {
             commands::stop_game,
             commands::get_recommended_emulator,
             commands::add_coins,
+            commands::add_coins_via_key,
             commands::get_coin_balance,
             commands::start_game,
             commands::end_game,
@@ -213,6 +214,15 @@ pub fn run() {
             commands::set_network_role,
             commands::start_network_discovery,
             commands::start_network_advertising,
+            commands::start_revenue_sync,
+            commands::sync_revenue_now,
+            commands::set_master_ip,
+            commands::get_master_ip,
+            commands::check_timer_timeout,
+            commands::read_log_file,
+            commands::list_log_files,
+            commands::clear_logs,
+            commands::get_log_tail,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -220,14 +230,26 @@ pub fn run() {
 
 fn init_logging() {
     use tracing_subscriber;
+    use std::path::PathBuf;
+
+    // Create logs directory if it doesn't exist
+    let logs_dir = PathBuf::from("./data/logs");
+    let _ = std::fs::create_dir_all(&logs_dir);
+
+    // Set up file appender
+    let file_appender = tracing_appender::rolling::daily(&logs_dir, "neocab.log");
+    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
 
     let _ = tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::from_default_env()
                 .add_directive("neocab=debug".parse().unwrap()),
         )
-        .with_writer(std::io::stderr)
+        .with_writer(non_blocking)
         .try_init();
+
+    // Keep the guard alive for the lifetime of the program
+    std::mem::forget(_guard);
 }
 
 async fn initialize_app() -> Result<(

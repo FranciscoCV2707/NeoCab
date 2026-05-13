@@ -233,6 +233,22 @@ impl TimerManager {
             false
         }
     }
+
+    pub async fn should_warn(&self, warn_before_secs: i64) -> bool {
+        if let Ok(status) = self.get_status().await {
+            status.remaining_seconds <= warn_before_secs && status.remaining_seconds > 0
+        } else {
+            false
+        }
+    }
+
+    pub async fn get_remaining_seconds(&self) -> i64 {
+        if let Ok(status) = self.get_status().await {
+            status.remaining_seconds
+        } else {
+            0
+        }
+    }
 }
 
 impl Default for TimerManager {

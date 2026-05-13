@@ -1,0 +1,706 @@
+{
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\vite.config.ts": {
+    "mtime": 1778442348.1847315,
+    "hash": "23eb495142fc7ca62b218d172cb93f0a"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\build-scripts\\build-nsis.ps1": {
+    "mtime": 1778479318.3552957,
+    "hash": "62c8821e8b369711122534253058ab9d"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\App.tsx": {
+    "mtime": 1778447259.821614,
+    "hash": "1e08f51f09afd677d1ef063d99d6afe8"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\main.tsx": {
+    "mtime": 1778442348.1837316,
+    "hash": "ea7bebc824e5f67b3b9aef34cb4f9491"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\vite-env.d.ts": {
+    "mtime": 1778442348.1837316,
+    "hash": "8f68c27c3fc38817b2726b20e2d4f1ee"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\GameList.tsx": {
+    "mtime": 1778447271.9211311,
+    "hash": "6d8d15874129021056cca639daceb220"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\MainMenu.tsx": {
+    "mtime": 1778447264.0858607,
+    "hash": "a75b94954890c5d2c7463ad1e1dd4c05"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\SystemSelect.tsx": {
+    "mtime": 1778447267.347512,
+    "hash": "45fa0b4d2ed5374ab7dea4f1cda5e1d8"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\customization\\ColorPickerSection.tsx": {
+    "mtime": 1778478881.9385147,
+    "hash": "8e173e9d0ea70f318421d057c2b643b3"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\customization\\MediaManager.tsx": {
+    "mtime": 1778479092.4931664,
+    "hash": "9f60c65d3419bb7bf59f707dbfa2b828"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\customization\\MediaSettingsSection.tsx": {
+    "mtime": 1778478890.6114225,
+    "hash": "644d1ff8aa7d66b100aae147f74d2343"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\customization\\SliderSection.tsx": {
+    "mtime": 1778603632.2163558,
+    "hash": "dea8d105b8de3d9b84fe4ecc3612e5fe"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\customization\\ThemeEditor.tsx": {
+    "mtime": 1778603642.8796387,
+    "hash": "d4888a1627adbc6330cc5b131eb04d1d"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\customization\\ThemePreview.tsx": {
+    "mtime": 1778478895.794299,
+    "hash": "7fb24480d0b66edb2a361a8704c8d7f6"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\game\\GameScreen.tsx": {
+    "mtime": 1778475736.0389173,
+    "hash": "c3f5ad6d63b176ff3aed2016bcb82758"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\game\\index.ts": {
+    "mtime": 1778475752.946676,
+    "hash": "cae724161abbd3134303daec7ecd48eb"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\game-list\\GameListPanel.tsx": {
+    "mtime": 1778603655.9204867,
+    "hash": "4377b812130ed4f034f8afce9fc8e78e"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\game-list\\index.ts": {
+    "mtime": 1778475327.6083405,
+    "hash": "5e0f34b6e5bb60da9b5eadbaf0ae9032"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\hardware\\CoinOverlay.tsx": {
+    "mtime": 1778603662.5406783,
+    "hash": "20f0e0824678e476c1d3e9a36a2aba35"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\hardware\\HardwareCalibration.tsx": {
+    "mtime": 1778603686.133118,
+    "hash": "cca036f49e5f406140da8b0bb7415df8"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\hardware\\index.ts": {
+    "mtime": 1778476096.781423,
+    "hash": "66ba4a152e2ff1cd9e09542da28e4f39"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\settings\\ShaderSelector.tsx": {
+    "mtime": 1778604814.1473298,
+    "hash": "87ec12c5214bd9d5335e338ff0e8c83d"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\setup\\SetupWizard.tsx": {
+    "mtime": 1778479498.2359726,
+    "hash": "3398f4e47acb0604e1c120f2c5197876"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\setup\\steps\\ConfigureInputStep.tsx": {
+    "mtime": 1778479524.468669,
+    "hash": "1472fa4f088df34b3e82aec4a2460698"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\setup\\steps\\MediaDirectoryStep.tsx": {
+    "mtime": 1778479514.8005574,
+    "hash": "365c88e2d38cc4cf3f02c2f86930da25"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\setup\\steps\\OperatorPinStep.tsx": {
+    "mtime": 1778479530.3704414,
+    "hash": "e02c91ce9a596c5df3ff1c2dd646bfee"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\setup\\steps\\ReviewStep.tsx": {
+    "mtime": 1778479536.9703362,
+    "hash": "a55d3876f32d02ad7d6b8cafa9ef11df"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\setup\\steps\\RomDirectoryStep.tsx": {
+    "mtime": 1778479511.529817,
+    "hash": "3db42fc77c7a2691b235f20a9f5776f6"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\setup\\steps\\SystemsStep.tsx": {
+    "mtime": 1778479519.7165918,
+    "hash": "0e06d3f73442e616f9ad26589b4d1d66"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\setup\\steps\\WelcomeStep.tsx": {
+    "mtime": 1778479505.4434998,
+    "hash": "6dd7e40dd8886ec4e4c278ab7816dc6a"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\system-select\\index.ts": {
+    "mtime": 1778475352.460198,
+    "hash": "51b965c5c803f5edbf018a16deb11475"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\system-select\\SystemSelectUI.tsx": {
+    "mtime": 1778475335.1441824,
+    "hash": "a3711528cdf5d23fb4d158796eae47ab"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\wheel\\HyperSpinWheel.tsx": {
+    "mtime": 1778603690.8832183,
+    "hash": "0c5326e1e91e914bba101b785ec6a5b8"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\components\\wheel\\index.ts": {
+    "mtime": 1778475301.9598405,
+    "hash": "ae5751a02be39b74d1dcedea3728bdb1"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\context\\ArcadeContext.tsx": {
+    "mtime": 1778475725.240497,
+    "hash": "53463eceaecc9ecbbb1a26e28e97abb3"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\hooks\\index.ts": {
+    "mtime": 1778476724.840256,
+    "hash": "f9d8ec73b4251e87ec7953a155af7c30"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\hooks\\useHardware.ts": {
+    "mtime": 1778478347.4710448,
+    "hash": "a0a8e8091afe25fbe24e66489b92b9c1"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\hooks\\useMedia.ts": {
+    "mtime": 1778479081.710992,
+    "hash": "c5dfe9ed2c645a4af6a8e35ead0eab54"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\hooks\\useShaders.ts": {
+    "mtime": 1778604799.4811683,
+    "hash": "76105c50bd38cc52d7671a69d9b9edea"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\hooks\\useTauri.ts": {
+    "mtime": 1778475715.006314,
+    "hash": "8e6d56370385300e11609f8db00d34bc"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\hooks\\useTheme.ts": {
+    "mtime": 1778478954.334232,
+    "hash": "b778ccb0a6b8a965ce9aed19c9f33d2c"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\build.rs": {
+    "mtime": 1778604371.4103246,
+    "hash": "d1d9543124c3dd78ecfb022d93a44e7a"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\error.rs": {
+    "mtime": 1778474736.5823512,
+    "hash": "5aa9b2e495ba5a82ddb0c7dcbca4ae1f"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\lib.rs": {
+    "mtime": 1778604776.5531986,
+    "hash": "e6e5286041df8e03bbab3e8198cbe49c"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\main.rs": {
+    "mtime": 1778473187.6766796,
+    "hash": "cd5c98bc07ebb803e45293304027c045"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\adapters\\gambatte_adapter.rs": {
+    "mtime": 1778604371.4113257,
+    "hash": "06b853f8bde23f1da00be628005c95f5"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\adapters\\mame_adapter.rs": {
+    "mtime": 1778604371.4113257,
+    "hash": "3d6c52f5a1c0e95539d5aecbd1d5f10a"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\adapters\\mod.rs": {
+    "mtime": 1778604371.412326,
+    "hash": "e0561c855d2f691e35fe608de755f9df"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\adapters\\mupen64_adapter.rs": {
+    "mtime": 1778604371.413327,
+    "hash": "a5eb1eabf9c375455ccf982fb86634c7"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\adapters\\pcsx_redux_adapter.rs": {
+    "mtime": 1778604371.413327,
+    "hash": "2835a93a0360a1d17738cee59f410ace"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\adapters\\retroarch_adapter.rs": {
+    "mtime": 1778604371.4143257,
+    "hash": "36b1e2a82368ae2aa358d7cdc67e418a"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\adapters\\trait_adapter.rs": {
+    "mtime": 1778604371.4143257,
+    "hash": "8168b645846561d333b10c633abe1346"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\coin.rs": {
+    "mtime": 1778604371.4153266,
+    "hash": "acbbd80005f6057cac612d6db8f57de7"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\config.rs": {
+    "mtime": 1778604371.4153266,
+    "hash": "e5ca576764afd8eb60e6ae550aaf2eb2"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\emulator.rs": {
+    "mtime": 1778604371.416326,
+    "hash": "65ba42ddd36ccb52fe29a30987164877"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\games.rs": {
+    "mtime": 1778604371.416326,
+    "hash": "3921fede7d1ba11d6fb58312a8ad7bc0"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\hardware.rs": {
+    "mtime": 1778604371.417327,
+    "hash": "3bacd1ed4bf1a315fc655be400bf3914"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\input.rs": {
+    "mtime": 1778604371.417327,
+    "hash": "f7f19f53b722b9a67d9048fed853a2d0"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\media.rs": {
+    "mtime": 1778604371.4183257,
+    "hash": "5b9f32fd270bdc8605d5308451b279b0"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\mod.rs": {
+    "mtime": 1778604371.4183257,
+    "hash": "2795fb7848cf869850ca540c4d394b1a"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\operator.rs": {
+    "mtime": 1778604371.4183257,
+    "hash": "b2546a3128ef970996c590fcb555078e"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\shader.rs": {
+    "mtime": 1778604772.8298807,
+    "hash": "d20acea1636ae878c8c0fe4699e9ff55"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\system.rs": {
+    "mtime": 1778604371.4193249,
+    "hash": "ad0b23e5ffaf63aaca75c3ac2149476d"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\theme.rs": {
+    "mtime": 1778604371.4193249,
+    "hash": "87976a1374eaf7f052b51f307d2c57dd"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\theme_commands.rs": {
+    "mtime": 1778478608.8622143,
+    "hash": "46bca09d5afe1a015ff629b96c82b780"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\commands\\timer.rs": {
+    "mtime": 1778604371.4203243,
+    "hash": "ffb355be8989bea4a2afd5a7f9a82605"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\arduino_serial.rs": {
+    "mtime": 1778604371.4203243,
+    "hash": "d1ad0339d825d567b8e17d8a7e693dc7"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\autoboot.rs": {
+    "mtime": 1778604371.421325,
+    "hash": "18ffdd7a10c61440ff2b912ce2d11590"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\coin_hardware.rs": {
+    "mtime": 1778604371.421325,
+    "hash": "0e33c827a37bd193477b5a78a4d2a79d"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\coin_manager.rs": {
+    "mtime": 1778604371.4223258,
+    "hash": "a111b247c1cccb151615c88d6c19a070"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\config_manager.rs": {
+    "mtime": 1778604371.4223258,
+    "hash": "5af256ee78ff59efdfe8af3c980e3d6a"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\emulator_manager.rs": {
+    "mtime": 1778604371.4223258,
+    "hash": "1c0557e7f7739fe85540ee1ebbb39209"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\game_library.rs": {
+    "mtime": 1778604371.4233255,
+    "hash": "85efbddfc922dff53976c56b49b47bdf"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\game_state.rs": {
+    "mtime": 1778604371.4233255,
+    "hash": "17d4eb4487a2574239bdee5bb5b241d3"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\gpio_coins.rs": {
+    "mtime": 1778604371.4243257,
+    "hash": "2059a7bbdcde7fc25c670c26c4684756"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\media_manager.rs": {
+    "mtime": 1778604371.4243257,
+    "hash": "667a18496eba961caa94a28e333af121"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\mod.rs": {
+    "mtime": 1778604371.4253247,
+    "hash": "c77e2b2716052aaacf92f70f4142dfbc"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\operator_panel.rs": {
+    "mtime": 1778604371.4253247,
+    "hash": "8dbe335d3bfacdbe9adb6c7fc4dd6184"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\shader_manager.rs": {
+    "mtime": 1778604745.506203,
+    "hash": "ac796d60beb807eccdb72bb8ee9d01e4"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\theme_manager.rs": {
+    "mtime": 1778604371.4263246,
+    "hash": "8f6e0967e024f418f993b6eaa84242e9"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\core\\timer_manager.rs": {
+    "mtime": 1778604371.4263246,
+    "hash": "5d00896c080b0962091e701714c981f2"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\db\\connection.rs": {
+    "mtime": 1778604371.4273245,
+    "hash": "e827d4f79678f96a86e5f44980aabcd8"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\db\\mod.rs": {
+    "mtime": 1778444265.2785165,
+    "hash": "4174d3bb406941cc4a6a380d3c55354f"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\db\\migrations\\001_initial.sql": {
+    "mtime": 1778445184.3691292,
+    "hash": "5ea470f08a17634a501fad23eb4aeeab"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\input\\gilrs_backend.rs": {
+    "mtime": 1778444267.4125514,
+    "hash": "7a40c520f2a7268958f389784e38d399"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\input\\input_manager.rs": {
+    "mtime": 1778604371.4273245,
+    "hash": "1c03d2f25e8f01d715aba924aa191145"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\input\\mod.rs": {
+    "mtime": 1778604371.428327,
+    "hash": "a242adddd85bddf911bdf85918d9b349"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\input\\sdl_backend.rs": {
+    "mtime": 1778444267.0038266,
+    "hash": "121a64427204cc5461188b50a121a4c9"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\legacy\\event_loop.rs": {
+    "mtime": 1778604371.428327,
+    "hash": "cb6d41b6d9104a8848a946360d44078b"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\legacy\\mod.rs": {
+    "mtime": 1778604371.433326,
+    "hash": "1a2d5b10323d118f4c8e11a9772da74f"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\legacy\\graphics\\mod.rs": {
+    "mtime": 1778604371.429327,
+    "hash": "d80c4cc0182773a1f3f6ce8c0d1da194"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\legacy\\graphics\\renderer.rs": {
+    "mtime": 1778604371.429327,
+    "hash": "b727824a1d2cdd0b4732fb8614c95c5a"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\legacy\\graphics\\ui.rs": {
+    "mtime": 1778474697.6169086,
+    "hash": "1b0f8a9c669326c47b9152fa0ea2de4e"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\legacy\\graphics\\wheel.rs": {
+    "mtime": 1778604371.4303253,
+    "hash": "34279c03c8c8e16aed3d35057df72a13"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\legacy\\input\\joystick.rs": {
+    "mtime": 1778604371.4303253,
+    "hash": "f397b86efa36192ddbe1d4c32a3893bf"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\legacy\\input\\keyboard.rs": {
+    "mtime": 1778604371.4313247,
+    "hash": "2abe73c30aacc4022ecc07e5f83f19f8"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\legacy\\input\\mod.rs": {
+    "mtime": 1778604371.4313247,
+    "hash": "42c35a6ff94e102cb195b55b974d0526"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\legacy\\input\\sdl_event_handler.rs": {
+    "mtime": 1778604371.4323251,
+    "hash": "a9eeaec87e38d79bb135af7426bdb7d2"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\legacy\\media\\hyperspin.rs": {
+    "mtime": 1778604371.4323251,
+    "hash": "b383b002ca525f504d36dcff1f658c7a"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\legacy\\media\\mod.rs": {
+    "mtime": 1778604371.433326,
+    "hash": "c3cf5d41869acf0927aec1dca8c5c8bc"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\models\\emulator.rs": {
+    "mtime": 1778445193.760337,
+    "hash": "f178930a25d796eefd964d8324c32b52"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\models\\game.rs": {
+    "mtime": 1778445189.3752246,
+    "hash": "59fc611d8dfd712358512e6138dbf8bd"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\models\\input_device.rs": {
+    "mtime": 1778445198.1246302,
+    "hash": "5755cf0ce22b9b075decf8acdc7b573e"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\models\\mod.rs": {
+    "mtime": 1778604371.433326,
+    "hash": "7fe69808dec3c010a6a0a21ffdb25848"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\models\\profile.rs": {
+    "mtime": 1778445197.2910428,
+    "hash": "92f5407c6c0198c08bd071785b4aa81c"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\models\\session.rs": {
+    "mtime": 1778445196.4425962,
+    "hash": "fce4361bfe0ea04dba13642f891b77cd"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\models\\system.rs": {
+    "mtime": 1778445190.8337483,
+    "hash": "3ee6dc5866f0e61b2fc282d96f76f544"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\utils\\mod.rs": {
+    "mtime": 1778604371.434326,
+    "hash": "a6978fcc80dc8afd6e55ec5721ad883b"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\utils\\platform.rs": {
+    "mtime": 1778444269.6077428,
+    "hash": "71919da19b6bad9b2d84084a3654f60d"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\src\\utils\\platform_detect.rs": {
+    "mtime": 1778604371.434326,
+    "hash": "b747c662f27c00bc3d191c9526f93ad9"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\AGENTS.md": {
+    "mtime": 1778601300.8687596,
+    "hash": "2cc61de68498aa1af7a556c73807e522"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\CHECKLIST_v1.0.md": {
+    "mtime": 1778449809.5207217,
+    "hash": "43df5d44f449ef5d0b049c72cfcda1cb"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\CLAUDE.md": {
+    "mtime": 1778488840.7752059,
+    "hash": "91e2212e3a895eee8e39f0b8d097b801"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\index.html": {
+    "mtime": 1778442348.1817312,
+    "hash": "980adb7f3b362d9e0f299bece26cf44c"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\NEOCAB_PLAN_COMPLETO.md": {
+    "mtime": 1778472969.4143984,
+    "hash": "630b72e44fe63065ae25de16a32e32b1"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\PLAN_MAESTRO_REAL_COMPLETO.md": {
+    "mtime": 1778471496.4723425,
+    "hash": "f3082ecb7ff869cf2ffe5c064c14506a"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\PROGRESO_v1.0.md": {
+    "mtime": 1778533974.3607657,
+    "hash": "50e6757d9724a706e3f948a721abb7cd"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\README.md": {
+    "mtime": 1778477941.5820339,
+    "hash": "90c0daa4b0879d4b51240d0f0679c505"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\RESUMEN_SESION_2.md": {
+    "mtime": 1778488646.4918718,
+    "hash": "295aa7ae31d969af510ad7fb5eb71cde"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\ROADMAP.md": {
+    "mtime": 1778534019.2008095,
+    "hash": "18b8ff22eb45056695bbbb1ea69b129c"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\SIGUIENTE_SESION.md": {
+    "mtime": 1778533931.7848346,
+    "hash": "0cacf3a42e8a4d1b8bf815c1b5d14615"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\STATUS.md": {
+    "mtime": 1778533811.2944245,
+    "hash": "eef15adfd8fdfc079586fd80cb1841c6"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\build-scripts\\BUILD.md": {
+    "mtime": 1778479366.2776742,
+    "hash": "edf675daaad0d235826e9f5973508bab"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\config\\shaders\\README.md": {
+    "mtime": 1778604830.4840288,
+    "hash": "c60acf2533bc31f3f1693a7d6afe32c8"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\00B_COMPATIBILIDAD_PLATAFORMAS.md": {
+    "mtime": 1778454110.0,
+    "hash": "3f8f1aa484896b848e4146a10596f76c"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\00C_WINDOWS_XP.md": {
+    "mtime": 1778454110.0,
+    "hash": "ff61c5c9fe4da8f3edcb8eebdf7e2f29"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\00_README_MAESTRO.md": {
+    "mtime": 1778440445.5293524,
+    "hash": "71a49e71d4f65b821cf7c47defa2bf6a"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\01_PLAN_MAESTRO_PARTE_1.md": {
+    "mtime": 1778454110.0,
+    "hash": "ae15a710d30ddb45467676f433fee00f"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\02_PLAN_MAESTRO_PARTE_2.md": {
+    "mtime": 1778440453.469932,
+    "hash": "6abe2d613b648323330671e60e88260c"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\03_PLAN_MAESTRO_PARTE_3.md": {
+    "mtime": 1778440445.9208648,
+    "hash": "e0ec3cee7025900cad598307fb528e57"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\04_PLAN_MAESTRO_PARTE_4.md": {
+    "mtime": 1778454110.0,
+    "hash": "2c554e707a78649e9b2ad5a19aa3832d"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\05_CRONOGRAMA_DIA_POR_DIA.md": {
+    "mtime": 1778454110.0,
+    "hash": "7ea16be3264fc039f93485acad8fe1f0"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\06_EMULADORES_EXHAUSTIVO.md": {
+    "mtime": 1778454110.0,
+    "hash": "5631aad0bd806f1f6676a5d65d297330"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\07_CONFIGURACION_CONTROLES.md": {
+    "mtime": 1778454110.0,
+    "hash": "b2e9d5b6a7749c077dd770767a57c661"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\08_CHECKLIST_FINAL.md": {
+    "mtime": 1778454110.0,
+    "hash": "910c4096b644b57e5912f0af7be9b6cc"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\09_TRABAJANDO_CON_IA.md": {
+    "mtime": 1778454110.0,
+    "hash": "1e999d20cb95e28433eca25e920b51d8"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\10_HARDWARE_FISICO.md": {
+    "mtime": 1778454110.0,
+    "hash": "c3f60b36754dd373eefed0d3ef753943"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\11_OPERACIONES.md": {
+    "mtime": 1778454110.0,
+    "hash": "6c3289e32b8d55d622182329494719a5"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\12_TEMPLATE_PROMPTS.md": {
+    "mtime": 1778454110.0,
+    "hash": "75350b101cd7dbef92162c1c6b979ee0"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\15_UI_HYPERSPIN_WHEEL.md": {
+    "mtime": 1778454110.0,
+    "hash": "479e86df4649adf85dbd6b6966074cc9"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\16_JOYTOKEY_INTEGRADO.md": {
+    "mtime": 1778454110.0,
+    "hash": "565e3ba6873ed96f2d281b60a76f45e6"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\17_SETUP_WIZARD.md": {
+    "mtime": 1778454110.0,
+    "hash": "8c44f1c13fbc04582d0a37fdb74cfde9"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\BIENVENIDA_SESION_2.md": {
+    "mtime": 1778442642.2262714,
+    "hash": "28bf38aefb401084c02e2001ae623d02"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\GUIA_RAPIDA.md": {
+    "mtime": 1778440446.359867,
+    "hash": "66363992c8149607304fd9be2be3afd7"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\INDEX_MAESTRO.md": {
+    "mtime": 1778440440.2914464,
+    "hash": "eece72b23b974991a602e8e56c1cf4db"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\INICIO.md": {
+    "mtime": 1778440447.3438668,
+    "hash": "cd09cc76efa505739e1dcf29a1d0bced"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\INTEGRATION_COMPLETE.md": {
+    "mtime": 1778477862.6001406,
+    "hash": "43165b83b581852fa7b60738e13a9404"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\NUEVAS_FUNCIONES_HYPERSPIN.md": {
+    "mtime": 1778482848.2327287,
+    "hash": "b8855f1800a7bcc612db83ce480f307a"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\ORGANIZACION.md": {
+    "mtime": 1778440424.7677782,
+    "hash": "0440eef52dc57eb416e797933843550e"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\PHASE4_HARDWARE.md": {
+    "mtime": 1778476129.5756998,
+    "hash": "3ff92cb4f7857a69e1615adaeaaae096"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\PHASE4_SESSION_SUMMARY.md": {
+    "mtime": 1778476898.3472216,
+    "hash": "4a320c65cd03a6973f0fff610e4fcff5"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\PHASE5_IMPLEMENTATION_PLAN.md": {
+    "mtime": 1778480703.4833882,
+    "hash": "628e8d9e4d47c67b004463c3ea90ab65"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\PHASE5_PLUS_ADVANCED_CUSTOMIZATION.md": {
+    "mtime": 1778477820.4871528,
+    "hash": "7b940b2aa433a7495a43e4eec6239359"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\PHASE6_WEEK1_SHADERS.md": {
+    "mtime": 1778480730.1881125,
+    "hash": "76f5f9654d5806063ccc8df99637f02b"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\PROGRESO_ACTUAL.md": {
+    "mtime": 1778480692.3330867,
+    "hash": "caa69c231af55719c3a88cca0da9a6c5"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\README.md": {
+    "mtime": 1778442348.1807315,
+    "hash": "070911911a8e1ac32796e78bff4a30c0"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\SESION_3_ROADMAP.md": {
+    "mtime": 1778442658.346184,
+    "hash": "84d2229ea32497badab128d89762b229"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\STATUS.md": {
+    "mtime": 1778480300.4109335,
+    "hash": "b697539d842c2ba76953b51220a85368"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\docs\\TAREAS.md": {
+    "mtime": 1778440916.4075112,
+    "hash": "6777394b72d9102dfede0c3ce11b146d"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\public\\tauri.svg": {
+    "mtime": 1778442348.1857305,
+    "hash": "f0966ff85db99f2d00771f92d18c9e7f"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\public\\vite.svg": {
+    "mtime": 1778442348.1867313,
+    "hash": "8e3a10e157f75ada21ab742c022d5430"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src\\assets\\react.svg": {
+    "mtime": 1778442348.1857305,
+    "hash": "f0402b67b6ce880f65666bb49e841696"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\128x128.png": {
+    "mtime": 1778442348.1657324,
+    "hash": "fdd248e915476e6212afcb096c330992"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\128x128@2x.png": {
+    "mtime": 1778442348.1657324,
+    "hash": "fd32cf41af4c52d279b92e9c61676130"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\32x32.png": {
+    "mtime": 1778442348.166732,
+    "hash": "1344a8f2569a67c695807140fb49cf10"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\icon.png": {
+    "mtime": 1778442348.178731,
+    "hash": "3fa4420986811b429d7f1654da77ac3b"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\Square107x107Logo.png": {
+    "mtime": 1778442348.1677327,
+    "hash": "24754965fb63f23a0fad45db0ef2554b"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\Square142x142Logo.png": {
+    "mtime": 1778442348.1687324,
+    "hash": "55d92879c6bd61fc7e79a84e1dcc51f6"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\Square150x150Logo.png": {
+    "mtime": 1778442348.1727319,
+    "hash": "6e41a89b0a2b484f3e7f1b3a5db65730"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\Square284x284Logo.png": {
+    "mtime": 1778442348.1727319,
+    "hash": "b5f57838809a4d93eed8ef656ce7c2c4"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\Square30x30Logo.png": {
+    "mtime": 1778442348.1737325,
+    "hash": "7a18f38b895070303fda351bd8ae757d"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\Square310x310Logo.png": {
+    "mtime": 1778442348.174732,
+    "hash": "eeabbd0c2b13960e089e468c20f99e51"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\Square44x44Logo.png": {
+    "mtime": 1778442348.174732,
+    "hash": "42c67a38757b409cec4b6eb0c25c714c"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\Square71x71Logo.png": {
+    "mtime": 1778442348.1757324,
+    "hash": "0670843e2fc39a0e53817a47b2b3399d"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\Square89x89Logo.png": {
+    "mtime": 1778442348.1757324,
+    "hash": "2bfa099bf584686f0dd98cfafb10bda3"
+  },
+  "C:\\Users\\Pako\\Desktop\\arcade\\NeoCab\\src-tauri\\icons\\StoreLogo.png": {
+    "mtime": 1778442348.176731,
+    "hash": "02859e2326344ae7c9559f1af0abba34"
+  }
+}

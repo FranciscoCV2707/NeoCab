@@ -11,6 +11,7 @@ pub mod hardware;
 pub mod media;
 pub mod shader;
 pub mod network;
+pub mod logs;
 
 pub use system::*;
 pub use games::*;
@@ -25,3 +26,4 @@ pub use hardware::*;
 pub use media::*;
 pub use shader::*;
 pub use network::*;
+pub use logs::*;
