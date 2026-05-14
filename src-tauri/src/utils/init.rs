@@ -2,14 +2,20 @@
 use std::path::PathBuf;
 use crate::Result;
 
+/// Returns the base directory next to the executable (portable install).
+fn base_dir() -> PathBuf {
+    std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(|p| p.to_path_buf()))
+        .unwrap_or_else(|| PathBuf::from("."))
+}
+
 /// Initialize application directory structure on first run
 pub async fn initialize_app_directories() -> Result<()> {
-    // Create base data directory
-    let data_dir = PathBuf::from("./data");
-    std::fs::create_dir_all(&data_dir)?;
+    let base = base_dir();
 
-    // Create subdirectories
     let subdirs = vec![
+        "data",
         "data/games",
         "data/media",
         "data/themes",
@@ -24,23 +30,20 @@ pub async fn initialize_app_directories() -> Result<()> {
     ];
 
     for subdir in subdirs {
-        std::fs::create_dir_all(subdir)?;
+        std::fs::create_dir_all(base.join(subdir))?;
     }
 
-    tracing::info!("Application directories initialized");
+    tracing::info!("Application directories initialized at {}", base.display());
 
-    // Create default config if it doesn't exist
-    create_default_config()?;
-
-    // Create default theme structure
-    create_default_media_structure()?;
+    create_default_config(&base)?;
+    create_default_media_structure(&base)?;
 
     Ok(())
 }
 
 /// Create default config.yml if it doesn't exist
-fn create_default_config() -> Result<()> {
-    let config_path = PathBuf::from("./data/config.yml");
+fn create_default_config(base: &PathBuf) -> Result<()> {
+    let config_path = base.join("data").join("config.yml");
 
     if config_path.exists() {
         return Ok(());
@@ -105,16 +108,16 @@ hardware:
 
     std::fs::write(&config_path, default_config)?;
 
-    tracing::info!("Created default config.yml at {:?}", config_path);
+    tracing::info!("Created default config.yml at {}", config_path.display());
     Ok(())
 }
 
 /// Create default media directory structure
-fn create_default_media_structure() -> Result<()> {
+fn create_default_media_structure(base: &PathBuf) -> Result<()> {
     let media_systems = vec!["arcade", "nes", "snes", "genesis", "psx", "n64", "gb"];
 
     for system in media_systems {
-        let system_media_dir = PathBuf::from(format!("./data/media/{}", system));
+        let system_media_dir = base.join("data").join("media").join(system);
         std::fs::create_dir_all(&system_media_dir)?;
 
         // Create placeholder file to indicate where to put media
@@ -132,7 +135,7 @@ fn create_default_media_structure() -> Result<()> {
 
 /// Check if this is first run (no config.yml)
 pub fn is_first_run() -> bool {
-    !std::path::Path::new("./data/config.yml").exists()
+    !base_dir().join("data").join("config.yml").exists()
 }
 
 #[cfg(test)]

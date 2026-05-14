@@ -101,10 +101,8 @@ export const GameScreen: React.FC<GameScreenProps> = ({ onBack }) => {
     <div className="game-screen">
       {showLaunchOverlay && (
         <FadeOverlay
-          isVisible={showLaunchOverlay}
+          visible={showLaunchOverlay}
           gameName={launchGameName}
-          duration={3000}
-          onFadeComplete={completeLaunch}
         />
       )}
 

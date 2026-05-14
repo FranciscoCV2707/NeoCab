@@ -1,7 +1,8 @@
 use std::collections::HashMap;
-use std::time::{Instant, Duration};
+use std::time::Instant;
+use std::path::Path;
 use serde::{Deserialize, Serialize};
-use tracing::{info, error, debug};
+use tracing::{info, debug};
 
 /// Represents an action to be triggered by an input event
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -22,7 +23,47 @@ pub struct MacroStep {
     pub delay_ms: u64,
 }
 
-// ... rest of the enums ...
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub enum AxisDirection {
+    Positive,
+    Negative,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub enum JoyTrigger {
+    Button { button: u8 },
+    Axis { axis: u8, direction: AxisDirection },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ResponseCurve {
+    Linear,
+    Exponential { factor: f32 },
+    Digital { threshold: f32 },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ArcadeAction {
+    CoinInsert,
+    InsertCoin,
+    StartGame,
+    PauseMenu,
+    ExitGame,
+    NavigateUp,
+    NavigateDown,
+    NavigateLeft,
+    NavigateRight,
+    Confirm,
+    Back,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct JoyMapping {
+    pub trigger: JoyTrigger,
+    pub action: MappedAction,
+    pub hold_ms: Option<u64>,
+    pub repeat_ms: Option<u64>,
+}
 
 /// A complete profile for a specific system or game
 #[derive(Debug, Clone, Serialize, Deserialize)]

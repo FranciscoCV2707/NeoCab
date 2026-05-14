@@ -497,18 +497,18 @@ impl Database {
     }
 
     pub async fn get_high_scores(&self, game_id: i64) -> Result<Vec<serde_json::Value>> {
-        let scores = sqlx::query!(
+        let scores = sqlx::query_as::<_, (String, i64, Option<String>)>(
             "SELECT player_name, score, created_at FROM high_scores WHERE game_id = ? ORDER BY score DESC LIMIT 10"
         )
         .bind(game_id)
         .fetch_all(&self.pool)
         .await?;
 
-        let result = scores.into_iter().map(|s| {
+        let result = scores.into_iter().map(|(player, score, date)| {
             serde_json::json!({
-                "player": s.player_name,
-                "score": s.score,
-                "date": s.created_at
+                "player": player,
+                "score": score,
+                "date": date
             })
         }).collect();
 

@@ -71,7 +71,7 @@ pub struct InputManager {
     mappings: Arc<RwLock<Vec<InputMapping>>>,
     enabled: Arc<RwLock<bool>>,
     deadzone: Arc<RwLock<f32>>,
-    joy_mapper: Arc<RwLock<crate::input::joy_mapper::JoyMapper>>,
+    pub joy_mapper: Arc<RwLock<crate::input::joy_mapper::JoyMapper>>,
     injector: Arc<Box<dyn crate::input::joy_mapper::KeyInjector>>,
 }
 

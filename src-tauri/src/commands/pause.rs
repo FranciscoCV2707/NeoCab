@@ -1,9 +1,7 @@
-use tauri::AppHandle;
-use tauri::Emitter;
-use crate::Result;
+use tauri::{AppHandle, Emitter};
 
 #[tauri::command]
-pub async fn toggle_pause_menu(app_handle: AppHandle) -> Result<()> {
-    app_handle.emit("toggle_pause_menu", ())?;
+pub async fn toggle_pause_menu(app_handle: AppHandle) -> Result<(), String> {
+    app_handle.emit("toggle_pause_menu", ()).map_err(|e| e.to_string())?;
     Ok(())
 }

@@ -51,6 +51,9 @@
       "webviewInstallMode": {
         "type": "embedBootstrapper",
         "silent": true
+      },
+      "nsis": {
+        "installMode": "currentUser"
       }
     }
   }

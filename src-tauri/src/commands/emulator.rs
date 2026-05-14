@@ -1,4 +1,4 @@
-use tauri::State;
+use tauri::{State, Emitter};
 use serde_json::json;
 use std::sync::Arc;
 use crate::db::Database;
