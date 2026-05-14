@@ -1,396 +1,220 @@
-# 🎮 NeoCab v1.0.0 - Estado del Proyecto ✅ COMPLETADO
+# 🎮 NeoCab v1.0.0 - Estado del Proyecto (Sesión 23+)
 
-**Última actualización:** 2026-05-13 (SESSION 21 - v1.0.0 FINAL RELEASE)  
-**Versión:** 1.0.0 PRODUCTION READY  
-**Progreso Global:** ✅ 100% COMPLETADO (400+ horas)
-
----
-
-## 📊 Resumen Ejecutivo
-
-NeoCab v1.0.0 es un **Sistema Operativo Profesional para Gabinetes Arcade** completamente funcional con:
-- ✅ **21 Sessions completadas** (100% del proyecto)
-- ✅ **13 Fases completadas** (Network, Installer, Features, Launcher, Polish, Release, Windows XP, Setup)
-- ✅ **Arquitectura full-stack** (Rust + React + Tauri)
-- ✅ **6 emuladores nativos + 100+ vía RetroArch**
-- ✅ **Sistema de monedas** (virtual + hardware GPIO/Arduino framework)
-- ✅ **Timer & auto-close** con configuración por sistema
-- ✅ **Temas ZIP** con asignación per-sistema
-- ✅ **Launcher** con crash detection y scripts pre/post
-- ✅ **Operator panel** PIN-secured con stats/logs/audit
-- ✅ **Network support** con mDNS y revenue sync
-- ✅ **Instaladores Windows (MSI + NSIS) + Linux (AppImage) + ARM**
-- ✅ **Windows XP legacy mode** con SDL2
-- ✅ **Setup wizard** con auto-init de directorios
-- ✅ **Documentación completa** (40+ archivos .md)
+**Última actualización:** 2026-05-14 (Sesión 23+ - Corrección de crashes)  
+**Versión:** 1.0.0 ESTABLE - Funcionando sin crashes  
+**Progreso Global:** ✅ NÚCLEO FUNCIONAL (ahora en fase de pulido)
 
 ---
 
-## 🏗️ Fases Completadas
+## 🟢 HITOS CRÍTICOS CORREGIDOS EN ESTA SESIÓN
 
-### Phase 1: Core Infrastructure ✅ (30-40h)
-- Feature flags (modern-ui, legacy-ui, hardware-gpio, hardware-arduino)
-- Build system con .cargo/config.toml
-- Platform detection (Windows XP vs Win7+)
-- Logging y startup inicial
+### 1️⃣ Crash por mDNS Daemon (ARREGLADO ✅)
+**Problema**: App se cerraba al iniciar si no había red/UDP multicast  
+**Causa**: `ServiceDaemon::new()` fallaba → error se propagaba → app cerraba silenciosamente  
+**Solución**: Daemon ahora es `Option<ServiceDaemon>`, fallback a modo standalone  
+**Resultado**: App arranca incluso sin red
 
-**Commits:** e89fd54, f88324a
+### 2️⃣ Crash por Config.yml Inválido (ARREGLADO ✅)
+**Problema**: YAML generado tenía estructura incompatible con AppConfig struct  
+**Causa**: Schema mismatch entre generador y parser  
+**Solución**: ConfigManager ahora carga defaults si el YAML falla al parsear  
+**Resultado**: App carga con configuración por defecto incluso si config.yml está mal
 
-### Phase 2: Legacy SDL2 Mode ✅ (55-65h)
-- SDL2 graphics engine
-- Renderer con fullscreen/windowed
-- HyperSpin wheel (Bresenham circles)
-- Input system (keyboard + joystick)
-- Media caching (HyperSpin structure)
+### 3️⃣ Comandos Duplicados en Handler (ARREGLADO ✅)
+**Problema**: 8 comandos registrados dos veces en invoke_handler  
+**Causa**: Copy-paste en lib.rs  
+**Solución**: Eliminados duplicados, reorganizado por categoría  
+**Resultado**: Handler compila limpio
 
-**Commits:** d5e1669, 8525d33, 34224ad, 942bc3f
-
-### Phase 3: HyperSpin Wheel UI (React) ✅ (40-50h)
-- Canvas-based wheel 60FPS
-- Game list panel con scrolling
-- System selector con estadísticas
-- Backend integration + ArcadeContext
-
-**Commits:** 92b7402, c013b2a
-
-### Phase 4: Hardware Integration ✅ (50-60h)
-- GPIO coin detection (RPi)
-- Arduino serial interface
-- Coin overlay UI (animations)
-- Hardware calibration wizard
-
-**Commits:** Phase 4 commits
-
-### Phase 5: Customization & Advanced ✅ (73-92h)
-
-#### Week 1: Theme Editor (28-32h)
-- ThemeEditor.tsx con 6 sub-componentes
-- ColorPickerSection, SliderSection, MediaSettingsSection
-- ThemePreview con live CSS injection
-- useTheme hook con Tauri integration
-- 660 líneas CSS + 960 React/TS
-
-**Commit:** 7be5d22
-
-#### Week 2: Media Manager (15-18h)
-- MediaManager backend (Rust 450 líneas)
-- 6 Tauri commands para media ops
-- React UI con 3 pestañas
-- useMedia hook
-- HyperSpin structure support
-
-**Commit:** 7bdabdd
-
-#### Week 3: Build System (12-15h)
-- build-nsis.ps1 (Windows NSIS)
-- build-appimage.sh (Linux AppImage)
-- build-all.sh (Master script)
-- BUILD.md (350 líneas docs)
-
-**Commit:** b685eeb
-
-#### Week 4: Setup Wizard (18-22h)
-- SetupWizard.tsx (7-step flow)
-- 6 step components individuales
-- 500+ líneas CSS
-- Validación + error handling
-
-**Commit:** 48f8d14
-
-### Phase 6 Week 1: CRT Shaders ✅ (18-22h)
-- ShaderManager (Rust backend)
-- 3 shaders GLSL:
-  - crt-geom.glsl (geometry + gamma)
-  - scanlines.glsl (horizontal scanlines)
-  - phosphor.glsl (shadow mask)
-- 5 Tauri commands (list, get, presets)
-- ShaderSelector React component
-- useShaders hook
-
-**Commit:** 3d13f10
+### 4️⃣ OperatorPanel Importaba Versión Vieja (ARREGLADO ✅)
+**Problema**: App.tsx importaba OperatorPanel simple (3 tabs) en lugar del nuevo (7 tabs)  
+**Causa**: Import equivocado  
+**Solución**: Cambio de `./components/OperatorPanel` → `./components/operator/OperatorPanel`  
+**Resultado**: Ahora ves los 7 tabs: Estadísticas, Controles, Red, Studio, Logs, Auditoría, Config
 
 ---
 
-## 📈 Estadísticas Globales
+## ⚙️ MEJORAS DE INSTALACIÓN Y RUTAS
 
-| Métrica | Valor |
-|---------|-------|
-| **Fases Completadas** | 5.25 / 8 |
-| **Semanas Completadas** | 21 / 32 |
-| **Horas Invertidas** | 266-329h |
-| **Total Proyecto Estimado** | 351-459h |
-| **Progreso Global** | ~60-65% |
-| **Commits Totales** | 20+ |
-| **Archivos Creados** | 100+ |
-| **Líneas de Código** | ~15,000+ |
+### Sin Necesidad de Administrador
+- **Antes**: Instalaba en `C:\Program Files\NeoCab\` (requería admin)
+- **Después**: Instala en `C:\Users\[Usuario]\AppData\Local\Programs\NeoCab\` (sin admin)
+- **Configuración**: `tauri.conf.json` → `installMode: "currentUser"`
 
-### Desglose por Tecnología
+### Rutas Portables (Auto-Contenida)
+- **Antes**: `./data/` relativo al CWD (impredecible en app instalada)
+- **Después**: `./data/` relativo al directorio del exe (portable)
+- **Función**: `get_base_dir()` en lib.rs que resuelve a la carpeta del exe
+- **Resultado**: Todo se crea junto al exe, sin problemas de permisos
 
-| Tech | Archivos | Líneas | Estado |
-|------|----------|--------|--------|
-| **React/TypeScript** | 25+ | ~3,500 | ✅ Completo |
-| **Rust** | 15+ | ~4,500 | ✅ Completo |
-| **CSS/Styling** | 10+ | ~2,500 | ✅ Completo |
-| **GLSL Shaders** | 3 | ~250 | ✅ Completo |
-| **Shell Scripts** | 4 | ~300 | ✅ Completo |
-| **SQLite** | 1 | ~500 | ✅ Schema |
-| **Documentation** | 35+ | ~4,000 | ✅ Completo |
-
----
-
-## 🎯 Próximos Pasos (Phase 6-8)
-
-### Phase 6 Week 2: Advanced Shaders (EN PROGRESO)
-- [x] Shader parameter system (brightness, contrast, scanlines, phosphor)
-- [x] Custom GLSL desde `config/shaders/*.glsl`
-- [x] Refresh/hot-reload via Refresh + watcher nativo `notify`
-- [x] Validacion basica con line numbers
-- [x] Parsing inicial de uniforms escalares (`float`/`int`)
-- [x] Profiling inicial de scan/refresh
-- [x] Cache de scans de shaders + invalidacion desde watcher
-- [x] Startup smoke con `npm run tauri:dev`
-- [ ] QA visual/manual con `npm run tauri dev`
-- [ ] GPU optimization real: atlasing, batching, memory pools, VRAM metrics
-
-### Phase 6 Weeks 3-4: Shader Polish / RetroArch Follow-up
-- [ ] More GLSL shaders (20+)
-- [ ] Scanline variations
-- [ ] Bloom/glow effects
-- [ ] RetroArchAdapter enhancement si sigue siendo prioridad
-
-### Phase 7: Extended Emulators (40-60h)
-- [ ] 20-30 emulator adapters
-- [ ] Sega Saturn, Dreamcast, Atari ST
-- [ ] SCUMMVM, Dosbox
-- [ ] Tier 1 + Tier 2 systems
-
-### Phase 8: Final Polish (15-25h)
-- [ ] Full system testing
-- [ ] Performance optimization
-- [ ] Documentation finalization
-- [ ] v3.0 release + deployment
-
----
-
-## 🔧 Compilación Status
-
-✅ **Shader checks pasan**
-- `cargo test shader_manager` OK (17 tests)
-- `npm run build` OK
-- `npm run tauri:dev` startup smoke OK
-- Warnings Rust non-critical existentes
-
-✅ **Frontend ready**
-- React 18+ con TypeScript
-- Vite dev server en :1420
-- HMR (Hot Module Reload) funcionando
-
-🔄 **Tauri visual QA pendiente**
-- Ejecutar `npm run tauri dev`
-- Validar shaders custom validos/invalidos desde UI
-
-✅ **Tauri integration complete**
-- 50+ Tauri commands registrados
-- State management para todos los managers
-- Full async/await support
-
----
-
-## 📁 Estructura de Directorios
-
+**Estructura de directorios post-instalación**:
 ```
-NeoCab/
-├── src/                          # Frontend React
-│   ├── components/               # React components
-│   │   ├── customization/        # Theme editor + media manager
-│   │   ├── setup/                # Setup wizard
-│   │   └── settings/             # Shader selector
-│   ├── hooks/                    # Custom hooks (useTheme, useMedia, useShaders)
-│   └── ...
-├── src-tauri/                    # Backend Rust
-│   ├── src/
-│   │   ├── commands/             # Tauri IPC handlers (50+ commands)
-│   │   ├── core/                 # Business logic (managers)
-│   │   ├── db/                   # SQLite integration
-│   │   ├── models/               # Data types
-│   │   └── ...
-│   └── Cargo.toml
-├── public/                       # Static assets
-│   ├── shaders/                  # GLSL shaders (crt-geom, scanlines, phosphor)
-│   └── ...
-├── build-scripts/                # Build automation
-│   ├── build-nsis.ps1            # Windows installer
-│   ├── build-appimage.sh         # Linux AppImage
-│   ├── build-all.sh              # Master build script
-│   └── BUILD.md                  # Build documentation
-├── docs/                         # Documentation (35+ files)
-│   ├── STATUS.md                 # Este archivo
-│   ├── PHASE5_IMPLEMENTATION_PLAN.md
-│   └── ...
-└── ...
+C:\Users\[Usuario]\AppData\Local\Programs\NeoCab\
+├── NeoCab.exe
+├── data/
+│   ├── neocab.db          ← Base de datos SQLite
+│   ├── config.yml         ← Config auto-generada
+│   ├── games/             ← ROMs por sistema
+│   ├── media/             ← Assets (wheels, marquees, etc.)
+│   ├── themes/            ← Configuración de temas
+│   ├── logs/              ← Registros diarios
+│   └── backups/
+└── config/
+    ├── shaders/           ← Shaders CRT/upscaling
+    ├── themes/
+    └── joy_profiles/      ← Mapeos de controles
 ```
 
 ---
 
-## 💾 Managers Principales (Rust)
+## ✅ ESTADO ACTUAL: ESTABLE
 
-| Manager | Responsabilidad | Estado |
-|---------|-----------------|--------|
-| **GameLibrary** | ROM scanning + indexing | ✅ Completo |
-| **EmulatorManager** | 15+ emulator adapters | ✅ Completo |
-| **CoinManager** | Balance, events, earnings | ✅ Completo |
-| **TimerManager** | Game timers + overtime | ✅ Completo |
-| **InputManager** | Device mapping + deadzone | ✅ Completo |
-| **OperatorPanel** | PIN auth + statistics | ✅ Completo |
-| **AutobootManager** | Windows Registry + .desktop | ✅ Completo |
-| **ThemeManager** | Theme JSON + CSS vars | ✅ Completo |
-| **MediaManager** | HyperSpin media scanning | ✅ Completo |
-| **ShaderManager** | GLSL shaders, presets, params, custom refresh | 🔄 Week 2 en progreso |
+### Backend (Rust)
+- ✅ Base de datos SQLite inicializada
+- ✅ 7 sistemas por defecto cargados (MAME, NES, SNES, Genesis, PSX, N64, GB)
+- ✅ 8 emuladores registrados (MAME + 7 cores RetroArch)
+- ✅ Servidor API (Axum en puerto 8080)
+- ✅ mDNS discovery y advertising
+- ✅ Monitoreo de carpetas media
+- ✅ Detección de shaders
+- ✅ Sistema de logging
 
----
+### Frontend (React)
+- ✅ App arranca sin crashes
+- ✅ UI se renderiza correctamente
+- ✅ 7 tabs funcionales en OperatorPanel
+- ✅ Navegación por clicks/botones
+- ✅ Diseño responsive
+- ✅ Estilos CSS aplicados
 
-## 🚀 Tauri Commands (50+)
-
-### System (2)
-- get_system_info
-
-### Games (2)
-- list_games, scan_roms
-
-### Emulator (4)
-- list_emulators, launch_game, stop_game, get_recommended_emulator
-
-### Coin (7)
-- add_coins, get_coin_balance, start_game, end_game, return_coins, get_earnings, ...
-
-### Timer (7)
-- start_timer, pause_timer, resume_timer, stop_timer, get_timer_status, add_timer_time, is_time_up
-
-### Input (6)
-- get_input_devices, get_input_mappings, set_deadzone, get_deadzone, set_input_enabled, is_input_enabled
-
-### Config (3)
-- get_config, set_config, reload_config
-
-### Operator (7)
-- authenticate_operator, logout_operator, is_operator_authenticated, change_operator_pin, get_operator_stats, get_session_stats, get_system_health
-
-### Autoboot (6)
-- enable_autoboot, disable_autoboot, is_autoboot_enabled, enable_kiosk_mode, disable_kiosk_mode, is_kiosk_mode_enabled
-
-### Theme (7)
-- list_themes, get_current_theme, load_theme, save_custom_theme, export_theme, import_theme, apply_theme
-
-### Media (6)
-- scan_media, get_media_stats, get_system_media, organize_media, get_media, import_media
-
-### Shader (12)
-- list_shaders, rescan_shaders, get_shader, validate_shader, list_shader_presets, get_shader_preset, get_default_shader, get_shader_params, set_shader_param, start_shader_watcher, stop_shader_watcher, is_shader_watcher_running
-
-**Total: 50+ commands**
+### Instalación
+- ✅ Instalador NSIS (sin admin)
+- ✅ Instalación portátil
+- ✅ Auto-crea directorios necesarios
+- ✅ Fallback graceful en errores
+- ✅ Maneja ausencia de red
 
 ---
 
-## 🎨 React Components (25+)
+## ⚠️ PROBLEMAS CONOCIDOS (Por Resolver)
 
-### Theme Customization (5)
-- ThemeEditor.tsx
-- ColorPickerSection.tsx
-- SliderSection.tsx
-- MediaSettingsSection.tsx
-- ThemePreview.tsx
+### Prioridad Alta
+- [ ] **Navegación por Teclado**: Las flechas no navegan menús
+  - Necesita: Integrar gamepad hook con UI
+  
+- [ ] **Lanzar Juegos**: No se pueden probar sin ROMs reales
+  - Backend listo, falta contenido
+  
+- [ ] **PIN Enforced**: No se pide PIN para acceder a Operator
+  - Necesita: Validación en App.tsx antes de mostrar panel
 
-### Media Management (1)
-- MediaManager.tsx
-
-### Setup Wizard (8)
-- SetupWizard.tsx (main)
-- WelcomeStep.tsx
-- RomDirectoryStep.tsx
-- MediaDirectoryStep.tsx
-- SystemsStep.tsx
-- ConfigureInputStep.tsx
-- OperatorPinStep.tsx
-- ReviewStep.tsx
-
-### Shader System (1)
-- ShaderSelector.tsx
-
-### Custom Hooks (3)
-- useTheme.ts
-- useMedia.ts
-- useShaders.ts
-
-**Total: 25+ components**
+### Prioridad Media
+- [ ] JoyMapper UI refinement
+- [ ] Smart Scraper integration completa
+- [ ] Pause Menu en contexto de juego
+- [ ] Attract Mode auto-trigger
 
 ---
 
-## 📝 Documentación
+## 📊 MATRIZ DE FEATURES
 
-### Guías Principales
-- **INDEX_MAESTRO.md** - Navegación completa
-- **README_MAESTRO.md** - Overview ejecutivo
-- **PLAN_MAESTRO_PARTE_1-4.md** - Visión, arquitectura, código, deployment
-
-### Implementación
-- **PHASE5_IMPLEMENTATION_PLAN.md** - Plan detallado Phase 5
-- **BUILD.md** - Guía de compilación (Windows + Linux)
-- **SETUP_WIZARD.md** - Documentación del wizard
-
-### Referencias
-- **06_EMULADORES_EXHAUSTIVO.md** - 300+ emuladores
-- **07_CONFIGURACION_CONTROLES.md** - Input mappings
-- **10_HARDWARE_FISICO.md** - Componentes arcade
-- **11_OPERACIONES.md** - Business model
-
-**Total: 35+ archivos .md**
+| Feature | Status | Notas |
+|---------|--------|-------|
+| **NeoCab Studio** | ⚠️ Parcial | Componente existe, UI funcional, necesita ROM test |
+| **JoyMapper** | ⚠️ Parcial | InputWizard tab visible, motor core funcional |
+| **Launcher Pro Fades** | ⚠️ Parcial | FadeOverlay existe, necesita contexto de juego |
+| **Smart Scraper** | ⚠️ Parcial | Comandos existen, UI no integrada |
+| **Attract Mode** | ✅ Implementado | Listo, auto-trigger pendiente |
+| **Marquee Dual Monitor** | ✅ Implementado | Segunda ventana configurada |
+| **Operator Panel** | ✅ Funcional | 7 tabs visibles y clickeables |
+| **Database** | ✅ Completo | SQLite 10 tablas, sistemas preload |
+| **Emulator Framework** | ✅ Completo | 8 adapters registrados |
 
 ---
 
-## 🐛 Estado de Bugs & Issues
+## 🔨 INFORMACIÓN DE BUILD
 
-✅ **Sin issues bloqueantes**
-- Compilación limpia
-- Todas las features funcionan
-- Tests pasando
+**Último build exitoso**: 2026-05-14 00:15 UTC  
+**Compilación**: ~7 minutos (React + Rust)  
+**Tamaño**: ~55 MB MSI, ~40 MB NSIS exe  
 
-⚠️ **Minor known issues**
-- Algunos shaders GLSL necesitan optimización
-- RetroArch integration (future enhancement)
-
----
-
-## 📅 Timeline Estimado
-
-| Fase | Semanas | Horas | Status |
-|------|---------|-------|--------|
-| 1-5 | 20 | 248-307h | ✅ Completo |
-| 6 (W1) | 1 | 18-22h | ✅ Completo |
-| 6 (W2-4) | 3 | 35-50h | ⏳ Próximo |
-| 7 | 4 | 40-60h | ⏳ Después |
-| 8 | 2 | 15-25h | ⏳ Final |
-| **TOTAL** | **30** | **351-464h** | **~60%** |
+**Instaladores**:
+- 📦 MSI: `src-tauri/target/release/bundle/msi/NeoCab_0.1.0_x64_en-US.msi`
+- 📦 EXE: `src-tauri/target/release/bundle/nsis/NeoCab_0.1.0_x64-setup.exe` ← Recomendado
 
 ---
 
-## 🎯 Métricas de Calidad
+## 📋 QUÉ FUNCIONA END-TO-END (TESTEABLE AHORA)
 
-- ✅ **Code Coverage**: 80%+ (core modules)
-- ✅ **Type Safety**: TypeScript strict + Rust type system
-- ✅ **Performance**: 60FPS wheel rendering, <2s startup
-- ✅ **Security**: PIN auth, operator panel, SQL injection prevention
-- ✅ **Accessibility**: Keyboard-first, arcade controls
-
----
-
-## 📞 Contacto & Soporte
-
-**GitHub**: https://github.com/neocab/NeoCab  
-**Issues**: Reportar en GitHub Issues  
-**Documentation**: /docs folder  
-**Build Help**: Consultar BUILD.md
+1. ✅ Instalar sin admin
+2. ✅ App arranca a menú principal
+3. ✅ Botón "Operator" → OperatorPanel
+4. ✅ Ver 7 tabs (Estadísticas, Controles, Red, Studio, Logs, Auditoría, Config)
+5. ✅ Cambiar entre tabs clickeando
+6. ✅ Ver información de sistema/logs
+7. ✅ Red discovery funcional en background
+8. ✅ API server corriendo en puerto 8080
+9. ✅ Crear carpetas y archivos automáticamente
+10. ✅ Recuperarse de errores de config sin crashear
 
 ---
 
-**Last Commit**: 3d13f10 (Phase 6 Week 1)  
-**Next Commit**: Phase 6 Week 2 (Advanced Shaders QA / docs)
+## 🚀 PRÓXIMOS PASOS (ROADMAP)
+
+### Semana 1
+- [ ] Integrar navegación por teclado (flechas)
+- [ ] Enforcer PIN en acceso a Operator
+- [ ] Crear ROM demo o mock para testing
+- [ ] Pause menu en contexto de juego
+
+### Semana 2
+- [ ] Smart Scraper UI integration
+- [ ] Theme editor flujo completo
+- [ ] Statistics population
+- [ ] InputWizard flujo end-to-end
+
+### Semana 3
+- [ ] Soporte multi-idioma (i18n framework existe)
+- [ ] Profiling y optimización
+- [ ] Testing de edge cases
+
+---
+
+## 🎓 DOCUMENTACIÓN RELACIONADA
+
+- **Arquitectura**: `docs/02_PLAN_MAESTRO_PARTE_2.md`
+- **UI Guide**: `docs/15_UI_HYPERSPIN_WHEEL.md`
+- **JoyMapper**: `docs/16_JOYMAPPER_NATIVO.md`
+- **NeoCab Studio**: `docs/18_NEOCAB_STUDIO.md`
+- **Setup**: `docs/17_SETUP_WIZARD.md`
+- **Roadmap Completo**: `docs/05_CRONOGRAMA_DIA_POR_DIA.md`
+
+---
+
+## 🔍 DEBUGGING
+
+**Ubicación de logs**:
+```
+%LOCALAPPDATA%\Programs\NeoCab\data\logs\neocab.log
+```
+
+**Verificar que app arranca correctamente**: Log debe contener:
+```
+Base directory: C:\Users\...\AppData\Local\Programs\NeoCab
+Default emulators initialized
+NeoCab API Server listening on 0.0.0.0:8080
+mDNS Advertising started
+mDNS Discovery started
+```
+
+---
+
+## 📈 EVALUACIÓN GENERAL
+
+**Salud del Proyecto**: 🟢 **ESTABLE**  
+**Arquitectura**: 🟢 **SÓLIDA**  
+**Backend**: 🟢 **LISTO**  
+**Frontend**: 🟡 **EN PROGRESO** (faltan integraciones)  
+**Testing**: 🟡 **BLOQUEADO POR CONTENIDO** (sin ROMs)  
+
+**Conclusión**: La aplicación es estable y funciona. El núcleo está listo. Los próximos pasos son completar las integraciones UI y permitir testing con contenido real (ROMs).
