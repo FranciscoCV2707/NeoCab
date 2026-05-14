@@ -9,7 +9,7 @@ interface FadeOverlayProps {
         duration_ms: number;
         background_image: string;
         loading_text: string;
-        show_logo: bool;
+        show_logo: boolean;
     };
 }
 

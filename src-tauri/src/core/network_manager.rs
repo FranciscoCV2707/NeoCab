@@ -42,7 +42,7 @@ pub struct EarningsSyncPayload {
 }
 
 pub struct NetworkManager {
-    daemon: ServiceDaemon,
+    daemon: Option<ServiceDaemon>,
     discovered_cabinets: Arc<RwLock<HashMap<String, CabinetInfo>>>,
     role: Arc<RwLock<NetworkRole>>,
     cabinet_id: String,
@@ -55,9 +55,13 @@ pub struct NetworkManager {
 
 impl NetworkManager {
     pub fn new(cabinet_id: String, cabinet_name: String, api_port: u16, db: Arc<crate::db::Database>) -> Result<Self> {
-        let daemon = ServiceDaemon::new().map_err(|e| {
-            crate::error::NeoCabError::System(format!("Failed to start mDNS daemon: {}", e))
-        })?;
+        let daemon = match ServiceDaemon::new() {
+            Ok(d) => Some(d),
+            Err(e) => {
+                warn!("mDNS daemon unavailable (network features disabled): {}", e);
+                None
+            }
+        };
 
         Ok(Self {
             daemon,
@@ -126,11 +130,19 @@ impl NetworkManager {
     }
 
     pub fn start_advertising(&self) -> Result<()> {
+        let daemon = match &self.daemon {
+            Some(d) => d,
+            None => {
+                warn!("mDNS not available, skipping advertising");
+                return Ok(());
+            }
+        };
+
         let service_type = "_neocab._tcp.local.";
         let instance_name = format!("{}.{}", self.cabinet_name, self.cabinet_id);
         let host_name = format!("{}.local.", self.cabinet_id);
         let port = self.api_port;
-        
+
         let mut properties = HashMap::new();
         properties.insert("id".to_string(), self.cabinet_id.clone());
         properties.insert("name".to_string(), self.cabinet_name.clone());
@@ -147,7 +159,7 @@ impl NetworkManager {
             crate::error::NeoCabError::System(format!("Failed to create service info: {}", e))
         })?;
 
-        self.daemon.register(service_info).map_err(|e| {
+        daemon.register(service_info).map_err(|e| {
             crate::error::NeoCabError::System(format!("Failed to register mDNS service: {}", e))
         })?;
 
@@ -156,8 +168,16 @@ impl NetworkManager {
     }
 
     pub fn start_discovery(&self) -> Result<()> {
+        let daemon = match &self.daemon {
+            Some(d) => d,
+            None => {
+                warn!("mDNS not available, skipping discovery");
+                return Ok(());
+            }
+        };
+
         let service_type = "_neocab._tcp.local.";
-        let receiver = self.daemon.browse(service_type).map_err(|e| {
+        let receiver = daemon.browse(service_type).map_err(|e| {
             crate::error::NeoCabError::System(format!("Failed to start mDNS browsing: {}", e))
         })?;
 

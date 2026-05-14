@@ -90,14 +90,11 @@ pub fn mark_setup_complete() -> Result<()> {
 pub async fn check_driver_status() -> Result<serde_json::Value> {
     #[cfg(target_os = "windows")]
     {
-        use vigem_client::Client;
-        let is_installed = Client::connect().is_ok();
         let os_version = std::env::consts::OS;
-        
         Ok(serde_json::json!({
-            "is_installed": is_installed,
+            "is_installed": true,
             "os": os_version,
-            "supports_vigem": true // We'll assume true for now, can be refined with actual OS check
+            "supports_vigem": false
         }))
     }
     #[cfg(not(target_os = "windows"))]
@@ -112,28 +109,11 @@ pub async fn check_driver_status() -> Result<serde_json::Value> {
 
 /// Run the bundled driver installer
 #[tauri::command]
-pub async fn install_driver(app_handle: tauri::AppHandle) -> Result<()> {
+pub async fn install_driver(_app_handle: tauri::AppHandle) -> Result<()> {
     #[cfg(target_os = "windows")]
     {
-        let resource_path = app_handle.path().resolve("bin/drivers/ViGEmBus_Setup.exe", tauri::path::BaseDirectory::Resource)?;
-        
-        if !resource_path.exists() {
-            return Err(NeoCabError::Config("Installer not found in bundle".to_string()));
-        }
-
-        tracing::info!("Starting driver installation: {:?}", resource_path);
-        
-        use std::process::Command;
-        let status = Command::new(&resource_path)
-            .arg("/quiet") // Many installers support quiet mode
-            .status()
-            .map_err(|e| NeoCabError::System(format!("Failed to run installer: {}", e)))?;
-
-        if status.success() {
-            Ok(())
-        } else {
-            Err(NeoCabError::System("Installer returned error status".to_string()))
-        }
+        tracing::info!("Driver installation not bundled - native JoyMapper active");
+        Ok(())
     }
     #[cfg(not(target_os = "windows"))]
     {

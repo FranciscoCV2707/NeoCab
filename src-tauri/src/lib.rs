@@ -221,8 +221,9 @@ fn run_modern_app() {
             commands::get_default_paths,
             commands::save_setup_config,
             commands::mark_setup_complete,
-            commands::get_default_operator_pin,
-            // System commands
+            commands::check_driver_status,
+            commands::install_driver,
+            // Game library
             commands::get_system_info,
             commands::list_systems,
             commands::list_games,
@@ -233,10 +234,16 @@ fn run_modern_app() {
             commands::get_save_states,
             commands::get_high_scores,
             commands::scan_roms,
+            commands::detect_emulators,
+            commands::scrape_game,
+            commands::update_play_stats,
+            // Emulator
             commands::list_emulators,
             commands::launch_game,
             commands::stop_game,
             commands::get_recommended_emulator,
+            commands::check_timer_timeout,
+            // Coin system
             commands::add_coins,
             commands::add_coins_via_key,
             commands::get_coin_balance,
@@ -244,19 +251,15 @@ fn run_modern_app() {
             commands::end_game,
             commands::return_coins,
             commands::get_earnings,
+            // Timer
             commands::start_timer,
             commands::pause_timer,
             commands::resume_timer,
             commands::stop_timer,
             commands::get_timer_status,
-            // Shader commands
-            commands::list_shaders,
-            commands::get_shader_params,
-            commands::set_shader_param,
-            commands::list_shader_presets,
-            commands::get_shader_preset,
             commands::add_timer_time,
             commands::is_time_up,
+            // Input
             commands::get_input_devices,
             commands::get_input_mappings,
             commands::set_deadzone,
@@ -266,34 +269,15 @@ fn run_modern_app() {
             commands::start_recording_input,
             commands::get_recorded_input,
             commands::save_recorded_profile,
+            // Config
             commands::get_config,
             commands::set_config,
             commands::reload_config,
-            commands::check_driver_status,
-            commands::install_driver,
-            commands::save_theme_config,
-            commands::get_theme_config,
-            commands::get_theme_config, // Duplicate check, will remove if needed
             commands::load_system_config,
             commands::get_all_system_configs,
-            commands::authenticate_operator,
-            commands::logout_operator,
-            commands::is_operator_authenticated,
-            commands::change_operator_pin,
-            commands::get_operator_stats,
-            commands::get_session_stats,
-            commands::get_system_health,
-            commands::enable_autoboot,
-            commands::disable_autoboot,
-            commands::is_autoboot_enabled,
-            // Audit commands
-            commands::audit_roms,
-            commands::audit_media,
-            commands::audit_full,
-            commands::get_logs,
-            commands::enable_kiosk_mode,
-            commands::disable_kiosk_mode,
-            commands::is_kiosk_mode_enabled,
+            // Theme
+            commands::save_theme_config,
+            commands::get_theme_config,
             commands::set_theme,
             commands::get_current_theme,
             commands::get_theme_css,
@@ -301,6 +285,26 @@ fn run_modern_app() {
             commands::set_system_theme,
             commands::remove_system_theme,
             commands::list_system_themes,
+            // Operator
+            commands::authenticate_operator,
+            commands::logout_operator,
+            commands::is_operator_authenticated,
+            commands::change_operator_pin,
+            commands::get_operator_stats,
+            commands::get_session_stats,
+            commands::get_system_health,
+            // Autoboot / kiosk
+            commands::enable_autoboot,
+            commands::disable_autoboot,
+            commands::is_autoboot_enabled,
+            commands::enable_kiosk_mode,
+            commands::disable_kiosk_mode,
+            commands::is_kiosk_mode_enabled,
+            // Audit
+            commands::audit_roms,
+            commands::audit_media,
+            commands::audit_full,
+            // Hardware
             commands::list_gpio_pins,
             commands::list_serial_ports,
             commands::test_gpio_pin,
@@ -309,6 +313,7 @@ fn run_modern_app() {
             commands::get_hardware_status,
             commands::start_hardware_monitoring,
             commands::stop_hardware_monitoring,
+            // Media
             commands::scan_media,
             commands::get_media_stats,
             commands::get_system_media,
@@ -317,7 +322,7 @@ fn run_modern_app() {
             commands::import_media,
             commands::trigger_media_rescan,
             commands::get_all_game_media,
-            commands::get_network_info,
+            // Shaders
             commands::list_shaders,
             commands::rescan_shaders,
             commands::get_shader,
@@ -330,6 +335,8 @@ fn run_modern_app() {
             commands::start_shader_watcher,
             commands::stop_shader_watcher,
             commands::is_shader_watcher_running,
+            // Network
+            commands::get_network_info,
             commands::list_discovered_cabinets,
             commands::get_network_role,
             commands::set_network_role,
@@ -339,18 +346,12 @@ fn run_modern_app() {
             commands::sync_revenue_now,
             commands::set_master_ip,
             commands::get_master_ip,
-            commands::check_timer_timeout,
+            // Logs
             commands::read_log_file,
             commands::list_log_files,
             commands::clear_logs,
             commands::get_log_tail,
-            commands::audit_roms,
-            commands::audit_media,
-            commands::audit_full,
-            commands::detect_emulators,
-            // Scraping and play stats
-            commands::scrape_game,
-            commands::update_play_stats,
+            // Pause menu
             commands::toggle_pause_menu,
         ])
         .run(tauri::generate_context!())
@@ -359,10 +360,13 @@ fn run_modern_app() {
 
 fn init_logging() {
     use tracing_subscriber;
-    use std::path::PathBuf;
 
-    // Create logs directory if it doesn't exist
-    let logs_dir = PathBuf::from("./data/logs");
+    let logs_dir = std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(|p| p.to_path_buf()))
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join("data")
+        .join("logs");
     let _ = std::fs::create_dir_all(&logs_dir);
 
     // Set up file appender
@@ -381,6 +385,14 @@ fn init_logging() {
     std::mem::forget(_guard);
 }
 
+/// Returns the base directory for all app data (next to the exe, portable).
+fn get_base_dir() -> PathBuf {
+    std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(|p| p.to_path_buf()))
+        .unwrap_or_else(|| PathBuf::from("."))
+}
+
 async fn initialize_app() -> Result<(
     std::sync::Arc<db::Database>,
     core::GameLibrary,
@@ -396,7 +408,15 @@ async fn initialize_app() -> Result<(
     core::ConfigManager,
     core::NetworkManager,
 )> {
-    let db = std::sync::Arc::new(db::Database::new("./data/neocab.db").await?);
+    let base = get_base_dir();
+    let data_dir = base.join("data");
+    let config_dir = base.join("config");
+
+    tracing::info!("Base directory: {}", base.display());
+
+    let db = std::sync::Arc::new(
+        db::Database::new(data_dir.join("neocab.db").to_str().unwrap_or("./data/neocab.db")).await?
+    );
     db.init_default_systems().await?;
 
     let game_library = core::GameLibrary::new(db.clone());
@@ -409,8 +429,8 @@ async fn initialize_app() -> Result<(
     let input_manager = input::InputManager::new();
     let operator_panel = core::OperatorPanel::new("0000".to_string());
     let autoboot_manager = core::AutobootManager::default();
-    let theme_manager = core::ThemeManager::new("./data/themes".into());
-    let media_manager = core::MediaManager::new("./data".into(), 256 * 1024 * 1024);
+    let theme_manager = core::ThemeManager::new(data_dir.join("themes"));
+    let media_manager = core::MediaManager::new(data_dir.clone(), 256 * 1024 * 1024);
 
     // Start media folder watching for automatic rescans
     if let Err(e) = media_manager.start_auto_watch().await {
@@ -425,7 +445,7 @@ async fn initialize_app() -> Result<(
         shader_path.clone(),
         shader_path.clone(),
     );
-    let config_manager = core::ConfigManager::new("./data/config.yml", db.clone()).await?;
+    let config_manager = core::ConfigManager::new(data_dir.join("config.yml"), db.clone()).await?;
 
     // Phase 7: Network Manager
     let cabinet_id = uuid::Uuid::new_v4().to_string(); // In a real app, this should be persistent

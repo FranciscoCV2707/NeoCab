@@ -17,7 +17,24 @@
       "Bash(git -C /c/Users/Pako/Desktop/arcade/NeoCab commit -m 'feat: add automatic setup wizard and directory initialization *)",
       "Bash(grep -E \"^\\\\\\\\[|files changed\")",
       "Bash(git -C /c/Users/Pako/Desktop/arcade/NeoCab commit -m 'docs: update all markdown files for v1.0.0 final release *)",
-      "PowerShell(Test-Path \"C:\\\\Users\\\\Pako\\\\Desktop\\\\arcade\\\\NeoCab\\\\docs\"; Get-ChildItem \"C:\\\\Users\\\\Pako\\\\Desktop\\\\arcade\\\\NeoCab\\\\docs\" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })"
+      "PowerShell(Test-Path \"C:\\\\Users\\\\Pako\\\\Desktop\\\\arcade\\\\NeoCab\\\\docs\"; Get-ChildItem \"C:\\\\Users\\\\Pako\\\\Desktop\\\\arcade\\\\NeoCab\\\\docs\" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })",
+      "Bash(powershell -ExecutionPolicy Bypass -File BUILD_INSTALLER.ps1 -BuildType dev)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\Pako\\\\Desktop\\\\NeoCab_Instaladores\")",
+      "Bash(cp 'C:\\\\Users\\\\Pako\\\\Desktop\\\\arcade\\\\NeoCab\\\\src-tauri\\\\target\\\\release\\\\bundle\\\\nsis\\\\NeoCab_0.1.0_x64-setup.exe' 'C:\\\\Users\\\\Pako\\\\Desktop\\\\NeoCab_Instaladores\" *)",
+      "Bash(cp \"C:\\\\Users\\\\Pako\\\\Desktop\\\\arcade\\\\NeoCab\\\\INSTALADORES_LISTOS.md\" \"C:\\\\Users\\\\Pako\\\\Desktop\\\\NeoCab_Instaladores\\\\LEEME.md\")",
+      "Read(//c/Users/Pako/Desktop/**)",
+      "Bash(set SQLX_OFFLINE=true)",
+      "Bash(npm run *)",
+      "Bash(echo \"BUILD_OK\")",
+      "Bash(echo \"BUILD_FAILED\")",
+      "Bash(cp \"C:\\\\Users\\\\Pako\\\\Desktop\\\\arcade\\\\NeoCab\\\\src-tauri\\\\target\\\\release\\\\bundle\\\\nsis\\\\NeoCab_0.1.0_x64-setup.exe\" \"C:\\\\Users\\\\Pako\\\\Desktop\\\\NeoCab_Instaladores\\\\NeoCab_Setup_NUEVO.exe\")",
+      "Bash(cp \"C:\\\\Users\\\\Pako\\\\Desktop\\\\arcade\\\\NeoCab\\\\src-tauri\\\\target\\\\release\\\\bundle\\\\msi\\\\NeoCab_0.1.0_x64_en-US.msi\" \"C:\\\\Users\\\\Pako\\\\Desktop\\\\NeoCab_Instaladores\\\\NeoCab_Setup_NUEVO.msi\")",
+      "Bash(SQLX_OFFLINE=true cargo check)",
+      "Bash(SQLX_OFFLINE=true npm run tauri build)",
+      "Bash(git rm *)",
+      "Bash(rm -f ./nul ./src-tauri/nul)",
+      "Bash(git clean *)",
+      "Bash(grep -E \"\\\\.md$|\\\\.ps1$|\\\\.log$\")"
     ]
   }
 }

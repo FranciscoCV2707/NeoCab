@@ -87,7 +87,6 @@ pub async fn import_external_library(
         "launchbox" => importer.import_launchbox_xml(path, system_id).await,
         _ => Err(crate::error::NeoCabError::Config("Unsupported format".to_string())),
     }
-    }
     .map_err(|e| e.to_string())
 }
 
@@ -114,9 +113,9 @@ pub async fn import_steam_games(
         let game = Game {
             id: 0,
             title: sg.name.clone(),
-            sort_title: sg.name.to_lowercase(),
+            sort_title: Some(sg.name.to_lowercase()),
             system_id,
-            emulator_id: None, // Steam handles its own launching
+            emulator_id: None,
             rom_path: format!("steam://rungameid/{}", sg.app_id),
             filename: Some(sg.app_id.clone()),
             file_size: None,
@@ -128,13 +127,23 @@ pub async fn import_steam_games(
             developer: None,
             publisher: None,
             genre: None,
+            players: None,
+            rating: 0.0,
+            rating_count: 0,
             region: None,
             language: None,
             is_favorite: 0,
+            is_hidden: 0,
+            has_save_state: 0,
             play_count: 0,
             total_play_time: 0,
             last_played: None,
-            rating: None,
+            image_path: None,
+            marquee_path: None,
+            video_path: None,
+            external_id: None,
+            created_at: None,
+            updated_at: None,
         };
 
         if let Ok(_) = db.insert_game(&game).await {

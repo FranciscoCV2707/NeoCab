@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import './ThemeEditor.css';
 
@@ -23,6 +23,15 @@ interface ThemeConfig {
         select: string;
         back: string;
     };
+    fade: {
+        enabled: boolean;
+        duration_ms: number;
+        loading_text: string;
+    };
+    bezel: {
+        enabled: boolean;
+        opacity: number;
+    };
 }
 
 export const ThemeEditor: React.FC = () => {
@@ -36,6 +45,15 @@ export const ThemeEditor: React.FC = () => {
             navigation: 'nav.wav',
             select: 'select.wav',
             back: 'back.wav'
+        },
+        fade: {
+            enabled: false,
+            duration_ms: 1000,
+            loading_text: 'Loading...'
+        },
+        bezel: {
+            enabled: false,
+            opacity: 0.8
         }
     });
 

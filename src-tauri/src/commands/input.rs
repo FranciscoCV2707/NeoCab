@@ -167,6 +167,8 @@ pub async fn save_recorded_profile(
     let profile = JoyProfile {
         name: profile_name.clone(),
         deadzone: 0.15,
+        anti_deadzone: 0.0,
+        curve: crate::input::joy_mapper::ResponseCurve::Linear,
         mappings,
     };
 

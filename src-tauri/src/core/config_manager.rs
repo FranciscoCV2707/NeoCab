@@ -173,7 +173,7 @@ impl ConfigManager {
 
         // Try to load from file, fall back to default
         let config = if config_path.exists() {
-            Self::load_from_file(&config_path)?
+            Self::load_from_file(&config_path)
         } else {
             info!("Config file not found, using defaults");
             AppConfig::default()
@@ -189,12 +189,23 @@ impl ConfigManager {
         })
     }
 
-    fn load_from_file(path: &Path) -> Result<AppConfig> {
-        let content = std::fs::read_to_string(path)?;
-        let config = serde_yaml::from_str(&content)
-            .map_err(|e| crate::error::NeoCabError::Config(format!("YAML parse error: {}", e)))?;
-        info!("Loaded config from {:?}", path);
-        Ok(config)
+    fn load_from_file(path: &Path) -> AppConfig {
+        match std::fs::read_to_string(path) {
+            Ok(content) => match serde_yaml::from_str::<AppConfig>(&content) {
+                Ok(config) => {
+                    info!("Loaded config from {:?}", path);
+                    config
+                }
+                Err(e) => {
+                    tracing::warn!("Config parse failed, using defaults: {}", e);
+                    AppConfig::default()
+                }
+            },
+            Err(e) => {
+                tracing::warn!("Config read failed, using defaults: {}", e);
+                AppConfig::default()
+            }
+        }
     }
 
     async fn apply_db_overrides(
@@ -212,7 +223,7 @@ impl ConfigManager {
     }
 
     pub async fn reload(&self) -> Result<()> {
-        let new_config = Self::load_from_file(&self.config_path)?;
+        let new_config = Self::load_from_file(&self.config_path);
         let new_config = Self::apply_db_overrides(new_config, &self.db).await.ok()
             .unwrap_or_default();
 

@@ -4,13 +4,13 @@ import { listen, emit } from "@tauri-apps/api/event";
 import { useGamepad, GamepadAction } from "./hooks/useGamepad";
 import { useAudio } from "./hooks/useAudio";
 import { FadeOverlay } from "./components/launcher/FadeOverlay";
-// t import removed as it is no longer used here
+import { PauseMenu } from "./components/launcher/PauseMenu";
 import GameList from "./components/GameList";
 import SystemSelect from "./components/SystemSelect";
 import MainMenu from "./components/MainMenu";
 import AttractMode from "./components/AttractMode";
 import SaveStateModal, { SaveState } from "./components/SaveStateModal";
-import OperatorPanel from "./components/OperatorPanel";
+import { OperatorPanel } from "./components/operator/OperatorPanel";
 import "./App.css";
 
 export interface Game {
@@ -62,7 +62,7 @@ export default function App() {
   const [fadeVisible, setFadeVisible] = useState(false);
   const [pauseVisible, setPauseVisible] = useState(false);
   const [fadeInfo, setFadeInfo] = useState({ game: "", system: "" });
-  const [fadeConfig, setFadeConfig] = useState<any>(null);
+  const [fadeConfig] = useState<any>(null);
   const { playSound, playBGM, stopBGM } = useAudio();
 
   useEffect(() => {
@@ -352,14 +352,13 @@ export default function App() {
         />
       )}
 
-      {view === 'systems' && (
-        <AttractMode 
-          games={games} 
+      {currentView === 'systems' && (
+        <AttractMode
+          games={games}
           onPlayGame={(game) => {
-            setIsAttractMode(false);
             handlePlayGame(game);
-          }} 
-          onExit={() => setIsAttractMode(false)} 
+          }}
+          onExit={() => {}}
         />
       )}
       
@@ -415,9 +414,7 @@ export default function App() {
         </div>
       )}
 
-      {currentView === "operator" && (
-        <OperatorPanel onBack={() => setCurrentView("menu")} />
-      )}
+      {currentView === "operator" && <OperatorPanel />}
 
       {showSaveStateModal && pendingGame && (
         <SaveStateModal
