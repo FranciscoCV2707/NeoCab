@@ -124,7 +124,7 @@ pub async fn check_timer_timeout(
     emulator: String,
     auto_exit: bool,
     emulator_manager: State<'_, EmulatorManager>,
-    timer_manager: State<'_, TimerManager>,
+    timer_manager: State<'_, Arc<TimerManager>>,
 ) -> Result<serde_json::Value, String> {
     let is_time_up = timer_manager.is_time_up().await;
     let remaining = timer_manager.get_remaining_seconds().await;

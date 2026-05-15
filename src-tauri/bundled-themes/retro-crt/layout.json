@@ -1,0 +1,52 @@
+{
+  "version": "1.0",
+  "name": "Retro CRT Layout",
+  "components": {
+    "system_carousel": {
+      "type": "carousel",
+      "position": { "x": "center", "y": "center" },
+      "size": { "width": "100%", "height": 350 },
+      "item_size": { "width": 280, "height": 180 },
+      "visible_items": 5,
+      "animation": {
+        "onFocus": { "scale": 1.15, "glow": 0.5, "duration": 250 },
+        "onBlur": { "scale": 0.85, "opacity": 0.4, "duration": 250 }
+      }
+    },
+    "game_list": {
+      "type": "list",
+      "position": { "x": 40, "y": 80 },
+      "size": { "width": 550, "height": 750 },
+      "item_height": 55,
+      "visible_items": 12
+    },
+    "preview_panel": {
+      "type": "panel",
+      "position": { "x": 620, "y": 80 },
+      "size": { "width": 1250, "height": 750 },
+      "elements": [
+        { "type": "video", "position": { "x": 0, "y": 0 }, "size": { "width": "100%", "height": 380 } },
+        { "type": "text", "field": "title", "position": { "x": 0, "y": 400 }, "font": "title" },
+        { "type": "text", "field": "description", "position": { "x": 0, "y": 470 }, "font": "ui" },
+        { "type": "metadata", "fields": ["year", "developer", "genre", "players"], "position": { "x": 0, "y": 580 } }
+      ]
+    },
+    "scanline_overlay": {
+      "type": "overlay",
+      "pattern": "scanlines",
+      "opacity": 0.15,
+      "position": { "x": 0, "y": 0 },
+      "size": { "width": "100%", "height": "100%" }
+    },
+    "status_bar": {
+      "type": "bar",
+      "position": { "x": 0, "y": "bottom" },
+      "size": { "width": "100%", "height": 35 },
+      "elements": [
+        { "type": "text", "field": "credits", "align": "left" },
+        { "type": "text", "field": "timer", "align": "center" },
+        { "type": "text", "field": "clock", "align": "right" }
+      ]
+    }
+  }
+}

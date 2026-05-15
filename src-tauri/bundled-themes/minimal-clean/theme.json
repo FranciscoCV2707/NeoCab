@@ -1,0 +1,54 @@
+{
+  "name": "Minimal Clean",
+  "version": "1.0.0",
+  "author": "NeoCab Team",
+  "description": "Clean, modern, flat design with subtle accents. Inspired by Windows Fluent Design",
+  "colors": {
+    "primary": "#0078d4",
+    "secondary": "#f5f5f5",
+    "accent": "#00b7c3",
+    "text": "#333333",
+    "background": "#ffffff",
+    "surface": "#f0f0f0",
+    "border": "#e0e0e0",
+    "highlight": "#0078d4",
+    "success": "#107c10",
+    "warning": "#ff8c00",
+    "error": "#d13438"
+  },
+  "fonts": {
+    "ui": "Segoe UI",
+    "title": "Segoe UI",
+    "subtitle": "Segoe UI",
+    "mono": "Consolas"
+  },
+  "layout": {
+    "system_view": "list",
+    "game_view": "compact",
+    "wheel_style": "hidden",
+    "transition": "fade",
+    "animation_speed": 200,
+    "easing": "linear"
+  },
+  "media": {
+    "video_enabled": true,
+    "video_loop": true,
+    "snap_type": "screenshot",
+    "marquee_enabled": false,
+    "wheel_enabled": false,
+    "box_art_enabled": true
+  },
+  "sounds": {
+    "navigate": "nav.wav",
+    "select": "select.wav",
+    "back": "back.wav",
+    "coin": "coin.wav",
+    "start": "start.wav"
+  },
+  "effects": {
+    "scanlines": false,
+    "crt_curve": 0,
+    "glow_intensity": 0,
+    "shadow_enabled": false
+  }
+}

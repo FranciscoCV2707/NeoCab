@@ -1,7 +1,7 @@
 # 🎮 NeoCab - Installation Guide
 
-**Version:** 1.0  
-**Last Updated:** 2026-05-13
+**Version:** 1.3  
+**Last Updated:** 2026-05-14
 
 ## Table of Contents
 1. [Windows Installation](#windows-installation)

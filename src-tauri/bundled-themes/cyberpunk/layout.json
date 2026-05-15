@@ -1,0 +1,54 @@
+{
+  "version": "1.0",
+  "name": "Cyberpunk Layout",
+  "components": {
+    "system_grid": {
+      "type": "grid",
+      "position": { "x": "center", "y": "center" },
+      "size": { "width": "85%", "height": "60%" },
+      "columns": 5,
+      "item_size": { "width": 220, "height": 140 },
+      "gap": 16,
+      "animation": {
+        "onFocus": { "scale": 1.15, "glitch": true, "duration": 200 },
+        "onBlur": { "scale": 1.0, "opacity": 0.6, "duration": 200 }
+      }
+    },
+    "game_list": {
+      "type": "list",
+      "position": { "x": 80, "y": 60 },
+      "size": { "width": 450, "height": 700 },
+      "item_height": 48,
+      "visible_items": 13
+    },
+    "preview_panel": {
+      "type": "panel",
+      "position": { "x": 560, "y": 60 },
+      "size": { "width": 1280, "height": 700 },
+      "elements": [
+        { "type": "video", "position": { "x": 0, "y": 0 }, "size": { "width": "100%", "height": 420 } },
+        { "type": "wheel", "position": { "x": 0, "y": 440 }, "size": { "width": 250, "height": 120 } },
+        { "type": "text", "field": "title", "position": { "x": 270, "y": 440 }, "font": "title" },
+        { "type": "text", "field": "description", "position": { "x": 270, "y": 510 }, "font": "ui" },
+        { "type": "metadata", "fields": ["year", "developer", "genre", "players"], "position": { "x": 270, "y": 600 } }
+      ]
+    },
+    "scanline_overlay": {
+      "type": "overlay",
+      "pattern": "scanlines",
+      "opacity": 0.08,
+      "position": { "x": 0, "y": 0 },
+      "size": { "width": "100%", "height": "100%" }
+    },
+    "status_bar": {
+      "type": "bar",
+      "position": { "x": 0, "y": "bottom" },
+      "size": { "width": "100%", "height": 38 },
+      "elements": [
+        { "type": "text", "field": "credits", "align": "left" },
+        { "type": "text", "field": "timer", "align": "center" },
+        { "type": "text", "field": "clock", "align": "right" }
+      ]
+    }
+  }
+}

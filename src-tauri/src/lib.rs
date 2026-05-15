@@ -12,6 +12,7 @@ pub mod legacy;
 
 pub use error::{NeoCabError, Result};
 use tauri::Manager;
+use std::sync::Arc;
 use std::path::PathBuf;
 use utils::RuntimeMode;
 
@@ -175,29 +176,31 @@ fn run_modern_app() {
                     db,
                     game_library,
                     emulator_manager,
-                    coin_manager,
-                    timer_manager,
+                    coin_manager_arc,
+                    timer_manager_arc,
+                    session_manager_arc,
                     input_manager,
                     operator_panel,
                     autoboot_manager,
                     theme_manager,
                     media_manager,
                     shader_manager,
-                    config_manager,
+                    config_manager_arc,
                     network_manager,
                 )) => {
                     app.manage(db);
                     app.manage(game_library);
                     app.manage(emulator_manager);
-                    app.manage(coin_manager);
-                    app.manage(timer_manager);
+                    app.manage(coin_manager_arc);
+                    app.manage(timer_manager_arc);
+                    app.manage(session_manager_arc);
                     app.manage(input_manager);
                     app.manage(operator_panel);
                     app.manage(autoboot_manager);
                     app.manage(theme_manager);
                     app.manage(media_manager);
                     app.manage(shader_manager);
-                    app.manage(config_manager);
+                    app.manage(config_manager_arc);
                     app.manage(network_manager);
 
                     // Show marquee window on start if it exists
@@ -269,6 +272,21 @@ fn run_modern_app() {
             commands::start_recording_input,
             commands::get_recorded_input,
             commands::save_recorded_profile,
+            commands::get_connected_devices,
+            commands::set_input_context,
+            commands::get_input_context,
+            commands::add_profile_assignment,
+            commands::get_profile_assignments,
+            commands::remove_profile_assignment,
+            commands::load_input_profile,
+            commands::get_active_profile,
+            commands::switch_input_set,
+            commands::get_input_state,
+            commands::create_profile_from_template,
+            commands::list_input_templates,
+            commands::import_antimicrox_profile,
+            commands::set_device_deadzone,
+            commands::set_response_curve,
             // Config
             commands::get_config,
             commands::set_config,
@@ -285,6 +303,30 @@ fn run_modern_app() {
             commands::set_system_theme,
             commands::remove_system_theme,
             commands::list_system_themes,
+            commands::load_theme,
+            commands::save_custom_theme,
+            commands::export_theme,
+            commands::import_theme,
+            commands::apply_theme,
+            commands::list_themes,
+            commands::set_game_theme,
+            commands::get_game_theme,
+            commands::remove_game_theme,
+            commands::get_all_game_themes,
+            commands::resolve_game_theme,
+            // Session (coins + time unified)
+            commands::session_insert_coin,
+            commands::session_start,
+            commands::session_check,
+            commands::session_pause,
+            commands::session_resume,
+            commands::session_end,
+            commands::session_add_time,
+            commands::session_get_status,
+            commands::session_get_config,
+            commands::session_set_config,
+            commands::session_set_system_mode,
+            commands::session_update_system_config,
             // Operator
             commands::authenticate_operator,
             commands::logout_operator,
@@ -397,15 +439,16 @@ async fn initialize_app() -> Result<(
     std::sync::Arc<db::Database>,
     core::GameLibrary,
     core::EmulatorManager,
-    core::CoinManager,
-    core::TimerManager,
+    std::sync::Arc<core::CoinManager>,
+    std::sync::Arc<core::TimerManager>,
+    std::sync::Arc<core::SessionManager>,
     input::InputManager,
     core::OperatorPanel,
     core::AutobootManager,
     core::ThemeManager,
     core::MediaManager,
     core::ShaderManager,
-    core::ConfigManager,
+    std::sync::Arc<core::ConfigManager>,
     core::NetworkManager,
 )> {
     let base = get_base_dir();
@@ -425,11 +468,25 @@ async fn initialize_app() -> Result<(
     emulator_manager.initialize_default_emulators().await?;
 
     let coin_manager = core::CoinManager::new(db.clone());
+    let coin_manager_arc = Arc::new(coin_manager);
     let timer_manager = core::TimerManager::new();
+    let timer_manager_arc = Arc::new(timer_manager);
+    let config_manager = core::ConfigManager::new(data_dir.join("config.yml"), db.clone()).await?;
+    let config_manager_arc = Arc::new(config_manager);
+    let session_manager = core::SessionManager::new(
+        coin_manager_arc.clone(),
+        timer_manager_arc.clone(),
+        config_manager_arc.clone(),
+    );
+    let session_manager_arc = Arc::new(session_manager);
     let input_manager = input::InputManager::new();
     let operator_panel = core::OperatorPanel::new("0000".to_string());
     let autoboot_manager = core::AutobootManager::default();
     let theme_manager = core::ThemeManager::new(data_dir.join("themes"));
+    theme_manager.install_bundled_themes().map_err(|e| {
+        tracing::warn!("Failed to install bundled themes: {}", e);
+        e
+    }).ok();
     let media_manager = core::MediaManager::new(data_dir.clone(), 256 * 1024 * 1024);
 
     // Start media folder watching for automatic rescans
@@ -445,7 +502,6 @@ async fn initialize_app() -> Result<(
         shader_path.clone(),
         shader_path.clone(),
     );
-    let config_manager = core::ConfigManager::new(data_dir.join("config.yml"), db.clone()).await?;
 
     // Phase 7: Network Manager
     let cabinet_id = uuid::Uuid::new_v4().to_string(); // In a real app, this should be persistent
@@ -465,15 +521,16 @@ async fn initialize_app() -> Result<(
         db,
         game_library,
         emulator_manager,
-        coin_manager,
-        timer_manager,
+        coin_manager_arc,
+        timer_manager_arc,
+        session_manager_arc,
         input_manager,
         operator_panel,
         autoboot_manager,
         theme_manager,
         media_manager,
         shader_manager,
-        config_manager,
+        config_manager_arc,
         network_manager,
     ))
 }

@@ -1,6 +1,8 @@
-# 📖 NeoCab Master User Manual v1.0 🎮
+# 📖 NeoCab Master User Manual v1.3 🎮
 
-This manual provides a comprehensive, step-by-step guide to mastering your **NeoCab** installation. From basic navigation to advanced theme creation and input engineering, everything is covered here.
+This manual provides a comprehensive, step-by-step guide to mastering your **NeoCab** installation. From basic navigation to advanced theme creation, input engineering, and keyboard/gamepad configuration, everything is covered here.
+
+**Version:** 1.3.0 | **Last Updated:** 2026-05-14
 
 ---
 

@@ -6,13 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **NeoCab** is a professional arcade cabinet operating system. It's a cross-platform Tauri + React + Rust application that powers arcade machines with:
 - **300+ emulators** (MAME, PSX, N64, SNES, Genesis, etc.)
-- **Coin & timer system** for commercial operation
+- **Coin & timer system** for commercial operation (SessionManager, 4 modes)
 - **Operator panel** with PIN security & statistics
-- **Universal input system** (any joystick/gamepad)
+- **Universal input system** (JoyMapper v2 with radial deadzones, spline curves, shift layers)
+- **Unified navigation** (keyboard + gamepad with configurable keymap)
 - **Autoboot kiosk mode** for turnkey operation
-- **Multiple visual themes**
+- **5 bundled themes** with per-system/game assignment
 
-**Duration:** 16 weeks | **Scope:** 80-120 hours | **Status:** Week 1 in progress
+**Current Version:** v1.3.0 | **Status:** Production Ready
 
 ## Technology Stack
 
@@ -171,11 +172,11 @@ test: add game scanner tests
 
 ## Weekly Checklist
 
-After each week:
-1. Update `docs/STATUS.md` with completions
-2. Make commit for week's work
+After each session:
+1. Update `STATUS.md` with completions
+2. Make commit for session's work
 3. Run `cargo test` + `npm run build`
-4. Check next week's tasks in `docs/TAREAS.md`
+4. Update `CHANGELOG.md`
 
 ## graphify
 

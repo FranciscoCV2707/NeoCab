@@ -287,6 +287,19 @@ impl Database {
         .execute(pool)
         .await?;
 
+        // Game-level theme assignments table
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS game_theme_assignments (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                game_id     INTEGER NOT NULL UNIQUE,
+                theme_name  TEXT NOT NULL,
+                updated_at  TEXT DEFAULT (datetime('now')),
+                FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
+            )",
+        )
+        .execute(pool)
+        .await?;
+
         // Analytics table
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS analytics (
@@ -424,6 +437,51 @@ impl Database {
     pub async fn remove_system_theme(&self, system_name: &str) -> Result<()> {
         sqlx::query("DELETE FROM system_theme_assignments WHERE system_name = ?")
             .bind(system_name)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(())
+    }
+
+    // Game-level theme assignment methods
+    pub async fn set_game_theme(&self, game_id: i64, theme_name: &str) -> Result<()> {
+        sqlx::query(
+            "INSERT INTO game_theme_assignments (game_id, theme_name)
+             VALUES (?, ?)
+             ON CONFLICT(game_id) DO UPDATE SET theme_name = excluded.theme_name, updated_at = datetime('now')",
+        )
+        .bind(game_id)
+        .bind(theme_name)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn get_game_theme(&self, game_id: i64) -> Result<Option<String>> {
+        let theme = sqlx::query_scalar::<_, String>(
+            "SELECT theme_name FROM game_theme_assignments WHERE game_id = ?",
+        )
+        .bind(game_id)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(theme)
+    }
+
+    pub async fn get_all_game_themes(&self) -> Result<Vec<(i64, String)>> {
+        let rows = sqlx::query_as::<_, (i64, String)>(
+            "SELECT game_id, theme_name FROM game_theme_assignments ORDER BY game_id",
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(rows)
+    }
+
+    pub async fn remove_game_theme(&self, game_id: i64) -> Result<()> {
+        sqlx::query("DELETE FROM game_theme_assignments WHERE game_id = ?")
+            .bind(game_id)
             .execute(&self.pool)
             .await?;
 

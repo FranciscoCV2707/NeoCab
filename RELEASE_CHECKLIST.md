@@ -1,7 +1,7 @@
-# ✅ NeoCab v1.0.0 Release Checklist
+# ✅ NeoCab v1.3.0 Release Checklist
 
-**Release Date:** 2026-05-12  
-**Version:** 1.0.0  
+**Release Date:** 2026-05-14  
+**Version:** 1.3.0  
 **Status:** READY FOR RELEASE
 
 ---
@@ -10,7 +10,7 @@
 
 - [x] TypeScript: Zero errors (strict mode)
 - [x] Rust: Zero compilation errors (cargo check clean)
-- [x] React build: 146.93 kB → 47.19 kB gzip (587ms)
+- [x] React build: 226KB JS, 63KB CSS
 - [x] All tests passing: 100+ tests ✓
 - [x] Code review completed
 - [x] No security vulnerabilities identified

@@ -1,13 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { useNetwork, NetworkRole } from '../../hooks/useNetwork';
+// TODO: Re-implement network hook
+// import { useNetwork, NetworkRole } from '../../hooks/useNetwork';
 import { invoke } from '@tauri-apps/api/core';
 import './NetworkPanel.css';
 
 export const NetworkPanel: React.FC = () => {
-    const { discoveredCabinets, role, changeRole, loading, error } = useNetwork();
+    const [discoveredCabinets, setDiscoveredCabinets] = useState<any[]>([]);
+    const [role, setRole] = useState<string>('master');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [masterIp, setMasterIp] = useState<string | null>(null);
     const [syncing, setSyncing] = useState(false);
     const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
+
+    const changeRole = async (newRole: string) => {
+        setRole(newRole);
+        try {
+            await invoke('set_network_role', { role: newRole });
+        } catch (err) {
+            console.error('Failed to change role:', err);
+        }
+    };
 
     useEffect(() => {
         loadMasterIp();
@@ -35,7 +48,7 @@ export const NetworkPanel: React.FC = () => {
     };
 
     const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        changeRole(e.target.value as NetworkRole);
+        changeRole(e.target.value);
     };
 
     return (

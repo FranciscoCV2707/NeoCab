@@ -1,7 +1,7 @@
-# NeoCab v1.0.0 - Release Manifest
+# NeoCab v1.3.0 - Release Manifest
 
-**Release Date:** May 13, 2026  
-**Build Timestamp:** 2026-05-13T14:00:00Z  
+**Release Date:** May 14, 2026  
+**Build Timestamp:** 2026-05-14T14:00:00Z  
 **Status:** Production Ready
 
 ---

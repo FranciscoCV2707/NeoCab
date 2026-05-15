@@ -1,0 +1,54 @@
+{
+  "name": "Cyberpunk",
+  "version": "1.0.0",
+  "author": "NeoCab Team",
+  "description": "Dark theme with neon accents and glitch effects, inspired by cyberpunk aesthetics",
+  "colors": {
+    "primary": "#ff006e",
+    "secondary": "#0d0d0d",
+    "accent": "#8338ec",
+    "text": "#ffffff",
+    "background": "#0a0a0a",
+    "surface": "#1a0a1a",
+    "border": "#ff006e",
+    "highlight": "#8338ec",
+    "success": "#00ff00",
+    "warning": "#ffcc00",
+    "error": "#ff006e"
+  },
+  "fonts": {
+    "ui": "Verdana",
+    "title": "Impact",
+    "subtitle": "Verdana",
+    "mono": "Consolas"
+  },
+  "layout": {
+    "system_view": "grid",
+    "game_view": "full",
+    "wheel_style": "flat",
+    "transition": "glitch",
+    "animation_speed": 250,
+    "easing": "easeOutBack"
+  },
+  "media": {
+    "video_enabled": true,
+    "video_loop": true,
+    "snap_type": "video",
+    "marquee_enabled": true,
+    "wheel_enabled": true,
+    "box_art_enabled": true
+  },
+  "sounds": {
+    "navigate": "nav.wav",
+    "select": "select.wav",
+    "back": "back.wav",
+    "coin": "coin.wav",
+    "start": "start.wav"
+  },
+  "effects": {
+    "scanlines": true,
+    "crt_curve": 0.1,
+    "glow_intensity": 0.8,
+    "shadow_enabled": true
+  }
+}

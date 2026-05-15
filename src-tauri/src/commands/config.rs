@@ -1,5 +1,6 @@
 use serde_json::json;
 use tauri::State;
+use std::sync::Arc;
 use crate::core::ConfigManager;
 use crate::core::config_manager::SystemGameConfig;
 use crate::utils::EmulatorDetector;
@@ -38,7 +39,7 @@ pub fn reload_config() -> String {
 pub async fn save_system_config(
     system: String,
     config: SystemGameConfig,
-    config_manager: State<'_, ConfigManager>,
+    config_manager: State<'_, Arc<ConfigManager>>,
 ) -> Result<String, String> {
     config_manager
         .save_system_config(config)
@@ -51,7 +52,7 @@ pub async fn save_system_config(
 #[tauri::command]
 pub async fn load_system_config(
     system: String,
-    config_manager: State<'_, ConfigManager>,
+    config_manager: State<'_, Arc<ConfigManager>>,
 ) -> Result<SystemGameConfig, String> {
     config_manager
         .load_system_config(&system)
@@ -61,7 +62,7 @@ pub async fn load_system_config(
 
 #[tauri::command]
 pub async fn get_all_system_configs(
-    config_manager: State<'_, ConfigManager>,
+    config_manager: State<'_, Arc<ConfigManager>>,
 ) -> Result<Vec<SystemGameConfig>, String> {
     config_manager
         .get_all_system_configs()

@@ -20,6 +20,7 @@ pub mod importer;
 pub mod steam_importer;
 pub mod hardware_scripting;
 pub mod bezel_manager;
+pub mod session_manager;
 
 pub use bezel_manager::BezelManager;
 pub use emulator_manager::EmulatorManager;
@@ -42,3 +43,4 @@ pub use network_manager::{NetworkManager, CabinetInfo, NetworkRole};
 pub use scraper::{GameScraper, ScrapedGameInfo};
 pub use importer::UniversalImporter;
 pub use hardware_scripting::{HardwareScriptEngine, HardwareEvent, HardwareAction, HardwareScript};
+pub use session_manager::{SessionManager, SessionMode, SessionConfig, SessionState, SessionStatus, ArcadeConfig, TimedConfig};

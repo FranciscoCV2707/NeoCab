@@ -1,4 +1,4 @@
-# NeoCab v3.0 Build Instructions
+# NeoCab v1.3.0 Build Instructions
 
 Complete guide for building NeoCab for Windows and Linux.
 

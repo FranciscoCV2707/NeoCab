@@ -1,4 +1,4 @@
-# NeoCab - Windows XP Legacy Mode Build Guide
+# NeoCab v1.3.0 - Windows XP Legacy Mode Build Guide
 
 **Status:** ✅ Code-complete | ⚠️ Requires development environment setup
 

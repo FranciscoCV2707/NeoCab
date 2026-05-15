@@ -1,12 +1,20 @@
 # 🕹️ NeoCab: The Ultimate Unified Arcade OS
 
-[![Version](https://img.shields.io/badge/version-1.0.0--stable-brightgreen)](https://github.com/FranciscoCV2707/NeoCab)
+[![Version](https://img.shields.io/badge/version-1.3.0--stable-brightgreen)](https://github.com/FranciscoCV2707/NeoCab)
 [![Platform](https://img.shields.io/badge/platform-Windows%20XP%20|%207%20|%2010%20|%2011%20|%20Linux%20|%20ARM-blue)](https://github.com/FranciscoCV2707/NeoCab)
 [![License](https://img.shields.io/badge/license-MIT-orange)](LICENSE)
 
 **NeoCab** is a high-performance, all-in-one arcade management platform designed to replace the fragmented legacy ecosystem (HyperSpin, RocketLauncher, JoyToKey, etc.) with a single, ultra-fast, and visually stunning native application.
 
 Built with **Rust** for maximum performance and **React/Tauri** for a modern, fluid interface, NeoCab runs flawlessly on everything from 20-year-old Windows XP cabinets to modern 4K gaming rigs and Raspberry Pi devices.
+
+---
+
+## 📋 Latest Updates (v1.3.0)
+- ✅ **Advanced Input System** (v1.2): JoyMapper v2 with radial deadzones, spline curves, shift layers, 6 controller templates, AntiMicroX import
+- ✅ **Unified Navigation** (v1.3): Keyboard + gamepad navigation with configurable keymap, 15 mappable actions
+- ✅ **Theme System** (v1.1): 5 bundled themes, HyperSpin-style layouts, per-system/game assignment
+- ✅ **Session System** (v1.1): Unified coins + time management with 4 modes (Arcade, Timed, Unlimited, Token)
 
 ---
 

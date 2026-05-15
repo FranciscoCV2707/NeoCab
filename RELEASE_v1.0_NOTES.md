@@ -1,6 +1,6 @@
-# NeoCab v1.0.0 - Release Notes
+# NeoCab v1.3.0 - Release Notes
 
-**Release Date:** May 13, 2026  
+**Release Date:** May 14, 2026  
 **Status:** ✅ Production Ready  
 **Platforms:** Windows XP/7/10/11, Linux x86_64, Raspberry Pi ARM
 
@@ -338,6 +338,6 @@ NeoCab v1.0.0 - All rights reserved / Open source under [LICENSE]
 ---
 
 **Release Signature:**  
-NeoCab v1.0.0 - Production Ready  
-Built: 2026-05-13  
+NeoCab v1.3.0 - Production Ready  
+Built: 2026-05-14  
 Platforms: Windows XP → 11, Linux x86_64, Raspberry Pi ARM

@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { CoinOverlay } from '../hardware/CoinOverlay';
-import { useTimer } from '../../hooks/useTimer';
-import { useGameSession } from '../../hooks/useGameSession';
 import './GameRunningOverlay.css';
 
 interface GameRunningOverlayProps {
@@ -30,36 +28,39 @@ export const GameRunningOverlay: React.FC<GameRunningOverlayProps> = ({
   onGameEnded,
   emulatorPID: _emulatorPID,
 }) => {
-  const { status, startTimer, stopTimer, checkTimeout, isGameRunning } =
-    useTimer();
-  const { endCurrentSession } = useGameSession();
+  const [timeRemaining, setTimeRemaining] = useState(durationSeconds);
   const [gameStopped, setGameStopped] = useState(false);
 
-  // Start timer when game is running
   useEffect(() => {
-    if (isRunning && !isGameRunning) {
-      startTimer(durationSeconds);
-    }
-  }, [isRunning, isGameRunning, durationSeconds, startTimer]);
-
-  // Setup emulator exit listener (crash detection)
-  useEffect(() => {
-    if (!isRunning || gameStopped) {
+    if (!isRunning) {
+      setTimeRemaining(durationSeconds);
       return;
     }
+    const interval = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          if (onGameEnded) onGameEnded();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isRunning, durationSeconds, onGameEnded]);
+
+  useEffect(() => {
+    if (!isRunning || gameStopped) return;
 
     let unlistenFn: (() => void) | null = null;
 
     const setupListener = async () => {
       try {
-        unlistenFn = await listen('emulator_exited', async (event: any) => {
-          console.log('Emulator crash detected:', event.payload);
+        unlistenFn = await listen('emulator_exited', async () => {
+          console.log('Emulator crash detected');
           setGameStopped(true);
-          await stopTimer();
-          await endCurrentSession();
-          if (onGameEnded) {
-            onGameEnded();
-          }
+          setTimeRemaining(0);
+          if (onGameEnded) onGameEnded();
         });
       } catch (err) {
         console.error('Failed to setup emulator exit listener:', err);
@@ -69,47 +70,26 @@ export const GameRunningOverlay: React.FC<GameRunningOverlayProps> = ({
     setupListener();
 
     return () => {
-      if (unlistenFn) {
-        unlistenFn();
-      }
+      if (unlistenFn) unlistenFn();
     };
-  }, [isRunning, gameStopped, stopTimer, onGameEnded, endCurrentSession]);
+  }, [isRunning, gameStopped, onGameEnded]);
 
-  // Check timeout periodically while game is running
   useEffect(() => {
-    if (!isRunning || gameStopped) {
-      return;
-    }
+    if (!isRunning || gameStopped) return;
 
-    const checkTimeoutInterval = setInterval(async () => {
-      try {
-        const emulator = systemName.toLowerCase();
-        const stopped = await checkTimeout(emulator, autoExit);
-
-        if (stopped) {
+    const checkInterval = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev <= 0 && autoExit) {
+          clearInterval(checkInterval);
           setGameStopped(true);
-          await stopTimer();
-          await endCurrentSession();
-          if (onGameEnded) {
-            onGameEnded();
-          }
+          if (onGameEnded) onGameEnded();
         }
-      } catch (err) {
-        console.error('Error checking timeout:', err);
-      }
-    }, 1000); // Check every second for timeout
+        return prev;
+      });
+    }, 1000);
 
-    return () => clearInterval(checkTimeoutInterval);
-  }, [
-    isRunning,
-    gameStopped,
-    systemName,
-    autoExit,
-    checkTimeout,
-    stopTimer,
-    onGameEnded,
-    endCurrentSession,
-  ]);
+    return () => clearInterval(checkInterval);
+  }, [isRunning, gameStopped, autoExit, onGameEnded]);
 
   if (!isRunning) return null;
 
@@ -120,11 +100,16 @@ export const GameRunningOverlay: React.FC<GameRunningOverlayProps> = ({
         balance={balance}
         coinsNeeded={coinsNeeded}
         isGameRunning={isRunning && !gameStopped}
-        remainingSeconds={status?.remaining_seconds || 0}
-        warnBefore={warnBeforeSeconds}
+        remainingSeconds={timeRemaining}
       />
+      {timeRemaining <= warnBeforeSeconds && timeRemaining > 0 && (
+        <div className={`timeout-warning ${timeRemaining <= 10 ? 'critical' : ''}`}>
+          <div className="timer-value">
+            {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+          </div>
+          <div className="timer-label">Time remaining - {systemName}</div>
+        </div>
+      )}
     </div>
   );
 };
-
-export default GameRunningOverlay;

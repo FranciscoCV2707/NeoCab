@@ -1,11 +1,12 @@
 use tauri::State;
 use serde_json::json;
 use crate::core::TimerManager;
+use std::sync::Arc;
 
 #[tauri::command]
 pub async fn start_timer(
     duration_seconds: i64,
-    timer_manager: State<'_, TimerManager>,
+    timer_manager: State<'_, Arc<TimerManager>>,
 ) -> Result<String, String> {
     match timer_manager.start(duration_seconds).await {
         Ok(status) => {
@@ -29,7 +30,7 @@ pub async fn start_timer(
 
 #[tauri::command]
 pub async fn pause_timer(
-    timer_manager: State<'_, TimerManager>,
+    timer_manager: State<'_, Arc<TimerManager>>,
 ) -> Result<String, String> {
     match timer_manager.pause().await {
         Ok(status) => {
@@ -53,7 +54,7 @@ pub async fn pause_timer(
 
 #[tauri::command]
 pub async fn resume_timer(
-    timer_manager: State<'_, TimerManager>,
+    timer_manager: State<'_, Arc<TimerManager>>,
 ) -> Result<String, String> {
     match timer_manager.resume().await {
         Ok(status) => {
@@ -76,7 +77,7 @@ pub async fn resume_timer(
 
 #[tauri::command]
 pub async fn stop_timer(
-    timer_manager: State<'_, TimerManager>,
+    timer_manager: State<'_, Arc<TimerManager>>,
 ) -> Result<String, String> {
     match timer_manager.stop().await {
         Ok(_) => {
@@ -98,7 +99,7 @@ pub async fn stop_timer(
 
 #[tauri::command]
 pub async fn get_timer_status(
-    timer_manager: State<'_, TimerManager>,
+    timer_manager: State<'_, Arc<TimerManager>>,
 ) -> Result<String, String> {
     match timer_manager.get_status().await {
         Ok(status) => {
@@ -127,7 +128,7 @@ pub async fn get_timer_status(
 #[tauri::command]
 pub async fn add_timer_time(
     seconds: i64,
-    timer_manager: State<'_, TimerManager>,
+    timer_manager: State<'_, Arc<TimerManager>>,
 ) -> Result<String, String> {
     match timer_manager.add_time(seconds).await {
         Ok(status) => {
@@ -152,7 +153,7 @@ pub async fn add_timer_time(
 
 #[tauri::command]
 pub async fn is_time_up(
-    timer_manager: State<'_, TimerManager>,
+    timer_manager: State<'_, Arc<TimerManager>>,
 ) -> Result<String, String> {
     let time_up = timer_manager.is_time_up().await;
 
