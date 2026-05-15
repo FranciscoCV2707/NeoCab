@@ -34,7 +34,8 @@
       "Bash(git rm *)",
       "Bash(rm -f ./nul ./src-tauri/nul)",
       "Bash(git clean *)",
-      "Bash(grep -E \"\\\\.md$|\\\\.ps1$|\\\\.log$\")"
+      "Bash(grep -E \"\\\\.md$|\\\\.ps1$|\\\\.log$\")",
+      "Skill(graphify)"
     ]
   }
 }
