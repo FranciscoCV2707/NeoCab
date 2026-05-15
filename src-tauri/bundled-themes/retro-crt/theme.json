@@ -1,0 +1,54 @@
+{
+  "name": "Retro CRT",
+  "version": "1.0.0",
+  "author": "NeoCab Team",
+  "description": "Authentic CRT monitor effect with green phosphor scanlines and curvature",
+  "colors": {
+    "primary": "#33ff33",
+    "secondary": "#0d1a0d",
+    "accent": "#00ff00",
+    "text": "#33ff33",
+    "background": "#050a05",
+    "surface": "#0d1a0d",
+    "border": "#33ff33",
+    "highlight": "#66ff66",
+    "success": "#33ff33",
+    "warning": "#ffff33",
+    "error": "#ff3333"
+  },
+  "fonts": {
+    "ui": "Courier New",
+    "title": "Courier New",
+    "subtitle": "Courier New",
+    "mono": "Courier New"
+  },
+  "layout": {
+    "system_view": "carousel",
+    "game_view": "split",
+    "wheel_style": "3d",
+    "transition": "slide",
+    "animation_speed": 350,
+    "easing": "easeOutCubic"
+  },
+  "media": {
+    "video_enabled": true,
+    "video_loop": true,
+    "snap_type": "screenshot",
+    "marquee_enabled": true,
+    "wheel_enabled": true,
+    "box_art_enabled": false
+  },
+  "sounds": {
+    "navigate": "nav.wav",
+    "select": "select.wav",
+    "back": "back.wav",
+    "coin": "coin.wav",
+    "start": "start.wav"
+  },
+  "effects": {
+    "scanlines": true,
+    "crt_curve": 0.3,
+    "glow_intensity": 0.3,
+    "shadow_enabled": false
+  }
+}

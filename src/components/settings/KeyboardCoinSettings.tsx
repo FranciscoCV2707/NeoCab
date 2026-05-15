@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useKeyboardCoinInput } from '../../hooks/useKeyboardCoinInput';
+import React, { useState, useEffect } from 'react';
 import './KeyboardCoinSettings.css';
 
 interface KeyboardCoinSettingsProps {
@@ -10,170 +9,66 @@ interface KeyboardCoinSettingsProps {
   }) => void;
 }
 
-export const KeyboardCoinSettings: React.FC<KeyboardCoinSettingsProps> = ({
-  onConfigChange,
-}) => {
-  const { config, updateConfig, lastCoinAdded, error } =
-    useKeyboardCoinInput();
-  const [listeningForKey, setListeningForKey] = useState(false);
-  const [tempKey, setTempKey] = useState<string | null>(null);
+export const KeyboardCoinSettings: React.FC<KeyboardCoinSettingsProps> = ({ onConfigChange }) => {
+  const [enabled, setEnabled] = useState(false);
+  const [coinKey, setCoinKey] = useState('5');
+  const [coinAmount, setCoinAmount] = useState(1);
+  const [isListening, setIsListening] = useState(false);
 
-  const handleEnableToggle = () => {
-    const newConfig = { ...config, enabled: !config.enabled };
-    updateConfig(newConfig);
+  useEffect(() => {
+    if (!isListening) return;
+    const handler = (e: KeyboardEvent) => {
+      setCoinKey(e.key);
+      setIsListening(false);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isListening]);
+
+  useEffect(() => {
     if (onConfigChange) {
-      onConfigChange(newConfig);
+      onConfigChange({ enabled, coinKey, coinAmount });
     }
-  };
-
-  const handleCoinAmountChange = (amount: number) => {
-    const newConfig = { ...config, coinAmount: Math.max(1, amount) };
-    updateConfig(newConfig);
-    if (onConfigChange) {
-      onConfigChange(newConfig);
-    }
-  };
-
-  const handleStartListening = () => {
-    setTempKey(null);
-    setListeningForKey(true);
-  };
-
-  const handleKeyCapture = (e: React.KeyboardEvent) => {
-    e.preventDefault();
-    const key = e.key;
-
-    if (key === 'Escape') {
-      setListeningForKey(false);
-      setTempKey(null);
-      return;
-    }
-
-    setTempKey(key);
-  };
-
-  const handleConfirmKey = () => {
-    if (tempKey) {
-      const newConfig = { ...config, coinKey: tempKey };
-      updateConfig(newConfig);
-      if (onConfigChange) {
-        onConfigChange(newConfig);
-      }
-    }
-    setListeningForKey(false);
-    setTempKey(null);
-  };
-
-  const handleCancelKey = () => {
-    setListeningForKey(false);
-    setTempKey(null);
-  };
+  }, [enabled, coinKey, coinAmount, onConfigChange]);
 
   return (
     <div className="keyboard-coin-settings">
-      <h3 className="settings-title">Keyboard Coin Input</h3>
-
-      <div className="settings-group">
-        <div className="setting-row">
-          <label className="setting-label">Enable Keyboard Coins</label>
-          <input
-            type="checkbox"
-            className="setting-checkbox"
-            checked={config.enabled}
-            onChange={handleEnableToggle}
-          />
-        </div>
-
-        {config.enabled && (
-          <>
-            <div className="setting-row">
-              <label className="setting-label">Coin Key</label>
-              {!listeningForKey ? (
-                <div className="key-display">
-                  <span className="key-value">{config.coinKey}</span>
-                  <button
-                    className="key-button"
-                    onClick={handleStartListening}
-                  >
-                    Change Key
-                  </button>
-                </div>
-              ) : (
-                <div className="key-listener">
-                  <div className="listener-message">
-                    Press a key to assign as coin input
-                    {tempKey && (
-                      <span className="temp-key">
-                        {' '}
-                        (Pressed: <strong>{tempKey}</strong>)
-                      </span>
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    autoFocus
-                    onKeyDown={handleKeyCapture}
-                    onBlur={() => setListeningForKey(false)}
-                    style={{ display: 'none' }}
-                  />
-                  <div className="listener-buttons">
-                    <button
-                      className="confirm-button"
-                      onClick={handleConfirmKey}
-                      disabled={!tempKey}
-                    >
-                      Confirm
-                    </button>
-                    <button
-                      className="cancel-button"
-                      onClick={handleCancelKey}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="setting-row">
-              <label className="setting-label">Coins per Press</label>
-              <div className="amount-control">
-                <button
-                  className="amount-button"
-                  onClick={() => handleCoinAmountChange(config.coinAmount - 1)}
-                  disabled={config.coinAmount <= 1}
-                >
-                  −
-                </button>
-                <span className="amount-value">{config.coinAmount}</span>
-                <button
-                  className="amount-button"
-                  onClick={() => handleCoinAmountChange(config.coinAmount + 1)}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            {lastCoinAdded && (
-              <div className="coin-added-indicator">
-                ✓ Coin added!
-              </div>
-            )}
-          </>
-        )}
-
-        {error && <div className="setting-error">{error}</div>}
+      <h3>Keyboard Coin Input</h3>
+      <div className="setting-row">
+        <label>Enable Keyboard Coin</label>
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={(e) => setEnabled(e.target.checked)}
+        />
       </div>
-
-      <div className="settings-info">
-        <p>Press the configured key to add coins during gameplay.</p>
-        <p className="info-small">
-          Default key is <strong>5</strong> (common arcade coin key).
-        </p>
+      <div className="setting-row">
+        <label>Coin Key</label>
+        <div className="key-input-row">
+          <input
+            type="text"
+            value={coinKey}
+            readOnly
+            className="key-display"
+          />
+          <button
+            onClick={() => setIsListening(true)}
+            disabled={isListening}
+          >
+            {isListening ? 'Press a key...' : 'Change Key'}
+          </button>
+        </div>
+      </div>
+      <div className="setting-row">
+        <label>Coins per Press</label>
+        <input
+          type="number"
+          min={1}
+          max={99}
+          value={coinAmount}
+          onChange={(e) => setCoinAmount(Number(e.target.value))}
+        />
       </div>
     </div>
   );
 };
-
-export default KeyboardCoinSettings;

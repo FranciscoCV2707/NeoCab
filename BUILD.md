@@ -2,8 +2,8 @@
 
 Complete instructions for building NeoCab on all supported platforms.
 
-**Last Updated:** 2026-05-12  
-**Status:** ✅ Ready for Windows/Linux/ARM builds
+**Last Updated:** 2026-05-14  
+**Status:** ✅ Ready for Windows/Linux/ARM builds | v1.3.0
 
 ---
 

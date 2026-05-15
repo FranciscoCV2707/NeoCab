@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 
-interface ThemeInfo {
+export interface ThemeInfo {
   name: string;
   author: string;
   version: string;
@@ -9,13 +9,30 @@ interface ThemeInfo {
   preview_path?: string;
 }
 
-interface ThemeData {
+export interface ThemeData {
   name: string;
   author: string;
   version: string;
+  description?: string;
   colors: Record<string, string>;
-  wheel: Record<string, any>;
+  fonts: Record<string, string>;
+  layout: {
+    system_view: string;
+    game_view: string;
+    wheel_style: string;
+    transition: string;
+    animation_speed: number;
+    easing: string;
+  };
   media: Record<string, any>;
+  sounds: Record<string, string>;
+  effects: {
+    scanlines: boolean;
+    crt_curve: number;
+    glow_intensity: number;
+    shadow_enabled: boolean;
+  };
+  wheel?: Record<string, any>;
 }
 
 interface UseThemeReturn {

@@ -1,13 +1,39 @@
-# 🚀 NeoCab v1.0 - Release Notes
+# 🚀 NeoCab v1.3 - Release Notes
 
-**Release Date:** May 13, 2026  
+**Release Date:** May 14, 2026  
 **Status:** Stable Release
 
 ## Overview
 
-NeoCab v1.0 is the complete arcade cabinet operating system, feature-complete and ready for commercial deployment. Supports 6 major emulators across Windows, Linux, and Raspberry Pi platforms.
+NeoCab v1.3 is the complete arcade cabinet operating system with advanced input processing and unified navigation. Built on v1.0 foundation with major improvements in themes, session management, input processing, and keyboard/gamepad navigation.
 
-## Major Features
+## Major Features (v1.3)
+
+### Unified Navigation
+- **Keyboard + Gamepad:** Single hook for both input types
+- **Configurable Keymap:** 15 mappable actions with localStorage persistence
+- **KeymapConfigPanel:** UI with recording mode in Operator Panel
+- **useKeyboardNav:** List/grid navigation with page up/down support
+
+### Advanced Input System (v1.2)
+- **JoyMapper v2:** Radial deadzone, spline curves, shift layers, stick delay
+- **Multi-gamepad:** Independent mapper per device with GUID tracking
+- **6 Controller Templates:** ArcadeStick, SNES, Xbox, PS, Flight, Racing
+- **AntiMicroX Import:** Parse XML profiles automatically
+- **Per-game profiles:** Hierarchical resolution (game > system > global)
+- **14 new Tauri commands** for input management
+
+### Session System (v1.1)
+- **SessionManager:** Unified coins + time management
+- **4 modes:** Arcade, Timed, Unlimited, Token
+- **Per-system configuration** with pause/resume support
+
+### Theme System (v1.1)
+- **5 bundled themes** with auto-install
+- **Per-system/game assignment** with hierarchy resolution
+- **Theme Editor** with 7 tabs and export/import
+
+## Previous Features (v1.0)
 
 ### Emulation
 - **6 Emulators:** MAME, RetroArch (7 cores), PCSX Redux, Mupen64, Gambatte
@@ -190,6 +216,29 @@ To upgrade from earlier phases:
 
 ## Changelog
 
+### v1.3.0 (2026-05-14)
+- Unified keyboard + gamepad navigation
+- Configurable keymap with 15 actions
+- KeymapConfigPanel in Operator Panel
+- useKeyboardNav hook for list/grid navigation
+- SessionConfig tab in Operator Panel
+
+### v1.2.0 (2026-05-14)
+- JoyMapper v2 with radial deadzone, spline curves, shift layers
+- Multi-gamepad support with per-device profiles
+- 6 controller templates
+- AntiMicroX profile import
+- 14 new Tauri commands for input management
+- Per-game profile system with auto-switching
+
+### v1.1.0 (2026-05-14)
+- 5 bundled themes with auto-install
+- Theme hierarchy (game > system > global)
+- SessionManager (coins + time unified, 4 modes)
+- ViewTransition component (5 types)
+- MainMenu + SystemSelect redesigned
+- 12 new session Tauri commands
+
 ### v1.0.0 (2026-05-13)
 - Initial stable release
 - All phases 1-11 complete
@@ -207,7 +256,7 @@ Powered by MAME, RetroArch, and open-source emulators
 
 ## License
 
-NeoCab v1.0 - All Rights Reserved (Commercial)
+NeoCab v1.3.0 - All Rights Reserved (Commercial)
 
 ---
 

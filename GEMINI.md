@@ -1,6 +1,8 @@
-# 🎮 NeoCab (ArcadeCore v3) - Project Context
+# 🎮 NeoCab v1.3.0 - Project Context
 
 NeoCab is a professional-grade arcade cabinet operating system and frontend. It is designed to be high-performance, cross-platform, and support both modern hardware (Win7+, Linux, RPi) and legacy cabinets (Windows XP).
+
+**Current Version:** v1.3.0 | **Status:** Production Ready | **Last Updated:** 2026-05-14
 
 ## 🏗️ Architectural Vision
 
@@ -56,9 +58,9 @@ The system is managed by specialized "God Nodes" (Managers) that orchestrate dif
 - **Database**: Use SQLx macros for type safety.
 
 ### Frontend (React)
-- **State**: Prefer `ArcadeContext` or `zustand` stores.
-- **Styling**: Vanilla CSS with variables for live theme injection.
-- **IPC**: Communication via `invoke` handlers defined in `commands/`.
+- **State**: Prefer local state + hooks (`useUnifiedInput`, `useTheme`, `useKeyboardNav`)
+- **Styling**: Vanilla CSS with variables for live theme injection
+- **IPC**: Communication via `invoke` handlers defined in `commands/`
 
 ## 🧪 Testing and Validation
 - **Backend**: `cd src-tauri && cargo test`
@@ -66,7 +68,8 @@ The system is managed by specialized "God Nodes" (Managers) that orchestrate dif
 - **Hot-Reload**: Verify config and shader changes refresh automatically in the UI.
 
 ## 📖 Key Documentation
-- `SIGUIENTE_SESION.md`: Immediate tasks and session history.
-- `PLAN_MAESTRO_REAL_COMPLETO.md`: Gap analysis between plan and implementation.
-- `docs/INDEX_MAESTRO.md`: Root of the 12,000+ line documentation suite.
-- `graphify-out/GRAPH_REPORT.md`: Detailed architectural dependency map.
+- `STATUS.md`: Current project status (v1.3.0)
+- `CHANGELOG.md`: Version history
+- `ROADMAP.md`: Project roadmap
+- `docs/INDEX_MAESTRO.md`: Root of the documentation suite
+- `SIGUIENTE_SESION.md`: Immediate tasks and session history

@@ -2,6 +2,145 @@
 
 All notable changes to this project are documented here.
 
+## [1.2.0] - 2026-05-14 - INPUT SYSTEM PHASE
+
+> Advanced input system inspired by AntiMicroX, Durazno, JoystickGremlin, UCR, and x360ce.
+
+### JoyMapper v2 - Advanced Input Processing
+- **Radial deadzone**: Circular deadzone for analog sticks (both axes combined)
+- **Linear deadzone**: Traditional per-axis deadzone
+- **Anti-deadzone**: Compensates for internal game deadzones
+- **Per-stick configuration**: Separate deadzones for left stick, right stick, and triggers
+- **Response curves**: Linear, Exponential (configurable factor), Digital (threshold), Spline (custom control points)
+- **Per-stick curves**: Independent curves for left and right sticks
+- **Shift layers (sets)**: Multiple mapping sets per profile, toggle via button or cycle
+- **Stick delay**: Smoothing for direction changes to prevent accidental inputs
+- **Trigger range**: Remap trigger min/max for racing wheels and flight sticks
+- **Button combos**: Multiple buttons pressed together trigger a single action (300ms buffer)
+- **Hold actions**: Different action for tap vs hold, with configurable hold threshold
+- **Repeat**: Auto-repeat action while button is held (configurable interval)
+
+### Input Templates (6 presets)
+- **ArcadeStick**: Radial deadzone + digital response
+- **SNES Pad**: Linear deadzone + digital threshold
+- **Xbox Controller**: Radial sticks + exponential curves + shift layers
+- **PlayStation Controller**: DualShock/DualSense layout
+- **Flight Stick**: Radial + exponential + stick delay
+- **Racing Wheel**: Radial + anti-deadzone
+
+### AntiMicroX Import
+- `import_antimicrox_profile(xml)` - parses AntiMicroX XML profiles
+- Converts button-to-key mappings automatically
+- Preserves deadzone settings
+
+### Multi-Gamepad Support
+- Independent JoyMapper instance per device
+- Device GUID tracking for per-device profiles
+- Auto-load device-specific profiles on connection
+
+### Per-Game Profile System
+- Hierarchical resolution: game > system > global
+- `set_context(system, game)` auto-loads matching profile
+- `ProfileAssignment` for explicit scope-to-profile mapping
+
+### 14 New Tauri Commands
+- `get_connected_devices`, `set_input_context`, `get_input_context`
+- `add_profile_assignment`, `get_profile_assignments`, `remove_profile_assignment`
+- `load_input_profile`, `get_active_profile`, `switch_input_set`
+- `get_input_state`, `create_profile_from_template`, `list_input_templates`
+- `import_antimicrox_profile`, `set_device_deadzone`, `set_response_curve`
+
+### Build Status
+- Frontend: `npm run build` (217KB JS, 58KB CSS)
+- Backend: `cargo check` (warnings only, no errors)
+
+---
+
+## [1.3.0] - 2026-05-14 - NAVIGATION PHASE
+
+> Unified keyboard + gamepad navigation with configurable keymap.
+
+### Unified Input System
+- **`useUnifiedInput` hook**: Combines keyboard (keydown events) + gamepad (backend polling at 60fps)
+- **`useKeyboardNav` hook**: List navigation with grid support, page up/down, confirm/back actions
+- **Replaced `useGamepad`** in App.tsx with unified input system
+- **Repeat delay**: Configurable debounce (default 200ms) to prevent duplicate inputs
+- **15 mappable actions**: up, down, left, right, confirm, back, coin, start, pause, quick_save, quick_load, screenshot, toggle_menu, page_up, page_down
+
+### Configurable Keymap
+- **`KeymapConfig` interface**: Full keyboard + gamepad mapping
+- **Default mappings**: WASD + arrows for navigation, Enter/Space for confirm, Escape for back
+- **localStorage persistence**: Keymap saved as `neocab_keymap`
+- **Multiple keys per action**: Each action can have multiple keyboard keys or gamepad buttons
+- **Reset to defaults**: One-click restore
+
+### KeymapConfigPanel Component
+- **Tabs**: Keyboard and Gamepad configuration
+- **Recording mode**: Press any key/button to assign to an action
+- **Visual key badges**: Shows all assigned keys with remove buttons
+- **Integrated in OperatorPanel**: New "Keymap" tab for easy access
+
+### SessionConfig Tab
+- Added "Sesiones" tab to OperatorPanel for coin/time configuration
+
+### Build Status
+- Frontend: 226KB JS, 63KB CSS
+- Backend: cargo check (warnings only)
+
+---
+
+## [1.1.0] - 2026-05-14 🚧 IMPROVEMENT PHASE IN PROGRESS
+
+> Based on exhaustive analysis of 6 arcade frontends (AdvanceMAME, AttractMode, AttractPlus, Pegasus, RetroFE, SimpleLauncher) and 11 controller tools (AntiMicroX, Durazno, FreePIE, joy2key, JoystickGremlin, JoystickGremlinEx, Key2Joy, UCR-AHK, UCR, x360ce).
+
+### Fase 1: Arquitectura Base ✅
+- **Removed dead dependencies**: `@tabler/icons-react`, `zustand`, `framer-motion`, `react-router-dom`
+- **Removed dead code**: `ArcadeContext.tsx`, 13 unused hooks, `customization/` directory, `HyperSpinWheel`, `theme_commands.rs`
+- **Integrated `useTheme` hook** into `App.tsx` with dynamic CSS variable injection
+- **Fixed `list_available_themes`** to scan real theme directory instead of hardcoded values
+- **Added 6 new theme Tauri commands**: `load_theme`, `save_custom_theme`, `export_theme`, `import_theme`, `apply_theme`, `list_themes`
+- **Unified ThemeEditor**: 7 tabs (Colors, Fonts, Layout, Media, Sounds, Effects, Preview) with 5 presets and export/import
+- **Fixed 8 broken components** that imported deleted modules
+- **Added ESLint config** (`.eslintrc.json`)
+- **Added easing utility** with 20+ Penner easing functions
+
+### Fase 2: Sistema de Temas HyperSpin-Style ✅
+- **5 bundled themes** with `theme.json` + `layout.json` each:
+  - Arcade Classic (neon orange, carousel 3D)
+  - Neon Future (magenta/cyan, grid)
+  - Minimal Clean (Windows flat, list)
+  - Retro CRT (green phosphor + scanlines)
+  - Cyberpunk (dark + glitch effects)
+- **Theme auto-install** on first run via `install_bundled_themes()`
+- **Theme hierarchy**: Game → System → Global (fallback)
+- **Database**: New `game_theme_assignments` table for per-game themes
+- **Theme commands**: `set_game_theme`, `get_game_theme`, `remove_game_theme`, `get_all_game_themes`, `resolve_game_theme`
+- **CSS generator**: `get_theme_css` produces 17+ dynamic CSS variables
+- **App.tsx**: Applies CSS variables, scanlines overlay, theme class to body
+
+### Fase 3: UI Visual Mejorada ✅
+- **ViewTransition component**: 5 transition types (slide, fade, scale, flip, glitch) with configurable easing
+- **MainMenu redesigned**: Animated logo with glow pulse, floating particles, 3D button hover effects, real-time clock
+- **SystemSelect redesigned**: 3D carousel with distance-based scaling, per-system colors, ambient lighting, focus ring animation
+- **App.css updated**: 17+ dynamic CSS variables, theme body classes, custom scrollbar styling
+
+### Fase 4: Sistema de Coins/Tiempo Configurable ✅
+- **New SessionManager** unifying coins + time into single system
+- **4 session modes**: Arcade (credits), Timed (minutes per credit), Unlimited, Token
+- **Arcade config**: coins_per_credit, time_per_credit_minutes, free_play, continue_cost, max_continues
+- **Timed config**: minutes_per_credit, warning_at_minutes, pause_allowed, pause_limit_minutes, pause_max_count
+- **12 new Tauri commands**: `session_insert_coin`, `session_start`, `session_check`, `session_pause`, `session_resume`, `session_end`, `session_add_time`, `session_get_status`, `session_get_config`, `session_set_config`, `session_set_system_mode`, `session_update_system_config`
+- **5 new Tauri events**: `coin_inserted`, `time_added`, `session_started`, `timer_warning`, `time_expired`
+- **SessionOverlay component**: Credits display, countdown timer, warning animation, game over screen
+- **SessionConfig component**: Full configuration panel for Operator Panel
+
+### Build Status
+- Frontend: ✅ `npm run build` (217KB JS, 58KB CSS)
+- Backend: ✅ `cargo check` (warnings only, no errors)
+- ESLint: ✅ Warnings only, no errors
+
+---
+
 ## [1.0.0] - 2026-05-13 ✅ RELEASED - PRODUCTION READY
 
 ### Added - Session 22: Elite Phase (Final Polish)

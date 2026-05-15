@@ -1,0 +1,54 @@
+{
+  "name": "Arcade Classic",
+  "version": "1.0.0",
+  "author": "NeoCab Team",
+  "description": "Authentic 80s arcade cabinet aesthetic with neon glow and warm orange accents",
+  "colors": {
+    "primary": "#ff6b00",
+    "secondary": "#1a1a1a",
+    "accent": "#00ffcc",
+    "text": "#ffffff",
+    "background": "#0a0a0a",
+    "surface": "#1a1a1a",
+    "border": "#ff6b00",
+    "highlight": "#ff8c00",
+    "success": "#00c853",
+    "warning": "#ffcc00",
+    "error": "#ff1744"
+  },
+  "fonts": {
+    "ui": "Arial",
+    "title": "Impact",
+    "subtitle": "Arial",
+    "mono": "Consolas"
+  },
+  "layout": {
+    "system_view": "carousel",
+    "game_view": "split",
+    "wheel_style": "3d",
+    "transition": "slide",
+    "animation_speed": 300,
+    "easing": "easeOutCubic"
+  },
+  "media": {
+    "video_enabled": true,
+    "video_loop": true,
+    "snap_type": "video",
+    "marquee_enabled": true,
+    "wheel_enabled": true,
+    "box_art_enabled": true
+  },
+  "sounds": {
+    "navigate": "nav.wav",
+    "select": "select.wav",
+    "back": "back.wav",
+    "coin": "coin.wav",
+    "start": "start.wav"
+  },
+  "effects": {
+    "scanlines": false,
+    "crt_curve": 0,
+    "glow_intensity": 0.7,
+    "shadow_enabled": true
+  }
+}

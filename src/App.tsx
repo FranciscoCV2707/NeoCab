@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, emit } from "@tauri-apps/api/event";
-import { useGamepad, GamepadAction } from "./hooks/useGamepad";
+import { useUnifiedInput } from "./hooks/useUnifiedInputHook";
+import { InputAction } from "./hooks/useUnifiedInput";
+import { useKeyboardNav } from "./hooks/useKeyboardNav";
 import { useAudio } from "./hooks/useAudio";
+import { useTheme } from "./hooks/useTheme";
 import { FadeOverlay } from "./components/launcher/FadeOverlay";
 import { PauseMenu } from "./components/launcher/PauseMenu";
+import { ViewTransition } from "./components/ViewTransition";
 import GameList from "./components/GameList";
 import SystemSelect from "./components/SystemSelect";
 import MainMenu from "./components/MainMenu";
@@ -53,6 +57,7 @@ interface ScanProgressPayload {
 type View = "menu" | "systems" | "games" | "operator";
 
 export default function App() {
+  const { currentTheme, applyTheme, listThemes } = useTheme();
   const [currentView, setCurrentView] = useState<View>("menu");
   const [systems, setSystems] = useState<System[]>([]);
   const [selectedSystem, setSelectedSystem] = useState<System | null>(null);
@@ -111,6 +116,65 @@ export default function App() {
       unlisten.then((f) => f());
     };
   }, []);
+
+  useEffect(() => {
+    if (!currentTheme) return;
+    const root = document.documentElement;
+    const body = document.body;
+
+    // Apply CSS variables from theme colors
+    if (currentTheme.colors) {
+      Object.entries(currentTheme.colors).forEach(([key, value]) => {
+        root.style.setProperty(`--${key}`, value as string);
+      });
+    }
+
+    // Apply font variables
+    if (currentTheme.fonts) {
+      Object.entries(currentTheme.fonts).forEach(([key, value]) => {
+        root.style.setProperty(`--font-${key}`, value as string);
+      });
+    }
+
+    // Apply layout variables
+    if (currentTheme.layout) {
+      root.style.setProperty('--animation-speed', `${currentTheme.layout.animation_speed}ms`);
+      root.style.setProperty('--transition-easing', currentTheme.layout.easing);
+    }
+
+    // Apply effects
+    if (currentTheme.effects) {
+      root.style.setProperty('--glow-intensity', String(currentTheme.effects.glow_intensity));
+      root.style.setProperty('--scanlines', currentTheme.effects.scanlines ? '1' : '0');
+      root.style.setProperty('--crt-curve', String(currentTheme.effects.crt_curve));
+
+      // Apply scanlines overlay if enabled
+      if (currentTheme.effects.scanlines) {
+        if (!document.getElementById('scanlines-overlay')) {
+          const overlay = document.createElement('div');
+          overlay.id = 'scanlines-overlay';
+          overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 9999;
+            background: repeating-linear-gradient(
+              0deg,
+              rgba(0, 0, 0, 0.15),
+              rgba(0, 0, 0, 0.15) 1px,
+              transparent 1px,
+              transparent 2px
+            );
+          `;
+          body.appendChild(overlay);
+        }
+      } else {
+        const overlay = document.getElementById('scanlines-overlay');
+        if (overlay) overlay.remove();
+      }
+    }
+
+    // Apply theme class to body for theme-specific CSS
+    body.className = `theme-${(currentTheme.name || 'default').toLowerCase().replace(/\s+/g, '-')}`;
+  }, [currentTheme]);
 
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -293,32 +357,39 @@ export default function App() {
     }
   };
 
-  const handleGamepadAction = useCallback((action: GamepadAction) => {
+  const handleUnifiedAction = useCallback((action: InputAction) => {
     resetAttractTimer();
-    
-    if (action === "UP" || action === "DOWN" || action === "LEFT" || action === "RIGHT") {
+
+    if (['up', 'down', 'left', 'right'].includes(action)) {
       playSound('navigate');
     }
 
     if (currentView === "menu") {
-      if (action === "CONFIRM") {
+      if (action === 'confirm') {
         playSound('select');
         setCurrentView("systems");
       }
     } else if (currentView === "systems") {
-      if (action === "UP" || action === "LEFT") setFocusedIndex(prev => Math.max(0, prev - 1));
-      if (action === "DOWN" || action === "RIGHT") setFocusedIndex(prev => Math.min(systems.length - 1, prev + 1));
-      if (action === "CONFIRM") handleSelectSystem(systems[focusedIndex]);
-      if (action === "BACK") handleBack();
+      if (action === 'up' || action === 'left') setFocusedIndex(prev => Math.max(0, prev - 1));
+      if (action === 'down' || action === 'right') setFocusedIndex(prev => Math.min(systems.length - 1, prev + 1));
+      if (action === 'confirm') handleSelectSystem(systems[focusedIndex]);
+      if (action === 'back') handleBack();
     } else if (currentView === "games") {
-      if (action === "UP") setFocusedIndex(prev => Math.max(0, prev - 1));
-      if (action === "DOWN") setFocusedIndex(prev => Math.min(games.length - 1, prev + 1));
-      if (action === "CONFIRM") handlePlayGame(games[focusedIndex]);
-      if (action === "BACK") handleBack();
+      if (action === 'up') setFocusedIndex(prev => Math.max(0, prev - 1));
+      if (action === 'down') setFocusedIndex(prev => Math.min(games.length - 1, prev + 1));
+      if (action === 'confirm') handlePlayGame(games[focusedIndex]);
+      if (action === 'back') handleBack();
+      if (action === 'coin') {
+        invoke('session_insert_coin').catch(() => {});
+      }
+    } else if (currentView === "operator") {
+      if (action === 'back') {
+        setCurrentView("menu");
+      }
     }
   }, [currentView, focusedIndex, systems, games, handleSelectSystem, handlePlayGame, handleBack, playSound]);
 
-  useGamepad({ onAction: handleGamepadAction });
+  useUnifiedInput({ onAction: handleUnifiedAction });
 
   useEffect(() => {
     if (currentView === "games" && games[focusedIndex]) {
@@ -378,7 +449,7 @@ export default function App() {
       </div>
 
       {currentView === "menu" && (
-        <div className="view-transition">
+        <ViewTransition transitionType="slide" direction="left">
           <MainMenu
             onScanROMs={handleScanROMs}
             onSelectSystem={() => setCurrentView("systems")}
@@ -386,11 +457,11 @@ export default function App() {
             loading={loading}
             scanProgress={scanProgress}
           />
-        </div>
+        </ViewTransition>
       )}
 
       {currentView === "systems" && (
-        <div className="view-transition">
+        <ViewTransition transitionType="slide" direction="right">
           <SystemSelect
             systems={systems}
             onSelectSystem={handleSelectSystem}
@@ -398,11 +469,11 @@ export default function App() {
             loading={loading}
             focusedIndex={focusedIndex}
           />
-        </div>
+        </ViewTransition>
       )}
 
       {currentView === "games" && selectedSystem && (
-        <div className="view-transition">
+        <ViewTransition transitionType="fade">
           <GameList
             system={selectedSystem}
             games={games}
@@ -411,10 +482,14 @@ export default function App() {
             loading={loading}
             focusedIndex={focusedIndex}
           />
-        </div>
+        </ViewTransition>
       )}
 
-      {currentView === "operator" && <OperatorPanel />}
+      {currentView === "operator" && (
+        <ViewTransition transitionType="scale">
+          <OperatorPanel />
+        </ViewTransition>
+      )}
 
       {showSaveStateModal && pendingGame && (
         <SaveStateModal

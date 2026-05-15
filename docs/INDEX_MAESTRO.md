@@ -1,6 +1,8 @@
-# 📑 Índice Maestro de Documentación - NeoCab v1.0 🚀
+# 📑 Índice Maestro de Documentación - NeoCab v1.3 🚀
 
 Bienvenido al centro de documentación técnica y operativa de NeoCab. Aquí encontrarás todo lo necesario para entender, configurar y expandir el sistema.
+
+**Versión actual:** 1.3.0 | **Última actualización:** 2026-05-14
 
 ---
 
@@ -14,7 +16,7 @@ Bienvenido al centro de documentación técnica y operativa de NeoCab. Aquí enc
 ## 🛠️ Documentación Técnica (Nivel Master)
 ### Core & Infraestructura
 - [**Arquitectura NeoCab (Visión General)**](../NEOCAB_PLAN_COMPLETO.md): Cómo funciona el corazón de Rust y React.
-- [**JoyMapper Nativo**](16_JOYMAPPER_NATIVO.md): El motor de gestión de entrada sin drivers.
+- [**JoyMapper Nativo v2**](16_JOYMAPPER_NATIVO.md): Motor de gestión de entrada con deadzones, curvas, shift layers.
 - [**Launcher Pro & Fade System**](19_LAUNCHER_PRO_FADE_SYSTEM.md): Ciclo de vida de lanzamiento y transiciones.
 - [**Bezel Manager**](19_LAUNCHER_PRO_FADE_SYSTEM.md#bezel-manager): Gestión automática de marcos decorativos.
 
@@ -37,9 +39,11 @@ Bienvenido al centro de documentación técnica y operativa de NeoCab. Aquí enc
 ---
 
 ## 📈 Registro de Desarrollo
-- [**Estado del Proyecto (STATUS)**](../STATUS.md): Versión actual y estabilidad.
-- [**Registro de Progreso Final**](../PROGRESO_v1.0.md): Hitos alcanzados hasta la v1.0.
-- [**Resumen de la Fase Elite**](SESSION_22_ELITE_PHASE.md): Todo lo logrado en la última gran actualización.
+- [**Estado del Proyecto (STATUS)**](../STATUS.md): Versión actual y estabilidad (v1.3.0).
+- [**Registro de Progreso**](../PROGRESO_v1.0.md): Hitos alcanzados hasta v1.3.0.
+- [**Plan de Mejora Completa**](../PLAN_MEJORA_COMPLETA.md): Análisis de 6 frontends + 11 herramientas de control.
+- [**Changelog**](../CHANGELOG.md): Registro detallado de cambios por versión.
+- [**Roadmap**](../ROADMAP.md): Hoja de ruta del proyecto.
 
 ---
 **NeoCab - La culminación de la ingeniería arcade.**

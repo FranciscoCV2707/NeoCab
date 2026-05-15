@@ -18,10 +18,16 @@ pub struct Theme {
     pub description: String,
     pub colors: ThemeColors,
     pub fonts: ThemeFonts,
-    pub wheel: WheelSettings,
-    pub overlay: OverlaySettings,
-    pub transitions: TransitionSettings,
+    pub layout: ThemeLayout,
     pub media: MediaSettings,
+    pub sounds: ThemeSounds,
+    pub effects: ThemeEffects,
+    #[serde(default)]
+    pub wheel: Option<WheelSettings>,
+    #[serde(default)]
+    pub overlay: Option<OverlaySettings>,
+    #[serde(default)]
+    pub transitions: Option<TransitionSettings>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -31,15 +37,47 @@ pub struct ThemeColors {
     pub accent: String,
     pub text: String,
     pub background: String,
+    pub surface: String,
+    pub border: String,
+    pub highlight: String,
     pub success: String,
+    pub warning: String,
     pub error: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ThemeFonts {
     pub ui: String,
-    pub display: String,
-    pub menu: String,
+    pub title: String,
+    pub subtitle: String,
+    pub mono: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ThemeLayout {
+    pub system_view: String,
+    pub game_view: String,
+    pub wheel_style: String,
+    pub transition: String,
+    pub animation_speed: u32,
+    pub easing: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ThemeSounds {
+    pub navigate: String,
+    pub select: String,
+    pub back: String,
+    pub coin: String,
+    pub start: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ThemeEffects {
+    pub scanlines: bool,
+    pub crt_curve: f32,
+    pub glow_intensity: f32,
+    pub shadow_enabled: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -68,11 +106,12 @@ pub struct TransitionSettings {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MediaSettings {
-    pub show_wheels: bool,
-    pub show_box_art: bool,
-    pub show_backgrounds: bool,
-    pub background_opacity: f32,
-    pub wheel_size: String,
+    pub video_enabled: bool,
+    pub video_loop: bool,
+    pub snap_type: String,
+    pub marquee_enabled: bool,
+    pub wheel_enabled: bool,
+    pub box_art_enabled: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -94,42 +133,69 @@ impl Default for Theme {
             colors: ThemeColors {
                 primary: "#ff6b00".to_string(),
                 secondary: "#1a1a1a".to_string(),
-                accent: "#ffcc00".to_string(),
+                accent: "#00ffcc".to_string(),
                 text: "#ffffff".to_string(),
                 background: "#0a0a0a".to_string(),
+                surface: "#1a1a1a".to_string(),
+                border: "#ff6b00".to_string(),
+                highlight: "#ff8c00".to_string(),
                 success: "#00c853".to_string(),
+                warning: "#ffcc00".to_string(),
                 error: "#ff1744".to_string(),
             },
             fonts: ThemeFonts {
-                ui: "arcade.ttf".to_string(),
-                display: "digital.ttf".to_string(),
-                menu: "arcade.ttf".to_string(),
+                ui: "Arial".to_string(),
+                title: "Impact".to_string(),
+                subtitle: "Arial".to_string(),
+                mono: "Consolas".to_string(),
             },
-            wheel: WheelSettings {
+            layout: ThemeLayout {
+                system_view: "carousel".to_string(),
+                game_view: "split".to_string(),
+                wheel_style: "3d".to_string(),
+                transition: "slide".to_string(),
+                animation_speed: 300,
+                easing: "easeOutCubic".to_string(),
+            },
+            media: MediaSettings {
+                video_enabled: true,
+                video_loop: true,
+                snap_type: "video".to_string(),
+                marquee_enabled: true,
+                wheel_enabled: true,
+                box_art_enabled: true,
+            },
+            sounds: ThemeSounds {
+                navigate: "nav.wav".to_string(),
+                select: "select.wav".to_string(),
+                back: "back.wav".to_string(),
+                coin: "coin.wav".to_string(),
+                start: "start.wav".to_string(),
+            },
+            effects: ThemeEffects {
+                scanlines: false,
+                crt_curve: 0.0,
+                glow_intensity: 0.7,
+                shadow_enabled: true,
+            },
+            wheel: Some(WheelSettings {
                 item_size: 120,
                 item_spacing: 15,
                 animation_duration: 300,
                 selected_color: "#ff6b00".to_string(),
                 unselected_color: "#666666".to_string(),
-            },
-            overlay: OverlaySettings {
+            }),
+            overlay: Some(OverlaySettings {
                 coin_position: "top-right".to_string(),
                 timer_position: "bottom-right".to_string(),
                 stats_opacity: 0.8,
                 animation_style: "smooth".to_string(),
-            },
-            transitions: TransitionSettings {
+            }),
+            transitions: Some(TransitionSettings {
                 wheel_rotation: "easeOutCubic".to_string(),
                 page_change: "fadeInOut".to_string(),
                 duration: 300,
-            },
-            media: MediaSettings {
-                show_wheels: true,
-                show_box_art: true,
-                show_backgrounds: true,
-                background_opacity: 0.7,
-                wheel_size: "large".to_string(),
-            },
+            }),
         }
     }
 }
@@ -148,6 +214,50 @@ impl ThemeManager {
             current_theme: Arc::new(RwLock::new(Theme::default())),
             system_themes: Arc::new(RwLock::new(HashMap::new())),
         }
+    }
+
+    /// Install bundled themes from src-tauri/bundled-themes/ if they don't exist
+    pub fn install_bundled_themes(&self) -> Result<()> {
+        if !self.themes_dir.exists() {
+            fs::create_dir_all(&self.themes_dir).map_err(|e| {
+                crate::error::NeoCabError::System(format!("Failed to create themes dir: {}", e))
+            })?;
+        }
+
+        let bundled_themes = [
+            ("arcade-classic", include_str!("../../bundled-themes/arcade-classic/theme.json"), include_str!("../../bundled-themes/arcade-classic/layout.json")),
+            ("neon-future", include_str!("../../bundled-themes/neon-future/theme.json"), include_str!("../../bundled-themes/neon-future/layout.json")),
+            ("minimal-clean", include_str!("../../bundled-themes/minimal-clean/theme.json"), include_str!("../../bundled-themes/minimal-clean/layout.json")),
+            ("retro-crt", include_str!("../../bundled-themes/retro-crt/theme.json"), include_str!("../../bundled-themes/retro-crt/layout.json")),
+            ("cyberpunk", include_str!("../../bundled-themes/cyberpunk/theme.json"), include_str!("../../bundled-themes/cyberpunk/layout.json")),
+        ];
+
+        let mut installed = 0;
+        for (name, theme_json, layout_json) in bundled_themes {
+            let theme_dir = self.themes_dir.join(name);
+            if !theme_dir.exists() {
+                fs::create_dir_all(&theme_dir).map_err(|e| {
+                    crate::error::NeoCabError::System(format!("Failed to create theme dir: {}", e))
+                })?;
+
+                fs::write(theme_dir.join("theme.json"), theme_json).map_err(|e| {
+                    crate::error::NeoCabError::System(format!("Failed to write theme: {}", e))
+                })?;
+
+                fs::write(theme_dir.join("layout.json"), layout_json).map_err(|e| {
+                    crate::error::NeoCabError::System(format!("Failed to write layout: {}", e))
+                })?;
+
+                installed += 1;
+                info!("Installed bundled theme: {}", name);
+            }
+        }
+
+        if installed > 0 {
+            info!("Installed {} bundled themes", installed);
+        }
+
+        Ok(())
     }
 
     /// Load a theme by name from ~/NeoCab/Themes/{name}/theme.json

@@ -1,0 +1,251 @@
+.system-select-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background: var(--background, #0a0a0a);
+}
+
+.system-ambient {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 30%, var(--system-color, #ff6b00) 0%, transparent 60%);
+  opacity: 0.15;
+  transition: background 0.5s ease;
+  pointer-events: none;
+}
+
+.system-header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 2px solid var(--border, #ff6b00);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.5s ease;
+}
+
+.system-header.loaded {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--surface, #1a1a1a);
+  border: 1px solid var(--border, #ff6b00);
+  border-radius: 8px;
+  color: var(--text, #ffffff);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+  background: var(--primary, #ff6b00);
+  color: var(--background, #0a0a0a);
+}
+
+.back-icon {
+  font-size: 1.2rem;
+}
+
+.system-info {
+  text-align: center;
+  flex: 1;
+}
+
+.system-title {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--primary, #ff6b00);
+  text-shadow: 0 0 20px var(--primary, #ff6b00);
+  letter-spacing: 2px;
+}
+
+.system-subtitle {
+  margin: 4px 0 0;
+  color: var(--text, #ffffff);
+  opacity: 0.6;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+.system-counter {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 1.2rem;
+  color: var(--text, #ffffff);
+  opacity: 0.8;
+}
+
+.counter-current {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary, #ff6b00);
+}
+
+.counter-separator {
+  opacity: 0.5;
+}
+
+.carousel-wrapper {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+}
+
+.systems-carousel {
+  display: flex;
+  gap: 24px;
+  padding: 40px 50%;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  align-items: center;
+  height: 320px;
+}
+
+.systems-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.system-card {
+  position: relative;
+  flex: 0 0 280px;
+  height: 240px;
+  padding: 0;
+  border: 2px solid var(--card-color, #888);
+  border-radius: 16px;
+  background: var(--surface, #1a1a1a);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: visible;
+}
+
+.system-card.visible {
+  transform: scale(calc(1 - var(--card-distance, 0) * 0.15));
+  opacity: calc(1 - var(--card-distance, 0) * 0.3);
+}
+
+.system-card.focused {
+  transform: scale(1.15);
+  opacity: 1;
+  box-shadow: 0 0 40px var(--card-color, #ff6b00), 0 12px 48px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.system-card.hidden {
+  transform: scale(0.7);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 24px;
+  gap: 16px;
+}
+
+.card-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.system-card.focused .card-icon {
+  transform: scale(1.1);
+}
+
+.card-content {
+  text-align: center;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text, #ffffff);
+  letter-spacing: 1px;
+}
+
+.card-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 12px;
+  background: var(--card-color, #888);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.card-focus-ring {
+  position: absolute;
+  inset: -8px;
+  border: 3px solid var(--card-color, #ff6b00);
+  border-radius: 20px;
+  opacity: 0.5;
+  animation: focusRingPulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes focusRingPulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.02); }
+}
+
+.carousel-indicators {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text, #ffffff);
+  opacity: 0.3;
+  transition: all 0.3s ease;
+}
+
+.indicator.active {
+  opacity: 1;
+  width: 24px;
+  border-radius: 4px;
+  background: var(--primary, #ff6b00);
+}

@@ -1,6 +1,6 @@
-# ✅ Checklist v1.0 - NeoCab Production Release
+# ✅ Checklist v1.3 - NeoCab Production Release
 
-## 🎯 COMPLETADO (42/42 items)
+## 🎯 COMPLETADO (v1.0 + v1.1 + v1.2 + v1.3)
 
 ### Backend - Tauri + Rust ✅
 - ✅ Tauri 2.x setup + migrations
@@ -307,12 +307,17 @@ None of these limit functional operation in arcade environments.
 
 ## ✅ FINAL STATUS
 
-**NeoCab v1.0 is feature-complete and production-ready.**
+**NeoCab v1.3 is feature-complete and production-ready.**
 
-All critical functionality is implemented, tested, and documented. Non-blocking features are post-launch priorities that don't affect arcade operation.
+All critical functionality is implemented, tested, and documented including:
+- Advanced input system (JoyMapper v2) with radial deadzones, spline curves, shift layers
+- Unified keyboard + gamepad navigation with configurable keymap
+- 5 bundled themes with per-system/game assignment
+- Session management (coins + time, 4 modes)
+- Visual UI improvements with transitions and animations
 
 **Ready to deploy on arcade cabinets now.**
 
 ---
 
-Last Updated: 2026-05-10 | Version: v1.0.0
+Last Updated: 2026-05-14 | Version: v1.3.0

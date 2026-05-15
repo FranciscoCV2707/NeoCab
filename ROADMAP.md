@@ -357,18 +357,36 @@
 
 ---
 
-## 🎯 Post-v1.0 Roadmap (Future Considerations)
+## 🎯 Post-v1.0 Roadmap
 
-### v1.1 Enhancement Topics
+### ✅ v1.1 - Improvement Phase (COMPLETED 2026-05-14)
+- [x] Dead code elimination (zustand, framer-motion, unused hooks)
+- [x] Theme system integration with 5 bundled themes
+- [x] Visual UI improvements (ViewTransition, MainMenu, SystemSelect)
+- [x] Session system (coins + time unified)
+
+### ✅ v1.2 - Input System Phase (COMPLETED 2026-05-14)
+- [x] JoyMapper v2 with radial deadzone, spline curves, shift layers
+- [x] Multi-gamepad support with per-device profiles
+- [x] 6 input templates (ArcadeStick, SNES, Xbox, PS, Flight, Racing)
+- [x] AntiMicroX profile import
+- [x] 14 new Tauri commands for input management
+- [x] Per-game profile system with auto-switching
+
+### ✅ v1.3 - Navigation Phase (COMPLETED 2026-05-14)
+- [x] useUnifiedInput hook (keyboard + gamepad)
+- [x] useKeyboardNav hook for list/grid navigation
+- [x] Configurable keymap with 15 actions
+- [x] KeymapConfigPanel in Operator Panel
+- [x] SessionConfig tab in Operator Panel
+
+### v1.4+ Future Considerations
 - [ ] Hardware integration testing (GPIO/Arduino with real hardware)
 - [ ] End-to-end testing on physical cabinets
 - [ ] Performance optimization for older hardware
-- [ ] Community feedback integration
-
-### v1.2+ Long-term Features
 - [ ] Additional emulator adapters (Dolphin, PCSX2, Yuzu, etc.)
-- [ ] In-game pause menu system
-- [ ] Per-game advanced configuration
+- [ ] In-game pause menu system enhancements
+- [ ] Per-game advanced configuration UI
 - [ ] Web-based remote management API
 - [ ] Mobile app for remote operation
 - [ ] AI-powered game discovery

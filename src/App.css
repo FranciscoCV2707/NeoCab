@@ -1,10 +1,22 @@
 :root {
-  --primary-color: #ff6b00;
-  --secondary-color: #1a1a1a;
-  --text-color: #ffffff;
-  --border-color: #ff6b00;
-  --button-hover: #ff8c00;
-  --font-family: "Arial", sans-serif;
+  --primary: #ff6b00;
+  --secondary: #1a1a1a;
+  --accent: #00ffcc;
+  --text: #ffffff;
+  --background: #0a0a0a;
+  --surface: #1a1a1a;
+  --border: #ff6b00;
+  --highlight: #ff8c00;
+  --success: #00c853;
+  --warning: #ffcc00;
+  --error: #ff1744;
+  --font-ui: "Arial", sans-serif;
+  --font-title: "Impact", sans-serif;
+  --font-subtitle: "Arial", sans-serif;
+  --font-mono: "Consolas", monospace;
+  --glow-intensity: 0.7;
+  --animation-speed: 300ms;
+  --transition-easing: cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 * {
@@ -14,90 +26,91 @@
 }
 
 body {
-  background-color: var(--secondary-color);
-  color: var(--text-color);
-  font-family: var(--font-family);
+  background-color: var(--background);
+  color: var(--text);
+  font-family: var(--font-ui);
   overflow: hidden;
+  transition: background-color var(--animation-speed) var(--transition-easing),
+              color var(--animation-speed) var(--transition-easing);
 }
 
-.app {
+.app-container {
   width: 100vw;
   height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  position: relative;
+  background: linear-gradient(135deg, var(--background) 0%, var(--surface) 100%);
 }
 
-/* Main Menu */
-.menu-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 40px;
-  text-align: center;
+/* Search overlay */
+.search-overlay {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
 }
 
-.menu-header {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+.search-input {
+  padding: 10px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  width: 200px;
+  transition: all 0.3s ease;
 }
 
-.menu-header h1 {
-  font-size: 4rem;
-  color: var(--primary-color);
-  text-shadow: 0 0 20px var(--primary-color);
-  margin-bottom: 10px;
-  letter-spacing: 3px;
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 12px var(--primary);
+  width: 280px;
 }
 
-.menu-header .subtitle {
-  font-size: 1.2rem;
-  color: #aaa;
-  margin-top: 10px;
+/* Global button styles */
+button {
+  font-family: var(--font-ui);
 }
 
-.menu-content {
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.scan-progress {
-  padding: 15px 30px;
-  background-color: var(--primary-color);
-  border: 2px solid var(--border-color);
-  border-radius: 5px;
-  margin-bottom: 20px;
-  animation: pulse 1s infinite;
+::-webkit-scrollbar-track {
+  background: var(--surface);
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
 }
 
-.menu-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  width: 100%;
-  max-width: 400px;
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
 
-.menu-button {
-  padding: 20px 30px;
-  font-size: 1.2rem;
-  background-color: var(--secondary-color);
-  color: var(--text-color);
+/* Theme-specific body classes */
+body.theme-arcade-classic {
+  --glow-intensity: 0.7;
+}
+
+body.theme-neon-future {
+  --glow-intensity: 1.0;
+}
+
+body.theme-minimal-clean {
+  --glow-intensity: 0;
+}
+
+body.theme-retro-crt {
+  --glow-intensity: 0.3;
+}
+
+body.theme-cyberpunk {
+  --glow-intensity: 0.8;
+}
   border: 3px solid var(--border-color);
   border-radius: 5px;
   cursor: pointer;

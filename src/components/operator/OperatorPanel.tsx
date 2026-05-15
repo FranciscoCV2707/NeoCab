@@ -1,32 +1,22 @@
 import React, { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { useNetwork } from '../../hooks/useNetwork';
 import { NetworkPanel } from './NetworkPanel';
 import { LogViewer } from './LogViewer';
 import { AuditPanel } from './AuditPanel';
 import { MasterDashboard } from './MasterDashboard';
 import { SystemManager } from '../settings/SystemManager';
-import './OperatorPanel.css';
 import { ThemeEditor } from '../studio/ThemeEditor';
-
-type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'settings' | 'input' | 'studio';
-
-const TABS: { id: TabType; label: string; icon: string }[] = [
-    { id: 'statistics', label: 'Estadísticas', icon: '📊' },
-    { id: 'input', label: 'Controles', icon: '🕹️' },
-    { id: 'network', label: 'Red', icon: '🌐' },
-    { id: 'studio', label: 'Studio', icon: '🎨' },
-    { id: 'logs', label: 'Registros', icon: '📋' },
-    { id: 'audit', label: 'Auditoría', icon: '🔍' },
-    { id: 'settings', label: 'Configuración', icon: '⚙️' },
-];
-
 import { InputWizard } from './InputWizard';
+import KeymapConfigPanel from './KeymapConfig';
+import { SessionConfig } from './SessionConfig';
+import './OperatorPanel.css';
+
+type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'settings' | 'input' | 'studio' | 'keymap' | 'sessions';
 
 export const OperatorPanel: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('statistics');
-    const { role } = useNetwork();
-    const isMaster = role === 'Master';
+    const role = 'Standalone' as string;
+    const isMaster = false;
 
     return (
         <div className="operator-panel">
@@ -42,6 +32,18 @@ export const OperatorPanel: React.FC = () => {
                     onClick={() => setActiveTab('input')}
                 >
                     🕹️ Controles
+                </button>
+                <button
+                    className={`tab-button ${activeTab === 'keymap' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('keymap')}
+                >
+                    ⌨️ Keymap
+                </button>
+                <button
+                    className={`tab-button ${activeTab === 'sessions' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('sessions')}
+                >
+                    🪙 Sesiones
                 </button>
                 <button
                     className={`tab-button ${activeTab === 'network' ? 'active' : ''}`}
@@ -84,6 +86,8 @@ export const OperatorPanel: React.FC = () => {
             <div className="tab-content">
                 {activeTab === 'statistics' && (isMaster ? <MasterDashboard /> : <StatisticsTab />)}
                 {activeTab === 'input' && <InputWizard />}
+                {activeTab === 'keymap' && <KeymapConfigPanel />}
+                {activeTab === 'sessions' && <SessionConfig />}
                 {activeTab === 'network' && <NetworkPanel />}
                 {activeTab === 'studio' && <ThemeEditor />}
                 {activeTab === 'logs' && <LogViewer />}

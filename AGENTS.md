@@ -21,6 +21,21 @@ Keep feature code close to the layer it belongs to: UI changes in `src/`, IPC an
 - `npm run format` formats frontend TypeScript and TSX files with Prettier.
 - `cd src-tauri; cargo test` runs Rust tests.
 
+## Current Version: v1.3.0
+
+### Completed Features
+- **v1.0**: Core infrastructure, emulators, network, launcher, shaders
+- **v1.1**: Theme system (5 themes), UI improvements, session management
+- **v1.2**: JoyMapper v2 (radial deadzones, spline curves, shift layers, multi-gamepad)
+- **v1.3**: Unified navigation (keyboard + gamepad), configurable keymap
+
+### Key Architecture Notes
+- `SessionManager` unifies coins + time in `src-tauri/src/core/session_manager.rs`
+- `JoyMapper` v2 in `src-tauri/src/input/joy_mapper.rs` with advanced input processing
+- `useUnifiedInput` hook in `src/hooks/useUnifiedInputHook.ts` for keyboard + gamepad
+- Theme hierarchy: Game → System → Global (fallback)
+- 100+ Tauri commands, 50+ React components
+
 ## Coding Style & Naming Conventions
 TypeScript uses strict mode with `noUnusedLocals` and `noUnusedParameters` enabled. Prefer clear, component-focused names and keep React files in `PascalCase.tsx` form, such as `GameScreen.tsx` or `SetupWizard.tsx`.
 

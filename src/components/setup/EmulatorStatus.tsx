@@ -1,106 +1,64 @@
-import React from 'react';
-import { useEmulatorDetection } from '../../hooks/useEmulatorDetection';
+import React, { useState, useEffect } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import './EmulatorStatus.css';
 
+interface EmulatorInfo {
+  name: string;
+  path?: string;
+  installed: boolean;
+}
+
 export const EmulatorStatus: React.FC = () => {
-    const {
-        emulators,
-        loading,
-        error,
-        detectEmulators,
-        getInstalledEmulators,
-        getMissingEmulators,
-    } = useEmulatorDetection();
+  const [emulators, setEmulators] = useState<EmulatorInfo[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    const installed = getInstalledEmulators();
-    const missing = getMissingEmulators();
+  useEffect(() => {
+    detectEmulators();
+  }, []);
 
-    if (loading) {
-        return (
-            <div className="emulator-status">
-                <p>Detectando emuladores instalados...</p>
-                <div className="loader"></div>
-            </div>
-        );
+  const detectEmulators = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await invoke<string>('detect_emulators');
+      const parsed = JSON.parse(result);
+      if (parsed.success) {
+        setEmulators(parsed.emulators || []);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to detect emulators');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return (
-        <div className="emulator-status">
-            <h3>Estado de Emuladores</h3>
-            {error && <div className="error-message">{error}</div>}
+  const installed = emulators.filter(e => e.installed);
+  const missing = emulators.filter(e => !e.installed);
 
-            <div className="status-summary">
-                <div className="summary-card">
-                    <span className="count installed">{installed.length}</span>
-                    <span className="label">Instalados</span>
-                </div>
-                <div className="summary-card">
-                    <span className="count missing">{missing.length}</span>
-                    <span className="label">Faltantes</span>
-                </div>
-                <div className="summary-card">
-                    <span className="percentage">{Math.round((installed.length / emulators.size) * 100)}%</span>
-                    <span className="label">Cobertura</span>
-                </div>
-            </div>
-
-            {installed.length > 0 && (
-                <div className="section installed-section">
-                    <h4>✅ Emuladores Instalados ({installed.length})</h4>
-                    <table className="emulator-table">
-                        <tbody>
-                            {installed.map((emu) => (
-                                <tr key={emu.id}>
-                                    <td className="name">{emu.name}</td>
-                                    <td className="path">{emu.path || 'En PATH'}</td>
-                                    <td className="status">
-                                        <span className="badge installed-badge">✓ Listo</span>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-
-            {missing.length > 0 && (
-                <div className="section missing-section">
-                    <h4>⚠️ Emuladores Faltantes ({missing.length})</h4>
-                    <p className="info">
-                        Descarga e instala los siguientes emuladores para soportar más sistemas:
-                    </p>
-                    <div className="missing-list">
-                        {missing.map((emu) => (
-                            <div key={emu.id} className="missing-item">
-                                <div className="emu-info">
-                                    <span className="emu-name">{emu.name}</span>
-                                    <span className="command">(comando: {emu.id})</span>
-                                </div>
-                                <a
-                                    href="https://www.mamedev.org/" // TODO: dynamic URL from emu object
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="download-link"
-                                >
-                                    Descargar →
-                                </a>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            <button onClick={detectEmulators} className="refresh-button">
-                🔄 Re-detectar Emuladores
-            </button>
-
-            {installed.length === 0 && missing.length > 0 && (
-                <div className="warning-box">
-                    <strong>⚠️ Advertencia:</strong> No se detectaron emuladores instalados.
-                    NeoCab necesita al menos un emulador para funcionar correctamente.
-                    Por favor, instala al menos MAME o RetroArch.
-                </div>
-            )}
-        </div>
-    );
+  return (
+    <div className="emulator-status">
+      <h3>Emulator Status</h3>
+      {error && <div className="error">{error}</div>}
+      <button onClick={detectEmulators} disabled={loading}>
+        {loading ? 'Detecting...' : 'Detect Emulators'}
+      </button>
+      <div className="emulator-list">
+        <h4>Installed ({installed.length})</h4>
+        {installed.map((emu) => (
+          <div key={emu.name} className="emulator-item installed">
+            <span className="emulator-name">{emu.name}</span>
+            <span className="emulator-path">{emu.path}</span>
+          </div>
+        ))}
+        <h4>Missing ({missing.length})</h4>
+        {missing.map((emu) => (
+          <div key={emu.name} className="emulator-item missing">
+            <span className="emulator-name">{emu.name}</span>
+            <span>Not found</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };

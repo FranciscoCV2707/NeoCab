@@ -1,0 +1,34 @@
+{
+  "version": "1.0",
+  "name": "Minimal Clean Layout",
+  "components": {
+    "system_list": {
+      "type": "list",
+      "position": { "x": 0, "y": 60 },
+      "size": { "width": 300, "height": "calc(100% - 100)" },
+      "item_height": 50,
+      "visible_items": 15,
+      "animation": {
+        "onFocus": { "backgroundColor": "#e8f4fd", "duration": 100 },
+        "onBlur": { "backgroundColor": "transparent", "duration": 100 }
+      }
+    },
+    "game_list": {
+      "type": "grid",
+      "position": { "x": 320, "y": 60 },
+      "size": { "width": "calc(100% - 340)", "height": "calc(100% - 100)" },
+      "columns": 5,
+      "item_size": { "width": 200, "height": 280 },
+      "gap": 16
+    },
+    "status_bar": {
+      "type": "bar",
+      "position": { "x": 0, "y": 0 },
+      "size": { "width": "100%", "height": 50 },
+      "elements": [
+        { "type": "text", "field": "title", "align": "left" },
+        { "type": "text", "field": "credits", "align": "right" }
+      ]
+    }
+  }
+}
