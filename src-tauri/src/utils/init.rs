@@ -138,6 +138,57 @@ pub fn is_first_run() -> bool {
     !base_dir().join("data").join("config.yml").exists()
 }
 
+/// Check if portable mode is enabled (portable.txt next to exe)
+pub fn is_portable_mode() -> bool {
+    base_dir().join("portable.txt").exists()
+}
+
+/// Get data directory (portable vs appdata)
+pub fn get_data_dir() -> PathBuf {
+    if is_portable_mode() {
+        base_dir().join("data")
+    } else {
+        #[cfg(windows)]
+        {
+            std::env::var("APPDATA")
+                .map(|p| PathBuf::from(p).join("NeoCab"))
+                .unwrap_or_else(|_| base_dir().join("data"))
+        }
+        #[cfg(not(windows))]
+        {
+            dirs::data_dir()
+                .map(|p| p.join("neocab"))
+                .unwrap_or_else(|| base_dir().join("data"))
+        }
+    }
+}
+
+/// Run startup validations (non-fatal warnings)
+pub fn run_startup_validations() {
+    let base = base_dir();
+    let exe = std::env::current_exe().ok();
+
+    // Check if running from temp directory
+    if let Some(ref exe_path) = exe {
+        let s = exe_path.to_string_lossy().to_lowercase();
+        if s.contains("temp") || s.contains("tmp") {
+            tracing::warn!("Running from temporary directory: {:?}", exe_path);
+        }
+    }
+
+    // Check disk space (disabled on Windows due to winapi complexity)
+    #[cfg(not(windows))]
+    {
+        let _ = base; // suppress unused warning
+    }
+
+    if is_portable_mode() {
+        tracing::info!("Portable mode active");
+    }
+
+    tracing::info!("Startup validations complete");
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

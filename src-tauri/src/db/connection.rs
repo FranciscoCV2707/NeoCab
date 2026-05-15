@@ -17,47 +17,66 @@ impl Database {
             tokio::fs::create_dir_all(parent).await?;
         }
 
-        // Create database connection with WAL mode enabled
-        let options = SqliteConnectOptions::from_str(db_path)?.create_if_missing(true);
+        let options = SqliteConnectOptions::from_str(db_path)?
+            .create_if_missing(true)
+            .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal)
+            .synchronous(sqlx::sqlite::SqliteSynchronous::Normal)
+            .foreign_keys(true);
 
         let pool = SqlitePool::connect_with(options).await?;
 
-        // Initialize schema on first run
-        let result = sqlx::query_scalar::<_, i64>(
-            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='systems'",
-        )
-        .fetch_one(&pool)
-        .await
-        .unwrap_or(0);
+        // Enable cache pragma
+        sqlx::query("PRAGMA cache_size = -8000")
+            .execute(&pool)
+            .await?;
 
-        if result == 0 {
-            // Run migrations
-            Self::init_schema(&pool).await?;
-        }
+        // Run versioned migrations
+        super::migrations::run_migrations(&pool).await?;
 
         Ok(Self { pool })
     }
 
+    // Fallback for legacy DBs without _migrations table
     async fn init_schema(pool: &SqlitePool) -> Result<()> {
-        // Enable WAL mode and pragmas
-        sqlx::query("PRAGMA journal_mode = WAL")
-            .execute(pool)
-            .await?;
+        // Check if migrations already ran
+        let has_migrations = sqlx::query_scalar::<_, i64>(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='_migrations'",
+        )
+        .fetch_one(pool)
+        .await
+        .unwrap_or(0);
 
-        sqlx::query("PRAGMA synchronous = NORMAL")
-            .execute(pool)
-            .await?;
+        if has_migrations > 0 {
+            return Ok(()); // Already migrated
+        }
 
-        sqlx::query("PRAGMA foreign_keys = ON")
-            .execute(pool)
-            .await?;
+        // Run the initial migration directly
+        let sql = include_str!("migrations/001_initial.sql");
+        sqlx::query(sql).execute(pool).await?;
 
-        sqlx::query("PRAGMA cache_size = -8000")
-            .execute(pool)
-            .await?;
+        // Mark as applied
+        use sha2::{Sha256, Digest};
+        let mut hasher = Sha256::new();
+        hasher.update(sql.as_bytes());
+        let checksum = format!("{:x}", hasher.finalize());
 
-        // Create tables
-        Self::create_tables(pool).await?;
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS _migrations (
+                version INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                checksum TEXT NOT NULL,
+                applied_at TEXT DEFAULT (datetime('now'))
+            )",
+        )
+        .execute(pool)
+        .await?;
+
+        sqlx::query(
+            "INSERT INTO _migrations (version, name, checksum) VALUES (1, '001_initial', ?)"
+        )
+        .bind(&checksum)
+        .execute(pool)
+        .await?;
 
         Ok(())
     }
@@ -321,6 +340,23 @@ impl Database {
                 score       INTEGER NOT NULL,
                 player_name TEXT NOT NULL,
                 created_at  TEXT DEFAULT (datetime('now'))
+            )",
+        )
+        .execute(pool)
+        .await?;
+
+        // Tags table
+        // Tags table & jukebox table are created via migrations
+        
+        // Fuzzy match cache table
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS fuzzy_matches (
+                game_id     INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+                artwork_path TEXT NOT NULL,
+                similarity  REAL NOT NULL DEFAULT 0.0,
+                method      TEXT NOT NULL DEFAULT 'exact',
+                created_at  TEXT DEFAULT (datetime('now')),
+                PRIMARY KEY (game_id, artwork_path)
             )",
         )
         .execute(pool)
@@ -911,6 +947,41 @@ impl Database {
         .await?;
 
         Ok(())
+    }
+
+    // Fuzzy match cache
+    pub async fn cache_fuzzy_match(
+        &self,
+        game_id: i64,
+        artwork_path: &str,
+        similarity: f64,
+        method: &str,
+    ) -> Result<()> {
+        sqlx::query(
+            "INSERT OR REPLACE INTO fuzzy_matches (game_id, artwork_path, similarity, method)
+             VALUES (?, ?, ?, ?)",
+        )
+        .bind(game_id)
+        .bind(artwork_path)
+        .bind(similarity)
+        .bind(method)
+        .execute(&self.pool)
+        .await?;
+        Ok(())
+    }
+
+    pub async fn get_cached_fuzzy_match(
+        &self,
+        game_id: i64,
+    ) -> Result<Option<(String, f64, String)>> {
+        let row = sqlx::query_as::<_, (String, f64, String)>(
+            "SELECT artwork_path, similarity, method FROM fuzzy_matches WHERE game_id = ?
+             ORDER BY similarity DESC LIMIT 1",
+        )
+        .bind(game_id)
+        .fetch_optional(&self.pool)
+        .await?;
+        Ok(row)
     }
 
     pub async fn get_recent_sessions(&self, limit: i64) -> Result<serde_json::Value> {

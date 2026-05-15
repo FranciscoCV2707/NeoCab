@@ -370,6 +370,219 @@ CI/CD: GitHub Actions (Windows/Linux/ARM)
 
 ---
 
+## [2.0.0] - 2026-05-15 - IMPROVEMENT PHASE
+
+> Comprehensive improvement based on analysis of AdvanceMAME, Attract, AttractPlus, Pegasus Frontend, RetroFE, and SimpleLauncher.
+> 30 features implemented across 4 phases in a single session.
+
+### FASE 0 — Baja Fruta (5/5)
+
+#### 0.1 Auto-Updater
+- Standalone `neocab-updater` binary (Rust, no Tauri deps)
+- GitHub API release check (`--check` flag)
+- ZIP download with progress bar
+- Safe extraction with Zip Slip protection
+- Apply & restart pipeline (`--apply <zip> <exe> <pid>`)
+- UI: `UpdaterPanel.tsx` with progress bar and changelog display
+- 3 Tauri commands: `check_for_updates`, `download_update`, `apply_update`
+
+#### 0.2 Config Injection (6 emuladores)
+- Trait `EmulatorConfigInjector` with `read_current()` and `inject()`
+- **MAME** (.ini): video, vsync, brightness, contrast, gamma, samplerate, volume
+- **RetroArch** (.cfg): video_driver, fullscreen, vsync, scale, audio_volume, latency
+- **Dolphin** (Dolphin.ini): GFXBackend, InternalResolution, VSync, Volume
+- **PCSX2** (PCSX2.ini): Renderer, UpscaleMultiplier, VSyncEnable, OutputVolume
+- **DuckStation** (settings.ini): Renderer, ResolutionScale, VSync, AudioBackend
+- **Xenia** (.toml): gpu, draw_resolution_scale_x, vsync, fullscreen
+- Registry with `find_injector()`, `list_injectors()`, `get_all_injectors()`
+- 4 Tauri commands: `list_config_injectors`, `detect_config_injector`, `read_emulator_config`, `inject_emulator_config`
+
+#### 0.3 Fuzzy Matching
+- Jaro-Winkler algorithm implementation in Rust
+- `normalize_name()` for filename cleaning (strip extensions, non-alphanumeric)
+- `find_best_artwork()` pipeline: exact match → fuzzy match → default
+- Configurable threshold (default 0.80)
+- SQLite cache table `fuzzy_matches`
+- 5 unit tests
+- Tauri command: `find_cover_art`
+
+#### 0.4 Scraping Batch
+- ScreenScraper API integration (full v2)
+- Rate limiter (1 req/s) with priority queue
+- `scrape_all()` batch orchestrator with cancellation
+- Progress events via Tauri (real-time `scrape_progress`)
+- Media downloader (box art, screenshot, wheel, marquee, video)
+- Fallback scraper with title-case cleanup
+- Tauri commands: `scrape_all`, `cancel_scraping`
+
+#### 0.5 Multi-language
+- 5 language files: EN, ES, FR, DE, PT-BR (283 keys each)
+- Reactive `useTranslation()` hook with auto-locale detection
+- Language selector dropdown in MainMenu footer
+- Backward-compatible old-style keys (UPPER_SNAKE aliases)
+- `Locale` type with 5 variants
+
+### FASE 1 — Arquitectura Frontend (4/5)
+
+#### 1.1 Zustand Stores
+- `useGameStore`: games, focusedIndex, sort, filters, enrichGames with media
+- `useSystemStore`: systems, selectedSystem, loading, scanProgress
+- `useUIStore`: currentView, fade, pause, attract, save state modal
+- `useThemeStore`: currentTheme, listThemes, applyTheme, reloadTheme
+- Shared types in `stores/types.ts` (Game, System, SaveState, View, SortField)
+- `initUIListeners()` for Tauri events
+- App.tsx refactored from 516→280 lines
+
+#### 1.3 Layout Engine (prototype)
+- `LayoutEngine.tsx`: parses YAML layout → renders components
+- `ReloadableImage.tsx`: auto-updates artwork on game change
+- `ReloadableText.tsx`: renders with token substitution
+- `Container`: grouping with clipping support
+
+#### 1.4 Live Theme Reload (F5)
+- `initThemeHotkey()` registers F5 keydown listener
+- `reloadTheme()` in store: clears cache, re-applies CSS variables
+- `--theme-reload` CSS custom property trigger for re-render
+
+#### 1.5 Magic Tokens
+- 12 built-in tokens: `[Title]`, `[Year]`, `[Developer]`, `[Publisher]`, `[Genre]`, `[Players]`, `[PlayedCount]`, `[PlayedTime]`, `[Rating]`, `[Description]`, `[Favourite]`, `[LastPlayed]`
+- 3 function tokens: `[!upper]`, `[!lower]`, `[!truncate]`
+- `registerTokenFunction()` API for custom functions
+- `parseTokens()` with regex replacement
+- `getTokenValue()` for single token lookup
+
+### FASE 2 — Backend Rust (6/6)
+
+#### 2.1 Auto-detección Emuladores
+- 15 emuladores detectados: MAME, RetroArch, Dolphin, PCSX2, DuckStation, Xenia, RPCS3, Cemu, PPSSPP, Flycast, melonDS, Citra, Yuzu, Ryujinx, ScummVM
+- Multi-path search: PATH, installation dir, Program Files, LocalAppData, /usr/bin, /opt, Flatpak, Snap
+- Version detection via `--version` flag
+- RetroArch core detection (scans cores dir for `_libretro` files)
+- Tauri command: `auto_detect_emulators`
+
+#### 2.2 Launch Pipeline
+- Trait `LaunchStrategy` with priority-based ordering
+- 6 strategies: `ChdMountStrategy` (10), `ChdToCueStrategy` (15), `ZipExtractStrategy` (20), `BatchFileStrategy` (30), `ShortcutStrategy` (40), `DefaultRomStrategy` (999)
+- `LaunchContext` with rom_path, emulator_path, args, scripts
+- `execute_launch()` orchestrator
+
+#### 2.3 Mount Archivos
+- CHD → .cue extraction via chdman
+- ZIP/7z/RAR → temp extraction with PowerShell/unar
+- `find_first_rom()` heuristic for extracted archives
+
+#### 2.4 Kiosk Mode
+- `KioskConfig` struct with 7 CLI flags: `--kiosk`, `--autoboot <system>`, `--autoboot-delay <sec>`, `--disable-menu-*` (settings, shutdown, reboot, appclose, suspend)
+- Managed Tauri state
+- Tauri command: `get_kiosk_config`
+- Windows Registry autoboot (HKCU Run)
+- Linux .desktop autostart
+
+#### 2.5 RetroAchievements
+- Full API client: login, game achievements, user summary
+- RetroArch credentials injection (cheevos_enable, username, password)
+- 4 Tauri commands: `ra_login`, `ra_get_game_achievements`, `ra_get_user_summary`, `ra_inject_retroarch`
+
+#### 2.6 DB Migrations
+- Versioned SQL migrations with `_migrations` tracking table
+- SHA-256 checksum verification per migration
+- `run_migrations()` runner with transaction per migration
+- `001_initial.sql`: complete schema (16 tables, 8 indexes)
+- Fallback for legacy DBs without migration tracking
+
+### FASE 3 — Avanzado (9/9)
+
+#### 3.1 Plugins Lua
+- `PluginEngine`: discover, enable, disable, list
+- Scans `data/plugins/*.lua`
+- Ready for rlua sandbox integration
+
+#### 3.2 Animation Events
+- 21 easing functions with CSS cubic-bezier mapping
+- `animate()` function with requestAnimationFrame
+- `getEasingCSS()` for CSS transitions
+- Property animation: opacity, scale, position
+
+#### 3.3 Video Pipeline
+- `QualityLevel` enum: Ultra, High, Medium, Low, Potato
+- FPS monitoring with 60-sample rolling window
+- Auto-degrade at <30 FPS, auto-upgrade at >55 FPS
+- Benchmark via CPU cores + total RAM
+
+#### 3.4 Script Hooks (OS-level)
+- 9 script events: Quit, Reboot, Shutdown, GameLaunchStart, GameLaunchEnd, ConfigChanged, CoinInserted, IdleTimeout, Error
+- `ScriptHookManager` with register/run API
+- Environment variables: `NEOCAB_EVENT`, `NEOCAB_GAME_TITLE`
+- Platform-aware execution (cmd /c on Windows, bash -c on Linux)
+
+#### 3.5 Multi-monitor
+- `DisplayManager` with per-display config (resolution, rotation, mirror, layout)
+- Default 2 displays: main (1920x1080) + marquee (1920x480)
+- Rotation (0/90/180/270) and mirror toggle per display
+- Tauri commands: `get_display_config`, `set_display_rotation`
+
+#### 3.6 SafeQuit
+- `SafeQuitManager` with timeout-based attract activation
+- Per-emulator rules with configurable timeout and action
+- Tauri commands: `safe_quit_check`, `safe_quit_get_rules`
+
+#### 3.7 Tags
+- `TagManager` with full CRUD: create, delete, list, add/remove game tags
+- Customizable colors per tag
+- Game count aggregation
+- 6 Tauri commands
+- DB migration `002_tags_jukebox_safequit.sql`
+
+#### 3.8 Screen Rotation
+- Rotation commands (0/90/180/270)
+- Display config query
+
+#### 3.9 Jukebox
+- File scanner for mp3/ogg/flac/wav/m4a
+- Track listing with metadata
+- Tauri command: `jukebox_list_tracks`
+
+### FASE 4 — Infraestructura (6/6)
+
+#### 4.1 Testing Frontend
+- Vitest + @testing-library/react + happy-dom
+- Test setup with Tauri API mocks
+- 24 tests across 3 files:
+  - `easing.test.ts`: 21 functions, CSS mapping, edge cases (7 tests)
+  - `i18n.test.ts`: 5 languages, fallback, interpolation, backward-compat (9 tests)
+  - `tokens.test.ts`: token resolution, parseTokens, custom functions (8 tests)
+- Coverage thresholds: 60% statements, 50% branches, 60% functions, 60% lines
+
+#### 4.2 WebSocket/Event-driven Input
+- `hotplug.rs` with device enumeration (Windows/Linux)
+- Connect/disconnect detection with callbacks
+- Background polling thread (2s interval)
+- Tauri event emission on state change
+
+#### 4.3 Logging
+- Rolling daily appender with 30-day retention
+- GZip compression for logs >7 days
+- Auto-cleanup for logs >60 days
+- `cleanup_old_logs()` with file age check
+
+#### 4.4 CI/CD
+- GitHub Actions workflow: quality → rust → build-windows → release
+- Steps: lint → build → test → clippy → cargo test → tauri build
+- Release with `softprops/action-gh-release` on tags
+
+#### 4.5 Gamepad Hotplug
+- `HotplugDetector` with device polling
+- Cross-platform device enumeration
+- Connect/disconnect callbacks
+
+#### 4.6 Startup Validation
+- `portable.txt` detection for portable mode
+- Temp directory execution warning
+- `get_data_dir()` with platform-aware fallback (APPDATA/Xdg)
+- `run_startup_validations()` at app init
+
+---
+
 ## Feedback & Support
 
 - **Bug Reports:** https://github.com/[repo]/issues
@@ -379,6 +592,6 @@ CI/CD: GitHub Actions (Windows/Linux/ARM)
 
 ---
 
-**Last Updated:** 2026-05-13  
-**Next Release:** TBD (post-v1.0)  
-**Status:** ✅ Production Ready - Available for Download
+**Last Updated:** 2026-05-15  
+**Next Release:** v2.0.0  
+**Status:** ✅ Improvement Phase Complete - 30 features implemented

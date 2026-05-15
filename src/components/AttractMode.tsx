@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { t } from "../i18n";
 
-import { Game } from "../App";
+import { Game } from "../stores/types";
 
 interface AttractModeProps {
   games: Game[];

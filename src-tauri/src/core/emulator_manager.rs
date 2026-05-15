@@ -1,8 +1,10 @@
 use std::sync::Arc;
 use std::collections::HashMap;
+use std::path::PathBuf;
 use tracing::{info, warn};
 use crate::error::{Result, NeoCabError};
 use crate::adapters::{EmulatorAdapter, MameAdapter};
+use crate::adapters::launch::{self, LaunchStrategy, LaunchContext, LaunchResult};
 use crate::db::Database;
 use crate::models::Game;
 use std::process::Command;
@@ -130,6 +132,41 @@ impl EmulatorManager {
         }
 
         Ok(())
+    }
+
+    /// Launch using the strategy pipeline
+    pub async fn launch_with_pipeline(&self, game: &Game, emulator_name: &str) -> Result<LaunchResult> {
+        let emulator_path = self.get_adapter_path(emulator_name)
+            .ok_or_else(|| NeoCabError::EmulatorNotFound(emulator_name.to_string()))?;
+
+        let strategies: Vec<Box<dyn LaunchStrategy>> = vec![
+            Box::new(launch::ChdMountStrategy),
+            Box::new(launch::ChdToCueStrategy),
+            Box::new(launch::ZipExtractStrategy),
+            Box::new(launch::BatchFileStrategy),
+            Box::new(launch::ShortcutStrategy),
+            Box::new(launch::DefaultRomStrategy),
+        ];
+
+        let ctx = LaunchContext {
+            rom_path: PathBuf::from(&game.rom_path),
+            emulator_path: Some(PathBuf::from(&emulator_path)),
+            emulator_args: None,
+            system_name: String::new(),
+            game_title: game.title.clone(),
+            pre_script: None,
+            post_script: None,
+        };
+
+        launch::execute_launch(&strategies, ctx).await
+    }
+
+    /// Get the path for an emulator adapter
+    fn get_adapter_path(&self, name: &str) -> Option<String> {
+        // Try to find configured path - for now construct from adapter name
+        let adapter = self.adapters.get(name)?;
+        // Adapters don't expose their path directly; use name as fallback
+        Some(name.to_string())
     }
 
     pub async fn stop_game(&self, emulator_name: &str) -> Result<()> {

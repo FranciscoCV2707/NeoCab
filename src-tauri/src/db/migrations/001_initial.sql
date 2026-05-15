@@ -1,21 +1,12 @@
--- NeoCab Database Schema - Initial Migration
--- Optimized for arcade cabinet with coin/timer system
-
-PRAGMA journal_mode = WAL;
-PRAGMA synchronous = NORMAL;
-PRAGMA foreign_keys = ON;
-PRAGMA cache_size = -8000;
-
--- Systems (arcade, console, handheld, computer)
 CREATE TABLE IF NOT EXISTS systems (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     name        TEXT NOT NULL UNIQUE,
     display_name TEXT NOT NULL,
-    category    TEXT NOT NULL,
+    category    TEXT NOT NULL DEFAULT 'arcade',
     manufacturer TEXT,
     year_start  INTEGER,
     year_end    INTEGER,
-    extensions  TEXT NOT NULL,
+    extensions  TEXT NOT NULL DEFAULT '.zip',
     bios_path   TEXT,
     roms_path   TEXT,
     enabled     INTEGER DEFAULT 1,
@@ -23,7 +14,6 @@ CREATE TABLE IF NOT EXISTS systems (
     created_at  TEXT DEFAULT (datetime('now'))
 );
 
--- Emulators (MAME, RetroArch, Dolphin, etc)
 CREATE TABLE IF NOT EXISTS emulators (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     name            TEXT NOT NULL UNIQUE,
@@ -33,7 +23,7 @@ CREATE TABLE IF NOT EXISTS emulators (
     executable_arm  TEXT,
     args_template   TEXT,
     extra_args      TEXT,
-    min_os_win      TEXT DEFAULT "7",
+    min_os_win      TEXT DEFAULT '7',
     supported_arches TEXT DEFAULT '["x64","x86","arm64"]',
     requires_bios   INTEGER DEFAULT 0,
     version         TEXT,
@@ -41,7 +31,6 @@ CREATE TABLE IF NOT EXISTS emulators (
     created_at      TEXT DEFAULT (datetime('now'))
 );
 
--- Games library
 CREATE TABLE IF NOT EXISTS games (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     title           TEXT NOT NULL,
@@ -72,13 +61,12 @@ CREATE TABLE IF NOT EXISTS games (
     marquee_path    TEXT,
     video_path      TEXT,
     external_id     TEXT,
-    region          TEXT DEFAULT "World",
-    language        TEXT DEFAULT "en",
+    region          TEXT DEFAULT 'World',
+    language        TEXT DEFAULT 'en',
     created_at      TEXT DEFAULT (datetime('now')),
     updated_at      TEXT DEFAULT (datetime('now'))
 );
 
--- Game sessions (for tracking coin/timer usage)
 CREATE TABLE IF NOT EXISTS sessions (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     game_id         INTEGER NOT NULL REFERENCES games(id),
@@ -92,7 +80,6 @@ CREATE TABLE IF NOT EXISTS sessions (
     notes           TEXT
 );
 
--- Coin events for tracking currency
 CREATE TABLE IF NOT EXISTS coin_events (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     event_type  TEXT NOT NULL,
@@ -103,18 +90,16 @@ CREATE TABLE IF NOT EXISTS coin_events (
     timestamp   TEXT DEFAULT (datetime('now'))
 );
 
--- User profiles
 CREATE TABLE IF NOT EXISTS profiles (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     name        TEXT NOT NULL UNIQUE,
     avatar_path TEXT,
     pin_hash    TEXT,
-    role        TEXT DEFAULT "player",
+    role        TEXT DEFAULT 'player',
     created_at  TEXT DEFAULT (datetime('now')),
     last_login  TEXT
 );
 
--- Input devices (gamepads, arcade sticks, etc)
 CREATE TABLE IF NOT EXISTS input_devices (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     guid        TEXT NOT NULL UNIQUE,
@@ -122,11 +107,10 @@ CREATE TABLE IF NOT EXISTS input_devices (
     vendor_id   INTEGER,
     product_id  INTEGER,
     device_type TEXT,
-    profile_name TEXT DEFAULT "default",
+    profile_name TEXT DEFAULT 'default',
     created_at  TEXT DEFAULT (datetime('now'))
 );
 
--- Input key mappings
 CREATE TABLE IF NOT EXISTS input_mappings (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     profile_name TEXT NOT NULL,
@@ -139,7 +123,6 @@ CREATE TABLE IF NOT EXISTS input_mappings (
     UNIQUE(profile_name, device_guid, action, game_id, system_id)
 );
 
--- Achievements (RetroAchievements support)
 CREATE TABLE IF NOT EXISTS achievements (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     game_id         INTEGER NOT NULL REFERENCES games(id),
@@ -154,7 +137,6 @@ CREATE TABLE IF NOT EXISTS achievements (
     hardcore        INTEGER DEFAULT 0
 );
 
--- Save states
 CREATE TABLE IF NOT EXISTS save_states (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     game_id     INTEGER NOT NULL REFERENCES games(id),
@@ -167,14 +149,27 @@ CREATE TABLE IF NOT EXISTS save_states (
     created_at  TEXT DEFAULT (datetime('now'))
 );
 
--- General configuration
 CREATE TABLE IF NOT EXISTS config (
     key     TEXT NOT NULL PRIMARY KEY,
     value   TEXT NOT NULL,
     updated_at TEXT DEFAULT (datetime('now'))
 );
 
--- Analytics and events
+CREATE TABLE IF NOT EXISTS system_theme_assignments (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    system_name TEXT NOT NULL UNIQUE,
+    theme_name  TEXT NOT NULL,
+    updated_at  TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS game_theme_assignments (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    game_id     INTEGER NOT NULL UNIQUE,
+    theme_name  TEXT NOT NULL,
+    updated_at  TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS analytics (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     event_type  TEXT NOT NULL,
@@ -182,7 +177,24 @@ CREATE TABLE IF NOT EXISTS analytics (
     timestamp   TEXT DEFAULT (datetime('now'))
 );
 
--- Performance indexes
+CREATE TABLE IF NOT EXISTS high_scores (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    game_id     INTEGER NOT NULL REFERENCES games(id),
+    profile_id  INTEGER REFERENCES profiles(id),
+    score       INTEGER NOT NULL,
+    player_name TEXT NOT NULL,
+    created_at  TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS fuzzy_matches (
+    game_id     INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+    artwork_path TEXT NOT NULL,
+    similarity  REAL NOT NULL DEFAULT 0.0,
+    method      TEXT NOT NULL DEFAULT 'exact',
+    created_at  TEXT DEFAULT (datetime('now')),
+    PRIMARY KEY (game_id, artwork_path)
+);
+
 CREATE INDEX IF NOT EXISTS idx_games_system   ON games(system_id);
 CREATE INDEX IF NOT EXISTS idx_games_title    ON games(sort_title);
 CREATE INDEX IF NOT EXISTS idx_games_favorite ON games(is_favorite);
