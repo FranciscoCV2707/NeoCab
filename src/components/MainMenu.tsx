@@ -9,6 +9,8 @@ interface MainMenuProps {
   onShowOperator: () => void;
   loading: boolean;
   scanProgress: string;
+  locale?: string;
+  onLocaleChange?: (locale: string) => void;
 }
 
 export default function MainMenu({
@@ -17,6 +19,8 @@ export default function MainMenu({
   onShowOperator,
   loading,
   scanProgress,
+  locale,
+  onLocaleChange,
 }: MainMenuProps) {
   const [showPinPad, setShowPinPad] = useState(false);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
@@ -135,8 +139,23 @@ export default function MainMenu({
           <span className="status-dot" />
           <span>Ready to play</span>
         </div>
-        <div className="footer-time">
-          {currentTime.toLocaleTimeString()}
+        <div className="footer-right">
+          {onLocaleChange && (
+            <select
+              className="locale-select"
+              value={locale || "en"}
+              onChange={(e) => onLocaleChange(e.target.value)}
+            >
+              <option value="en">EN</option>
+              <option value="es">ES</option>
+              <option value="fr">FR</option>
+              <option value="de">DE</option>
+              <option value="pt-br">PT</option>
+            </select>
+          )}
+          <div className="footer-time">
+            {currentTime.toLocaleTimeString()}
+          </div>
         </div>
       </div>
 

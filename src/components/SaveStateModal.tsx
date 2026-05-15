@@ -1,17 +1,6 @@
 import { convertFileSrc } from "@tauri-apps/api/core";
 import "./SaveStateModal.css";
-import { Game } from "../App";
-
-export interface SaveState {
-  id: number;
-  game_id: number;
-  slot: number;
-  save_path: string;
-  thumbnail?: string;
-  description?: string;
-  play_time: number;
-  created_at?: string;
-}
+import { Game, SaveState } from "../stores/types";
 
 interface SaveStateModalProps {
   game: Game;
@@ -62,7 +51,7 @@ export default function SaveStateModal({ game, saveStates, onPlayNew, onPlayStat
               <div className="state-info">
                 <h3>Slot {state.slot}</h3>
                 <p>{state.description || new Date(state.created_at || '').toLocaleString()}</p>
-                <span className="play-time">{Math.floor(state.play_time / 60)}m played</span>
+                <span className="play-time">{Math.floor((state.play_time || 0) / 60)}m played</span>
               </div>
             </button>
           ))}

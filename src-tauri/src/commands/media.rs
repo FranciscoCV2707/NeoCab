@@ -201,6 +201,48 @@ pub async fn trigger_media_rescan(
         }
     }
 }
+use crate::db::Database;
+use std::sync::Arc;
+use crate::utils::fuzzy_match;
+
+#[tauri::command]
+pub async fn find_cover_art(
+    game_title: String,
+    system_name: String,
+    game_crc32: Option<String>,
+    games_dir: String,
+    db: tauri::State<'_, Arc<Database>>,
+) -> Result<String, String> {
+    let artwork_dir = std::path::Path::new(&games_dir)
+        .join("images")
+        .join(&system_name);
+
+    // Check cache first
+    // Note: would need game_id for cache lookup; simplified for now
+    let threshold = 0.80;
+
+    match fuzzy_match::find_best_artwork(&game_title, &artwork_dir, threshold) {
+        Some((path, similarity, method)) => {
+            let result = serde_json::json!({
+                "found": true,
+                "path": path.to_string_lossy().to_string(),
+                "similarity": similarity,
+                "method": method
+            });
+            Ok(result.to_string())
+        }
+        None => {
+            let result = serde_json::json!({
+                "found": false,
+                "path": serde_json::Value::Null,
+                "similarity": 0.0,
+                "method": "none"
+            });
+            Ok(result.to_string())
+        }
+    }
+}
+
 #[tauri::command]
 pub async fn get_all_game_media(
     system: String,

@@ -69,6 +69,10 @@ fn determine_shader_path() -> PathBuf {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    run_with_config(core::kiosk_config::KioskConfig::default())
+}
+
+pub fn run_with_config(kiosk_config: core::kiosk_config::KioskConfig) {
     // Initialize logging
     init_logging();
 
@@ -77,6 +81,7 @@ pub fn run() {
         eprintln!("Warning: Failed to initialize directories: {}", e);
         tracing::warn!("Failed to initialize directories: {}", e);
     }
+    utils::run_startup_validations();
 
     // Detect runtime mode (Modern or Legacy)
     let runtime_mode = utils::detect_mode();
@@ -116,7 +121,12 @@ pub fn run() {
     }
 
     // Otherwise, run modern Tauri app
-    run_modern_app();
+    run_modern_app(kiosk_config);
+}
+
+/// Parse CLI arguments into KioskConfig
+pub fn parse_cli_args(args: &[String]) -> core::kiosk_config::KioskConfig {
+    core::kiosk_config::parse_cli_args(args)
 }
 
 /// Run legacy SDL2 application (Windows XP compatible)
@@ -166,7 +176,7 @@ fn run_legacy_app() {
 }
 
 /// Run modern Tauri application
-fn run_modern_app() {
+fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
     let _ = tauri::Builder::default()
         .setup(|app| {
             let result = tauri::async_runtime::block_on(initialize_app());
@@ -197,6 +207,7 @@ fn run_modern_app() {
                     app.manage(input_manager);
                     app.manage(operator_panel);
                     app.manage(autoboot_manager);
+                    app.manage(kiosk_config);
                     app.manage(theme_manager);
                     app.manage(media_manager);
                     app.manage(shader_manager);
@@ -238,7 +249,10 @@ fn run_modern_app() {
             commands::get_high_scores,
             commands::scan_roms,
             commands::detect_emulators,
+            commands::auto_detect_emulators,
             commands::scrape_game,
+            commands::scrape_all,
+            commands::cancel_scraping,
             commands::update_play_stats,
             // Emulator
             commands::list_emulators,
@@ -364,6 +378,7 @@ fn run_modern_app() {
             commands::import_media,
             commands::trigger_media_rescan,
             commands::get_all_game_media,
+            commands::find_cover_art,
             // Shaders
             commands::list_shaders,
             commands::rescan_shaders,
@@ -393,8 +408,44 @@ fn run_modern_app() {
             commands::list_log_files,
             commands::clear_logs,
             commands::get_log_tail,
+            // Kiosk
+            commands::get_kiosk_config,
+            // Tags
+            commands::list_tags,
+            commands::create_tag,
+            commands::delete_tag,
+            commands::add_game_tag,
+            commands::remove_game_tag,
+            commands::get_game_tags,
+            // Jukebox
+            commands::jukebox_list_tracks,
+            // SafeQuit
+            commands::safe_quit_check,
+            commands::safe_quit_get_rules,
+            // Display
+            commands::get_display_config,
+            commands::set_display_rotation,
+            commands::create_tag,
+            commands::delete_tag,
+            commands::add_game_tag,
+            commands::remove_game_tag,
+            commands::get_game_tags,
+            // RetroAchievements
+            commands::ra_login,
+            commands::ra_get_game_achievements,
+            commands::ra_get_user_summary,
+            commands::ra_inject_retroarch,
+            // Config injection
+            commands::list_config_injectors,
+            commands::detect_config_injector,
+            commands::read_emulator_config,
+            commands::inject_emulator_config,
             // Pause menu
             commands::toggle_pause_menu,
+            // Updater
+            commands::check_for_updates,
+            commands::download_update,
+            commands::apply_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -411,7 +462,7 @@ fn init_logging() {
         .join("logs");
     let _ = std::fs::create_dir_all(&logs_dir);
 
-    // Set up file appender
+    // Rolling file appender with max retention (30 days)
     let file_appender = tracing_appender::rolling::daily(&logs_dir, "neocab.log");
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
 
@@ -423,8 +474,50 @@ fn init_logging() {
         .with_writer(non_blocking)
         .try_init();
 
-    // Keep the guard alive for the lifetime of the program
     std::mem::forget(_guard);
+
+    // Cleanup old logs (keep last 30 days)
+    cleanup_old_logs(&logs_dir, 30);
+}
+
+fn cleanup_old_logs(logs_dir: &std::path::Path, max_days: u64) {
+    let Ok(entries) = std::fs::read_dir(logs_dir) else { return; };
+    let now = std::time::SystemTime::now();
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.extension().and_then(|e| e.to_str()) != Some("log") {
+            continue;
+        }
+        if let Ok(metadata) = std::fs::metadata(&path) {
+            if let Ok(modified) = metadata.modified() {
+                if let Ok(duration) = now.duration_since(modified) {
+                    if duration.as_secs() > max_days * 86400 {
+                        // Compress old logs
+                        let gz_path = path.with_extension("log.gz");
+                        if !gz_path.exists() {
+                            if let Ok(content) = std::fs::read_to_string(&path) {
+                                use std::io::Write;
+                                let mut encoder = flate2::write::GzEncoder::new(
+                                    Vec::new(), flate2::Compression::default(),
+                                );
+                                if encoder.write_all(content.as_bytes()).is_ok() {
+                                    if let Ok(compressed) = encoder.finish() {
+                                        let _ = std::fs::write(&gz_path, compressed);
+                                    }
+                                }
+                            }
+                        }
+                        // Remove logs older than 2*max_days
+                        if duration.as_secs() > max_days * 86400 * 2 {
+                            let _ = std::fs::remove_file(&path);
+                            let _ = std::fs::remove_file(&gz_path);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 /// Returns the base directory for all app data (next to the exe, portable).

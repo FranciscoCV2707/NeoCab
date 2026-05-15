@@ -12,16 +12,18 @@ pub fn needs_setup() -> bool {
 /// Get list of available emulators for setup
 #[tauri::command]
 pub fn get_available_emulators() -> Result<Vec<String>> {
-    // Return list of emulators that can be configured
-    let emulators = vec![
-        "MAME",
-        "RetroArch",
-        "PCSX Redux",
-        "Mupen64",
-        "Gambatte",
-    ];
+    let detected = crate::utils::EmulatorDetector::detect_all();
+    let names: Vec<String> = detected.iter()
+        .filter(|e| e.installed)
+        .map(|e| e.name.clone())
+        .collect();
+    Ok(names)
+}
 
-    Ok(emulators.iter().map(|s| s.to_string()).collect())
+/// Auto-detect all emulators on the system
+#[tauri::command]
+pub fn auto_detect_emulators() -> Result<Vec<crate::utils::EmulatorInfo>> {
+    Ok(crate::utils::EmulatorDetector::detect_all())
 }
 
 /// Validate ROM directory path

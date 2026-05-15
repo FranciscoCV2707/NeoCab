@@ -277,3 +277,67 @@ pub async fn update_play_stats(
         .map_err(|e| e.to_string())
 }
 
+use std::sync::atomic::{AtomicBool, Ordering};
+
+/// Global cancel flag for batch scraping
+static SCRAPE_CANCEL: AtomicBool = AtomicBool::new(false);
+
+/// Batch scrape all games that are missing metadata for a given system
+#[tauri::command]
+pub async fn scrape_all(
+    system_name: String,
+    db: State<'_, Arc<Database>>,
+    app_handle: tauri::AppHandle,
+) -> Result<String, String> {
+    use crate::core::scraper::GameScraper;
+
+    SCRAPE_CANCEL.store(false, Ordering::Relaxed);
+
+    let system = db.get_system_by_name(&system_name).await
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| format!("System '{}' not found", system_name))?;
+
+    // Get all games for this system
+    let games = db.get_games_by_system(system.id, None, None, false).await
+        .map_err(|e| e.to_string())?;
+
+    // Filter to only unscraped games
+    let to_scrape: Vec<_> = games.into_iter()
+        .filter(|g| g.description.is_none() || g.description.as_deref() == Some(""))
+        .collect();
+
+    if to_scrape.is_empty() {
+        return Ok(serde_json::json!({"scraped": 0, "total": 0, "skipped": true}).to_string());
+    }
+
+    let media_dir = PathBuf::from("./media");
+    let scraper = GameScraper::new(media_dir);
+    let cancel = Arc::new(AtomicBool::new(false));
+
+    // Pass cancel to scraper but also allow global cancel
+    let cancel_clone = cancel.clone();
+    let (scraped, errors) = scraper.scrape_all(
+        &to_scrape,
+        &system_name,
+        cancel_clone,
+        Some(app_handle),
+    ).await;
+
+    let was_cancelled = SCRAPE_CANCEL.load(Ordering::Relaxed);
+
+    let result = serde_json::json!({
+        "scraped": scraped,
+        "errors": errors,
+        "total": to_scrape.len(),
+        "cancelled": was_cancelled,
+    });
+    Ok(result.to_string())
+}
+
+/// Cancel an ongoing batch scrape
+#[tauri::command]
+pub async fn cancel_scraping() -> Result<(), String> {
+    SCRAPE_CANCEL.store(true, Ordering::Relaxed);
+    Ok(())
+}
+

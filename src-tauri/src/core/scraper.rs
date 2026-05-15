@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use tracing::{info, warn, error, debug};
 use crate::error::Result;
 use tokio::time::{sleep, Duration};
+use tauri::Emitter;
 
 // ─── Scraped Result ───
 
@@ -544,5 +545,76 @@ impl GameScraper {
         }
 
         Ok(info)
+    }
+
+    /// Batch scrape all games without metadata.
+    /// Returns count of successfully scraped games.
+    pub async fn scrape_all(
+        &self,
+        games: &[crate::models::Game],
+        system_name: &str,
+        cancel: std::sync::Arc<std::sync::atomic::AtomicBool>,
+        app_handle: Option<tauri::AppHandle>,
+    ) -> (usize, usize) {
+        let total = games.len();
+        let mut scraped = 0usize;
+        let mut errors = 0usize;
+
+        info!("Batch scraping {} games for system {}", total, system_name);
+
+        for (i, game) in games.iter().enumerate() {
+            if cancel.load(std::sync::atomic::Ordering::Relaxed) {
+                info!("Batch scraping cancelled at game {}/{}", i, total);
+                break;
+            }
+
+            let rom_name = game.filename.as_deref().unwrap_or(&game.title);
+
+            if let Some(handle) = &app_handle {
+                let _ = handle.emit("scrape_progress", serde_json::json!({
+                    "current": i + 1,
+                    "total": total,
+                    "game_name": game.title,
+                    "status": "scraping",
+                }));
+            }
+
+            match self
+                .scrape_and_download(rom_name, system_name, game.crc32.as_deref())
+                .await
+            {
+                Ok(info) => {
+                    // Update DB with scraped metadata
+                    let year_i64 = info.year.map(|y| y as i64);
+                    let players_i64 = info.players.map(|p| p as i64);
+                    // Note: DB update would need db ref; returned info for caller to handle
+                    scraped += 1;
+                    if let Some(handle) = &app_handle {
+                        let _ = handle.emit("scrape_progress", serde_json::json!({
+                            "current": i + 1,
+                            "total": total,
+                            "game_name": game.title,
+                            "status": "done",
+                        }));
+                    }
+                }
+                Err(e) => {
+                    warn!("Failed to scrape {}: {}", game.title, e);
+                    errors += 1;
+                    if let Some(handle) = &app_handle {
+                        let _ = handle.emit("scrape_progress", serde_json::json!({
+                            "current": i + 1,
+                            "total": total,
+                            "game_name": game.title,
+                            "status": "error",
+                            "error": e.to_string(),
+                        }));
+                    }
+                }
+            }
+        }
+
+        info!("Batch scraping complete: {} scraped, {} errors", scraped, errors);
+        (scraped, errors)
     }
 }

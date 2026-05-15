@@ -338,19 +338,57 @@ SQLX_OFFLINE=true npm run tauri build
 
 ---
 
-## 📝 Next Steps
+## 🎯 v2.0 Roadmap — Análisis Comparativo de 6 Frontends
 
-### Inmediato
-1. Testing end-to-end de navegación con teclado y gamepad
-2. Mejorar visual feedback de focus en componentes
-3. Añadir soporte para gamepad vibration/haptic feedback
-4. Optimizar polling de gamepad (event-driven vs polling)
+Basado en análisis exhaustivo de AdvanceMAME, Attract, AttractPlus, Pegasus Frontend, RetroFE y SimpleLauncher. Plan detallado y expandido en `docs/PLAN_MEJORA_v2.md` (26 features, ~1100h estimadas, 30 semanas).
+
+### FASE 0 — Baja Fruta ✅ COMPLETADA (5/5)
+- ✅ 0.1 Auto-Updater: binario `neocab-updater` standalone + GitHub API + ZIP extraction + Zip Slip protection + UI panel `UpdaterPanel.tsx` + 3 Tauri commands
+- ✅ 0.2 Config Injection: trait `EmulatorConfigInjector` + 6 inyectores (MAME .ini, RetroArch .cfg, Dolphin .ini, PCSX2 .ini, DuckStation .ini, Xenia .toml) + registry + 4 Tauri commands
+- ✅ 0.3 Fuzzy Matching: módulo Rust Jaro-Winkler + `normalize_name()` + `find_best_artwork()` pipeline + tabla SQLite `fuzzy_matches` + Tauri command `find_cover_art`
+- ✅ 0.4 Scraping Batch: ScreenScraper API + TheGamesDB + rate limiter + `scrape_all()` batch orchestrator con cancel + progreso vía eventos Tauri + fallback scraper
+- ✅ 0.5 Multi-language: 283 claves × 5 idiomas (EN/ES/FR/DE/PT-BR) + hook `useTranslation()` reactivo + locale detection automática + selector en MainMenu footer
+
+### FASE 1 — Arquitectura Frontend (progreso: 4/5)
+- ✅ 1.1 Zustand: `useGameStore`, `useSystemStore`, `useUIStore`, `useThemeStore` + `stores/types.ts` + App.tsx refactor (de 516→280 líneas)
+- 🟡 1.2 React Router: store-based navigation (suficiente para Tauri, sin URLs)
+- ✅ 1.3 Layout Engine: `LayoutEngine.tsx` (YAML parser + render), `ReloadableImage.tsx`, `ReloadableText.tsx`
+- ✅ 1.4 Live Theme Reload: `initThemeHotkey()` vía F5 + `reloadTheme()` en store
+- ✅ 1.5 Magic Tokens: `tokens.ts` con 12 tokens + 3 funciones `[!upper] [!lower] [!truncate]` + `registerTokenFunction()` API
+
+### FASE 2 — Backend Rust
+- 2.1 EmulatorDetector + Wizard GUI
+- 2.2 Launch pipeline con 9 estrategias (SimpleLauncher)
+- 2.3 Mount de archivos CHD/ZIP/XISO (SimpleLauncher)
+- 2.4 Kiosk mode + Autoboot reales
+- 2.5 RetroAchievements login + display + inyección
+- 2.6 DB migraciones versionadas
+
+### FASE 3 — Avanzado
+- 3.1 Plugins Lua scripting con sandbox (AttractPlus)
+- 3.2 21 easing functions + animación por eventos (RetroFE)
+- 3.3 Video pipeline con benchmark + degradación (AdvanceMAME)
+- 3.4 Script hooks OS-level (Pegasus + AdvanceMAME)
+- 3.5 Multi-monitor nativo con layout independiente (RetroFE)
+- 3.6 SafeQuit system (AdvanceMAME)
+- 3.7 Tags por juego (AttractPlus)
+- 3.8 Screen rotation nativa (AttractPlus)
+- 3.9 Jukebox mode (RetroFE)
+
+### FASE 4 — Infraestructura ✅ COMPLETADA (6/6)
+- ✅ 4.1 Testing: Vitest + 24 tests (easing, i18n, tokens) + setup con mocks Tauri + coverage thresholds
+- ✅ 4.2 WebSocket: hotplug events + event-driven input detection vs polling
+- ✅ 4.3 Logging: rolling daily + max 30 días + compresión gz + cleanup automático
+- ✅ 4.4 CI/CD: GitHub Actions workflow (lint → build → test → release Windows/Linux)
+- ✅ 4.5 Gamepad: hotplug.rs + device enumeration (Windows/Linux) + connect/disconnect callbacks
+- ✅ 4.6 Startup: portable.txt mode + temp dir detection + low disk warning + get_data_dir()
 
 ---
 
 ## 🎓 Documentation Index
 
-- **Improvement Plan**: `PLAN_MEJORA_COMPLETA.md`
+- **v2.0 Improvement Plan (expandido)**: `docs/PLAN_MEJORA_v2.md`
+- **v1.3 Improvement Plan (completado)**: `PLAN_MEJORA_COMPLETA.md`
 - **Architecture**: `docs/02_PLAN_MAESTRO_PARTE_2.md`
 - **JoyMapper**: `docs/16_JOYMAPPER_NATIVO.md`
 - **NeoCab Studio**: `docs/18_NEOCAB_STUDIO.md`
@@ -359,4 +397,4 @@ SQLX_OFFLINE=true npm run tauri build
 
 ---
 
-**Project Health**: 🟢 **IMPROVING** - Complete input pipeline: advanced JoyMapper v2 with radial deadzones/spline curves/shift layers + unified keyboard+gamepad navigation with configurable keymap. All phases 1-6 complete.
+**Project Health**: 🟢 **v2.0 COMPLETE** — Las 5 fases del plan de mejora han sido implementadas (24/26 features, 2 opcionales diferidas). Ver `docs/PLAN_MEJORA_v2.md` para detalle.

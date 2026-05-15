@@ -18,8 +18,28 @@ pub mod launcher;
 pub mod studio;
 pub mod pause;
 pub mod setup;
+pub mod updater;
+pub mod config_inject;
+pub mod kiosk;
+pub mod achievements;
+pub mod tags;
+pub mod jukebox;
+pub mod safe_quit;
+pub mod display;
 
 pub use system::*;
+pub use updater::*;
+pub use config_inject::*;
+pub use kiosk::*;
+pub use achievements::*;
+pub use tags::*;
+pub use jukebox::*;
+pub use safe_quit::*;
+pub use display::*;
+
+pub fn get_tag_manager(db: std::sync::Arc<crate::db::Database>) -> crate::core::tag_manager::TagManager {
+    crate::core::tag_manager::TagManager::new(db)
+}
 pub use games::*;
 pub use emulator::*;
 pub use config::*;

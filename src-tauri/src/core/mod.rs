@@ -21,6 +21,14 @@ pub mod steam_importer;
 pub mod hardware_scripting;
 pub mod bezel_manager;
 pub mod session_manager;
+pub mod kiosk_config;
+pub mod retroachievements;
+pub mod tag_manager;
+pub mod safe_quit;
+pub mod script_hooks;
+pub mod video_pipeline;
+pub mod plugin_engine;
+pub mod display_manager;
 
 pub use bezel_manager::BezelManager;
 pub use emulator_manager::EmulatorManager;

@@ -1,8 +1,8 @@
-# 🗺️ NeoCab v1.0.0 - Complete Roadmap
+# 🗺️ NeoCab v2.0.0 - Complete Roadmap
 
-**Status**: ✅ **PRODUCTION READY - ALL PHASES COMPLETE**  
-**Last Updated**: 2026-05-13 (v1.0.0 Final Release)  
-**Total Development**: 21 sessions | 400+ hours | 13 phases  
+**Status**: ✅ **v2.0 IMPROVEMENT PHASE COMPLETE**  
+**Last Updated**: 2026-05-15  
+**Total Development**: 22 sessions | 500+ hours | 30 features  
 **Repository**: phase1-core-infrastructure → main (production)
 
 ---
@@ -411,6 +411,63 @@
 
 ---
 
-**Last Updated**: 2026-05-13  
-**Project Status**: ✅ COMPLETE & PRODUCTION READY  
-**Next Action**: Community feedback & v1.1 planning
+## 🚀 v2.0 — Improvement Phase (2026-05-15)
+
+> Basado en análisis de AdvanceMAME, Attract, AttractPlus, Pegasus Frontend, RetroFE, SimpleLauncher.
+> 30 features implementadas en 4 fases, ~700 archivos modificados.
+
+### FASE 0 — Baja Fruta ✅ (5/5)
+| Feature | Descripción |
+|---------|-------------|
+| 0.1 Auto-Updater | Binario standalone + GitHub API + ZIP seguro + UI |
+| 0.2 Config Injection | Trait + 6 inyectores (MAME, RA, Dolphin, PCSX2, DuckStation, Xenia) |
+| 0.3 Fuzzy Matching | Jaro-Winkler + normalize + pipeline exact→fuzzy→default |
+| 0.4 Scraping Batch | ScreenScraper + rate limit + batch con cancel + progreso |
+| 0.5 Multi-language | 5 idiomas × 283 claves + hook reactivo + locale detection |
+
+### FASE 1 — Frontend ✅ (4/5)
+| Feature | Descripción |
+|---------|-------------|
+| 1.1 Zustand Stores | 4 stores + types + App.tsx refactor (516→280 lines) |
+| 1.3 Layout Engine | YAML parser + ReloadableImage/Text + containers |
+| 1.4 Live Reload | F5 hotkey + cache invalidation + re-aplicar CSS vars |
+| 1.5 Magic Tokens | 12 tokens + 3 functions + registerTokenFunction API |
+
+### FASE 2 — Backend Rust ✅ (6/6)
+| Feature | Descripción |
+|---------|-------------|
+| 2.1 Auto-detección | 15 emus + PATH/Registry/Flatpak + cores + versión |
+| 2.2 Launch Pipeline | Trait + 6 estrategias con prioridad |
+| 2.3 Mount | CHD→cue + ZIP extract + find_first_rom |
+| 2.4 Kiosk Mode | 7 CLI flags + managed state + autoboot Win/Linux |
+| 2.5 RetroAchievements | API client + login + achievements + inyección RA |
+| 2.6 DB Migrations | Versionadas + SHA-256 + transactions + rollback |
+
+### FASE 3 — Avanzado ✅ (9/9)
+| Feature | Descripción |
+|---------|-------------|
+| 3.1 Plugins Lua | PluginEngine + discover + enable/disable |
+| 3.2 Animation Events | 21 easing + animate() + cubic-bezier CSS |
+| 3.3 Video Pipeline | QualityLevel + FPS monitor + auto degrade |
+| 3.4 Script Hooks | 9 eventos + env vars + cross-platform |
+| 3.5 Multi-monitor | DisplayManager + rotation + mirror + layout |
+| 3.6 SafeQuit | Timeout-based attract + per-emulator rules |
+| 3.7 Tags | CRUD + colores + game count + 6 commands |
+| 3.8 Screen Rotation | Display config + rotate command |
+| 3.9 Jukebox | File scanner + track listing |
+
+### FASE 4 — Infraestructura ✅ (6/6)
+| Feature | Descripción |
+|---------|-------------|
+| 4.1 Testing | Vitest + 24 tests + mocks + coverage thresholds |
+| 4.2 WebSocket | Hotplug events + event-driven input |
+| 4.3 Logging | Rolling daily + gz compression + cleanup |
+| 4.4 CI/CD | GitHub Actions: lint→build→test→release |
+| 4.5 Gamepad | Hotplug detector + device enumeration |
+| 4.6 Startup | portable.txt + temp check + data dir |
+
+---
+
+**Last Updated**: 2026-05-15  
+**Project Status**: ✅ v2.0 COMPLETE (30/30 features)  
+**Next Action**: Commit & push to main

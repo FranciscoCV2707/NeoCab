@@ -1,78 +1,96 @@
-export const easings = {
-  linear: (t: number) => t,
-  easeInQuad: (t: number) => t * t,
-  easeOutQuad: (t: number) => t * (2 - t),
-  easeInOutQuad: (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
-  easeInCubic: (t: number) => t * t * t,
-  easeOutCubic: (t: number) => (--t) * t * t + 1,
-  easeInOutCubic: (t: number) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
-  easeInQuart: (t: number) => t * t * t * t,
-  easeOutQuart: (t: number) => 1 - (--t) * t * t * t,
-  easeInOutQuart: (t: number) => t < 0.5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t,
-  easeInQuint: (t: number) => t * t * t * t * t,
-  easeOutQuint: (t: number) => 1 + (--t) * t * t * t * t,
-  easeInSine: (t: number) => 1 - Math.cos((t * Math.PI) / 2),
-  easeOutSine: (t: number) => Math.sin((t * Math.PI) / 2),
-  easeInOutSine: (t: number) => -(Math.cos(Math.PI * t) - 1) / 2,
-  easeInExpo: (t: number) => t === 0 ? 0 : Math.pow(2, 10 * t - 10),
-  easeOutExpo: (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
-  easeInCirc: (t: number) => 1 - Math.sqrt(1 - t * t),
-  easeOutCirc: (t: number) => Math.sqrt(1 - (--t) * t),
-  easeOutBack: (t: number) => {
-    const c1 = 1.70158;
-    const c3 = c1 + 1;
-    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
-  },
-  easeOutBounce: (t: number) => {
-    const n1 = 7.5625;
-    const d1 = 2.75;
-    if (t < 1 / d1) return n1 * t * t;
-    if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
-    if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
-    return n1 * (t -= 2.625 / d1) * t + 0.984375;
-  },
+export type EasingFunction = (t: number) => number;
+
+export const easing: Record<string, EasingFunction> = {
+  linear: (t) => t,
+
+  easeInQuad: (t) => t * t,
+  easeOutQuad: (t) => t * (2 - t),
+  easeInOutQuad: (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+
+  easeInCubic: (t) => t * t * t,
+  easeOutCubic: (t) => --t * t * t + 1,
+  easeInOutCubic: (t) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
+
+  easeInQuart: (t) => t * t * t * t,
+  easeOutQuart: (t) => 1 - --t * t * t * t,
+  easeInOutQuart: (t) => t < 0.5 ? 8 * t * t * t * t : 1 - 8 * --t * t * t * t,
+
+  easeInQuint: (t) => t * t * t * t * t,
+  easeOutQuint: (t) => 1 + --t * t * t * t * t,
+  easeInOutQuint: (t) => t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * --t * t * t * t * t,
+
+  easeInSine: (t) => 1 - Math.cos((t * Math.PI) / 2),
+  easeOutSine: (t) => Math.sin((t * Math.PI) / 2),
+  easeInOutSine: (t) => -(Math.cos(Math.PI * t) - 1) / 2,
+
+  easeInExpo: (t) => t === 0 ? 0 : Math.pow(2, 10 * t - 10),
+  easeOutExpo: (t) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
+  easeInOutExpo: (t) => !t ? 0 : t === 1 ? 1 : t < 0.5
+    ? Math.pow(2, 20 * t - 10) / 2 : (2 - Math.pow(2, -20 * t + 10)) / 2,
+
+  easeInCirc: (t) => 1 - Math.sqrt(1 - t * t),
+  easeOutCirc: (t) => Math.sqrt(1 - --t * t),
+  easeInOutCirc: (t) => t < 0.5
+    ? (1 - Math.sqrt(1 - 4 * t * t)) / 2
+    : (Math.sqrt(1 - 4 * (t - 1) * (t - 1)) + 1) / 2,
+
+  easeOutBack: (t) => { const c = 1.70158; return --t * t * ((c + 1) * t + c) + 1; },
+  easeInOutBack: (t) => { const c = 1.70158 * 1.525; return t < 0.5
+    ? (Math.pow(2 * t, 2) * ((c + 1) * 2 * t - c)) / 2
+    : (Math.pow(2 * t - 2, 2) * ((c + 1) * (t * 2 - 2) + c) + 2) / 2; },
 };
 
+/// CSS cubic-bezier values for common easing functions
+const easingCSS: Record<string, string> = {
+  linear: "cubic-bezier(0, 0, 1, 1)",
+  easeInQuad: "cubic-bezier(0.55, 0.085, 0.68, 0.53)",
+  easeOutQuad: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+  easeInOutQuad: "cubic-bezier(0.455, 0.03, 0.515, 0.955)",
+  easeInCubic: "cubic-bezier(0.55, 0.055, 0.675, 0.19)",
+  easeOutCubic: "cubic-bezier(0.215, 0.61, 0.355, 1)",
+  easeInOutCubic: "cubic-bezier(0.645, 0.045, 0.355, 1)",
+  easeInQuart: "cubic-bezier(0.895, 0.03, 0.685, 0.22)",
+  easeOutQuart: "cubic-bezier(0.165, 0.84, 0.44, 1)",
+  easeInOutQuart: "cubic-bezier(0.77, 0, 0.175, 1)",
+  easeOutBack: "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+};
+
+export function getEasingCSS(name: string): string {
+  return easingCSS[name] || easingCSS.linear;
+}
+
+/// Creates an animation promise that resolves after completion
 export function animate(
+  element: HTMLElement,
+  property: string,
   from: number,
   to: number,
   duration: number,
-  easing: keyof typeof easings = 'easeOutCubic',
-  onUpdate: (value: number) => void,
-  onComplete?: () => void,
-): () => void {
-  const start = performance.now();
-  const easeFn = easings[easing] || easings.easeOutCubic;
-  let cancelled = false;
+  easingFn: EasingFunction,
+): Promise<void> {
+  return new Promise((resolve) => {
+    const start = performance.now();
 
-  function step(now: number) {
-    if (cancelled) return;
-    const elapsed = now - start;
-    const progress = Math.min(elapsed / duration, 1);
-    const easedProgress = easeFn(progress);
-    const value = from + (to - from) * easedProgress;
-    onUpdate(value);
-    if (progress < 1) {
-      requestAnimationFrame(step);
-    } else {
-      onComplete?.();
-    }
-  }
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(elapsed / duration, 1);
+      const value = from + (to - from) * easingFn(t);
 
-  requestAnimationFrame(step);
+      if (property === "opacity") {
+        element.style.opacity = String(value);
+      } else if (property === "scale") {
+        element.style.transform = `scale(${value})`;
+      } else {
+        (element.style as any)[property] = `${value}px`;
+      }
 
-  return () => { cancelled = true; };
-}
+      if (t < 1) {
+        requestAnimationFrame(tick);
+      } else {
+        resolve();
+      }
+    };
 
-export function getEasingCSS(easing: string): string {
-  const map: Record<string, string> = {
-    linear: 'linear',
-    easeOutCubic: 'cubic-bezier(0.33, 1, 0.68, 1)',
-    easeOutQuad: 'cubic-bezier(0.25, 1, 0.5, 1)',
-    easeOutBounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-    easeOutBack: 'cubic-bezier(0.36, 0, 0.66, -0.56)',
-    easeInCubic: 'cubic-bezier(0.32, 0, 0.67, 0)',
-    easeInOutCubic: 'cubic-bezier(0.65, 0, 0.35, 1)',
-  };
-  return map[easing] || 'ease';
+    requestAnimationFrame(tick);
+  });
 }

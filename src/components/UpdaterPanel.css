@@ -1,0 +1,110 @@
+.updater-panel {
+  padding: 16px;
+  background: var(--surface, #1a1a1a);
+  border-radius: 8px;
+  border: 1px solid var(--border, #333);
+}
+
+.updater-panel h3 {
+  margin: 0 0 12px;
+  color: var(--text, #fff);
+  font-size: 1.1rem;
+}
+
+.updater-check-btn,
+.updater-download-btn {
+  padding: 8px 20px;
+  border: 2px solid var(--primary, #ff6b00);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--primary, #ff6b00);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.updater-check-btn:hover:not(:disabled),
+.updater-download-btn:hover {
+  background: var(--primary, #ff6b00);
+  color: var(--background, #0a0a0a);
+}
+
+.updater-check-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.updater-download-btn {
+  margin-top: 12px;
+  background: var(--primary, #ff6b00);
+  color: var(--background, #0a0a0a);
+  font-weight: 600;
+}
+
+.updater-status {
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(255, 107, 0, 0.1);
+  border-radius: 4px;
+  color: var(--text, #fff);
+  font-size: 0.85rem;
+}
+
+.updater-progress-container {
+  margin-top: 12px;
+}
+
+.updater-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--secondary, #333);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.updater-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary, #ff6b00), var(--highlight, #ff8c00));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.updater-progress-text {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--text, #aaa);
+}
+
+.updater-changelog {
+  margin-top: 12px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.updater-changelog h4 {
+  margin: 0 0 8px;
+  color: var(--text, #fff);
+  font-size: 0.9rem;
+}
+
+.updater-changelog pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 0.8rem;
+  color: var(--text, #aaa);
+  line-height: 1.4;
+}
+
+.updater-up-to-date {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(0, 200, 83, 0.1);
+  border: 1px solid var(--success, #00c853);
+  border-radius: 6px;
+  color: var(--success, #00c853);
+  text-align: center;
+}

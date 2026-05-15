@@ -52,9 +52,11 @@ notify = "6.1"
 sha2 = "0.10"
 crc32fast = "1.3"
 bcrypt = "0.15"
+strsim = "0.11"
 
 # Compression
 zip = "0.6"
+flate2 = "1.0"
 
 # System info
 sysinfo = "0.30"
@@ -85,7 +87,7 @@ glfw = { version = "0.54", optional = true }
 serialport = { version = "4.3", optional = true }
 rppal = { version = "0.14", optional = true }
 enigo = "0.6.1"
-winapi = { version = "0.3.9", features = ["winuser", "winbase", "windef"] }
+winapi = { version = "0.3.9", features = ["winuser", "winbase", "windef", "synchapi", "processthreadsapi", "handleapi"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 winreg = "0.52"
