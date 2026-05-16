@@ -2,6 +2,50 @@
 
 All notable changes to this project are documented here.
 
+## [1.3.0] - 2026-05-16 - v2.0 COMPLETE
+
+> All 26 features from the improvement plan completed. NeoCab now matches or exceeds the capabilities of AdvanceMAME, AttractPlus, Pegasus Frontend, RetroFE, and SimpleLauncher.
+
+### FASE 0 — Baja Fruta ✅
+- **Auto-Updater**: GitHub API + semver + ZIP extraction + Zip Slip protection
+- **Config Injection**: 6 injectors (MAME, RetroArch, Dolphin, PCSX2, DuckStation, Xenia)
+- **Fuzzy Matching**: Jaro-Winkler algorithm for artwork matching
+- **Scraping Batch**: ScreenScraper + TGDB + rate limiter + fallback
+- **Multi-language**: 283 keys × 5 languages (EN/ES/FR/DE/PT-BR)
+
+### FASE 1 — Arquitectura Frontend ✅
+- **Zustand Stores**: useGameStore, useSystemStore, useUIStore, useThemeStore
+- **Layout Engine**: YAML parser + ReloadableImage/Text/Video components
+- **Live Theme Reload**: F5 hotkey
+- **Magic Tokens**: 12 tokens + 3 functions [!upper, !lower, !truncate]
+
+### FASE 2 — Backend Rust ✅
+- **EmulatorDetector**: Auto-detection + GUI wizard
+- **Launch Pipeline**: 9 strategies (CHD mount, ZIP extract, batch, shortcut, etc.)
+- **Mount CHD/ZIP/XISO**: Full disk image support
+- **Kiosk Mode + Autoboot**: --kiosk flag + autoboot delay
+- **RetroAchievements**: Login + display + injection
+- **DB Migrations**: Versioned migrations with checksum validation
+
+### FASE 3 — Características Avanzadas ✅
+- **Lua Plugin Engine**: Sandbox with safe API
+- **21 Easing Functions**: Penner equations + CSS cubic-bezier
+- **Video Pipeline**: FPS monitoring + auto-degradation (Ultra → Potato)
+- **Script Hooks**: OS-level event hooks
+- **Multi-monitor**: Independent layouts per display
+- **SafeQuit System**: Memory monitoring + automatic return to attract
+- **Tags**: Game tagging system
+- **Screen Rotation**: Native display rotation
+- **Jukebox Mode**: Background music player
+
+### FASE 4 — Infraestructura ✅
+- **Testing**: Vitest + 24 tests (easing, i18n, tokens)
+- **WebSocket**: Event-driven input detection
+- **Logging**: Rolling daily + max 30 days + gz compression
+- **CI/CD**: GitHub Actions (lint → build → test → release)
+- **Gamepad Hotplug**: Device enumeration + connect/disconnect callbacks
+- **Startup Validation**: Portable mode + temp dir + low disk warning
+
 ## [1.2.0] - 2026-05-14 - INPUT SYSTEM PHASE
 
 > Advanced input system inspired by AntiMicroX, Durazno, JoystickGremlin, UCR, and x360ce.

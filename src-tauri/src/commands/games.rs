@@ -175,31 +175,58 @@ pub async fn scan_roms(
     app_handle: tauri::AppHandle,
     roms_dir: Option<String>,
     game_library: State<'_, GameLibrary>,
+    db: State<'_, Arc<Database>>,
+    config_manager: State<'_, Arc<crate::core::ConfigManager>>,
 ) -> Result<String, String> {
-    let dir = roms_dir
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from("./roms"));
+    let mut dirs_to_scan = Vec::new();
+
+    if let Some(dir) = roms_dir {
+        dirs_to_scan.push(std::path::PathBuf::from(dir));
+    } else {
+        // Fallback to configured global path
+        if let Ok(path) = config_manager.get_string("default_roms_path").await {
+            dirs_to_scan.push(std::path::PathBuf::from(path));
+        } else {
+            // Further fallback to per-system paths
+            if let Ok(systems) = db.get_systems().await {
+                for sys in systems {
+                    if let Some(p) = sys.roms_path {
+                        if !p.is_empty() {
+                            dirs_to_scan.push(std::path::PathBuf::from(p));
+                        }
+                    }
+                }
+            }
+            if dirs_to_scan.is_empty() {
+                dirs_to_scan.push(std::path::PathBuf::from("./roms"));
+            }
+        }
+    }
 
     use tauri::Emitter;
 
-    let count = {
-        use tauri::Emitter;
-        let app = std::sync::Arc::new(app_handle);
+    let mut total_count = 0;
+    
+    for dir in dirs_to_scan {
+        let app = std::sync::Arc::new(app_handle.clone());
         let app_clone = app.clone();
 
-        game_library.scan_roms(&dir, move |current, total, filename| {
+        match game_library.scan_roms(&dir, move |current, total, filename| {
             let _ = app_clone.emit("scan_progress", ScanProgress {
                 current,
                 total,
                 filename: filename.to_string(),
             });
-        }).await.map_err(|e| e.to_string())?
-    };
+        }).await {
+            Ok(count) => total_count += count,
+            Err(e) => tracing::warn!("Failed to scan dir {:?}: {}", dir, e),
+        }
+    }
 
     let result = json!({
         "success": true,
-        "games_found": count,
-        "message": format!("Found {} new games", count)
+        "games_found": total_count,
+        "message": format!("Found {} new games", total_count)
     });
     Ok(result.to_string())
 }

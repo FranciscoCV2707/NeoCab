@@ -67,20 +67,24 @@ impl GameLibrary {
 
         info!("Supported extensions: {:?}", supported_extensions);
 
-        let db = self.db.clone();
         let supported = supported_extensions;
+        let roms_dir_buf = roms_dir.to_path_buf();
 
-        let files: Vec<_> = walkdir::WalkDir::new(roms_dir)
-            .into_iter()
-            .filter_map(|e| e.ok())
-            .filter(|e| e.file_type().is_file())
-            .filter(|e| {
-                let ext = e.path().extension()
-                    .and_then(|e| e.to_str())
-                    .map(|e| e.to_lowercase());
-                ext.map(|e| supported.contains(&e)).unwrap_or(false)
-            })
-            .collect();
+        let files: Vec<_> = tokio::task::spawn_blocking(move || {
+            walkdir::WalkDir::new(roms_dir_buf)
+                .into_iter()
+                .filter_map(|e| e.ok())
+                .filter(|e| e.file_type().is_file())
+                .filter(|e| {
+                    let ext = e.path().extension()
+                        .and_then(|e| e.to_str())
+                        .map(|e| e.to_lowercase());
+                    ext.map(|e| supported.contains(&e)).unwrap_or(false)
+                })
+                .collect()
+        })
+        .await
+        .map_err(|e| crate::error::NeoCabError::Other(e.to_string()))?;
 
         let total_files = files.len();
         let mut games_found = 0;
@@ -115,8 +119,19 @@ impl GameLibrary {
             .and_then(|n| n.to_str())
             .unwrap_or("unknown");
 
-        let content = tokio::fs::read(path).await?;
-        let crc32 = format!("{:08x}", hash(&content));
+        // Use streaming CRC32 to avoid OOM for large files
+        use tokio::io::AsyncReadExt;
+        let mut file = tokio::fs::File::open(path).await?;
+        let mut hasher = crc32fast::Hasher::new();
+        let mut buffer = [0u8; 8192];
+        
+        loop {
+            let n = file.read(&mut buffer).await?;
+            if n == 0 { break; }
+            hasher.update(&buffer[..n]);
+        }
+        
+        let crc32 = format!("{:08x}", hasher.finalize());
 
         if self.db.get_game_by_crc32(&crc32).await?.is_some() {
             return Ok(false);

@@ -577,6 +577,21 @@ impl Database {
         }
 
         let games = sql.fetch_all(&self.pool).await?;
+        
+        // Apply secondary fuzzy sorting if search is active
+        if let Some(s) = search {
+            let mut scored_games: Vec<(crate::models::Game, f64)> = games
+                .into_iter()
+                .map(|g| {
+                    let sim = crate::utils::fuzzy_match::jaro_winkler(s, &g.title);
+                    (g, sim)
+                })
+                .collect();
+            
+            scored_games.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+            return Ok(scored_games.into_iter().map(|(g, _)| g).collect());
+        }
+
         Ok(games)
     }
 
