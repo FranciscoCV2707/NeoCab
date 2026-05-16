@@ -182,31 +182,26 @@ pub async fn scan_roms(
 
     use tauri::Emitter;
 
-    let result = game_library.scan_roms(&dir, |current, total, filename| {
-        let _ = app_handle.emit("scan_progress", ScanProgress {
-            current,
-            total,
-            filename: filename.to_string(),
-        });
-    }).await;
+    let count = {
+        use tauri::Emitter;
+        let app = std::sync::Arc::new(app_handle);
+        let app_clone = app.clone();
 
-    match result {
-        Ok(count) => {
-            let result = json!({
-                "success": true,
-                "games_found": count,
-                "message": format!("Found {} new games", count)
+        game_library.scan_roms(&dir, move |current, total, filename| {
+            let _ = app_clone.emit("scan_progress", ScanProgress {
+                current,
+                total,
+                filename: filename.to_string(),
             });
-            Ok(result.to_string())
-        }
-        Err(e) => {
-            let error = json!({
-                "success": false,
-                "error": e.to_string()
-            });
-            Err(error.to_string())
-        }
-    }
+        }).await.map_err(|e| e.to_string())?
+    };
+
+    let result = json!({
+        "success": true,
+        "games_found": count,
+        "message": format!("Found {} new games", count)
+    });
+    Ok(result.to_string())
 }
 
 /// Scrape metadata and artwork for a single game

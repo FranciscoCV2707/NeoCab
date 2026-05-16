@@ -36,6 +36,9 @@ pub enum NeoCabError {
     #[error("Network error: {0}")]
     Network(String),
 
+    #[error("All scrapers failed ({0} errors)")]
+    ScraperAllFailed(usize),
+
     #[error("Unknown error")]
     Unknown,
 }

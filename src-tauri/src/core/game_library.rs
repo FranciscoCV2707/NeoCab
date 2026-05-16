@@ -1,6 +1,5 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use walkdir::WalkDir;
 use crc32fast::hash;
 use tracing::{info, warn};
 use crate::db::Database;
@@ -17,23 +16,21 @@ impl GameLibrary {
     }
 
     pub async fn get_games(
-        &self, 
+        &self,
         system_name: &str,
         search: Option<&str>,
         genre: Option<&str>,
         only_favorites: bool,
     ) -> Result<Vec<crate::models::Game>> {
-        // Handle virtual smart collections
         match system_name {
             "virtual-all" => {
-                return self.db.get_games_by_system(0, search, genre, only_favorites).await; // Assumes 0 or some way returns all
+                return self.db.get_games_by_system(0, search, genre, only_favorites).await;
             }
             "virtual-favorites" => {
                 return self.db.get_games_by_system(0, search, genre, true).await;
             }
             "virtual-recent" => {
-                // Return all games sorted by last_played (if we had a specific query, for now just all games)
-                return self.db.get_games_by_system(0, search, genre, only_favorites).await; 
+                return self.db.get_games_by_system(0, search, genre, only_favorites).await;
             }
             _ => {}
         }
@@ -46,11 +43,11 @@ impl GameLibrary {
         }
     }
 
-    pub async fn scan_roms<F>(&self, roms_dir: &Path, on_progress: F) -> Result<usize> 
-    where 
-        F: Fn(usize, usize, &str) + Send + Sync 
+    pub async fn scan_roms<F>(&self, roms_dir: &Path, on_progress: F) -> Result<usize>
+    where
+        F: Fn(usize, usize, &str) + Send + Sync + 'static
     {
-        info!("Starting ROM scan in {:?}", roms_dir);
+        info!("Starting async ROM scan in {:?}", roms_dir);
 
         if !roms_dir.exists() {
             warn!("ROMs directory does not exist: {:?}", roms_dir);
@@ -70,41 +67,40 @@ impl GameLibrary {
 
         info!("Supported extensions: {:?}", supported_extensions);
 
-        // Count files first for progress
-        let all_files: Vec<_> = WalkDir::new(roms_dir)
+        let db = self.db.clone();
+        let supported = supported_extensions;
+
+        let files: Vec<_> = walkdir::WalkDir::new(roms_dir)
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|e| e.file_type().is_file())
+            .filter(|e| {
+                let ext = e.path().extension()
+                    .and_then(|e| e.to_str())
+                    .map(|e| e.to_lowercase());
+                ext.map(|e| supported.contains(&e)).unwrap_or(false)
+            })
             .collect();
-        
-        let total_files = all_files.len();
+
+        let total_files = files.len();
         let mut games_found = 0;
 
-        for (i, entry) in all_files.iter().enumerate() {
+        for (i, entry) in files.iter().enumerate() {
             let path = entry.path();
-            let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
-            
+            let file_name = path.file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or("");
+
             on_progress(i + 1, total_files, file_name);
 
-            let extension = path
-                .extension()
-                .and_then(|e| e.to_str())
-                .map(|e| e.to_lowercase());
-
-            if let Some(ext) = extension {
-                if !supported_extensions.contains(&ext) {
-                    continue;
+            match self.index_game(path).await {
+                Ok(is_new) => {
+                    if is_new {
+                        games_found += 1;
+                    }
                 }
-
-                match self.index_game(path).await {
-                    Ok(is_new) => {
-                        if is_new {
-                            games_found += 1;
-                        }
-                    }
-                    Err(e) => {
-                        warn!("Failed to index {:?}: {}", path, e);
-                    }
+                Err(e) => {
+                    warn!("Failed to index {:?}: {}", path, e);
                 }
             }
         }
@@ -119,16 +115,15 @@ impl GameLibrary {
             .and_then(|n| n.to_str())
             .unwrap_or("unknown");
 
-        let content = std::fs::read(path)?;
-        let crc32 = Self::calculate_crc32(&content);
+        let content = tokio::fs::read(path).await?;
+        let crc32 = format!("{:08x}", hash(&content));
 
-        // Check if game already exists by CRC32
         if self.db.get_game_by_crc32(&crc32).await?.is_some() {
             return Ok(false);
         }
 
         let system_id = self.detect_system(path).await?;
-        let file_size = std::fs::metadata(path).map(|m| m.len() as i64).ok();
+        let file_size = tokio::fs::metadata(path).await.map(|m| m.len() as i64).ok();
 
         let game = Game {
             id: 0,
@@ -171,10 +166,6 @@ impl GameLibrary {
         Ok(true)
     }
 
-    fn calculate_crc32(data: &[u8]) -> String {
-        format!("{:08x}", hash(data))
-    }
-
     async fn detect_system(&self, path: &Path) -> Result<i64> {
         let extension = path
             .extension()
@@ -195,7 +186,6 @@ impl GameLibrary {
             }
         }
 
-        // Default to first system if no exact match found
         systems.first().map(|s| s.id).ok_or_else(|| {
             sqlx::Error::RowNotFound.into()
         })
