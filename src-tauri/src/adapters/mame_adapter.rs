@@ -42,11 +42,6 @@ impl MameAdapter {
         info!("MAME command: {:?}", cmd.get_program());
         cmd
     }
-
-    pub async fn is_running(&self) -> bool {
-        let process = self.process.lock().await;
-        process.is_some()
-    }
 }
 
 #[async_trait]
@@ -57,6 +52,21 @@ impl EmulatorAdapter for MameAdapter {
 
     fn version(&self) -> &str {
         &self.version
+    }
+
+    async fn is_running(&self) -> bool {
+        let mut process = self.process.lock().await;
+        if let Some(child) = process.as_mut() {
+            match child.try_wait() {
+                Ok(None) => true,
+                _ => {
+                    *process = None;
+                    false
+                }
+            }
+        } else {
+            false
+        }
     }
 
     async fn launch(&self, rom_path: &str) -> Result<()> {

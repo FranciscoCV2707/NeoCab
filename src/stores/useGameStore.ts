@@ -4,6 +4,7 @@ import { Game, System, SortField, SortOrder } from "./types";
 
 interface GameStore {
   games: Game[];
+  loading: boolean;
   focusedIndex: number;
   searchQuery: string;
   sortField: SortField;
@@ -26,6 +27,7 @@ interface GameStore {
 
 export const useGameStore = create<GameStore>((set, get) => ({
   games: [],
+  loading: false,
   focusedIndex: 0,
   searchQuery: "",
   sortField: "title",
@@ -35,7 +37,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   filterFavorites: false,
 
   loadGames: async (systemName: string, search?: string) => {
-    set({ loading: true } as any);  // Will be removed when we refactor
+    set({ loading: true });
     try {
       const dbGames = await invoke<Game[]>("list_games", {
         system: systemName,
@@ -43,23 +45,34 @@ export const useGameStore = create<GameStore>((set, get) => ({
       });
 
       const enrichedGames = await get().enrichGames(systemName, dbGames);
-      set({ games: enrichedGames, focusedIndex: 0 });
+      set({ games: enrichedGames, focusedIndex: 0, loading: false });
     } catch (error) {
       console.error("Failed to load games:", error);
-    } finally {
-      set({ loading: false } as any);
+      set({ loading: false });
     }
   },
 
   enrichGames: async (systemName: string, games: Game[]): Promise<Game[]> => {
-    return Promise.all(games.map(async (game) => {
-      try {
+    if (games.length === 0) return [];
+    
+    try {
+      const gameNames = games.map(g => (g.filename || g.title || "").replace(/\.[^/.]+$/, ""));
+      const response = await invoke<string>("get_batch_media", {
+        system: systemName,
+        gameNames,
+      });
+      
+      const batchResult = JSON.parse(response);
+      if (!batchResult.success) return games;
+      
+      const results = batchResult.results;
+      
+      return games.map(game => {
         const gameName = (game.filename || game.title || "").replace(/\.[^/.]+$/, "");
-        const mediaResult = await invoke<string>("get_all_game_media", {
-          system: systemName,
-          gameName,
-        });
-        const media = JSON.parse(mediaResult).media;
+        const media = results[gameName];
+        
+        if (!media) return game;
+        
         return {
           ...game,
           image_path: media.box_art || media.screenshot || game.image_path,
@@ -67,10 +80,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
           wheel_path: media.wheel || game.wheel_path,
           marquee_path: media.marquee || game.marquee_path,
         };
-      } catch {
-        return game;
-      }
-    }));
+      });
+    } catch (error) {
+      console.error("Failed to enrich games in batch:", error);
+      return games;
+    }
   },
 
   setFocusedIndex: (index: number) => set({ focusedIndex: index }),

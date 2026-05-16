@@ -7,4 +7,5 @@ pub trait EmulatorAdapter: Send + Sync {
     fn version(&self) -> &str;
     async fn launch(&self, rom_path: &str) -> Result<()>;
     async fn stop(&self) -> Result<()>;
+    async fn is_running(&self) -> bool;
 }

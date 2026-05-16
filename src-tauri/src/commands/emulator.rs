@@ -58,12 +58,34 @@ pub async fn launch_game(
     // 5. Launch the game via EmulatorManager
     match emulator_manager.launch_game(&game, &emu).await {
         Ok(_) => {
-            // Wait a bit or detect window focus (simple delay for now)
+            // Start monitoring process
             let app_clone = app_handle.clone();
-            tokio::spawn(async move {
-                tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
-                let _ = app_clone.emit("game_launch_ready", ());
-            });
+            if let Some(adapter) = emulator_manager.get_adapter(&emu) {
+                let db_clone = db.inner().clone();
+                tokio::spawn(async move {
+                    // Let frontend know we're ready
+                    tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
+                    let _ = app_clone.emit("game_launch_ready", ());
+                    
+                    let start_time = std::time::Instant::now();
+                    
+                    // Poll until the process finishes
+                    loop {
+                        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                        if !adapter.is_running().await {
+                            break;
+                        }
+                    }
+                    
+                    // Process finished
+                    let elapsed = start_time.elapsed().as_secs() as i64;
+                    if elapsed > 10 {
+                        // Only count if played for more than 10 seconds
+                        let _ = db_clone.update_play_stats(game_id, elapsed).await;
+                    }
+                    let _ = app_clone.emit("game_launch_finished", ());
+                });
+            }
 
             let result = json!({
                 "success": true,

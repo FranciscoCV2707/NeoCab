@@ -186,16 +186,46 @@ fn get_screenscraper_system_id(system_name: &str) -> Option<u32> {
     map.get(system_name.to_lowercase().as_str()).copied()
 }
 
+fn get_tgdb_platform_id(system_name: &str) -> Option<u32> {
+    let map: HashMap<&str, u32> = HashMap::from([
+        ("mame", 23),
+        ("arcade", 23),
+        ("nes", 7),
+        ("snes", 6),
+        ("n64", 3),
+        ("gamecube", 2),
+        ("wii", 9),
+        ("gb", 4),
+        ("gbc", 5),
+        ("gba", 18),
+        ("nds", 20),
+        ("genesis", 15),
+        ("megadrive", 15),
+        ("mastersystem", 16),
+        ("saturn", 17),
+        ("dreamcast", 14),
+        ("gamegear", 24),
+        ("psx", 10),
+        ("ps2", 11),
+        ("psp", 13),
+        ("atari2600", 22),
+        ("neogeo", 24),
+    ]);
+    map.get(system_name.to_lowercase().as_str()).copied()
+}
+
 // ─── Main Scraper ───
 
 pub struct GameScraper {
     client: Client,
     media_dir: PathBuf,
-    // ScreenScraper credentials (free tier)
+    // ScreenScraper credentials
     ss_dev_id: String,
     ss_dev_password: String,
     ss_user: String,
     ss_password: String,
+    // TheGamesDB
+    tgdb_api_key: String,
     // Rate limiting
     last_request: std::sync::Mutex<std::time::Instant>,
 }
@@ -213,22 +243,25 @@ impl GameScraper {
             ss_dev_password: String::new(),
             ss_user: String::new(),
             ss_password: String::new(),
+            tgdb_api_key: String::new(),
             last_request: std::sync::Mutex::new(std::time::Instant::now()),
         }
     }
 
-    /// Configure ScreenScraper credentials
-    pub fn set_screenscraper_credentials(
+    /// Configure API credentials
+    pub fn set_credentials(
         &mut self,
-        dev_id: &str,
-        dev_password: &str,
-        user: &str,
-        password: &str,
+        ss_dev_id: &str,
+        ss_dev_password: &str,
+        ss_user: &str,
+        ss_password: &str,
+        tgdb_api_key: &str,
     ) {
-        self.ss_dev_id = dev_id.to_string();
-        self.ss_dev_password = dev_password.to_string();
-        self.ss_user = user.to_string();
-        self.ss_password = password.to_string();
+        self.ss_dev_id = ss_dev_id.to_string();
+        self.ss_dev_password = ss_dev_password.to_string();
+        self.ss_user = ss_user.to_string();
+        self.ss_password = ss_password.to_string();
+        self.tgdb_api_key = tgdb_api_key.to_string();
     }
 
     /// Rate limiter — max 1 request per second for ScreenScraper
@@ -244,6 +277,98 @@ impl GameScraper {
             let mut last = self.last_request.lock().unwrap();
             *last = std::time::Instant::now();
         }
+    }
+
+    /// Scrape a single game using the best available source
+    pub async fn scrape(
+        &self,
+        rom_name: &str,
+        system_name: &str,
+        crc32: Option<&str>,
+    ) -> Result<ScrapedGameInfo> {
+        // Try ScreenScraper first (highest quality)
+        if !self.ss_dev_id.is_empty() {
+            match self.scrape_screenscraper(rom_name, system_name, crc32).await {
+                Ok(info) if !info.title.is_empty() && info.description.is_some() => return Ok(info),
+                _ => {
+                    info!("ScreenScraper failed or returned low quality for {}, trying TheGamesDB...", rom_name);
+                }
+            }
+        }
+
+        // Try TheGamesDB as secondary
+        if !self.tgdb_api_key.is_empty() {
+            match self.scrape_thegamesdb(rom_name, system_name).await {
+                Ok(info) if !info.title.is_empty() => return Ok(info),
+                _ => {
+                    info!("TheGamesDB failed or returned empty for {}, using fallback...", rom_name);
+                }
+            }
+        }
+
+        // Ultimate fallback (cleaned filename)
+        self.scrape_fallback(rom_name, system_name).await
+    }
+
+    /// Scrape a single game using TheGamesDB API
+    pub async fn scrape_thegamesdb(
+        &self,
+        rom_name: &str,
+        system_name: &str,
+    ) -> Result<ScrapedGameInfo> {
+        if self.tgdb_api_key.is_empty() {
+            return Err(crate::error::NeoCabError::Config("TheGamesDB API key not configured".to_string()));
+        }
+
+        let platform_id = get_tgdb_platform_id(system_name).unwrap_or(23); // Default Arcade
+        let clean_name = rom_name
+            .replace(".zip", "")
+            .replace(".7z", "")
+            .replace(".bin", "")
+            .replace(".rom", "");
+
+        let url = format!(
+            "https://api.thegamesdb.net/v1/Games/ByGameName?apikey={}&name={}&platform={}",
+            self.tgdb_api_key, 
+            urlencoding::encode(&clean_name),
+            platform_id
+        );
+
+        info!("Scraping via TheGamesDB: {} (platform {})", rom_name, platform_id);
+
+        let response = self.client.get(&url).send().await?;
+        if !response.status().is_success() {
+            return Err(crate::error::NeoCabError::Network(format!("TGDB status {}", response.status())));
+        }
+
+        let resp_data: TGDBSearchResponse = response.json().await?;
+        
+        if let Some(data) = resp_data.data {
+            if let Some(games) = data.games {
+                if let Some(game) = games.first() {
+                    return Ok(ScrapedGameInfo {
+                        title: game.game_title.clone().unwrap_or_default(),
+                        description: game.overview.clone(),
+                        year: game.release_date.as_ref()
+                            .and_then(|d| d.get(0..4))
+                            .and_then(|y| y.parse().ok()),
+                        developer: None, // Need separate API call for developers in TGDB v1
+                        publisher: None,
+                        genre: None,
+                        players: game.players.map(|p| p as i32),
+                        rating: game.rating.as_ref().and_then(|r| r.parse().ok()),
+                        region: None,
+                        box_art_url: None, // Need separate images call for TGDB
+                        screenshot_url: None,
+                        wheel_url: None,
+                        marquee_url: None,
+                        video_url: None,
+                    });
+                }
+            }
+        }
+
+        Err(crate::error::NeoCabError::Other("No data found in TheGamesDB".to_string()))
     }
 
     /// Scrape a single game using ScreenScraper API
@@ -504,7 +629,7 @@ impl GameScraper {
         system_name: &str,
         crc32: Option<&str>,
     ) -> Result<ScrapedGameInfo> {
-        let info = self.scrape_screenscraper(rom_name, system_name, crc32).await?;
+        let info = self.scrape(rom_name, system_name, crc32).await?;
         
         let game_media_dir = self.media_dir.join(system_name);
         let clean_name = rom_name.replace(".zip", "").replace(".7z", "");

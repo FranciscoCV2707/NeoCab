@@ -271,3 +271,36 @@ pub async fn get_all_game_media(
         "media": media
     }).to_string())
 }
+
+#[tauri::command]
+pub async fn get_batch_media(
+    system: String,
+    game_names: Vec<String>,
+    media_manager: State<'_, MediaManager>,
+) -> Result<String, String> {
+    let mut results = json!({});
+    
+    let types = vec![
+        ("wheel", crate::core::MediaType::Wheel),
+        ("box_art", crate::core::MediaType::BoxArt),
+        ("background", crate::core::MediaType::Background),
+        ("screenshot", crate::core::MediaType::Screenshot),
+        ("video", crate::core::MediaType::Video),
+        ("marquee", crate::core::MediaType::Marquee),
+    ];
+
+    for game_name in game_names {
+        let mut media = json!({});
+        for (key, mtype) in &types {
+            if let Ok(Some(path)) = media_manager.get_media(&system, &game_name, *mtype).await {
+                media[key] = json!(path.to_string_lossy().to_string());
+            }
+        }
+        results[game_name] = media;
+    }
+
+    Ok(json!({
+        "success": true,
+        "results": results
+    }).to_string())
+}

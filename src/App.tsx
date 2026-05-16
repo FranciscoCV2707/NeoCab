@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { emit } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import { useUnifiedInput } from "./hooks/useUnifiedInputHook";
 import { InputAction } from "./hooks/useUnifiedInput";
 import { useAudio } from "./hooks/useAudio";
@@ -143,7 +143,7 @@ export default function App() {
     setLoading(true);
     setScanProgress("Scanning ROMs...");
     try {
-      const result = JSON.parse(await invoke<string>("scan_roms", { romsDir: "./roms" }));
+      const result = JSON.parse(await invoke<string>("scan_roms", { romsDir: null }));
       setScanProgress(`Found ${result.games_found} new games!`);
       setTimeout(() => { loadSystems(); setScanProgress(""); }, 2000);
     } catch (error) {
@@ -180,18 +180,21 @@ export default function App() {
     stopBGM();
     try {
       const emulator = selectedSystem?.name || "mame";
-      const startTime = Date.now();
       await invoke("launch_game", { gameId: game.id.toString(), emulator });
-      setTimeout(async () => {
-        const dur = Math.floor((Date.now() - startTime) / 1000) + 60;
-        await invoke("update_play_stats", { gameId: game.id, playTimeSeconds: dur });
-        playBGM();
-      }, 5000);
     } catch (error) {
       playSound("error");
       playBGM();
     }
   };
+
+  useEffect(() => {
+    const unlisten = listen("game_launch_finished", () => {
+      playBGM();
+    });
+    return () => {
+      unlisten.then(f => f());
+    };
+  }, [playBGM]);
 
   const handleBack = () => {
     playSound("back");
