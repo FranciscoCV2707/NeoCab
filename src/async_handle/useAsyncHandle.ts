@@ -2,7 +2,7 @@ import { useCallback, useRef } from 'react';
 import { useAsyncStore, type AsyncHandle } from './useAsyncStore';
 import type { CreateAsyncHandleOptions, AsyncOperation } from './types';
 
-export function useAsyncHandle<T = unknown>(options?: CreateAsyncHandleOptions<T>) {
+export function useAsyncHandle<T = unknown>(_: CreateAsyncHandleOptions<T> | undefined) {
   const handleRef = useRef<AsyncHandle<T> | null>(null);
 
   const createHandle = useAsyncStore((state) => state.createHandle);

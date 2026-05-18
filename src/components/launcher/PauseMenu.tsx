@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import './PauseMenu.css';
 
 interface PauseMenuProps {
@@ -8,15 +7,30 @@ interface PauseMenuProps {
     onExitGame: () => void;
 }
 
+interface MenuOption {
+    id: string;
+    label: string;
+    icon: string;
+}
+
 export const PauseMenu: React.FC<PauseMenuProps> = ({ gameName, onClose, onExitGame }) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const options = [
+    const options = useMemo<MenuOption[]>(() => [
         { id: 'resume', label: 'REANUDAR', icon: '▶️' },
         { id: 'save', label: 'GUARDAR PARTIDA', icon: '💾' },
         { id: 'load', label: 'CARGAR PARTIDA', icon: '📂' },
         { id: 'shaders', label: 'AJUSTES VISUALES', icon: '📺' },
         { id: 'exit', label: 'SALIR AL MENÚ', icon: '🚪' }
-    ];
+    ], []);
+
+    const handleSelect = useCallback(() => {
+        const option = options[selectedIndex];
+        switch (option.id) {
+            case 'resume': onClose(); break;
+            case 'exit': onExitGame(); break;
+            default: console.log(`Selected: ${option.label}`);
+        }
+    }, [options, selectedIndex, onClose, onExitGame]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -28,17 +42,7 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({ gameName, onClose, onExitG
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [selectedIndex]);
-
-    const handleSelect = () => {
-        const option = options[selectedIndex];
-        switch (option.id) {
-            case 'resume': onClose(); break;
-            case 'exit': onExitGame(); break;
-            // Add other cases as we implement them
-            default: console.log(`Selected: ${option.label}`);
-        }
-    };
+    }, [options.length, handleSelect, onClose]);
 
     return (
         <div className="pause-menu-overlay">

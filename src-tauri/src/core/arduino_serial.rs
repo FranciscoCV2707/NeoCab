@@ -1,6 +1,4 @@
-use std::io::{Read, Write};
-use std::time::Duration;
-use crate::error::{NeoCabError, Result};
+use crate::error::Result;
 
 /// Arduino Serial Interface for arcade hardware control
 /// Communicates with Arduino for coin counting and solenoid triggering
@@ -10,6 +8,7 @@ pub struct ArduinoInterface {
     #[cfg(not(feature = "hardware-arduino"))]
     port: Option<()>,
     port_name: String,
+    #[allow(dead_code)]
     baud_rate: u32,
     is_connected: bool,
 }

@@ -112,7 +112,7 @@ fn apply_ini_section(content: &str, section: &str, pairs: &[Option<(&str, &str)>
     // Insert after section header (or replace existing keys)
     for (key, val) in &valid {
         let mut replaced = false;
-        let mut start = section_idx.map(|i| i + 1).unwrap_or(insert_idx + 1);
+        let start = section_idx.map(|i| i + 1).unwrap_or(insert_idx + 1);
         for i in start..lines.len() {
             let trimmed = lines[i].trim();
             if trimmed.starts_with('[') { break; }

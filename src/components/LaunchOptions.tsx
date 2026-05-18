@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useLaunch } from '../launch/useLaunchHook';
 import { useTranslation } from '../i18n';
 import type { LaunchStrategyType, LaunchContext } from '../launch/types';
@@ -41,14 +41,14 @@ export function LaunchOptions({ game, onLaunch, onCancel }: LaunchOptionsProps) 
   const [selectedStrategy, setSelectedStrategy] = useState<LaunchStrategyType>('direct');
   const [commandArgs, setCommandArgs] = useState('');
 
-  const ctx: LaunchContext = {
+  const ctx = useMemo<LaunchContext>(() => ({
     gameId: game.id,
     gameTitle: game.title,
     systemName: game.system_name,
     romPath: game.rom_path,
     emulatorId: game.emulator_id || '',
     commandLineArgs: commandArgs ? commandArgs.split(' ').filter(Boolean) : undefined,
-  };
+  }), [game.id, game.title, game.system_name, game.rom_path, game.emulator_id, commandArgs]);
 
   const availableStrategies = getAvailableStrategies(ctx);
 

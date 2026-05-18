@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use super::injector_trait::{EmulatorConfigInjector, EmulatorSettings, VideoSettings, AudioSettings};
+use super::injector_trait::{EmulatorConfigInjector, EmulatorSettings};
 use std::path::PathBuf;
 use std::fs;
 

@@ -7,7 +7,6 @@ import type {
   SystemConfig,
   GlobalConfig,
   ResolvedConfig,
-  PRIORITY,
 } from './types';
 
 interface ConfigState {
@@ -172,7 +171,7 @@ export const useConfigStore = create<ConfigState & ConfigActions>()(
         set((state) => {
           const systemConfig = state.systems[system];
           if (!systemConfig) return state;
-          const { [key]: _, ...rest } = systemConfig.overrides;
+          const { [key]: _k, ...rest } = systemConfig.overrides;
           return {
             systems: {
               ...state.systems,
@@ -185,7 +184,7 @@ export const useConfigStore = create<ConfigState & ConfigActions>()(
         set((state) => {
           const gameConfig = state.games[gameId];
           if (!gameConfig) return state;
-          const { [key]: _, ...rest } = gameConfig.overrides;
+          const { [key]: _k, ...rest } = gameConfig.overrides;
           return {
             games: {
               ...state.games,
@@ -201,7 +200,7 @@ export const useConfigStore = create<ConfigState & ConfigActions>()(
 
       clearRuntimeOverride: (key) =>
         set((state) => {
-          const { [key]: _, ...rest } = state.runtimeOverrides;
+          const { [key]: _k, ...rest } = state.runtimeOverrides;
           return { runtimeOverrides: rest };
         }),
 

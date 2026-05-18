@@ -37,6 +37,7 @@ impl Database {
     }
 
     // Fallback for legacy DBs without _migrations table
+    #[allow(dead_code)]
     async fn init_schema(pool: &SqlitePool) -> Result<()> {
         // Check if migrations already ran
         let has_migrations = sqlx::query_scalar::<_, i64>(
@@ -81,6 +82,7 @@ impl Database {
         Ok(())
     }
 
+    #[allow(dead_code)]
     async fn create_tables(pool: &SqlitePool) -> Result<()> {
         // Systems table
         sqlx::query(

@@ -1,11 +1,9 @@
 import { create } from 'zustand';
 import { invoke } from '@tauri-apps/api/core';
 import type {
-  Resource,
   ResourceType,
   ResourceLoadOptions,
   ResourcePool,
-  DEFAULT_POOL_CONFIG,
 } from './types';
 
 interface ResourceState {
@@ -37,7 +35,7 @@ export const useResourceStore = create<ResourceState & ResourceActions>((set, ge
   loadingResources: new Set(),
   preloadQueue: [],
 
-  load: async <T>(id: string, type: ResourceType, path: string, options: ResourceLoadOptions = {}) => {
+  load: async <T>(id: string, type: ResourceType, path: string, _options: ResourceLoadOptions = {}) => {
     const { pool, loadingResources } = get();
 
     if (pool.resources.has(id)) {

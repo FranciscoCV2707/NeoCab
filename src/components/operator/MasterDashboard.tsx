@@ -13,6 +13,13 @@ interface CabinetStats {
     is_online: boolean;
 }
 
+interface DiscoveredCabinet {
+    id: string;
+    name: string;
+    ip: string;
+    port: number;
+}
+
 export const MasterDashboard: React.FC = () => {
     const [cabinets, setCabinets] = useState<CabinetStats[]>([]);
     const [totalRevenue, setTotalRevenue] = useState(0);
@@ -27,7 +34,7 @@ export const MasterDashboard: React.FC = () => {
 
     const loadMasterStats = async () => {
         try {
-            const discoveredCabinets = await invoke<any[]>('list_discovered_cabinets');
+            const discoveredCabinets = await invoke<DiscoveredCabinet[]>('list_discovered_cabinets');
 
             let totalRev = 0;
             let totalSess = 0;

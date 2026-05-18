@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useLaunchStore } from '../stores/useLaunchStore';
-import type { LaunchContext, LaunchStrategyType, MountInfo } from './types';
+import type { LaunchContext, LaunchStrategyType } from './types';
 
 export function useLaunch() {
   const {

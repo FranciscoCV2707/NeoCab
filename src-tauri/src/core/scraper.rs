@@ -2,7 +2,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use std::collections::HashMap;
-use tracing::{info, warn, error, debug};
+use tracing::{info, warn, debug};
 use crate::error::Result;
 use tokio::time::{sleep, Duration};
 use tauri::Emitter;
@@ -74,6 +74,7 @@ struct SSTextSingle {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct SSDate {
     region: Option<String>,
     text: Option<String>,
@@ -90,6 +91,7 @@ struct SSRating {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct SSMedia {
     #[serde(rename = "type")]
     media_type: Option<String>,
@@ -106,12 +108,14 @@ struct TGDBSearchResponse {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct TGDBData {
     count: Option<u32>,
     games: Option<Vec<TGDBGame>>,
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct TGDBGame {
     id: Option<u32>,
     game_title: Option<String>,
@@ -710,8 +714,8 @@ impl GameScraper {
             {
                 Ok(info) => {
                     // Update DB with scraped metadata
-                    let year_i64 = info.year.map(|y| y as i64);
-                    let players_i64 = info.players.map(|p| p as i64);
+                    let _year_i64 = info.year.map(|y| y as i64);
+                    let _players_i64 = info.players.map(|p| p as i64);
                     // Note: DB update would need db ref; returned info for caller to handle
                     scraped += 1;
                     if let Some(handle) = &app_handle {

@@ -1,6 +1,4 @@
-use tauri::State;
 use serde_json::json;
-use crate::core::GPIOCoinDetector;
 use crate::core::ArduinoInterface;
 
 #[tauri::command]
@@ -42,8 +40,8 @@ pub async fn list_serial_ports() -> Result<String, String> {
 
 #[tauri::command]
 pub async fn test_arduino_connection(
-    port_name: String,
-    baud_rate: u32,
+    _port_name: String,
+    _baud_rate: u32,
 ) -> Result<String, String> {
     #[cfg(feature = "hardware-arduino")]
     {
@@ -148,7 +146,7 @@ pub async fn start_hardware_monitoring(
         _ => HardwareType::None,
     };
 
-    let config = HardwareConfig {
+    let _config = HardwareConfig {
         hardware_type: hw_type,
         gpio_pin,
         serial_port,

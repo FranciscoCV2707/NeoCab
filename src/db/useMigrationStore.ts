@@ -3,7 +3,6 @@ import { persist } from 'zustand/middleware';
 import {
   MIGRATIONS,
   getMigrations,
-  getMigration,
   getLatestVersion,
   type Migration,
   type MigrationResult,
@@ -26,7 +25,6 @@ interface MigrationActions {
 }
 
 const DB_VERSION_KEY = 'neocab_db_version';
-const APPLIED_KEY = 'neocab_applied_migrations';
 
 export const useMigrationStore = create<MigrationState & MigrationActions>()(
   persist(

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
-use tracing::{info, warn, error};
+use tracing::{info, warn};
 use crate::error::{NeoCabError, Result};
 use crate::core::arduino_serial::ArduinoInterface;
 
@@ -95,20 +95,20 @@ impl HardwareScriptEngine {
             }
         };
 
-        let mut lock = arduino.lock().await;
+        let _lock = arduino.lock().await;
 
         match action {
-            HardwareAction::TriggerSolenoid { output_id, duration_ms } => {
+            HardwareAction::TriggerSolenoid { output_id, duration_ms: _ } => {
                 info!("Executing TriggerSolenoid on ID {}", output_id);
                 // Custom trigger implementation
                 #[cfg(feature = "hardware-arduino")]
                 let _ = lock.trigger_solenoid(*output_id);
             }
-            HardwareAction::SetLED { pin, color_hex, state } => {
+            HardwareAction::SetLED { pin, color_hex: _, state } => {
                 info!("Executing SetLED on pin {} to state {}", pin, state);
                 // Send specific LED command to Arduino
             }
-            HardwareAction::BlinkLED { pin, times, interval_ms } => {
+            HardwareAction::BlinkLED { pin, times, interval_ms: _ } => {
                 info!("Executing BlinkLED on pin {} {} times", pin, times);
             }
             HardwareAction::PlaySound { sound_id } => {

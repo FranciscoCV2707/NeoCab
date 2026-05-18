@@ -3,7 +3,6 @@ import { invoke } from '@tauri-apps/api/core';
 import { NetworkPanel } from './NetworkPanel';
 import { LogViewer } from './LogViewer';
 import { AuditPanel } from './AuditPanel';
-import { MasterDashboard } from './MasterDashboard';
 import { SystemManager } from '../settings/SystemManager';
 import { ThemeEditor } from '../studio/ThemeEditor';
 import { InputWizard } from './InputWizard';
@@ -15,8 +14,6 @@ type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'settings' | 'input
 
 export const OperatorPanel: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('statistics');
-    const role = 'Standalone' as string;
-    const isMaster = false;
 
     return (
         <div className="operator-panel">
@@ -25,7 +22,7 @@ export const OperatorPanel: React.FC = () => {
                     className={`tab-button ${activeTab === 'statistics' ? 'active' : ''}`}
                     onClick={() => setActiveTab('statistics')}
                 >
-                    📊 {isMaster ? 'Panel Maestro' : 'Estadísticas'}
+                    📊 Estadísticas
                 </button>
                 <button
                     className={`tab-button ${activeTab === 'input' ? 'active' : ''}`}
@@ -84,7 +81,7 @@ export const OperatorPanel: React.FC = () => {
             </nav>
 
             <div className="tab-content">
-                {activeTab === 'statistics' && (isMaster ? <MasterDashboard /> : <StatisticsTab />)}
+                {activeTab === 'statistics' && <StatisticsTab />}
                 {activeTab === 'input' && <InputWizard />}
                 {activeTab === 'keymap' && <KeymapConfigPanel />}
                 {activeTab === 'sessions' && <SessionConfig />}
@@ -99,9 +96,22 @@ export const OperatorPanel: React.FC = () => {
 };
 
 const StatisticsTab: React.FC = () => {
-    const [stats, setStats] = React.useState<any>(null);
-    const [sessionStats, setSessionStats] = React.useState<any>(null);
-    const [systemHealth, setSystemHealth] = React.useState<any>(null);
+    interface StatsData {
+        earnings?: number;
+        total_revenue?: number;
+        sessions?: number;
+        total_sessions?: number;
+        health?: string;
+        database_status?: string;
+        total_roms?: number;
+        total_playtime?: number;
+        average_playtime?: number;
+        total_systems?: number;
+        coins_inserted?: number;
+    }
+    const [stats, setStats] = React.useState<StatsData | null>(null);
+    const [sessionStats, setSessionStats] = React.useState<StatsData | null>(null);
+    const [systemHealth, setSystemHealth] = React.useState<StatsData | null>(null);
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {

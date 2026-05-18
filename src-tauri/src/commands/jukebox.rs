@@ -1,6 +1,3 @@
-use crate::db::Database;
-use std::sync::Arc;
-use tauri::State;
 use serde::Serialize;
 
 #[derive(Serialize)]

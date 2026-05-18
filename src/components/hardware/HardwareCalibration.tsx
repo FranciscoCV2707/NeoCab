@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './HardwareCalibration.css';
 import { invoke } from '@tauri-apps/api/core';
 
@@ -33,30 +33,28 @@ export const HardwareCalibration: React.FC<HardwareCalibrationProps> = ({
     gpio_enabled: boolean;
   } | null>(null);
 
-  useEffect(() => {
-    loadHardwareStatus();
-    loadAvailableHardware();
-  }, []);
-
   const loadHardwareStatus = async () => {
     try {
       const result = await invoke<string>('get_hardware_status');
       const status = JSON.parse(result);
       setHardwareStatus(status);
+      return status;
     } catch (err) {
       console.error('Failed to load hardware status:', err);
+      return null;
     }
   };
 
-  const loadAvailableHardware = async () => {
+  const loadAvailableHardware = useCallback(async (status: { arduino_enabled: boolean; gpio_enabled: boolean } | null) => {
+    if (!status) return;
     try {
-      if (hardwareStatus?.gpio_enabled) {
+      if (status.gpio_enabled) {
         const result = await invoke<string>('list_gpio_pins');
         const data = JSON.parse(result);
         setGpioPins(data.available_pins);
       }
 
-      if (hardwareStatus?.arduino_enabled) {
+      if (status.arduino_enabled) {
         const result = await invoke<string>('list_serial_ports');
         const data = JSON.parse(result);
         setSerialPorts(data.ports);
@@ -64,7 +62,17 @@ export const HardwareCalibration: React.FC<HardwareCalibrationProps> = ({
     } catch (err) {
       console.error('Failed to load hardware:', err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const status = await loadHardwareStatus();
+      if (status) {
+        await loadAvailableHardware(status);
+      }
+    };
+    loadData();
+  }, [loadAvailableHardware]);
 
   const handleHardwareTypeChange = (type: 'none' | 'gpio' | 'arduino') => {
     const newConfig = { ...config, hardwareType: type };

@@ -1,9 +1,8 @@
 use std::sync::Arc;
 use tokio::sync::mpsc;
-use tokio::time::Duration;
 use tracing::{info, error, debug};
 use crate::error::Result;
-use crate::core::{CoinManager, CoinEvent};
+use crate::core::CoinManager;
 use serde::{Deserialize, Serialize};
 
 /// Hardware integration for coin detection and management

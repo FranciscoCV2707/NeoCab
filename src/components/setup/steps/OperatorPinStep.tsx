@@ -72,7 +72,7 @@ export const OperatorPinStep: React.FC<OperatorPinStepProps> = ({ value, onChang
       <div className="info-box">
         <h3>🔐 Security Tips</h3>
         <ul>
-          <li>Don't use obvious numbers (0000, 1111, 1234)</li>
+          <li>Don&apos;t use obvious numbers (0000, 1111, 1234)</li>
           <li>Choose something you can remember</li>
           <li>You can reset this PIN from the system terminal</li>
           <li>Access operator panel with: Menu → Operator (requires PIN)</li>

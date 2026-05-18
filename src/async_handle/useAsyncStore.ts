@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import type {
   AsyncOperation,
   AsyncStatus,
-  AsyncProgress,
   CreateAsyncHandleOptions,
 } from './types';
 import { createProgress, isActive } from './types';

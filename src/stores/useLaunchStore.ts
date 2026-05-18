@@ -5,10 +5,9 @@ import type {
   LaunchResult,
   LaunchStrategyType,
   StrategyConfig,
-  RomFileType,
   MountInfo,
 } from '../launch/types';
-import { detectRomType, detectMultipleDisks, DEFAULT_STRATEGY_CONFIG } from '../launch/types';
+import { DEFAULT_STRATEGY_CONFIG, detectRomType } from '../launch/types';
 
 interface LaunchState {
   activeContext: LaunchContext | null;

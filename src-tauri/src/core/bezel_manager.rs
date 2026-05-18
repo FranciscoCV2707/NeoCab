@@ -1,6 +1,4 @@
-use std::path::{Path, PathBuf};
-use crate::Result;
-use tracing::info;
+use std::path::PathBuf;
 
 pub struct BezelManager {
     base_path: PathBuf,

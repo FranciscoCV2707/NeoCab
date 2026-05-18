@@ -3,6 +3,13 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import './SessionOverlay.css';
 
+interface SessionStatus {
+  mode: string;
+  credits?: number;
+  remaining_seconds: number;
+  total_seconds: number;
+}
+
 interface SessionOverlayProps {
   visible: boolean;
   systemName: string;
@@ -14,7 +21,7 @@ export const SessionOverlay: React.FC<SessionOverlayProps> = ({
   systemName,
   onSessionExpired,
 }) => {
-  const [status, setStatus] = useState<any>(null);
+  const [status, setStatus] = useState<SessionStatus | null>(null);
   const [showWarning, setShowWarning] = useState(false);
   const [showExpired, setShowExpired] = useState(false);
 

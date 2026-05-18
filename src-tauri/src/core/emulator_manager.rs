@@ -164,7 +164,7 @@ impl EmulatorManager {
     /// Get the path for an emulator adapter
     fn get_adapter_path(&self, name: &str) -> Option<String> {
         // Try to find configured path - for now construct from adapter name
-        let adapter = self.adapters.get(name)?;
+        let _adapter = self.adapters.get(name)?;
         // Adapters don't expose their path directly; use name as fallback
         Some(name.to_string())
     }

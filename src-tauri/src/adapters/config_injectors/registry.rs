@@ -1,4 +1,4 @@
-use super::injector_trait::{EmulatorConfigInjector, EmulatorSettings};
+use super::injector_trait::EmulatorConfigInjector;
 use super::mame_injector::MameInjector;
 use super::retroarch_injector::RetroArchInjector;
 use super::dolphin_injector::DolphinInjector;

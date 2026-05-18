@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useScraper, useScraperConfig } from '../scrapers/useScraperHook';
-import { PROVIDER_INFO, type ScraperProvider, type MediaType } from '../scrapers/types';
+import { useScraper } from '../scrapers/useScraperHook';
+import { PROVIDER_INFO, type MediaType } from '../scrapers/types';
 import { useTranslation } from '../i18n';
 import './ScraperPanel.css';
 
@@ -29,8 +29,6 @@ export function ScraperPanel({ gameId, gameTitle, onScrapeComplete, onClose }: S
   const [searched, setSearched] = useState(false);
   const [selectedResult, setSelectedResult] = useState<string | null>(null);
   const [mediaTypes, setMediaTypes] = useState<MediaType[]>(['marquee', 'wheel', 'box']);
-
-  const { config: localConfig } = useScraperConfig('local');
 
   const handleSearch = useCallback(async () => {
     if (!query.trim()) return;

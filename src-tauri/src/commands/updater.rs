@@ -2,7 +2,6 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::process::Command;
 use serde::{Deserialize, Serialize};
-use tauri::Manager;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateInfo {
@@ -63,7 +62,7 @@ pub async fn check_for_updates() -> Result<UpdateInfo, String> {
 }
 
 #[tauri::command]
-pub async fn download_update(url: String, app_handle: tauri::AppHandle) -> Result<String, String> {
+pub async fn download_update(url: String, _app_handle: tauri::AppHandle) -> Result<String, String> {
     let temp_dir = std::env::temp_dir().join("neocab-update");
     std::fs::create_dir_all(&temp_dir)
         .map_err(|e| format!("Cannot create temp dir: {}", e))?;
@@ -86,8 +85,7 @@ pub async fn download_update(url: String, app_handle: tauri::AppHandle) -> Resul
             .send()
             .map_err(|e| format!("Download failed: {}", e))?;
 
-        let total_size = resp.content_length().unwrap_or(0);
-        let mut downloaded: u64 = 0;
+        let _total_size = resp.content_length().unwrap_or(0);
         let mut file = std::fs::File::create(&zip_path_clone)
             .map_err(|e| format!("Cannot create file: {}", e))?;
 
@@ -102,7 +100,6 @@ pub async fn download_update(url: String, app_handle: tauri::AppHandle) -> Resul
             }
             file.write_all(&buffer[..n])
                 .map_err(|e| format!("Write error: {}", e))?;
-            downloaded += n as u64;
         }
 
         let path_str = zip_path_clone.to_string_lossy().to_string();

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import './LogViewer.css';
 
@@ -22,7 +22,7 @@ export const LogViewer: React.FC = () => {
     null
   );
 
-  const loadLogFiles = async () => {
+  const loadLogFiles = useCallback(async () => {
     try {
       setError(null);
       const resultStr = await invoke<string>('list_log_files');
@@ -40,9 +40,9 @@ export const LogViewer: React.FC = () => {
       const message = err instanceof Error ? err.message : String(err);
       setError(`Failed to load log files: ${message}`);
     }
-  };
+  }, [selectedFile]);
 
-  const loadLogContent = async (filename?: string | null) => {
+  const loadLogContent = useCallback(async (filename?: string | null) => {
     const file = filename || selectedFile;
     if (!file) return;
 
@@ -68,7 +68,7 @@ export const LogViewer: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [viewMode, selectedFile]);
 
   const handleClearLogs = async () => {
     if (!window.confirm('Are you sure you want to delete all log files?')) {
@@ -104,13 +104,13 @@ export const LogViewer: React.FC = () => {
 
   useEffect(() => {
     loadLogFiles();
-  }, []);
+  }, [loadLogFiles]);
 
   useEffect(() => {
     if (selectedFile) {
       loadLogContent(selectedFile);
     }
-  }, [selectedFile]);
+  }, [selectedFile, loadLogContent]);
 
   useEffect(() => {
     if (autoScroll && logContainerRef.current) {
@@ -135,7 +135,7 @@ export const LogViewer: React.FC = () => {
         clearInterval(refreshInterval);
       }
     };
-  }, [viewMode, refreshInterval]);
+  }, [viewMode, refreshInterval, loadLogContent]);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 B';

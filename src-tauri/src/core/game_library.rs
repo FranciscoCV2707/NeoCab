@@ -1,6 +1,5 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::Arc;
-use crc32fast::hash;
 use tracing::{info, warn};
 use crate::db::Database;
 use crate::error::Result;

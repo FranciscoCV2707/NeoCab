@@ -81,7 +81,7 @@ impl NetworkManager {
         let db = self.db.clone();
         let id = self.cabinet_id.clone();
         let name = self.cabinet_name.clone();
-        let discovered = self.discovered_cabinets.clone();
+        let _discovered = self.discovered_cabinets.clone();
 
         let app = Router::new()
             .route("/api/status", get(move || async move {
@@ -101,7 +101,7 @@ impl NetworkManager {
                     }
                 }
             }))
-            .route("/api/revenue/sync", post(move |AxumState(db): AxumState<Arc<crate::db::Database>>, Json(payload): Json<EarningsSyncPayload>| async move {
+            .route("/api/revenue/sync", post(move |AxumState(_db): AxumState<Arc<crate::db::Database>>, Json(payload): Json<EarningsSyncPayload>| async move {
                 info!("Received revenue sync from {} ({}): ${}", payload.cabinet_name, payload.cabinet_id, payload.total_earnings);
                 // En una implementación real, aquí almacenarríamos el resumen remoto
                 // Por ahora solo lo logeamos

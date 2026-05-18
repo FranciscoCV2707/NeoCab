@@ -140,7 +140,7 @@ pub async fn session_set_system_mode(
 
 #[tauri::command]
 pub async fn session_update_system_config(
-    system_name: String,
+    _system_name: String,
     mode: String,
     arcade_config: Option<String>,
     timed_config: Option<String>,

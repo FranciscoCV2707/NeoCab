@@ -81,7 +81,7 @@ export function animate(
       } else if (property === "scale") {
         element.style.transform = `scale(${value})`;
       } else {
-        (element.style as any)[property] = `${value}px`;
+        (element.style as unknown as Record<string, string>)[property] = `${value}px`;
       }
 
       if (t < 1) {

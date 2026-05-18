@@ -498,7 +498,7 @@ impl InputManager {
             crate::input::joy_mapper::MappedAction::ArcadeAction(arcade_action) => {
                 info!("Triggered Arcade Action: {:?}", arcade_action);
             }
-            crate::input::joy_mapper::MappedAction::MouseButton(btn) => {
+            crate::input::joy_mapper::MappedAction::MouseButton(_btn) => {
                 // Future mouse implementation
             }
             _ => {}

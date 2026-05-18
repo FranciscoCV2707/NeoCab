@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use serde::{Deserialize, Serialize};
-use tracing::{info, warn};
+use tracing::info;
 use crate::error::Result;
 use crate::core::coin_manager::CoinManager;
 use crate::core::timer_manager::TimerManager;
@@ -209,7 +209,7 @@ impl SessionManager {
         }
     }
 
-    pub async fn start_session(&self, system_name: &str) -> Result<SessionState> {
+    pub async fn start_session(&self, _system_name: &str) -> Result<SessionState> {
         let config = self.session_config.read().await;
 
         match config.mode {

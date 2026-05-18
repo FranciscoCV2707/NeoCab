@@ -7,6 +7,11 @@ interface FadeInfo {
   system: string;
 }
 
+interface FadeConfig {
+  duration?: number;
+  easing?: string;
+}
+
 interface UIStore {
   currentView: View;
   fadeVisible: boolean;
@@ -16,7 +21,7 @@ interface UIStore {
   pendingGame: Game | null;
   saveStatesList: SaveState[];
   fadeInfo: FadeInfo;
-  fadeConfig: any;
+  fadeConfig: FadeConfig | null;
 
   setView: (view: View) => void;
   setFadeVisible: (v: boolean) => void;
@@ -66,12 +71,17 @@ export const useUIStore = create<UIStore>((set) => ({
 }));
 
 // Initialize Tauri event listeners (call once)
+interface LaunchEventPayload {
+  game: string;
+  system: string;
+}
+
 export function initUIListeners() {
   listen("toggle_pause_menu", () => {
     useUIStore.getState().togglePause();
   });
 
-  listen("game_launch_start", (event: any) => {
+  listen("game_launch_start", (event: { payload: LaunchEventPayload }) => {
     useUIStore.getState().setFadeInfo({
       game: event.payload.game,
       system: event.payload.system,

@@ -15,7 +15,7 @@ pub struct SafeQuitStatus {
 pub async fn safe_quit_check(
     emulator: String,
     elapsed_seconds: u64,
-    db: State<'_, Arc<Database>>,
+    _db: State<'_, Arc<Database>>,
 ) -> Result<SafeQuitStatus, String> {
     let rules = vec![SafeQuitRule::default_for(&emulator)];
     let active = SafeQuitManager::should_activate_attract(elapsed_seconds, &rules, &emulator);

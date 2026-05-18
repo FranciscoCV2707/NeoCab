@@ -53,6 +53,7 @@ pub struct MediaStats {
 
 pub struct MediaManager {
     media_path: PathBuf,
+    #[allow(dead_code)]
     cache_max_size: u64,
     is_watching: Arc<RwLock<bool>>,
     cache: Arc<RwLock<Option<MediaLibrary>>>,
@@ -238,7 +239,7 @@ impl MediaManager {
 
         self.start_watching(move || {
             // Spawn async task to handle rescan
-            let path = self_path.clone();
+            let _path = self_path.clone();
             let cache = self_cache.clone();
 
             tokio::spawn(async move {

@@ -24,7 +24,7 @@ export interface ThemeData {
     animation_speed: number;
     easing: string;
   };
-  media: Record<string, any>;
+  media: ThemeMediaSettings;
   sounds: Record<string, string>;
   effects: {
     scanlines: boolean;
@@ -32,7 +32,23 @@ export interface ThemeData {
     glow_intensity: number;
     shadow_enabled: boolean;
   };
-  wheel?: Record<string, any>;
+  wheel?: ThemeWheelSettings;
+}
+
+interface ThemeMediaSettings {
+  video_enabled: boolean;
+  video_loop: boolean;
+  snap_type: string;
+  marquee_enabled: boolean;
+  wheel_enabled: boolean;
+  box_art_enabled: boolean;
+  [key: string]: unknown;
+}
+
+interface ThemeWheelSettings {
+  style: string;
+  animation: string;
+  [key: string]: unknown;
 }
 
 interface UseThemeReturn {
@@ -55,7 +71,7 @@ export const useTheme = (): UseThemeReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleError = useCallback((err: any, context: string) => {
+  const handleError = useCallback((err: unknown, context: string) => {
     const message = err instanceof Error ? err.message : String(err);
     setError(`${context}: ${message}`);
     console.error(`[Theme Hook] ${context}:`, err);
