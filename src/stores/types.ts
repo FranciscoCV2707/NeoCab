@@ -40,7 +40,7 @@ export interface SaveState {
   created_at?: string;
 }
 
-export type View = "menu" | "systems" | "games" | "operator";
+export type View = "menu" | "systems" | "games" | "operator" | "settings";
 
 export type SortField = "title" | "year" | "genre" | "play_count" | "rating";
 export type SortOrder = "asc" | "desc";

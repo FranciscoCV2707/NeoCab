@@ -35,7 +35,10 @@
       "Bash(rm -f ./nul ./src-tauri/nul)",
       "Bash(git clean *)",
       "Bash(grep -E \"\\\\.md$|\\\\.ps1$|\\\\.log$\")",
-      "Skill(graphify)"
+      "Skill(graphify)",
+      "Bash(dir \"C:\\\\Users\\\\Pako\\\\Desktop\\\\arcade\\\\otros proyectos\\\\NeoCab\\\\src-tauri\\\\target\\\\release\\\\bundle\" /s /b)",
+      "Bash(findstr /i \".msi .exe\")",
+      "Bash(Test-Path *)"
     ]
   }
 }

@@ -1,12 +1,59 @@
-# 🎮 NeoCab v1.3.0 - Estado del Proyecto
+# NeoCab v1.3.0 - Estado del Proyecto
 
-**Última actualización:** 2026-05-14 (Fase 6 - Navigation Phase completa)  
+**Última actualización:** 2026-05-18  
 **Versión:** 1.3.0 ESTABLE  
-**Progreso Global:** ✅ FASES 1-6 COMPLETADAS
+**Progreso Global:** FASES 1-6 COMPLETADAS
 
 ---
 
-## 🟢 HITOS CRÍTICOS CORREGIDOS EN ESTA SESIÓN
+## SESION 2026-05-18 - Bugs UI corregidos
+
+### PinPad invisible (ARREGLADO)
+**Problema**: Panel de Operador y Ajustes no hacian nada al hacer click  
+**Causa**: `PinPad.tsx` no importaba su propio `PinPad.css` — el overlay era invisible  
+**Solucion**: Añadido `import './PinPad.css'` en `PinPad.tsx`  
+**PIN de acceso**: 1234
+
+### ViewTransition pantalla negra (ARREGLADO)
+**Problema**: Al navegar a "Jugar Arcade" el contenido desaparecia (pantalla negra)  
+**Causa**: `useEffect` dependia de `children` como prop, que tiene nueva referencia en cada re-render — disparaba ciclo exit→negro→enter continuamente  
+**Solucion**: Simplificado a animacion de entrada unica al montar el componente
+
+### AttractMode tapaba SystemSelect (ARREGLADO)
+**Problema**: Al entrar a seleccion de sistemas el contenido desaparecia  
+**Causa**: `{currentView === "systems" && <AttractMode ...>}` siempre renderizaba AttractMode encima, ignorando el estado `attractMode`  
+**Solucion**: Cambiado a `{attractMode && <AttractMode ...>}` con onExit correcto
+
+### Ajustes y Panel Operador eran lo mismo (ARREGLADO)
+**Problema**: Ambos botones del menu abrían el mismo OperatorPanel  
+**Causa**: `handlePinSuccess` llamaba `onShowOperator()` para ambas acciones  
+**Solucion**: Creado `SettingsPanel` separado con sus propios tabs:
+- **Ajustes** → Sistemas, Apariencia, Controles, Teclado
+- **Panel Operador** → Estadisticas, Sesiones, Red, Registros, Auditoria, Kiosk, Plugins, Safe Quit
+
+### save_system_config Command not found (ARREGLADO)
+**Problema**: "Failed to add system: Command save_system_config not found"  
+**Causa**: El comando existia en `commands/config.rs` pero no estaba registrado en `generate_handler!` de `lib.rs`  
+**Solucion**: Añadido `commands::save_system_config` en `lib.rs`
+
+### JSON.parse en SystemManager (ARREGLADO)
+**Problema**: "Unexpected token 'o', [object Obj... is not valid JSON" al cargar sistemas  
+**Causa**: Tauri 2.x deserializa automaticamente Rust → JS; el frontend hacia `invoke<string>` + `JSON.parse()` innecesariamente  
+**Solucion**: Cambiado a `invoke<SystemConfig[]>` sin JSON.parse
+
+### Marquee segunda ventana no actualizaba (ARREGLADO)
+**Problema**: La ventana marquee no mostraba el juego enfocado  
+**Causa**: `App.tsx` emitia evento `"update_marquee"` con campos `system`/`wheel_path`, pero `MarqueeView.tsx` escuchaba `"game_focused"` esperando `system_name`/`image_path`  
+**Solucion**: Sincronizados — App.tsx ahora emite `"game_focused"` con los campos correctos
+
+### Scan no recargaba juegos (ARREGLADO)
+**Problema**: Despues de escanear ROMs la lista de juegos no se actualizaba  
+**Causa**: `handleScanROMs` solo llamaba `loadSystems()`, no `loadGames()`  
+**Solucion**: Añadido `loadGames(selectedSystem.name)` si hay sistema seleccionado
+
+---
+
+## HITOS CRÍTICOS CORREGIDOS EN SESIONES ANTERIORES
 
 ### 1️⃣ Crash por mDNS Daemon (ARREGLADO ✅)
 **Problema**: App se cerraba al iniciar si no había red/UDP multicast  
@@ -82,10 +129,12 @@ C:\Users\[Usuario]\AppData\Local\Programs\NeoCab\
 ### Frontend (React)
 - ✅ App arranca sin crashes
 - ✅ UI se renderiza correctamente
-- ✅ 7 tabs funcionales en OperatorPanel
-- ✅ Navegación por clicks/botones
-- ✅ Diseño responsive
-- ✅ Estilos CSS aplicados
+- ✅ Panel Operador (PIN 1234): Estadisticas, Sesiones, Red, Logs, Auditoria, Kiosk, Plugins, Safe Quit
+- ✅ Ajustes (PIN 1234): Sistemas, Apariencia, Controles, Teclado
+- ✅ Navegacion sin pantallas negras
+- ✅ AttractMode solo activa tras 60s inactividad
+- ✅ Marquee segunda ventana sincronizada
+- ✅ Escaneo de ROMs actualiza lista de juegos
 
 ### Instalación
 - ✅ Instalador NSIS (sin admin)
@@ -96,23 +145,15 @@ C:\Users\[Usuario]\AppData\Local\Programs\NeoCab\
 
 ---
 
-## ⚠️ PROBLEMAS CONOCIDOS (Por Resolver)
+## PROBLEMAS CONOCIDOS (Por Resolver)
 
 ### Prioridad Alta
-- [ ] **Navegación por Teclado**: Las flechas no navegan menús
-  - Necesita: Integrar gamepad hook con UI
-  
-- [ ] **Lanzar Juegos**: No se pueden probar sin ROMs reales
-  - Backend listo, falta contenido
-  
-- [ ] **PIN Enforced**: No se pide PIN para acceder a Operator
-  - Necesita: Validación en App.tsx antes de mostrar panel
+- [ ] **Lanzar Juegos**: No se pueden probar sin ROMs reales — backend listo, falta contenido
 
 ### Prioridad Media
 - [ ] JoyMapper UI refinement
 - [ ] Smart Scraper integration completa
 - [ ] Pause Menu en contexto de juego
-- [ ] Attract Mode auto-trigger
 
 ---
 

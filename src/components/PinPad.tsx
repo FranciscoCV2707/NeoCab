@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { t } from "../i18n";
+import "./PinPad.css";
 
 interface PinPadProps {
   expectedPin: string;

@@ -33,8 +33,7 @@ export const SystemManager: React.FC = () => {
   const loadSystems = async () => {
     try {
       setLoading(true);
-      const result = await invoke<string>('get_all_system_configs');
-      const parsed = JSON.parse(result) as SystemConfig[];
+      const parsed = await invoke<SystemConfig[]>('get_all_system_configs');
       setSystems(parsed);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -47,7 +46,7 @@ export const SystemManager: React.FC = () => {
   const handleSaveSystem = async (config: SystemConfig) => {
     try {
       setLoading(true);
-      await invoke<string>('save_system_config', {
+      await invoke('save_system_config', {
         system: config.system,
         config,
       });
@@ -98,7 +97,7 @@ export const SystemManager: React.FC = () => {
 
     try {
       setLoading(true);
-      await invoke<string>('save_system_config', {
+      await invoke('save_system_config', {
         system: newSystemName,
         config: newConfig,
       });
@@ -123,7 +122,7 @@ export const SystemManager: React.FC = () => {
           pre_launch_script: pre || undefined,
           post_launch_script: post || undefined,
         };
-        await invoke<string>('save_system_config', {
+        await invoke('save_system_config', {
           system: systemName,
           config: updated,
         });

@@ -302,6 +302,7 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
             commands::set_config,
             commands::reload_config,
             commands::load_system_config,
+            commands::save_system_config,
             commands::get_all_system_configs,
             // Theme
             commands::save_theme_config,

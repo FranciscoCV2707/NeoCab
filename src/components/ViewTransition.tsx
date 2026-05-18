@@ -17,57 +17,27 @@ export const ViewTransition: React.FC<ViewTransitionProps> = ({
   easing = 'easeOutCubic',
   direction = 'left',
 }) => {
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [showContent, setShowContent] = useState(true);
-  const [animationPhase, setAnimationPhase] = useState<'enter' | 'exit' | 'idle'>('idle');
-  const prevChildrenRef = useRef<ReactNode>(null);
+  const [animationPhase, setAnimationPhase] = useState<'enter' | 'idle'>('enter');
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (isAnimating) return;
-
-    setIsAnimating(true);
-    setAnimationPhase('exit');
-
-    if (timerRef.current) clearTimeout(timerRef.current);
-
     timerRef.current = setTimeout(() => {
-      setShowContent(false);
-      prevChildrenRef.current = children;
-
-      timerRef.current = setTimeout(() => {
-        setShowContent(true);
-        setAnimationPhase('enter');
-
-        timerRef.current = setTimeout(() => {
-          setIsAnimating(false);
-          setAnimationPhase('idle');
-        }, duration);
-      }, 50);
+      setAnimationPhase('idle');
     }, duration);
-
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [children, duration, isAnimating]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const getAnimationClass = (phase: 'enter' | 'exit' | 'idle') => {
-    if (phase === 'idle') return '';
-    const dir = phase === 'exit' ? 'exit' : 'enter';
-
+  const getAnimationClass = () => {
+    if (animationPhase === 'idle') return '';
     switch (transitionType) {
-      case 'slide':
-        return `slide-${dir} ${direction === 'right' ? 'reverse' : ''}`;
-      case 'fade':
-        return `fade-${dir}`;
-      case 'scale':
-        return `scale-${dir}`;
-      case 'flip':
-        return `flip-${dir}`;
-      case 'glitch':
-        return `glitch-${dir}`;
-      default:
-        return `slide-${dir}`;
+      case 'slide': return `slide-enter ${direction === 'right' ? 'reverse' : ''}`;
+      case 'fade': return 'fade-enter';
+      case 'scale': return 'scale-enter';
+      case 'flip': return 'flip-enter';
+      case 'glitch': return 'glitch-enter';
+      default: return 'slide-enter';
     }
   };
 
@@ -75,13 +45,13 @@ export const ViewTransition: React.FC<ViewTransitionProps> = ({
 
   return (
     <div
-      className={`view-transition ${getAnimationClass(animationPhase)}`}
+      className={`view-transition ${getAnimationClass()}`}
       style={{
         '--transition-duration': `${duration}ms`,
         '--transition-easing': cssEasing,
       } as React.CSSProperties}
     >
-      {showContent ? children : null}
+      {children}
     </div>
   );
 };

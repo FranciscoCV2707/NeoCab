@@ -7,6 +7,7 @@ interface MainMenuProps {
   onScanROMs: () => void;
   onSelectSystem: () => void;
   onShowOperator: () => void;
+  onShowSettings: () => void;
   loading: boolean;
   scanProgress: string;
   locale?: string;
@@ -17,6 +18,7 @@ export default function MainMenu({
   onScanROMs,
   onSelectSystem,
   onShowOperator,
+  onShowSettings,
   loading,
   scanProgress,
   locale,
@@ -40,9 +42,8 @@ export default function MainMenu({
 
   const handlePinSuccess = () => {
     setShowPinPad(false);
-    if (pendingAction === 'settings' || pendingAction === 'operator') {
-      onShowOperator();
-    }
+    if (pendingAction === 'settings') onShowSettings();
+    if (pendingAction === 'operator') onShowOperator();
     setPendingAction(null);
   };
 

@@ -4,18 +4,18 @@ import { NetworkPanel } from './NetworkPanel';
 import { LogViewer } from './LogViewer';
 import { AuditPanel } from './AuditPanel';
 import { SafeQuitRulesPanel } from './SafeQuitRules';
-import { SystemManager } from '../settings/SystemManager';
-import { ThemeEditor } from '../studio/ThemeEditor';
-import { InputWizard } from './InputWizard';
-import KeymapConfigPanel from './KeymapConfig';
 import { SessionConfig } from './SessionConfig';
 import { PluginsPanel } from './PluginsPanel';
 import { KioskSettingsPanel } from './KioskSettingsPanel';
 import './OperatorPanel.css';
 
-type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'settings' | 'input' | 'studio' | 'keymap' | 'sessions' | 'safequit' | 'plugins' | 'kiosk';
+type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'sessions' | 'safequit' | 'plugins' | 'kiosk';
 
-export const OperatorPanel: React.FC = () => {
+interface OperatorPanelProps {
+    onBack: () => void;
+}
+
+export const OperatorPanel: React.FC<OperatorPanelProps> = ({ onBack }) => {
     const [activeTab, setActiveTab] = useState<TabType>('statistics');
 
     return (
@@ -26,18 +26,6 @@ export const OperatorPanel: React.FC = () => {
                     onClick={() => setActiveTab('statistics')}
                 >
                     📊 Estadísticas
-                </button>
-                <button
-                    className={`tab-button ${activeTab === 'input' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('input')}
-                >
-                    🕹️ Controles
-                </button>
-                <button
-                    className={`tab-button ${activeTab === 'keymap' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('keymap')}
-                >
-                    ⌨️ Keymap
                 </button>
                 <button
                     className={`tab-button ${activeTab === 'sessions' ? 'active' : ''}`}
@@ -52,12 +40,6 @@ export const OperatorPanel: React.FC = () => {
                     🌐 Red
                 </button>
                 <button
-                    className={`tab-button ${activeTab === 'studio' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('studio')}
-                >
-                    🎨 Studio
-                </button>
-                <button
                     className={`tab-button ${activeTab === 'logs' ? 'active' : ''}`}
                     onClick={() => setActiveTab('logs')}
                 >
@@ -68,12 +50,6 @@ export const OperatorPanel: React.FC = () => {
                     onClick={() => setActiveTab('audit')}
                 >
                     🔍 Auditoría
-                </button>
-                <button
-                    className={`tab-button ${activeTab === 'settings' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('settings')}
-                >
-                    ⚙️ Configuración
                 </button>
                 <button
                     className={`tab-button ${activeTab === 'safequit' ? 'active' : ''}`}
@@ -97,20 +73,19 @@ export const OperatorPanel: React.FC = () => {
                     className="tab-button manual-button"
                     onClick={() => window.open('https://github.com/PakoCaballero/NeoCab/wiki', '_blank')}
                 >
-                    📖 Manual
+                    Manual
+                </button>
+                <button className="tab-button manual-button" onClick={onBack}>
+                    Volver
                 </button>
             </nav>
 
             <div className="tab-content">
                 {activeTab === 'statistics' && <StatisticsTab />}
-                {activeTab === 'input' && <InputWizard />}
-                {activeTab === 'keymap' && <KeymapConfigPanel />}
                 {activeTab === 'sessions' && <SessionConfig />}
                 {activeTab === 'network' && <NetworkPanel />}
-                {activeTab === 'studio' && <ThemeEditor />}
                 {activeTab === 'logs' && <LogViewer />}
                 {activeTab === 'audit' && <AuditPanel />}
-                {activeTab === 'settings' && <SettingsTab />}
                 {activeTab === 'safequit' && <SafeQuitRulesPanel />}
                 {activeTab === 'plugins' && <PluginsPanel />}
                 {activeTab === 'kiosk' && <KioskSettingsPanel />}
@@ -221,11 +196,3 @@ const StatisticsTab: React.FC = () => {
     );
 };
 
-const SettingsTab: React.FC = () => {
-    return (
-        <div className="tab-pane">
-            <h3>Configuración del Sistema</h3>
-            <SystemManager />
-        </div>
-    );
-};

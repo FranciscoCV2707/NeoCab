@@ -636,6 +636,26 @@ CI/CD: GitHub Actions (Windows/Linux/ARM)
 
 ---
 
+## [2.0.2] - 2026-05-18 - BUG FIXES UI
+
+### Fixed
+- `PinPad.tsx` no importaba `PinPad.css` — el overlay del PIN era invisible; Panel de Operador y Ajustes parecian no hacer nada
+- `ViewTransition` causaba pantalla negra al navegar: `useEffect` con `children` como dependencia disparaba ciclo exit→negro→enter en cada re-render; simplificado a animacion de entrada unica al montar
+- `AttractMode` siempre renderizaba sobre `SystemSelect` (condicion era `currentView === "systems"` en lugar de `attractMode`)
+- `save_system_config` retornaba "Command not found": estaba implementado en Rust pero no registrado en `generate_handler!` de `lib.rs`
+- `SystemManager` fallaba con "Unexpected token 'o'": usaba `invoke<string>` + `JSON.parse` pero Tauri 2.x deserializa automaticamente; corregido a `invoke<SystemConfig[]>`
+- Marquee segunda ventana no actualizaba: `App.tsx` emitia `"update_marquee"` con campos `system`/`wheel_path` pero `MarqueeView` escuchaba `"game_focused"` esperando `system_name`/`image_path`
+- Escaneo de ROMs no recargaba lista de juegos: `handleScanROMs` solo llamaba `loadSystems()`, ahora tambien llama `loadGames()` si hay sistema activo
+
+### Changed
+- Separados "Ajustes" y "Panel de Operador" en vistas y componentes distintos:
+  - `SettingsPanel` (nueva vista `"settings"`): Sistemas, Apariencia, Controles, Teclado
+  - `OperatorPanel` (vista `"operator"` simplificada): Estadisticas, Sesiones, Red, Registros, Auditoria, Safe Quit, Plugins, Kiosk
+- Añadido tipo `"settings"` al union type `View` en `stores/types.ts`
+- `OperatorPanel` ahora recibe prop `onBack`; ambos paneles tienen boton "Volver" visible
+
+---
+
 ## [2.0.1] - 2026-05-18 - IMPLEMENTATION PLAN COMPLETE
 
 > Implementation of IMPLEMENTATION_PLAN.md - UI features and bug fixes.

@@ -20,6 +20,7 @@ import MainMenu from "./components/MainMenu";
 import AttractMode from "./components/AttractMode";
 import SaveStateModal from "./components/SaveStateModal";
 import { OperatorPanel } from "./components/operator/OperatorPanel";
+import { SettingsPanel } from "./components/settings/SettingsPanel";
 import { ToastContainer } from "./components/Toast";
 import { toast } from "./stores/useNotificationStore";
 import "./App.css";
@@ -144,7 +145,7 @@ export default function App() {
     try {
       const result = JSON.parse(await invoke<string>("scan_roms", { romsDir: null }));
       setScanProgress(`Found ${result.games_found} new games!`);
-      setTimeout(() => { loadSystems(); setScanProgress(""); }, 2000);
+      setTimeout(() => { loadSystems(); if (selectedSystem) loadGames(selectedSystem.name); setScanProgress(""); }, 2000);
     } catch (error) {
       setScanProgress(`Scan failed: ${error}`);
     } finally {
@@ -240,6 +241,9 @@ export default function App() {
       case "operator":
         if (action === "back") setView("menu");
         break;
+      case "settings":
+        if (action === "back") setView("menu");
+        break;
     }
   }, [currentView, focusedIndex, systems, games, resetAttractTimer, playSound, handleBack, handlePlayGame, handleSelectSystem, setFocusedIndex, setView]);
 
@@ -248,11 +252,11 @@ export default function App() {
   useEffect(() => {
     if (currentView === "games" && games[focusedIndex]) {
       const g = games[focusedIndex];
-      emit("update_marquee", {
+      emit("game_focused", {
         title: g.title,
         marquee_path: g.marquee_path,
-        wheel_path: g.wheel_path,
-        system: selectedSystem?.display_name || selectedSystem?.name,
+        image_path: g.wheel_path,
+        system_name: selectedSystem?.display_name || selectedSystem?.name,
       });
     }
   }, [focusedIndex, games, currentView, selectedSystem]);
@@ -267,8 +271,8 @@ export default function App() {
           onExitGame={() => { setPauseVisible(false); invoke("stop_game", { emulator: selectedSystem?.name || "mame" }); }}
         />
       )}
-      {currentView === "systems" && (
-        <AttractMode games={games} onPlayGame={handlePlayGame} onExit={() => {}} />
+      {attractMode && (
+        <AttractMode games={games} onPlayGame={handlePlayGame} onExit={() => setAttractMode(false)} />
       )}
       <div className="search-overlay">
         {currentView !== "menu" && (
@@ -286,6 +290,7 @@ export default function App() {
             onScanROMs={handleScanROMs}
             onSelectSystem={() => setView("systems")}
             onShowOperator={() => setView("operator")}
+            onShowSettings={() => setView("settings")}
             loading={loading}
             scanProgress={scanProgress}
             locale={locale}
@@ -305,7 +310,12 @@ export default function App() {
       )}
       {currentView === "operator" && (
         <ViewTransition transitionType="scale">
-          <OperatorPanel />
+          <OperatorPanel onBack={() => setView("menu")} />
+        </ViewTransition>
+      )}
+      {currentView === "settings" && (
+        <ViewTransition transitionType="scale">
+          <SettingsPanel onBack={() => setView("menu")} />
         </ViewTransition>
       )}
       {showSaveStateModal && pendingGame && (
