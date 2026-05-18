@@ -143,6 +143,9 @@ impl EmulatorManager {
             .ok_or_else(|| NeoCabError::EmulatorNotFound(emulator_name.to_string()))?;
 
         let strategies: Vec<Box<dyn LaunchStrategy>> = vec![
+            Box::new(launch::EmulatorSpecificStrategy),
+            Box::new(launch::SteamLaunchStrategy),
+            Box::new(launch::StoreLaunchStrategy),
             Box::new(launch::ChdMountStrategy),
             Box::new(launch::ChdToCueStrategy),
             Box::new(launch::ZipExtractStrategy),

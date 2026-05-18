@@ -1,3 +1,5 @@
+pub mod image_processor;
+pub mod rom_validator;
 pub mod arduino_serial;
 pub mod autoboot;
 pub mod bezel_manager;
@@ -31,6 +33,11 @@ pub mod timer_manager;
 pub mod video_pipeline;
 
 pub use arduino_serial::{ArduinoConfig, ArduinoInterface};
+pub use image_processor::{
+    EffectKind, EffectPreset, FrameConfig, ImageEffect, ImageProcessingConfig, ImageProcessor,
+    ProcessedImage, ShadowConfig,
+};
+pub use rom_validator::{RomStatus, RomType, RomValidator, ScanLevel, ScanResult, ScanSummary};
 pub use autoboot::AutobootManager;
 pub use bezel_manager::BezelManager;
 pub use coin_hardware::{CoinHardwareExt, HardwareConfig, HardwareMonitor, HardwareType};
