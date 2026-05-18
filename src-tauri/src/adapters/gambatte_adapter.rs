@@ -12,9 +12,7 @@ impl GambatteAdapter {
     }
 
     pub async fn launch(&mut self, rom_path: &str) -> Result<()> {
-        let child = Command::new("gambatte")
-            .arg(rom_path)
-            .spawn()?;
+        let child = Command::new("gambatte").arg(rom_path).spawn()?;
 
         self.process = Some(child);
         info!("Gambatte launched for: {}", rom_path);

@@ -1,18 +1,17 @@
-use serde::{Serialize, Deserialize};
-use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
-use std::time::Duration;
-use mdns_sd::{ServiceDaemon, ServiceInfo, ServiceEvent};
-use tracing::{info, error, warn, debug};
 use crate::error::Result;
 use axum::{
-    routing::{get, post},
-    Router,
-    Json,
     extract::State as AxumState,
+    routing::{get, post},
+    Json, Router,
 };
-use std::net::SocketAddr;
+use mdns_sd::{ServiceDaemon, ServiceEvent, ServiceInfo};
 use reqwest::Client;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::net::SocketAddr;
+use std::sync::{Arc, RwLock};
+use std::time::Duration;
+use tracing::{debug, error, info, warn};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CabinetInfo {
@@ -54,7 +53,12 @@ pub struct NetworkManager {
 }
 
 impl NetworkManager {
-    pub fn new(cabinet_id: String, cabinet_name: String, api_port: u16, db: Arc<crate::db::Database>) -> Result<Self> {
+    pub fn new(
+        cabinet_id: String,
+        cabinet_name: String,
+        api_port: u16,
+        db: Arc<crate::db::Database>,
+    ) -> Result<Self> {
         let daemon = match ServiceDaemon::new() {
             Ok(d) => Some(d),
             Err(e) => {
@@ -146,7 +150,12 @@ impl NetworkManager {
         let mut properties = HashMap::new();
         properties.insert("id".to_string(), self.cabinet_id.clone());
         properties.insert("name".to_string(), self.cabinet_name.clone());
-        properties.insert("role".to_string(), format!("{:?}", *self.role.read().unwrap()));
+        let role = self
+            .role
+            .read()
+            .map(|r| *r)
+            .unwrap_or(NetworkRole::Standalone);
+        properties.insert("role".to_string(), format!("{:?}", role));
 
         let service_info = ServiceInfo::new(
             service_type,
@@ -155,7 +164,8 @@ impl NetworkManager {
             "",
             port,
             Some(properties),
-        ).map_err(|e| {
+        )
+        .map_err(|e| {
             crate::error::NeoCabError::System(format!("Failed to create service info: {}", e))
         })?;
 
@@ -163,7 +173,10 @@ impl NetworkManager {
             crate::error::NeoCabError::System(format!("Failed to register mDNS service: {}", e))
         })?;
 
-        info!("mDNS Advertising started for {} on port {}", instance_name, port);
+        info!(
+            "mDNS Advertising started for {} on port {}",
+            instance_name, port
+        );
         Ok(())
     }
 
@@ -188,11 +201,20 @@ impl NetworkManager {
             while let Ok(event) = receiver.recv_async().await {
                 match event {
                     ServiceEvent::ServiceResolved(info) => {
-                        let id = info.get_property_val_str("id").unwrap_or("unknown").to_string();
-                        let name = info.get_property_val_str("name").unwrap_or("unknown").to_string();
+                        let id = info
+                            .get_property_val_str("id")
+                            .unwrap_or("unknown")
+                            .to_string();
+                        let name = info
+                            .get_property_val_str("name")
+                            .unwrap_or("unknown")
+                            .to_string();
                         let role_str = info.get_property_val_str("role").unwrap_or("Standalone");
 
-                        let ip = info.get_addresses().iter().next()
+                        let ip = info
+                            .get_addresses()
+                            .iter()
+                            .next()
                             .map(|a| a.to_string())
                             .unwrap_or_else(|| "0.0.0.0".to_string());
 
@@ -205,15 +227,22 @@ impl NetworkManager {
                             last_seen: chrono::Utc::now().timestamp() as u64,
                         };
 
-                        info!("Cabinet discovered: {} ({}) at {}:{}", cabinet.name, cabinet.id, cabinet.ip, cabinet.port);
+                        info!(
+                            "Cabinet discovered: {} ({}) at {}:{}",
+                            cabinet.name, cabinet.id, cabinet.ip, cabinet.port
+                        );
 
                         // Si es maestro, guardar su IP para sincronización
                         if cabinet.is_master {
-                            *master_ip.write().unwrap() = Some(cabinet.ip.clone());
+                            if let Ok(mut w) = master_ip.write() {
+                                *w = Some(cabinet.ip.clone());
+                            }
                             info!("Master cabinet detected at {}", cabinet.ip);
                         }
 
-                        discovered.write().unwrap().insert(id, cabinet);
+                        if let Ok(mut w) = discovered.write() {
+                            w.insert(id, cabinet);
+                        }
                     }
                     ServiceEvent::ServiceRemoved(_type, name) => {
                         info!("Cabinet removed: {}", name);
@@ -229,27 +258,41 @@ impl NetworkManager {
     }
 
     pub fn get_discovered_cabinets(&self) -> Vec<CabinetInfo> {
-        self.discovered_cabinets.read().unwrap().values().cloned().collect()
+        self.discovered_cabinets
+            .read()
+            .ok()
+            .map(|r| r.values().cloned().collect())
+            .unwrap_or_default()
     }
 
     pub fn set_role(&self, role: NetworkRole) {
-        *self.role.write().unwrap() = role;
-        // Re-advertising might be needed to update properties
+        if let Ok(mut w) = self.role.write() {
+            *w = role;
+        }
         let _ = self.start_advertising();
     }
 
     pub fn get_role(&self) -> NetworkRole {
-        *self.role.read().unwrap()
+        self.role
+            .read()
+            .ok()
+            .map(|r| *r)
+            .unwrap_or(NetworkRole::Standalone)
     }
 
     pub fn set_master_ip(&self, ip: String) {
-        *self.master_ip.write().unwrap() = Some(ip.clone());
+        if let Ok(mut w) = self.master_ip.write() {
+            *w = Some(ip.clone());
+        }
         info!("Master IP set to: {}", ip);
-        *self.role.write().unwrap() = NetworkRole::Client;
+        if let Ok(mut w) = self.role.write() {
+            *w = NetworkRole::Client;
+        }
+        let _ = self.start_advertising();
     }
 
     pub fn get_master_ip(&self) -> Option<String> {
-        self.master_ip.read().unwrap().clone()
+        self.master_ip.read().ok().and_then(|r| r.clone())
     }
 
     pub async fn sync_revenue_to_master(&self) -> Result<()> {
@@ -286,16 +329,18 @@ impl NetworkManager {
                     Ok(())
                 } else {
                     error!("Revenue sync failed with status: {}", response.status());
-                    Err(crate::error::NeoCabError::Network(
-                        format!("Revenue sync failed: {}", response.status())
-                    ))
+                    Err(crate::error::NeoCabError::Network(format!(
+                        "Revenue sync failed: {}",
+                        response.status()
+                    )))
                 }
             }
             Err(e) => {
                 warn!("Failed to reach master {}: {}", master_ip, e);
-                Err(crate::error::NeoCabError::Network(
-                    format!("Failed to reach master: {}", e)
-                ))
+                Err(crate::error::NeoCabError::Network(format!(
+                    "Failed to reach master: {}",
+                    e
+                )))
             }
         }
     }
@@ -312,13 +357,14 @@ impl NetworkManager {
             loop {
                 tokio::time::sleep(sync_interval).await;
 
-                let master = master_ip.read().unwrap().clone();
+                let master = master_ip.read().ok().and_then(|m| m.clone());
                 if let Some(master) = master {
                     let client = Client::new();
 
                     if let Ok(earnings) = db.get_earnings_summary().await {
                         let total_coins = earnings["total_coins"].as_i64().unwrap_or(0) as u64;
-                        let total_games_played = earnings["total_games"].as_i64().unwrap_or(0) as u64;
+                        let total_games_played =
+                            earnings["total_games"].as_i64().unwrap_or(0) as u64;
                         let total_earnings = total_coins as f64;
 
                         let payload = EarningsSyncPayload {
@@ -348,6 +394,9 @@ impl NetworkManager {
             }
         });
 
-        info!("Revenue sync task started (interval: {} seconds)", sync_interval.as_secs());
+        info!(
+            "Revenue sync task started (interval: {} seconds)",
+            sync_interval.as_secs()
+        );
     }
 }

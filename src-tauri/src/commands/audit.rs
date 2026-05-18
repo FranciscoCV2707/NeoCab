@@ -1,8 +1,8 @@
-use serde_json::json;
-use tauri::State;
-use std::sync::Arc;
-use std::path::Path;
 use crate::db::Database;
+use serde_json::json;
+use std::path::Path;
+use std::sync::Arc;
+use tauri::State;
 
 #[tauri::command]
 pub async fn audit_roms(
@@ -11,7 +11,7 @@ pub async fn audit_roms(
 ) -> Result<String, String> {
     let mut missing = Vec::new();
     let mut total_systems = 0;
-    
+
     let systems = db.get_systems().await.map_err(|e| e.to_string())?;
     for sys in systems {
         if let Some(ref sys_target) = system {
@@ -20,7 +20,10 @@ pub async fn audit_roms(
             }
         }
         total_systems += 1;
-        let games = db.get_games_by_system(sys.id, None, None, false).await.map_err(|e| e.to_string())?;
+        let games = db
+            .get_games_by_system(sys.id, None, None, false)
+            .await
+            .map_err(|e| e.to_string())?;
         for game in games {
             if !Path::new(&game.rom_path).exists() {
                 missing.push(json!({
@@ -32,7 +35,7 @@ pub async fn audit_roms(
             }
         }
     }
-    
+
     let result = json!({
         "success": true,
         "results": missing,
@@ -52,7 +55,7 @@ pub async fn audit_media(
     let mut missing_images = 0;
     let mut missing_videos = 0;
     let mut game_count = 0;
-    
+
     let systems = db.get_systems().await.map_err(|e| e.to_string())?;
     for sys in systems {
         if let Some(ref sys_target) = system {
@@ -60,7 +63,10 @@ pub async fn audit_media(
                 continue;
             }
         }
-        let games = db.get_games_by_system(sys.id, None, None, false).await.map_err(|e| e.to_string())?;
+        let games = db
+            .get_games_by_system(sys.id, None, None, false)
+            .await
+            .map_err(|e| e.to_string())?;
         game_count += games.len();
         for game in games {
             let img_missing = match game.image_path.as_deref() {
@@ -80,7 +86,7 @@ pub async fn audit_media(
             }
         }
     }
-    
+
     let result = json!({
         "success": true,
         "total_games": game_count,

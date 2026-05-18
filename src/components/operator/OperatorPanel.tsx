@@ -3,14 +3,17 @@ import { invoke } from '@tauri-apps/api/core';
 import { NetworkPanel } from './NetworkPanel';
 import { LogViewer } from './LogViewer';
 import { AuditPanel } from './AuditPanel';
+import { SafeQuitRulesPanel } from './SafeQuitRules';
 import { SystemManager } from '../settings/SystemManager';
 import { ThemeEditor } from '../studio/ThemeEditor';
 import { InputWizard } from './InputWizard';
 import KeymapConfigPanel from './KeymapConfig';
 import { SessionConfig } from './SessionConfig';
+import { PluginsPanel } from './PluginsPanel';
+import { KioskSettingsPanel } from './KioskSettingsPanel';
 import './OperatorPanel.css';
 
-type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'settings' | 'input' | 'studio' | 'keymap' | 'sessions';
+type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'settings' | 'input' | 'studio' | 'keymap' | 'sessions' | 'safequit' | 'plugins' | 'kiosk';
 
 export const OperatorPanel: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('statistics');
@@ -73,6 +76,24 @@ export const OperatorPanel: React.FC = () => {
                     ⚙️ Configuración
                 </button>
                 <button
+                    className={`tab-button ${activeTab === 'safequit' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('safequit')}
+                >
+                    🛡️ Safe Quit
+                </button>
+                <button
+                    className={`tab-button ${activeTab === 'plugins' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('plugins')}
+                >
+                    📜 Plugins
+                </button>
+                <button
+                    className={`tab-button ${activeTab === 'kiosk' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('kiosk')}
+                >
+                    📺 Kiosk
+                </button>
+                <button
                     className="tab-button manual-button"
                     onClick={() => window.open('https://github.com/PakoCaballero/NeoCab/wiki', '_blank')}
                 >
@@ -90,6 +111,9 @@ export const OperatorPanel: React.FC = () => {
                 {activeTab === 'logs' && <LogViewer />}
                 {activeTab === 'audit' && <AuditPanel />}
                 {activeTab === 'settings' && <SettingsTab />}
+                {activeTab === 'safequit' && <SafeQuitRulesPanel />}
+                {activeTab === 'plugins' && <PluginsPanel />}
+                {activeTab === 'kiosk' && <KioskSettingsPanel />}
             </div>
         </div>
     );

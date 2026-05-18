@@ -1,10 +1,10 @@
-use std::sync::Arc;
-use tokio::sync::Mutex;
-use std::time::{Duration, Instant};
-use chrono::{DateTime, Utc};
-use tracing::info;
-use serde::{Deserialize, Serialize};
 use crate::error::Result;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+use std::time::{Duration, Instant};
+use tokio::sync::Mutex;
+use tracing::info;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TimerState {

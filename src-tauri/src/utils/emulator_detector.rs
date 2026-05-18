@@ -30,121 +30,151 @@ pub struct EmulatorDetector;
 impl EmulatorDetector {
     const EMULATORS: &'static [EmulatorSpec] = &[
         EmulatorSpec {
-            id: "mame", name: "MAME",
+            id: "mame",
+            name: "MAME",
             binaries: &["mame.exe", "mame64.exe", "mame", "mame64"],
-            version_flag: "-version", version_regex: None,
+            version_flag: "-version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://www.mamedev.org/"),
             search_subdirs: &["mame", "MAME"],
         },
         EmulatorSpec {
-            id: "retroarch", name: "RetroArch",
+            id: "retroarch",
+            name: "RetroArch",
             binaries: &["retroarch.exe", "retroarch"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://www.retroarch.com/"),
             search_subdirs: &["RetroArch", "retroarch"],
         },
         EmulatorSpec {
-            id: "dolphin", name: "Dolphin",
+            id: "dolphin",
+            name: "Dolphin",
             binaries: &["Dolphin.exe", "Dolphin", "dolphin-emu"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://dolphin-emu.org/"),
             search_subdirs: &["Dolphin", "dolphin-emu"],
         },
         EmulatorSpec {
-            id: "pcsx2", name: "PCSX2",
+            id: "pcsx2",
+            name: "PCSX2",
             binaries: &["pcsx2.exe", "pcsx2", "pcsx2-qt"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://pcsx2.net/"),
             search_subdirs: &["PCSX2", "pcsx2"],
         },
         EmulatorSpec {
-            id: "duckstation", name: "DuckStation",
+            id: "duckstation",
+            name: "DuckStation",
             binaries: &["duckstation.exe", "duckstation-qt", "duckstation"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://duckstation.org/"),
             search_subdirs: &["DuckStation", "duckstation"],
         },
         EmulatorSpec {
-            id: "xenia", name: "Xenia",
+            id: "xenia",
+            name: "Xenia",
             binaries: &["xenia.exe", "xenia_canary.exe", "xenia"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://xenia.jp/"),
             search_subdirs: &["Xenia", "xenia"],
         },
         EmulatorSpec {
-            id: "rpcs3", name: "RPCS3",
+            id: "rpcs3",
+            name: "RPCS3",
             binaries: &["rpcs3.exe", "rpcs3"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://rpcs3.net/"),
             search_subdirs: &["RPCS3", "rpcs3"],
         },
         EmulatorSpec {
-            id: "cemu", name: "Cemu",
+            id: "cemu",
+            name: "Cemu",
             binaries: &["Cemu.exe", "cemu"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://cemu.info/"),
             search_subdirs: &["Cemu", "cemu"],
         },
         EmulatorSpec {
-            id: "ppsspp", name: "PPSSPP",
+            id: "ppsspp",
+            name: "PPSSPP",
             binaries: &["PPSSPPWindows64.exe", "PPSSPP.exe", "ppsspp"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://www.ppsspp.org/"),
             search_subdirs: &["PPSSPP", "ppsspp"],
         },
         EmulatorSpec {
-            id: "flycast", name: "Flycast",
+            id: "flycast",
+            name: "Flycast",
             binaries: &["flycast.exe", "flycast"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://flycast.do/"),
             search_subdirs: &["Flycast", "flycast"],
         },
         EmulatorSpec {
-            id: "melonds", name: "melonDS",
+            id: "melonds",
+            name: "melonDS",
             binaries: &["melonDS.exe", "melonds"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://melonds.kuribo64.net/"),
             search_subdirs: &["melonDS", "melonds"],
         },
         EmulatorSpec {
-            id: "citra", name: "Citra",
+            id: "citra",
+            name: "Citra",
             binaries: &["citra-qt.exe", "citra.exe", "citra"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://citra-emu.org/"),
             search_subdirs: &["Citra", "citra"],
         },
         EmulatorSpec {
-            id: "yuzu", name: "Yuzu",
+            id: "yuzu",
+            name: "Yuzu",
             binaries: &["yuzu.exe", "yuzu"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: None,
             search_subdirs: &["Yuzu", "yuzu"],
         },
         EmulatorSpec {
-            id: "ryujinx", name: "Ryujinx",
+            id: "ryujinx",
+            name: "Ryujinx",
             binaries: &["Ryujinx.exe", "ryujinx"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://ryujinx.org/"),
             search_subdirs: &["Ryujinx", "ryujinx"],
         },
         EmulatorSpec {
-            id: "scummvm", name: "ScummVM",
+            id: "scummvm",
+            name: "ScummVM",
             binaries: &["scummvm.exe", "scummvm"],
-            version_flag: "--version", version_regex: None,
+            version_flag: "--version",
+            version_regex: None,
             registry_paths: &[],
             download_url: Some("https://www.scummvm.org/"),
             search_subdirs: &["ScummVM", "scummvm"],
@@ -201,7 +231,9 @@ impl EmulatorDetector {
             // Direct binary in root
             for binary in spec.binaries {
                 let p = root.join(binary);
-                if p.exists() { return Some(p); }
+                if p.exists() {
+                    return Some(p);
+                }
             }
             // In subdirectories
             for subdir in spec.search_subdirs {
@@ -209,7 +241,9 @@ impl EmulatorDetector {
                 if dir.is_dir() {
                     for binary in spec.binaries {
                         let p = dir.join(binary);
-                        if p.exists() { return Some(p); }
+                        if p.exists() {
+                            return Some(p);
+                        }
                     }
                     // Recursive one level deeper
                     if let Ok(entries) = std::fs::read_dir(&dir) {
@@ -218,7 +252,9 @@ impl EmulatorDetector {
                             if sub.is_dir() {
                                 for binary in spec.binaries {
                                     let p = sub.join(binary);
-                                    if p.exists() { return Some(p); }
+                                    if p.exists() {
+                                        return Some(p);
+                                    }
                                 }
                             }
                         }
@@ -231,14 +267,18 @@ impl EmulatorDetector {
         #[cfg(target_os = "linux")]
         for binary in spec.binaries {
             let flatpak_path = PathBuf::from(format!("/var/lib/flatpak/exports/bin/{}", binary));
-            if flatpak_path.exists() { return Some(flatpak_path); }
+            if flatpak_path.exists() {
+                return Some(flatpak_path);
+            }
         }
 
         // 5. Snap (Linux)
         #[cfg(target_os = "linux")]
         for binary in spec.binaries {
             let snap_path = PathBuf::from(format!("/snap/bin/{}", binary));
-            if snap_path.exists() { return Some(snap_path); }
+            if snap_path.exists() {
+                return Some(snap_path);
+            }
         }
 
         None
@@ -282,19 +322,29 @@ impl EmulatorDetector {
         let stderr = String::from_utf8_lossy(&output.stderr);
         let combined = format!("{} {}", stdout, stderr);
         let combined = combined.trim();
-        if combined.is_empty() { None } else { Some(combined.to_string()) }
+        if combined.is_empty() {
+            None
+        } else {
+            Some(combined.to_string())
+        }
     }
 
     fn detect_cores(spec: &EmulatorSpec, path: &Path) -> Vec<String> {
-        if spec.id != "retroarch" { return vec![]; }
+        if spec.id != "retroarch" {
+            return vec![];
+        }
 
         // Try to find RetroArch cores directory
         let cores_dirs = vec![
             path.parent().map(|p| p.join("cores")),
             #[cfg(windows)]
-            env::var("APPDATA").ok().map(|a| PathBuf::from(a).join("RetroArch").join("cores")),
+            env::var("APPDATA")
+                .ok()
+                .map(|a| PathBuf::from(a).join("RetroArch").join("cores")),
             #[cfg(not(windows))]
-            env::var("HOME").ok().map(|h| PathBuf::from(h).join(".config/retroarch/cores")),
+            env::var("HOME")
+                .ok()
+                .map(|h| PathBuf::from(h).join(".config/retroarch/cores")),
         ];
 
         let mut cores = Vec::new();
@@ -318,7 +368,9 @@ impl EmulatorDetector {
     }
 
     fn installation_dir() -> Option<PathBuf> {
-        env::current_exe().ok().and_then(|p| p.parent().map(|d| d.to_path_buf()))
+        env::current_exe()
+            .ok()
+            .and_then(|p| p.parent().map(|d| d.to_path_buf()))
     }
 
     #[cfg(windows)]
@@ -332,7 +384,9 @@ fn which(binary: &str) -> Result<PathBuf, ()> {
     if let Ok(paths) = env::var("PATH") {
         for dir in env::split_paths(&paths) {
             let p = dir.join(binary);
-            if p.exists() { return Ok(p); }
+            if p.exists() {
+                return Ok(p);
+            }
         }
     }
     Err(())

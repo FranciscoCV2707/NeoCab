@@ -58,7 +58,7 @@ export function useAudio() {
 
   const playSound = useCallback((soundKey: keyof typeof SOUNDS) => {
     if (!audioContext.current || audioContext.current.state === 'suspended') {
-      audioContext.current?.resume().catch(() => {});
+      audioContext.current?.resume().catch((e) => console.warn('Audio resume failed:', e));
     }
     
     const buffer = soundBuffers.current.get(soundKey);

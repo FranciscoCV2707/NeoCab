@@ -10,6 +10,12 @@ pub struct HotplugDetector {
     running: Arc<AtomicBool>,
 }
 
+impl Default for HotplugDetector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl HotplugDetector {
     pub fn new() -> Self {
         Self {
@@ -18,7 +24,11 @@ impl HotplugDetector {
         }
     }
 
-    pub fn start(&self, on_connect: impl Fn(&str) + Send + 'static, on_disconnect: impl Fn(&str) + Send + 'static) {
+    pub fn start(
+        &self,
+        on_connect: impl Fn(&str) + Send + 'static,
+        on_disconnect: impl Fn(&str) + Send + 'static,
+    ) {
         let known = self.known_devices.clone();
         let running = self.running.clone();
         running.store(true, Ordering::Relaxed);
@@ -38,7 +48,8 @@ impl HotplugDetector {
                 }
 
                 // Detect removed devices
-                let removed: Vec<String> = known_set.iter()
+                let removed: Vec<String> = known_set
+                    .iter()
                     .filter(|d| !current.contains(d.as_str()))
                     .cloned()
                     .collect();

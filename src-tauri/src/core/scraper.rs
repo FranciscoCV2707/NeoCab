@@ -1,11 +1,11 @@
+use crate::error::Result;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
 use std::collections::HashMap;
-use tracing::{info, warn, debug};
-use crate::error::Result;
-use tokio::time::{sleep, Duration};
+use std::path::{Path, PathBuf};
 use tauri::Emitter;
+use tokio::time::{sleep, Duration};
+use tracing::{debug, info, warn};
 
 // ─── Scraped Result ───
 
@@ -186,7 +186,7 @@ fn get_screenscraper_system_id(system_name: &str) -> Option<u32> {
         ("model2", 54),
         ("model3", 55),
     ]);
-    
+
     map.get(system_name.to_lowercase().as_str()).copied()
 }
 
@@ -271,15 +271,17 @@ impl GameScraper {
     /// Rate limiter — max 1 request per second for ScreenScraper
     async fn rate_limit(&self) {
         let elapsed = {
-            let last = self.last_request.lock().unwrap();
-            last.elapsed()
+            let last = self.last_request.lock().ok();
+            last.map(|l| l.elapsed()).unwrap_or(Duration::ZERO)
         };
         if elapsed < Duration::from_millis(1200) {
             sleep(Duration::from_millis(1200) - elapsed).await;
         }
         {
-            let mut last = self.last_request.lock().unwrap();
-            *last = std::time::Instant::now();
+            let mut last = self.last_request.lock().ok();
+            if let Some(l) = last.as_mut() {
+                **l = std::time::Instant::now();
+            }
         }
     }
 
@@ -292,10 +294,18 @@ impl GameScraper {
     ) -> Result<ScrapedGameInfo> {
         // Try ScreenScraper first (highest quality)
         if !self.ss_dev_id.is_empty() {
-            match self.scrape_screenscraper(rom_name, system_name, crc32).await {
-                Ok(info) if !info.title.is_empty() && info.description.is_some() => return Ok(info),
+            match self
+                .scrape_screenscraper(rom_name, system_name, crc32)
+                .await
+            {
+                Ok(info) if !info.title.is_empty() && info.description.is_some() => {
+                    return Ok(info)
+                }
                 _ => {
-                    info!("ScreenScraper failed or returned low quality for {}, trying TheGamesDB...", rom_name);
+                    info!(
+                        "ScreenScraper failed or returned low quality for {}, trying TheGamesDB...",
+                        rom_name
+                    );
                 }
             }
         }
@@ -305,7 +315,10 @@ impl GameScraper {
             match self.scrape_thegamesdb(rom_name, system_name).await {
                 Ok(info) if !info.title.is_empty() => return Ok(info),
                 _ => {
-                    info!("TheGamesDB failed or returned empty for {}, using fallback...", rom_name);
+                    info!(
+                        "TheGamesDB failed or returned empty for {}, using fallback...",
+                        rom_name
+                    );
                 }
             }
         }
@@ -321,7 +334,9 @@ impl GameScraper {
         system_name: &str,
     ) -> Result<ScrapedGameInfo> {
         if self.tgdb_api_key.is_empty() {
-            return Err(crate::error::NeoCabError::Config("TheGamesDB API key not configured".to_string()));
+            return Err(crate::error::NeoCabError::Config(
+                "TheGamesDB API key not configured".to_string(),
+            ));
         }
 
         let platform_id = get_tgdb_platform_id(system_name).unwrap_or(23); // Default Arcade
@@ -333,27 +348,35 @@ impl GameScraper {
 
         let url = format!(
             "https://api.thegamesdb.net/v1/Games/ByGameName?apikey={}&name={}&platform={}",
-            self.tgdb_api_key, 
+            self.tgdb_api_key,
             urlencoding::encode(&clean_name),
             platform_id
         );
 
-        info!("Scraping via TheGamesDB: {} (platform {})", rom_name, platform_id);
+        info!(
+            "Scraping via TheGamesDB: {} (platform {})",
+            rom_name, platform_id
+        );
 
         let response = self.client.get(&url).send().await?;
         if !response.status().is_success() {
-            return Err(crate::error::NeoCabError::Network(format!("TGDB status {}", response.status())));
+            return Err(crate::error::NeoCabError::Network(format!(
+                "TGDB status {}",
+                response.status()
+            )));
         }
 
         let resp_data: TGDBSearchResponse = response.json().await?;
-        
+
         if let Some(data) = resp_data.data {
             if let Some(games) = data.games {
                 if let Some(game) = games.first() {
                     return Ok(ScrapedGameInfo {
                         title: game.game_title.clone().unwrap_or_default(),
                         description: game.overview.clone(),
-                        year: game.release_date.as_ref()
+                        year: game
+                            .release_date
+                            .as_ref()
                             .and_then(|d| d.get(0..4))
                             .and_then(|y| y.parse().ok()),
                         developer: None, // Need separate API call for developers in TGDB v1
@@ -372,7 +395,9 @@ impl GameScraper {
             }
         }
 
-        Err(crate::error::NeoCabError::Other("No data found in TheGamesDB".to_string()))
+        Err(crate::error::NeoCabError::Other(
+            "No data found in TheGamesDB".to_string(),
+        ))
     }
 
     /// Scrape a single game using ScreenScraper API
@@ -384,8 +409,7 @@ impl GameScraper {
     ) -> Result<ScrapedGameInfo> {
         self.rate_limit().await;
 
-        let system_id = get_screenscraper_system_id(system_name)
-            .unwrap_or(75); // Default to MAME/Arcade
+        let system_id = get_screenscraper_system_id(system_name).unwrap_or(75); // Default to MAME/Arcade
 
         let mut url = format!(
             "https://api.screenscraper.fr/api2/jeuInfos.php?devid={}&devpassword={}&softname=NeoCab&output=json&systemeid={}",
@@ -394,7 +418,10 @@ impl GameScraper {
 
         // Add user credentials if available
         if !self.ss_user.is_empty() {
-            url.push_str(&format!("&ssid={}&sspassword={}", self.ss_user, self.ss_password));
+            url.push_str(&format!(
+                "&ssid={}&sspassword={}",
+                self.ss_user, self.ss_password
+            ));
         }
 
         // Try CRC32 first (most accurate), then ROM name
@@ -409,17 +436,20 @@ impl GameScraper {
             url.push_str(&format!("&romnom={}", clean_name));
         }
 
-        info!("Scraping via ScreenScraper: {} (system {})", rom_name, system_id);
+        info!(
+            "Scraping via ScreenScraper: {} (system {})",
+            rom_name, system_id
+        );
 
         let response = self.client.get(&url).send().await?;
-        
+
         if !response.status().is_success() {
             warn!("ScreenScraper returned status {}", response.status());
             return self.scrape_fallback(rom_name, system_name).await;
         }
 
         let body = response.text().await?;
-        
+
         match serde_json::from_str::<SSResponse>(&body) {
             Ok(ss_response) => {
                 if let Some(game_resp) = ss_response.response {
@@ -440,59 +470,66 @@ impl GameScraper {
     /// Parse ScreenScraper game data into our format
     fn parse_screenscraper_game(&self, game: &SSGame) -> ScrapedGameInfo {
         // Get title (prefer English/World region)
-        let title = game.noms.as_ref()
+        let title = game
+            .noms
+            .as_ref()
             .and_then(|noms| {
                 noms.iter()
-                    .find(|n| n.region.as_deref() == Some("wor") || n.region.as_deref() == Some("us"))
+                    .find(|n| {
+                        n.region.as_deref() == Some("wor") || n.region.as_deref() == Some("us")
+                    })
                     .or_else(|| noms.first())
                     .and_then(|n| n.text.clone())
             })
             .unwrap_or_default();
 
         // Get description (prefer English)
-        let description = game.synopsis.as_ref()
-            .and_then(|syns| {
-                syns.iter()
-                    .find(|s| s.region.as_deref() == Some("en") || s.region.as_deref() == Some("us"))
-                    .or_else(|| syns.iter().find(|s| s.region.as_deref() == Some("wor")))
-                    .or_else(|| syns.first())
-                    .and_then(|s| s.text.clone())
-            });
+        let description = game.synopsis.as_ref().and_then(|syns| {
+            syns.iter()
+                .find(|s| s.region.as_deref() == Some("en") || s.region.as_deref() == Some("us"))
+                .or_else(|| syns.iter().find(|s| s.region.as_deref() == Some("wor")))
+                .or_else(|| syns.first())
+                .and_then(|s| s.text.clone())
+        });
 
         // Get year from dates
-        let year = game.dates.as_ref()
-            .and_then(|dates| {
-                dates.first()
-                    .and_then(|d| d.text.as_ref())
-                    .and_then(|t| t.get(0..4))
-                    .and_then(|y| y.parse::<i32>().ok())
-            });
+        let year = game.dates.as_ref().and_then(|dates| {
+            dates
+                .first()
+                .and_then(|d| d.text.as_ref())
+                .and_then(|t| t.get(0..4))
+                .and_then(|y| y.parse::<i32>().ok())
+        });
 
         // Get genre
-        let genre = game.genres.as_ref()
-            .and_then(|genres| {
-                genres.first()
-                    .and_then(|g| g.noms.as_ref())
-                    .and_then(|noms| {
-                        noms.iter()
-                            .find(|n| n.region.as_deref() == Some("en"))
-                            .or_else(|| noms.first())
-                            .and_then(|n| n.text.clone())
-                    })
-            });
+        let genre = game.genres.as_ref().and_then(|genres| {
+            genres
+                .first()
+                .and_then(|g| g.noms.as_ref())
+                .and_then(|noms| {
+                    noms.iter()
+                        .find(|n| n.region.as_deref() == Some("en"))
+                        .or_else(|| noms.first())
+                        .and_then(|n| n.text.clone())
+                })
+        });
 
         // Get rating (normalize to 0-5 scale)
-        let rating = game.note.as_ref()
+        let rating = game
+            .note
+            .as_ref()
             .and_then(|n| n.text.as_ref())
             .and_then(|t| t.parse::<f64>().ok())
             .map(|r| r / 4.0); // SS uses 0-20, normalize to 0-5
 
         // Get media URLs
-        let (box_art_url, screenshot_url, wheel_url, marquee_url, video_url) = 
+        let (box_art_url, screenshot_url, wheel_url, marquee_url, video_url) =
             self.extract_media_urls(game);
 
         // Get players
-        let players = game.joueurs.as_ref()
+        let players = game
+            .joueurs
+            .as_ref()
             .and_then(|j| j.text.as_ref())
             .and_then(|t| t.chars().next())
             .and_then(|c| c.to_digit(10))
@@ -517,7 +554,17 @@ impl GameScraper {
     }
 
     /// Extract media URLs from ScreenScraper game data
-    fn extract_media_urls(&self, game: &SSGame) -> (Option<String>, Option<String>, Option<String>, Option<String>, Option<String>) {
+    #[allow(clippy::type_complexity)]
+    fn extract_media_urls(
+        &self,
+        game: &SSGame,
+    ) -> (
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+    ) {
         let medias = match &game.medias {
             Some(m) => m,
             None => return (None, None, None, None, None),
@@ -532,24 +579,26 @@ impl GameScraper {
         for media in medias {
             let media_type = media.media_type.as_deref().unwrap_or("");
             let url = media.url.as_deref().unwrap_or("");
-            
-            if url.is_empty() { continue; }
+
+            if url.is_empty() {
+                continue;
+            }
 
             match media_type {
-                "box-2D" | "box-2D-front" => {
-                    if box_art.is_none() { box_art = Some(url.to_string()); }
+                "box-2D" | "box-2D-front" if box_art.is_none() => {
+                    box_art = Some(url.to_string());
                 }
-                "ss" | "sstitle" => {
-                    if screenshot.is_none() { screenshot = Some(url.to_string()); }
+                "ss" | "sstitle" if screenshot.is_none() => {
+                    screenshot = Some(url.to_string());
                 }
-                "wheel" | "wheel-hd" | "wheel-carbon" | "wheel-steel" => {
-                    if wheel.is_none() { wheel = Some(url.to_string()); }
+                "wheel" | "wheel-hd" | "wheel-carbon" | "wheel-steel" if wheel.is_none() => {
+                    wheel = Some(url.to_string());
                 }
-                "screenmarquee" | "marquee" => {
-                    if marquee.is_none() { marquee = Some(url.to_string()); }
+                "screenmarquee" | "marquee" if marquee.is_none() => {
+                    marquee = Some(url.to_string());
                 }
-                "video" | "video-normalized" => {
-                    if video.is_none() { video = Some(url.to_string()); }
+                "video" | "video-normalized" if video.is_none() => {
+                    video = Some(url.to_string());
                 }
                 _ => {}
             }
@@ -565,7 +614,7 @@ impl GameScraper {
             .replace(".7z", "")
             .replace("_", " ")
             .replace("-", " ");
-        
+
         // Title case the cleaned name
         let title = clean_name
             .split_whitespace()
@@ -613,7 +662,7 @@ impl GameScraper {
         info!("Downloading media: {} -> {:?}", url, dest);
 
         let resp = self.client.get(url).send().await?;
-        
+
         if !resp.status().is_success() {
             warn!("Failed to download {}: status {}", url, resp.status());
             return Ok(());
@@ -621,8 +670,12 @@ impl GameScraper {
 
         let bytes = resp.bytes().await?;
         tokio::fs::write(dest, bytes).await?;
-        
-        debug!("Downloaded {} bytes to {:?}", dest.metadata().map(|m| m.len()).unwrap_or(0), dest);
+
+        debug!(
+            "Downloaded {} bytes to {:?}",
+            dest.metadata().map(|m| m.len()).unwrap_or(0),
+            dest
+        );
         Ok(())
     }
 
@@ -634,42 +687,52 @@ impl GameScraper {
         crc32: Option<&str>,
     ) -> Result<ScrapedGameInfo> {
         let info = self.scrape(rom_name, system_name, crc32).await?;
-        
+
         let game_media_dir = self.media_dir.join(system_name);
         let clean_name = rom_name.replace(".zip", "").replace(".7z", "");
 
         // Download box art
         if let Some(url) = &info.box_art_url {
             let ext = url.rsplit('.').next().unwrap_or("png");
-            let dest = game_media_dir.join("Boxes").join(format!("{}.{}", clean_name, ext));
+            let dest = game_media_dir
+                .join("Boxes")
+                .join(format!("{}.{}", clean_name, ext));
             self.download_media(url, &dest).await.ok();
         }
 
         // Download screenshot
         if let Some(url) = &info.screenshot_url {
             let ext = url.rsplit('.').next().unwrap_or("png");
-            let dest = game_media_dir.join("Screenshots").join(format!("{}.{}", clean_name, ext));
+            let dest = game_media_dir
+                .join("Screenshots")
+                .join(format!("{}.{}", clean_name, ext));
             self.download_media(url, &dest).await.ok();
         }
 
         // Download wheel art
         if let Some(url) = &info.wheel_url {
             let ext = url.rsplit('.').next().unwrap_or("png");
-            let dest = game_media_dir.join("Wheels").join(format!("{}.{}", clean_name, ext));
+            let dest = game_media_dir
+                .join("Wheels")
+                .join(format!("{}.{}", clean_name, ext));
             self.download_media(url, &dest).await.ok();
         }
 
         // Download marquee
         if let Some(url) = &info.marquee_url {
             let ext = url.rsplit('.').next().unwrap_or("png");
-            let dest = game_media_dir.join("Marquees").join(format!("{}.{}", clean_name, ext));
+            let dest = game_media_dir
+                .join("Marquees")
+                .join(format!("{}.{}", clean_name, ext));
             self.download_media(url, &dest).await.ok();
         }
 
         // Download video
         if let Some(url) = &info.video_url {
             let ext = url.rsplit('.').next().unwrap_or("mp4");
-            let dest = game_media_dir.join("Videos").join(format!("{}.{}", clean_name, ext));
+            let dest = game_media_dir
+                .join("Videos")
+                .join(format!("{}.{}", clean_name, ext));
             self.download_media(url, &dest).await.ok();
         }
 
@@ -700,12 +763,15 @@ impl GameScraper {
             let rom_name = game.filename.as_deref().unwrap_or(&game.title);
 
             if let Some(handle) = &app_handle {
-                let _ = handle.emit("scrape_progress", serde_json::json!({
-                    "current": i + 1,
-                    "total": total,
-                    "game_name": game.title,
-                    "status": "scraping",
-                }));
+                let _ = handle.emit(
+                    "scrape_progress",
+                    serde_json::json!({
+                        "current": i + 1,
+                        "total": total,
+                        "game_name": game.title,
+                        "status": "scraping",
+                    }),
+                );
             }
 
             match self
@@ -719,31 +785,40 @@ impl GameScraper {
                     // Note: DB update would need db ref; returned info for caller to handle
                     scraped += 1;
                     if let Some(handle) = &app_handle {
-                        let _ = handle.emit("scrape_progress", serde_json::json!({
-                            "current": i + 1,
-                            "total": total,
-                            "game_name": game.title,
-                            "status": "done",
-                        }));
+                        let _ = handle.emit(
+                            "scrape_progress",
+                            serde_json::json!({
+                                "current": i + 1,
+                                "total": total,
+                                "game_name": game.title,
+                                "status": "done",
+                            }),
+                        );
                     }
                 }
                 Err(e) => {
                     warn!("Failed to scrape {}: {}", game.title, e);
                     errors += 1;
                     if let Some(handle) = &app_handle {
-                        let _ = handle.emit("scrape_progress", serde_json::json!({
-                            "current": i + 1,
-                            "total": total,
-                            "game_name": game.title,
-                            "status": "error",
-                            "error": e.to_string(),
-                        }));
+                        let _ = handle.emit(
+                            "scrape_progress",
+                            serde_json::json!({
+                                "current": i + 1,
+                                "total": total,
+                                "game_name": game.title,
+                                "status": "error",
+                                "error": e.to_string(),
+                            }),
+                        );
                     }
                 }
             }
         }
 
-        info!("Batch scraping complete: {} scraped, {} errors", scraped, errors);
+        info!(
+            "Batch scraping complete: {} scraped, {} errors",
+            scraped, errors
+        );
         (scraped, errors)
     }
 }

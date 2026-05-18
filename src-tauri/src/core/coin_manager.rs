@@ -1,10 +1,10 @@
-use std::sync::Arc;
-use tokio::sync::Mutex;
-use chrono::{DateTime, Utc};
-use tracing::{info, warn};
 use crate::db::Database;
 use crate::error::Result;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+use tokio::sync::Mutex;
+use tracing::{info, warn};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum CoinEvent {
@@ -76,15 +76,16 @@ impl CoinManager {
         state.coins_inserted += amount;
         state.last_event = Some(Utc::now());
 
-        info!("Added {} coins. New balance: {}", amount, state.total_balance);
+        info!(
+            "Added {} coins. New balance: {}",
+            amount, state.total_balance
+        );
 
         // Log coin event to database
-        self.db.log_coin_event(
-            CoinEvent::Inserted.as_str(),
-            amount,
-            "coin_slot",
-            None,
-        ).await.ok();
+        self.db
+            .log_coin_event(CoinEvent::Inserted.as_str(), amount, "coin_slot", None)
+            .await
+            .ok();
 
         Ok(state.clone())
     }
@@ -93,7 +94,10 @@ impl CoinManager {
         let mut state = self.state.lock().await;
 
         if state.total_balance < amount {
-            warn!("Insufficient coins. Have: {}, Need: {}", state.total_balance, amount);
+            warn!(
+                "Insufficient coins. Have: {}, Need: {}",
+                state.total_balance, amount
+            );
             return Err(crate::error::NeoCabError::System(
                 "Insufficient coins for this game".to_string(),
             ));
@@ -103,15 +107,16 @@ impl CoinManager {
         state.coins_used += amount;
         state.last_event = Some(Utc::now());
 
-        info!("Used {} coins. New balance: {}", amount, state.total_balance);
+        info!(
+            "Used {} coins. New balance: {}",
+            amount, state.total_balance
+        );
 
         // Log coin event to database
-        self.db.log_coin_event(
-            CoinEvent::Used.as_str(),
-            amount,
-            "game_start",
-            None,
-        ).await.ok();
+        self.db
+            .log_coin_event(CoinEvent::Used.as_str(), amount, "game_start", None)
+            .await
+            .ok();
 
         Ok(state.clone())
     }
@@ -129,15 +134,16 @@ impl CoinManager {
         state.total_balance -= amount;
         state.last_event = Some(Utc::now());
 
-        info!("Returned {} coins. New balance: {}", amount, state.total_balance);
+        info!(
+            "Returned {} coins. New balance: {}",
+            amount, state.total_balance
+        );
 
         // Log coin event to database
-        self.db.log_coin_event(
-            CoinEvent::Returned.as_str(),
-            amount,
-            "coin_return",
-            None,
-        ).await.ok();
+        self.db
+            .log_coin_event(CoinEvent::Returned.as_str(), amount, "coin_return", None)
+            .await
+            .ok();
 
         Ok(state.clone())
     }
@@ -150,10 +156,14 @@ impl CoinManager {
         let mut state = self.state.lock().await;
 
         if state.total_balance < game_cost {
-            warn!("Cannot start game. Cost: {}, Balance: {}", game_cost, state.total_balance);
-            return Err(crate::error::NeoCabError::System(
-                format!("Need {} more coins", game_cost - state.total_balance),
-            ));
+            warn!(
+                "Cannot start game. Cost: {}, Balance: {}",
+                game_cost, state.total_balance
+            );
+            return Err(crate::error::NeoCabError::System(format!(
+                "Need {} more coins",
+                game_cost - state.total_balance
+            )));
         }
 
         state.total_balance -= game_cost;
@@ -161,15 +171,16 @@ impl CoinManager {
         state.is_game_running = true;
         state.last_event = Some(Utc::now());
 
-        info!("Game started. Cost: {}. New balance: {}", game_cost, state.total_balance);
+        info!(
+            "Game started. Cost: {}. New balance: {}",
+            game_cost, state.total_balance
+        );
 
         // Log coin event
-        self.db.log_coin_event(
-            CoinEvent::Used.as_str(),
-            game_cost,
-            "game_start",
-            None,
-        ).await.ok();
+        self.db
+            .log_coin_event(CoinEvent::Used.as_str(), game_cost, "game_start", None)
+            .await
+            .ok();
 
         Ok(state.clone())
     }

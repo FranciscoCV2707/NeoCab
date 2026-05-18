@@ -53,7 +53,7 @@ pub struct ThemeConfig {
 #[tauri::command]
 pub async fn save_theme_config(config: ThemeConfig) -> Result<()> {
     let path = PathBuf::from("config/themes/current_theme.json");
-    
+
     // Ensure directory exists
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
@@ -61,7 +61,7 @@ pub async fn save_theme_config(config: ThemeConfig) -> Result<()> {
 
     let json = serde_json::to_string_pretty(&config)?;
     fs::write(&path, json)?;
-    
+
     info!("Theme configuration saved to {:?}", path);
     Ok(())
 }
@@ -69,7 +69,7 @@ pub async fn save_theme_config(config: ThemeConfig) -> Result<()> {
 #[tauri::command]
 pub async fn get_theme_config() -> Result<ThemeConfig> {
     let path = PathBuf::from("config/themes/current_theme.json");
-    
+
     if path.exists() {
         let content = fs::read_to_string(path)?;
         let config: ThemeConfig = serde_json::from_str(&content)?;
@@ -79,19 +79,29 @@ pub async fn get_theme_config() -> Result<ThemeConfig> {
         Ok(ThemeConfig {
             background: "".to_string(),
             elements: vec![
-                ThemeElement { 
-                    id: "video_box".to_string(), 
-                    name: "Video Preview".to_string(), 
-                    x: 10.0, y: 10.0, width: 40.0, height: 40.0, 
-                    opacity: 1.0, rotation: 0.0, r#type: "video".to_string(), 
-                    content: None 
+                ThemeElement {
+                    id: "video_box".to_string(),
+                    name: "Video Preview".to_string(),
+                    x: 10.0,
+                    y: 10.0,
+                    width: 40.0,
+                    height: 40.0,
+                    opacity: 1.0,
+                    rotation: 0.0,
+                    r#type: "video".to_string(),
+                    content: None,
                 },
-                ThemeElement { 
-                    id: "wheel_box".to_string(), 
-                    name: "Game Wheel".to_string(), 
-                    x: 60.0, y: 0.0, width: 40.0, height: 100.0, 
-                    opacity: 1.0, rotation: 0.0, r#type: "wheel".to_string(), 
-                    content: None 
+                ThemeElement {
+                    id: "wheel_box".to_string(),
+                    name: "Game Wheel".to_string(),
+                    x: 60.0,
+                    y: 0.0,
+                    width: 40.0,
+                    height: 100.0,
+                    opacity: 1.0,
+                    rotation: 0.0,
+                    r#type: "wheel".to_string(),
+                    content: None,
                 },
             ],
             sounds: ThemeSounds {
@@ -110,7 +120,7 @@ pub async fn get_theme_config() -> Result<ThemeConfig> {
                 enabled: true,
                 opacity: 1.0,
                 auto_hide: true,
-            }
+            },
         })
     }
 }

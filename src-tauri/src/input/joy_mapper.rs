@@ -1,8 +1,8 @@
-use std::collections::HashMap;
-use std::time::Instant;
-use std::path::Path;
 use serde::{Deserialize, Serialize};
-use tracing::{info, debug};
+use std::collections::HashMap;
+use std::path::Path;
+use std::time::Instant;
+use tracing::{debug, info};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", content = "value")]
@@ -39,9 +39,15 @@ pub enum JoyTrigger {
 pub enum ResponseCurve {
     #[default]
     Linear,
-    Exponential { factor: f32 },
-    Digital { threshold: f32 },
-    Spline { control_points: Vec<(f32, f32)> },
+    Exponential {
+        factor: f32,
+    },
+    Digital {
+        threshold: f32,
+    },
+    Spline {
+        control_points: Vec<(f32, f32)>,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -89,7 +95,9 @@ pub struct DeadzoneConfig {
     pub anti_deadzone: f32,
 }
 
-fn default_deadzone() -> f32 { 0.15 }
+fn default_deadzone() -> f32 {
+    0.15
+}
 
 impl Default for DeadzoneConfig {
     fn default() -> Self {
@@ -109,7 +117,9 @@ pub struct TriggerRange {
     pub max: f32,
 }
 
-fn default_trigger_max() -> f32 { 1.0 }
+fn default_trigger_max() -> f32 {
+    1.0
+}
 
 impl Default for TriggerRange {
     fn default() -> Self {
@@ -125,11 +135,16 @@ pub struct StickDelayConfig {
     pub delay_ms: u64,
 }
 
-fn default_stick_delay_ms() -> u64 { 50 }
+fn default_stick_delay_ms() -> u64 {
+    50
+}
 
 impl Default for StickDelayConfig {
     fn default() -> Self {
-        Self { enabled: false, delay_ms: 50 }
+        Self {
+            enabled: false,
+            delay_ms: 50,
+        }
     }
 }
 
@@ -220,6 +235,12 @@ impl Clone for JoyMapper {
     }
 }
 
+impl Default for JoyMapper {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl JoyMapper {
     pub fn new() -> Self {
         Self {
@@ -267,7 +288,9 @@ impl JoyMapper {
     }
 
     pub fn get_recorded_trigger(&self) -> Option<JoyTrigger> {
-        self.recording.as_ref().and_then(|r| r.detected_trigger.clone())
+        self.recording
+            .as_ref()
+            .and_then(|r| r.detected_trigger.clone())
     }
 
     pub fn get_active_set_name(&self) -> &str {
@@ -299,7 +322,10 @@ impl JoyMapper {
         };
         if profile.sets.len() > 1 {
             self.active_set_index = (self.active_set_index + 1) % profile.sets.len();
-            info!("Cycled to set: {}", profile.sets[self.active_set_index].name);
+            info!(
+                "Cycled to set: {}",
+                profile.sets[self.active_set_index].name
+            );
         }
     }
 
@@ -323,7 +349,8 @@ impl JoyMapper {
 
         if pressed {
             self.combo_buffer.insert(button, now);
-            self.combo_buffer.retain(|_, t| now.duration_since(*t).as_millis() < 300);
+            self.combo_buffer
+                .retain(|_, t| now.duration_since(*t).as_millis() < 300);
         }
 
         let trigger = JoyTrigger::Button { button };
@@ -372,14 +399,11 @@ impl JoyMapper {
             }
         };
 
-        let is_trigger_axis = match axis {
-            4 | 5 => true,
-            _ => false,
-        };
+        let is_trigger_axis = matches!(axis, 4 | 5);
 
         let (dz_config, curve) = if is_trigger_axis {
             (
-                profile.trigger_deadzone.clone().unwrap_or_else(|| DeadzoneConfig {
+                profile.trigger_deadzone.clone().unwrap_or(DeadzoneConfig {
                     r#type: DeadzoneType::Linear,
                     value: 0.1,
                     anti_deadzone: 0.0,
@@ -388,13 +412,25 @@ impl JoyMapper {
             )
         } else if axis < 2 {
             (
-                profile.left_stick_deadzone.clone().unwrap_or(profile.deadzone.clone()),
-                profile.left_stick_curve.clone().unwrap_or(profile.response_curve.clone()),
+                profile
+                    .left_stick_deadzone
+                    .clone()
+                    .unwrap_or(profile.deadzone.clone()),
+                profile
+                    .left_stick_curve
+                    .clone()
+                    .unwrap_or(profile.response_curve.clone()),
             )
         } else {
             (
-                profile.right_stick_deadzone.clone().unwrap_or(profile.deadzone.clone()),
-                profile.right_stick_curve.clone().unwrap_or(profile.response_curve.clone()),
+                profile
+                    .right_stick_deadzone
+                    .clone()
+                    .unwrap_or(profile.deadzone.clone()),
+                profile
+                    .right_stick_curve
+                    .clone()
+                    .unwrap_or(profile.response_curve.clone()),
             )
         };
 
@@ -410,13 +446,17 @@ impl JoyMapper {
 
         if let Some(stick_cfg) = &profile.stick_delay {
             if stick_cfg.enabled && !is_trigger_axis {
-                let state = self.stick_delay_states.entry(axis).or_insert_with(|| StickDelayState {
-                    last_direction_change: Instant::now(),
-                    last_axis_value: old_val,
-                    blocked: false,
-                });
+                let state =
+                    self.stick_delay_states
+                        .entry(axis)
+                        .or_insert_with(|| StickDelayState {
+                            last_direction_change: Instant::now(),
+                            last_axis_value: old_val,
+                            blocked: false,
+                        });
 
-                let crossed_zero = (old_val > 0.0 && processed < 0.0) || (old_val < 0.0 && processed > 0.0);
+                let crossed_zero =
+                    (old_val > 0.0 && processed < 0.0) || (old_val < 0.0 && processed > 0.0);
                 if crossed_zero {
                     state.last_direction_change = Instant::now();
                     state.blocked = true;
@@ -440,7 +480,10 @@ impl JoyMapper {
         let mut actions = Vec::new();
         let digital_threshold = 0.5;
 
-        let pos_trigger = JoyTrigger::Axis { axis, direction: AxisDirection::Positive };
+        let pos_trigger = JoyTrigger::Axis {
+            axis,
+            direction: AxisDirection::Positive,
+        };
         if processed_value > digital_threshold && old_val <= digital_threshold {
             if let Some(recording) = &mut self.recording {
                 recording.detected_trigger = Some(pos_trigger.clone());
@@ -451,7 +494,10 @@ impl JoyMapper {
             actions.extend(self.process_trigger(&pos_trigger, false));
         }
 
-        let neg_trigger = JoyTrigger::Axis { axis, direction: AxisDirection::Negative };
+        let neg_trigger = JoyTrigger::Axis {
+            axis,
+            direction: AxisDirection::Negative,
+        };
         if processed_value < -digital_threshold && old_val >= -digital_threshold {
             if let Some(recording) = &mut self.recording {
                 recording.detected_trigger = Some(neg_trigger.clone());
@@ -465,7 +511,13 @@ impl JoyMapper {
         actions
     }
 
-    pub fn handle_radial_stick(&mut self, axis_x: u8, axis_y: u8, x: f32, y: f32) -> Vec<MappedAction> {
+    pub fn handle_radial_stick(
+        &mut self,
+        axis_x: u8,
+        axis_y: u8,
+        x: f32,
+        y: f32,
+    ) -> Vec<MappedAction> {
         let profile = match &self.active_profile {
             Some(p) => p,
             None => {
@@ -475,8 +527,14 @@ impl JoyMapper {
             }
         };
 
-        let dz_config = profile.left_stick_deadzone.clone().unwrap_or(profile.deadzone.clone());
-        let curve = profile.left_stick_curve.clone().unwrap_or(profile.response_curve.clone());
+        let dz_config = profile
+            .left_stick_deadzone
+            .clone()
+            .unwrap_or(profile.deadzone.clone());
+        let curve = profile
+            .left_stick_curve
+            .clone()
+            .unwrap_or(profile.response_curve.clone());
 
         let magnitude = (x * x + y * y).sqrt();
 
@@ -493,7 +551,9 @@ impl JoyMapper {
             let processed_y = self.apply_axis_transform(y, &dz_config, &curve);
             self.axis_states.insert(axis_x, processed_x);
             self.axis_states.insert(axis_y, processed_y);
-            return self.handle_axis(axis_x, x).into_iter()
+            return self
+                .handle_axis(axis_x, x)
+                .into_iter()
                 .chain(self.handle_axis(axis_y, y))
                 .collect();
         };
@@ -515,13 +575,27 @@ impl JoyMapper {
         let digital_threshold = 0.5;
 
         if new_x.abs() > digital_threshold {
-            let dir = if new_x > 0.0 { AxisDirection::Positive } else { AxisDirection::Negative };
-            let trigger = JoyTrigger::Axis { axis: axis_x, direction: dir };
+            let dir = if new_x > 0.0 {
+                AxisDirection::Positive
+            } else {
+                AxisDirection::Negative
+            };
+            let trigger = JoyTrigger::Axis {
+                axis: axis_x,
+                direction: dir,
+            };
             actions.extend(self.process_trigger(&trigger, true));
         }
         if new_y.abs() > digital_threshold {
-            let dir = if new_y > 0.0 { AxisDirection::Positive } else { AxisDirection::Negative };
-            let trigger = JoyTrigger::Axis { axis: axis_y, direction: dir };
+            let dir = if new_y > 0.0 {
+                AxisDirection::Positive
+            } else {
+                AxisDirection::Negative
+            };
+            let trigger = JoyTrigger::Axis {
+                axis: axis_y,
+                direction: dir,
+            };
             actions.extend(self.process_trigger(&trigger, true));
         }
 
@@ -554,7 +628,11 @@ impl JoyMapper {
             norm
         };
 
-        if value >= 0.0 { final_val } else { -final_val }
+        if value >= 0.0 {
+            final_val
+        } else {
+            -final_val
+        }
     }
 
     fn apply_curve(&self, value: f32, curve: &ResponseCurve) -> f32 {
@@ -562,7 +640,11 @@ impl JoyMapper {
             ResponseCurve::Linear => value,
             ResponseCurve::Exponential { factor } => value.powf(*factor),
             ResponseCurve::Digital { threshold } => {
-                if value >= *threshold { 1.0 } else { 0.0 }
+                if value >= *threshold {
+                    1.0
+                } else {
+                    0.0
+                }
             }
             ResponseCurve::Spline { control_points } => {
                 if control_points.len() < 2 {
@@ -574,8 +656,12 @@ impl JoyMapper {
     }
 
     fn interpolate_spline(&self, x: f32, points: &[(f32, f32)]) -> f32 {
-        if x <= points[0].0 { return points[0].1; }
-        if x >= points.last().unwrap().0 { return points.last().unwrap().1; }
+        if x <= points[0].0 {
+            return points[0].1;
+        }
+        if x >= points.last().unwrap().0 {
+            return points.last().unwrap().1;
+        }
 
         for i in 0..points.len() - 1 {
             if x >= points[i].0 && x <= points[i + 1].0 {
@@ -633,11 +719,23 @@ impl JoyMapper {
         let mut actions = Vec::new();
         let now = Instant::now();
 
-        let triggers_to_check: Vec<(JoyTrigger, Option<u64>, Option<u64>, Option<MappedAction>)> = self.get_active_mappings()
+        #[allow(clippy::type_complexity)]
+        let triggers_to_check: Vec<(
+            JoyTrigger,
+            Option<u64>,
+            Option<u64>,
+            Option<MappedAction>,
+        )> = self
+            .get_active_mappings()
             .iter()
             .filter_map(|m| {
                 if self.press_times.contains_key(&m.trigger) {
-                    Some((m.trigger.clone(), m.hold_ms, m.repeat_ms, m.hold_action.clone()))
+                    Some((
+                        m.trigger.clone(),
+                        m.hold_ms,
+                        m.repeat_ms,
+                        m.hold_action.clone(),
+                    ))
                 } else {
                     None
                 }
@@ -653,7 +751,11 @@ impl JoyMapper {
                     if elapsed >= hold && !already_fired {
                         if let Some(ref ha) = hold_action {
                             actions.push(ha.clone());
-                        } else if let Some(mapping) = self.get_active_mappings().iter().find(|m| m.trigger == trigger) {
+                        } else if let Some(mapping) = self
+                            .get_active_mappings()
+                            .iter()
+                            .find(|m| m.trigger == trigger)
+                        {
                             actions.push(mapping.action.clone());
                         }
                         self.hold_fired.insert(trigger.clone(), true);
@@ -663,9 +765,17 @@ impl JoyMapper {
                 if let Some(repeat) = repeat_ms {
                     let already_fired = self.hold_fired.get(&trigger).cloned().unwrap_or(false);
                     if already_fired {
-                        let last = self.last_repeat.get(&trigger).cloned().unwrap_or(*press_time);
+                        let last = self
+                            .last_repeat
+                            .get(&trigger)
+                            .cloned()
+                            .unwrap_or(*press_time);
                         if now.duration_since(last).as_millis() as u64 >= repeat {
-                            if let Some(mapping) = self.get_active_mappings().iter().find(|m| m.trigger == trigger) {
+                            if let Some(mapping) = self
+                                .get_active_mappings()
+                                .iter()
+                                .find(|m| m.trigger == trigger)
+                            {
                                 actions.push(mapping.action.clone());
                             }
                             self.last_repeat.insert(trigger.clone(), now);
@@ -719,10 +829,34 @@ impl JoyMapper {
             trigger_range: None,
             stick_delay: None,
             mappings: vec![
-                JoyMapping { trigger: JoyTrigger::Button { button: 0 }, action: MappedAction::Key("Enter".to_string()), hold_ms: None, repeat_ms: None, hold_action: None },
-                JoyMapping { trigger: JoyTrigger::Button { button: 1 }, action: MappedAction::Key("Escape".to_string()), hold_ms: None, repeat_ms: None, hold_action: None },
-                JoyMapping { trigger: JoyTrigger::Button { button: 7 }, action: MappedAction::ArcadeAction(ArcadeAction::StartGame), hold_ms: None, repeat_ms: None, hold_action: None },
-                JoyMapping { trigger: JoyTrigger::Button { button: 6 }, action: MappedAction::ArcadeAction(ArcadeAction::InsertCoin), hold_ms: None, repeat_ms: None, hold_action: None },
+                JoyMapping {
+                    trigger: JoyTrigger::Button { button: 0 },
+                    action: MappedAction::Key("Enter".to_string()),
+                    hold_ms: None,
+                    repeat_ms: None,
+                    hold_action: None,
+                },
+                JoyMapping {
+                    trigger: JoyTrigger::Button { button: 1 },
+                    action: MappedAction::Key("Escape".to_string()),
+                    hold_ms: None,
+                    repeat_ms: None,
+                    hold_action: None,
+                },
+                JoyMapping {
+                    trigger: JoyTrigger::Button { button: 7 },
+                    action: MappedAction::ArcadeAction(ArcadeAction::StartGame),
+                    hold_ms: None,
+                    repeat_ms: None,
+                    hold_action: None,
+                },
+                JoyMapping {
+                    trigger: JoyTrigger::Button { button: 6 },
+                    action: MappedAction::ArcadeAction(ArcadeAction::InsertCoin),
+                    hold_ms: None,
+                    repeat_ms: None,
+                    hold_action: None,
+                },
             ],
             sets: Vec::new(),
         }
@@ -730,33 +864,68 @@ impl JoyMapper {
 
     fn arcade_stick_profile(name: &str) -> JoyProfile {
         let mut profile = Self::generic_profile(name);
-        profile.deadzone = DeadzoneConfig { r#type: DeadzoneType::Radial, value: 0.1, anti_deadzone: 0.0 };
+        profile.deadzone = DeadzoneConfig {
+            r#type: DeadzoneType::Radial,
+            value: 0.1,
+            anti_deadzone: 0.0,
+        };
         profile.response_curve = ResponseCurve::Digital { threshold: 0.7 };
         profile
     }
 
     fn snes_pad_profile(name: &str) -> JoyProfile {
         let mut profile = Self::generic_profile(name);
-        profile.deadzone = DeadzoneConfig { r#type: DeadzoneType::Linear, value: 0.2, anti_deadzone: 0.0 };
+        profile.deadzone = DeadzoneConfig {
+            r#type: DeadzoneType::Linear,
+            value: 0.2,
+            anti_deadzone: 0.0,
+        };
         profile.response_curve = ResponseCurve::Digital { threshold: 0.6 };
         profile
     }
 
     fn xbox_controller_profile(name: &str) -> JoyProfile {
         let mut profile = Self::generic_profile(name);
-        profile.left_stick_deadzone = Some(DeadzoneConfig { r#type: DeadzoneType::Radial, value: 0.15, anti_deadzone: 0.0 });
-        profile.right_stick_deadzone = Some(DeadzoneConfig { r#type: DeadzoneType::Radial, value: 0.15, anti_deadzone: 0.0 });
-        profile.trigger_deadzone = Some(DeadzoneConfig { r#type: DeadzoneType::Linear, value: 0.1, anti_deadzone: 0.0 });
+        profile.left_stick_deadzone = Some(DeadzoneConfig {
+            r#type: DeadzoneType::Radial,
+            value: 0.15,
+            anti_deadzone: 0.0,
+        });
+        profile.right_stick_deadzone = Some(DeadzoneConfig {
+            r#type: DeadzoneType::Radial,
+            value: 0.15,
+            anti_deadzone: 0.0,
+        });
+        profile.trigger_deadzone = Some(DeadzoneConfig {
+            r#type: DeadzoneType::Linear,
+            value: 0.1,
+            anti_deadzone: 0.0,
+        });
         profile.left_stick_curve = Some(ResponseCurve::Exponential { factor: 2.0 });
         profile.right_stick_curve = Some(ResponseCurve::Exponential { factor: 2.0 });
-        profile.trigger_range = Some(TriggerRange { min: 0.05, max: 1.0 });
+        profile.trigger_range = Some(TriggerRange {
+            min: 0.05,
+            max: 1.0,
+        });
 
         let shift_set = MappingSet {
             name: "shift".to_string(),
             toggle_button: Some(5),
             mappings: vec![
-                JoyMapping { trigger: JoyTrigger::Button { button: 0 }, action: MappedAction::ArcadeAction(ArcadeAction::QuickSave), hold_ms: None, repeat_ms: None, hold_action: None },
-                JoyMapping { trigger: JoyTrigger::Button { button: 1 }, action: MappedAction::ArcadeAction(ArcadeAction::QuickLoad), hold_ms: None, repeat_ms: None, hold_action: None },
+                JoyMapping {
+                    trigger: JoyTrigger::Button { button: 0 },
+                    action: MappedAction::ArcadeAction(ArcadeAction::QuickSave),
+                    hold_ms: None,
+                    repeat_ms: None,
+                    hold_action: None,
+                },
+                JoyMapping {
+                    trigger: JoyTrigger::Button { button: 1 },
+                    action: MappedAction::ArcadeAction(ArcadeAction::QuickLoad),
+                    hold_ms: None,
+                    repeat_ms: None,
+                    hold_action: None,
+                },
             ],
         };
         profile.sets.push(shift_set);
@@ -772,18 +941,41 @@ impl JoyMapper {
     fn flight_stick_profile(name: &str) -> JoyProfile {
         JoyProfile {
             name: name.to_string(),
-            deadzone: DeadzoneConfig { r#type: DeadzoneType::Radial, value: 0.1, anti_deadzone: 0.05 },
+            deadzone: DeadzoneConfig {
+                r#type: DeadzoneType::Radial,
+                value: 0.1,
+                anti_deadzone: 0.05,
+            },
             left_stick_deadzone: None,
             right_stick_deadzone: None,
-            trigger_deadzone: Some(DeadzoneConfig { r#type: DeadzoneType::Linear, value: 0.05, anti_deadzone: 0.0 }),
+            trigger_deadzone: Some(DeadzoneConfig {
+                r#type: DeadzoneType::Linear,
+                value: 0.05,
+                anti_deadzone: 0.0,
+            }),
             response_curve: ResponseCurve::Exponential { factor: 1.5 },
             left_stick_curve: None,
             right_stick_curve: None,
             trigger_range: Some(TriggerRange { min: 0.0, max: 1.0 }),
-            stick_delay: Some(StickDelayConfig { enabled: true, delay_ms: 30 }),
+            stick_delay: Some(StickDelayConfig {
+                enabled: true,
+                delay_ms: 30,
+            }),
             mappings: vec![
-                JoyMapping { trigger: JoyTrigger::Button { button: 0 }, action: MappedAction::Key("Space".to_string()), hold_ms: None, repeat_ms: None, hold_action: None },
-                JoyMapping { trigger: JoyTrigger::Button { button: 1 }, action: MappedAction::Key("LShift".to_string()), hold_ms: None, repeat_ms: None, hold_action: None },
+                JoyMapping {
+                    trigger: JoyTrigger::Button { button: 0 },
+                    action: MappedAction::Key("Space".to_string()),
+                    hold_ms: None,
+                    repeat_ms: None,
+                    hold_action: None,
+                },
+                JoyMapping {
+                    trigger: JoyTrigger::Button { button: 1 },
+                    action: MappedAction::Key("LShift".to_string()),
+                    hold_ms: None,
+                    repeat_ms: None,
+                    hold_action: None,
+                },
             ],
             sets: Vec::new(),
         }
@@ -792,18 +984,41 @@ impl JoyMapper {
     fn racing_wheel_profile(name: &str) -> JoyProfile {
         JoyProfile {
             name: name.to_string(),
-            deadzone: DeadzoneConfig { r#type: DeadzoneType::Radial, value: 0.05, anti_deadzone: 0.1 },
+            deadzone: DeadzoneConfig {
+                r#type: DeadzoneType::Radial,
+                value: 0.05,
+                anti_deadzone: 0.1,
+            },
             left_stick_deadzone: None,
             right_stick_deadzone: None,
-            trigger_deadzone: Some(DeadzoneConfig { r#type: DeadzoneType::Linear, value: 0.05, anti_deadzone: 0.0 }),
+            trigger_deadzone: Some(DeadzoneConfig {
+                r#type: DeadzoneType::Linear,
+                value: 0.05,
+                anti_deadzone: 0.0,
+            }),
             response_curve: ResponseCurve::Linear,
             left_stick_curve: None,
             right_stick_curve: None,
             trigger_range: Some(TriggerRange { min: 0.0, max: 1.0 }),
-            stick_delay: Some(StickDelayConfig { enabled: false, delay_ms: 0 }),
+            stick_delay: Some(StickDelayConfig {
+                enabled: false,
+                delay_ms: 0,
+            }),
             mappings: vec![
-                JoyMapping { trigger: JoyTrigger::Button { button: 0 }, action: MappedAction::Key("Enter".to_string()), hold_ms: None, repeat_ms: None, hold_action: None },
-                JoyMapping { trigger: JoyTrigger::Button { button: 1 }, action: MappedAction::Key("Escape".to_string()), hold_ms: None, repeat_ms: None, hold_action: None },
+                JoyMapping {
+                    trigger: JoyTrigger::Button { button: 0 },
+                    action: MappedAction::Key("Enter".to_string()),
+                    hold_ms: None,
+                    repeat_ms: None,
+                    hold_action: None,
+                },
+                JoyMapping {
+                    trigger: JoyTrigger::Button { button: 1 },
+                    action: MappedAction::Key("Escape".to_string()),
+                    hold_ms: None,
+                    repeat_ms: None,
+                    hold_action: None,
+                },
             ],
             sets: Vec::new(),
         }
@@ -841,7 +1056,10 @@ impl JoyMapper {
                     }
                 }
             } else if trimmed.starts_with("<action>") && trimmed.ends_with("</action>") {
-                if let Some(action) = trimmed.strip_prefix("<action>").and_then(|s| s.strip_suffix("</action>")) {
+                if let Some(action) = trimmed
+                    .strip_prefix("<action>")
+                    .and_then(|s| s.strip_suffix("</action>"))
+                {
                     if let Some(btn) = current_button {
                         profile.mappings.push(JoyMapping {
                             trigger: JoyTrigger::Button { button: btn },
@@ -854,7 +1072,10 @@ impl JoyMapper {
                     current_button = None;
                 }
             } else if trimmed.starts_with("<deadZone>") && trimmed.ends_with("</deadZone>") {
-                if let Some(val) = trimmed.strip_prefix("<deadZone>").and_then(|s| s.strip_suffix("</deadZone>")) {
+                if let Some(val) = trimmed
+                    .strip_prefix("<deadZone>")
+                    .and_then(|s| s.strip_suffix("</deadZone>"))
+                {
                     if let Ok(dz) = val.parse::<f32>() {
                         profile.deadzone.value = dz / 100.0;
                     }
@@ -864,7 +1085,10 @@ impl JoyMapper {
             }
         }
 
-        info!("Imported AntiMicroX profile with {} mappings", profile.mappings.len());
+        info!(
+            "Imported AntiMicroX profile with {} mappings",
+            profile.mappings.len()
+        );
         Ok(profile)
     }
 }
@@ -886,6 +1110,9 @@ impl KeyInjector for WindowsInjector {
     fn press_key(&self, key: &str) {
         use winapi::um::winuser::{SendInput, INPUT, INPUT_KEYBOARD, KEYBDINPUT};
         let vk = self.str_to_vk(key);
+        // SAFETY: Creating a zeroed INPUT struct and populating it with winapi types.
+        // The memory layout must match what Windows API expects (INPUT_KEYBOARD type).
+        // SendInput only reads from the struct and doesn't retain pointers.
         unsafe {
             let mut input = INPUT {
                 type_: INPUT_KEYBOARD,
@@ -905,6 +1132,8 @@ impl KeyInjector for WindowsInjector {
     fn release_key(&self, key: &str) {
         use winapi::um::winuser::{SendInput, INPUT, INPUT_KEYBOARD, KEYBDINPUT, KEYEVENTF_KEYUP};
         let vk = self.str_to_vk(key);
+        // SAFETY: Same as press_key - creating KEYBDINPUT with KEYEVENTF_KEYUP flag.
+        // SendInput processes and releases the key, then returns.
         unsafe {
             let mut input = INPUT {
                 type_: INPUT_KEYBOARD,
@@ -927,11 +1156,31 @@ impl WindowsInjector {
     fn str_to_vk(&self, key: &str) -> u16 {
         use winapi::um::winuser::*;
         match key.to_uppercase().as_str() {
-            "A" => 0x41, "B" => 0x42, "C" => 0x43, "D" => 0x44, "E" => 0x45,
-            "F" => 0x46, "G" => 0x47, "H" => 0x48, "I" => 0x49, "J" => 0x4A,
-            "K" => 0x4B, "L" => 0x4C, "M" => 0x4D, "N" => 0x4E, "O" => 0x4F,
-            "P" => 0x50, "Q" => 0x51, "R" => 0x52, "S" => 0x53, "T" => 0x54,
-            "U" => 0x55, "V" => 0x56, "W" => 0x57, "X" => 0x58, "Y" => 0x59,
+            "A" => 0x41,
+            "B" => 0x42,
+            "C" => 0x43,
+            "D" => 0x44,
+            "E" => 0x45,
+            "F" => 0x46,
+            "G" => 0x47,
+            "H" => 0x48,
+            "I" => 0x49,
+            "J" => 0x4A,
+            "K" => 0x4B,
+            "L" => 0x4C,
+            "M" => 0x4D,
+            "N" => 0x4E,
+            "O" => 0x4F,
+            "P" => 0x50,
+            "Q" => 0x51,
+            "R" => 0x52,
+            "S" => 0x53,
+            "T" => 0x54,
+            "U" => 0x55,
+            "V" => 0x56,
+            "W" => 0x57,
+            "X" => 0x58,
+            "Y" => 0x59,
             "Z" => 0x5A,
             "SPACE" => VK_SPACE as u16,
             "ENTER" | "RETURN" => VK_RETURN as u16,
@@ -947,10 +1196,18 @@ impl WindowsInjector {
             "LSHIFT" | "SHIFT" => VK_LSHIFT as u16,
             "RSHIFT" => VK_RSHIFT as u16,
             "TAB" => VK_TAB as u16,
-            "F1" => VK_F1 as u16, "F2" => VK_F2 as u16, "F3" => VK_F3 as u16,
-            "F4" => VK_F4 as u16, "F5" => VK_F5 as u16, "F6" => VK_F6 as u16,
-            "F7" => VK_F7 as u16, "F8" => VK_F8 as u16, "F9" => VK_F9 as u16,
-            "F10" => VK_F10 as u16, "F11" => VK_F11 as u16, "F12" => VK_F12 as u16,
+            "F1" => VK_F1 as u16,
+            "F2" => VK_F2 as u16,
+            "F3" => VK_F3 as u16,
+            "F4" => VK_F4 as u16,
+            "F5" => VK_F5 as u16,
+            "F6" => VK_F6 as u16,
+            "F7" => VK_F7 as u16,
+            "F8" => VK_F8 as u16,
+            "F9" => VK_F9 as u16,
+            "F10" => VK_F10 as u16,
+            "F11" => VK_F11 as u16,
+            "F12" => VK_F12 as u16,
             _ => 0,
         }
     }
@@ -972,8 +1229,12 @@ impl LinuxInjector {
 
 #[cfg(target_os = "linux")]
 impl KeyInjector for LinuxInjector {
-    fn press_key(&self, key: &str) { debug!("Linux Injector: Pressing {}", key); }
-    fn release_key(&self, key: &str) { debug!("Linux Injector: Releasing {}", key); }
+    fn press_key(&self, key: &str) {
+        debug!("Linux Injector: Pressing {}", key);
+    }
+    fn release_key(&self, key: &str) {
+        debug!("Linux Injector: Releasing {}", key);
+    }
 }
 
 #[cfg(target_os = "linux")]
@@ -981,13 +1242,21 @@ pub struct LinuxInjectorStub;
 
 #[cfg(target_os = "linux")]
 impl KeyInjector for LinuxInjectorStub {
-    fn press_key(&self, key: &str) { debug!("Linux Stub: Pressing {}", key); }
-    fn release_key(&self, key: &str) { debug!("Linux Stub: Releasing {}", key); }
+    fn press_key(&self, key: &str) {
+        debug!("Linux Stub: Pressing {}", key);
+    }
+    fn release_key(&self, key: &str) {
+        debug!("Linux Stub: Releasing {}", key);
+    }
 }
 
 pub struct StubInjector;
 
 impl KeyInjector for StubInjector {
-    fn press_key(&self, key: &str) { debug!("Stub Injector: Pressing {}", key); }
-    fn release_key(&self, key: &str) { debug!("Stub Injector: Releasing {}", key); }
+    fn press_key(&self, key: &str) {
+        debug!("Stub Injector: Pressing {}", key);
+    }
+    fn release_key(&self, key: &str) {
+        debug!("Stub Injector: Releasing {}", key);
+    }
 }

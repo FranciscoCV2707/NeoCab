@@ -1,8 +1,8 @@
-use tauri::{State, Emitter};
+use crate::core::{EmulatorManager, TimerManager};
+use crate::db::Database;
 use serde_json::json;
 use std::sync::Arc;
-use crate::db::Database;
-use crate::core::{EmulatorManager, TimerManager};
+use tauri::{Emitter, State};
 
 #[tauri::command]
 pub async fn list_emulators(
@@ -47,10 +47,13 @@ pub async fn launch_game(
     };
 
     // 3. Emit start event for Fade Overlay
-    let _ = app_handle.emit("game_launch_start", json!({
-        "game": game.title,
-        "system": game.system_id
-    }));
+    let _ = app_handle.emit(
+        "game_launch_start",
+        json!({
+            "game": game.title,
+            "system": game.system_id
+        }),
+    );
 
     // 4. Load JoyMapper profile automatically
     let _ = input_manager.load_profile_for_system(&emu).await;
@@ -66,9 +69,9 @@ pub async fn launch_game(
                     // Let frontend know we're ready
                     tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
                     let _ = app_clone.emit("game_launch_ready", ());
-                    
+
                     let start_time = std::time::Instant::now();
-                    
+
                     // Poll until the process finishes
                     loop {
                         tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
@@ -76,7 +79,7 @@ pub async fn launch_game(
                             break;
                         }
                     }
-                    
+
                     // Process finished
                     let elapsed = start_time.elapsed().as_secs() as i64;
                     if elapsed > 10 {

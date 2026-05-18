@@ -1,10 +1,13 @@
+use sha2::{Digest, Sha256};
 use sqlx::SqlitePool;
-use sha2::{Sha256, Digest};
 use tracing::info;
 
 const MIGRATIONS: &[(&str, &str)] = &[
     ("001_initial", include_str!("001_initial.sql")),
-    ("002_tags_jukebox_safequit", include_str!("002_tags_jukebox_safequit.sql")),
+    (
+        "002_tags_jukebox_safequit",
+        include_str!("002_tags_jukebox_safequit.sql"),
+    ),
 ];
 
 pub async fn run_migrations(pool: &SqlitePool) -> Result<(), sqlx::Error> {
@@ -21,11 +24,9 @@ pub async fn run_migrations(pool: &SqlitePool) -> Result<(), sqlx::Error> {
     .await?;
 
     // Get already applied migrations
-    let applied: Vec<i32> = sqlx::query_scalar(
-        "SELECT version FROM _migrations ORDER BY version"
-    )
-    .fetch_all(pool)
-    .await?;
+    let applied: Vec<i32> = sqlx::query_scalar("SELECT version FROM _migrations ORDER BY version")
+        .fetch_all(pool)
+        .await?;
 
     for (i, (name, sql)) in MIGRATIONS.iter().enumerate() {
         let version = (i + 1) as i32;
@@ -47,14 +48,12 @@ pub async fn run_migrations(pool: &SqlitePool) -> Result<(), sqlx::Error> {
         let mut tx = pool.begin().await?;
         sqlx::query(sql).execute(&mut *tx).await?;
 
-        sqlx::query(
-            "INSERT INTO _migrations (version, name, checksum) VALUES (?, ?, ?)"
-        )
-        .bind(version)
-        .bind(name)
-        .bind(&checksum)
-        .execute(&mut *tx)
-        .await?;
+        sqlx::query("INSERT INTO _migrations (version, name, checksum) VALUES (?, ?, ?)")
+            .bind(version)
+            .bind(name)
+            .bind(&checksum)
+            .execute(&mut *tx)
+            .await?;
 
         tx.commit().await?;
 

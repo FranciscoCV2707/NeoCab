@@ -1,10 +1,10 @@
+use super::trait_adapter::EmulatorAdapter;
+use crate::error::{NeoCabError, Result};
 use async_trait::async_trait;
-use std::process::{Command, Child};
+use std::process::{Child, Command};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tracing::{info, warn, error};
-use crate::error::{Result, NeoCabError};
-use super::trait_adapter::EmulatorAdapter;
+use tracing::{error, info, warn};
 
 pub struct MameAdapter {
     executable: String,
@@ -91,10 +91,7 @@ impl EmulatorAdapter for MameAdapter {
             }
             Err(e) => {
                 error!("Failed to start MAME: {}", e);
-                Err(NeoCabError::System(format!(
-                    "Failed to launch MAME: {}",
-                    e
-                )))
+                Err(NeoCabError::System(format!("Failed to launch MAME: {}", e)))
             }
         }
     }
@@ -112,10 +109,7 @@ impl EmulatorAdapter for MameAdapter {
                 }
                 Err(e) => {
                     warn!("Failed to kill MAME process: {}", e);
-                    Err(NeoCabError::System(format!(
-                        "Failed to stop MAME: {}",
-                        e
-                    )))
+                    Err(NeoCabError::System(format!("Failed to stop MAME: {}", e)))
                 }
             }
         } else {
@@ -131,10 +125,7 @@ mod tests {
 
     #[test]
     fn test_mame_adapter_creation() {
-        let mame = MameAdapter::new(
-            "mame".to_string(),
-            "0.262".to_string(),
-        );
+        let mame = MameAdapter::new("mame".to_string(), "0.262".to_string());
 
         assert_eq!(mame.name(), "mame");
         assert_eq!(mame.version(), "0.262");
@@ -142,10 +133,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_mame_not_running_initially() {
-        let mame = MameAdapter::new(
-            "mame".to_string(),
-            "0.262".to_string(),
-        );
+        let mame = MameAdapter::new("mame".to_string(), "0.262".to_string());
 
         assert!(!mame.is_running().await);
     }

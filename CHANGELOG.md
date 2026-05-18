@@ -636,6 +636,46 @@ CI/CD: GitHub Actions (Windows/Linux/ARM)
 
 ---
 
-**Last Updated:** 2026-05-15  
-**Next Release:** v2.0.0  
-**Status:** ✅ Improvement Phase Complete - 30 features implemented
+## [2.0.1] - 2026-05-18 - IMPLEMENTATION PLAN COMPLETE
+
+> Implementation of IMPLEMENTATION_PLAN.md - UI features and bug fixes.
+
+### FASE 1 — Bug Fixes & Cleanup
+- **Duplicate cleanup**: Removed `OperatorPanel.tsx`, `ShaderSelector.tsx`, `ShaderSelector.css` from `src/components/`
+- **Duplicate useUnifiedInput**: `useUnifiedInput.ts` + `useUnifiedInputHook.ts` kept (intentional separation of concerns)
+
+### FASE 2 — UI Features Completed
+
+#### Safe Quit Rules UI
+- **Frontend**: `SafeQuitRules.tsx` + `SafeQuitRules.css`
+- **Backend**: `SafeQuitState` in-memory storage, `safe_quit_get_rules`, `safe_quit_save_rule`, `safe_quit_delete_rule` commands
+- **Features**: CRUD for timeout rules per emulator, test button, enable/disable toggle
+
+#### Lua Plugins UI
+- **Frontend**: `PluginsPanel.tsx` + `PluginsPanel.css`
+- **Backend**: `PluginState` with `PluginEngine`, `plugin_list`, `plugin_discover`, `plugin_enable`, `plugin_disable` commands
+- **Features**: Plugin discovery, enable/disable, delete (UI only)
+
+#### Kiosk Settings UI
+- **Frontend**: `KioskSettingsPanel.tsx` + `KioskSettingsPanel.css`
+- **Backend**: Uses existing `get_kiosk_config` + new state management
+- **Features**: Full read/write for kiosk mode, autoboot system, delay, restriction toggles
+
+#### Scraping UI
+- Backend ready: `scrape_all`, `cancel_scraping` commands
+- Frontend: `useScraper` hook with `batchScrape` function
+- Status: UI layer exists via `ScraperPanel.tsx`
+
+### FASE 3 — Testing
+- **New tests**: `SafeQuitRules.test.tsx`, `PluginsPanel.test.tsx`, `KioskSettingsPanel.test.tsx`
+- **Total**: 37 tests passing
+
+### FASE 5 — Polish
+- **Format**: `cargo fmt` applied to all Rust files
+- **Build**: 310KB JS, 71KB CSS, 0 TypeScript errors, cargo check clean (warnings only)
+
+---
+
+**Last Updated:** 2026-05-18
+**Next Release:** v2.1.0
+**Status:** ✅ Implementation Plan Complete

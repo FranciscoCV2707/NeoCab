@@ -1,7 +1,7 @@
+use super::{InputHandler, Renderer};
 use crate::Result;
-use super::{Renderer, InputHandler};
-use std::time::{Duration, Instant};
 use std::collections::VecDeque;
+use std::time::{Duration, Instant};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LegacyGameState {
@@ -125,8 +125,12 @@ impl EventLoop {
                 // Log performance stats every 5 seconds
                 if last_stats_report.elapsed() > Duration::from_secs(5) {
                     let (frames, avg_ms, fps) = self.stats.get_stats();
-                    tracing::debug!("Event loop stats: {} frames, {:.2}ms/frame, {:.1} FPS",
-                        frames, avg_ms, fps);
+                    tracing::debug!(
+                        "Event loop stats: {} frames, {:.2}ms/frame, {:.1} FPS",
+                        frames,
+                        avg_ms,
+                        fps
+                    );
                     last_stats_report = Instant::now();
                 }
             }
@@ -195,11 +199,18 @@ impl EventLoop {
                 tracing::trace!("Input: Button 4");
             }
             InputEvent::Pause => {
-                tracing::info!("Input: Pause toggled (currently: {})", if self.paused { "paused" } else { "playing" });
+                tracing::info!(
+                    "Input: Pause toggled (currently: {})",
+                    if self.paused { "paused" } else { "playing" }
+                );
                 match self.current_state {
                     LegacyGameState::Playing => {
                         self.paused = !self.paused;
-                        let new_state = if self.paused { LegacyGameState::Paused } else { LegacyGameState::Playing };
+                        let new_state = if self.paused {
+                            LegacyGameState::Paused
+                        } else {
+                            LegacyGameState::Playing
+                        };
                         self.change_state(new_state);
                     }
                     _ => {}
@@ -215,7 +226,11 @@ impl EventLoop {
 
     fn change_state(&mut self, new_state: LegacyGameState) {
         if std::mem::discriminant(&self.current_state) != std::mem::discriminant(&new_state) {
-            tracing::info!("State transition: {:?} -> {:?}", self.current_state, new_state);
+            tracing::info!(
+                "State transition: {:?} -> {:?}",
+                self.current_state,
+                new_state
+            );
             self.current_state = new_state;
         }
     }
@@ -255,8 +270,12 @@ impl EventLoop {
     async fn shutdown(&mut self) -> Result<()> {
         tracing::info!("Event loop shutting down...");
         let (frames, avg_ms, fps) = self.stats.get_stats();
-        tracing::info!("Final stats: {} frames, {:.2}ms/frame, {:.1} FPS",
-            frames, avg_ms, fps);
+        tracing::info!(
+            "Final stats: {} frames, {:.2}ms/frame, {:.1} FPS",
+            frames,
+            avg_ms,
+            fps
+        );
         tracing::info!("Legacy application shutdown complete");
         Ok(())
     }

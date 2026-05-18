@@ -56,7 +56,7 @@ impl Database {
         sqlx::query(sql).execute(pool).await?;
 
         // Mark as applied
-        use sha2::{Sha256, Digest};
+        use sha2::{Digest, Sha256};
         let mut hasher = Sha256::new();
         hasher.update(sql.as_bytes());
         let checksum = format!("{:x}", hasher.finalize());
@@ -73,7 +73,7 @@ impl Database {
         .await?;
 
         sqlx::query(
-            "INSERT INTO _migrations (version, name, checksum) VALUES (1, '001_initial', ?)"
+            "INSERT INTO _migrations (version, name, checksum) VALUES (1, '001_initial', ?)",
         )
         .bind(&checksum)
         .execute(pool)
@@ -349,7 +349,7 @@ impl Database {
 
         // Tags table
         // Tags table & jukebox table are created via migrations
-        
+
         // Fuzzy match cache table
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS fuzzy_matches (
@@ -528,7 +528,7 @@ impl Database {
 
     pub async fn get_system_by_name(&self, name: &str) -> Result<Option<crate::models::System>> {
         let system = sqlx::query_as::<_, crate::models::System>(
-            "SELECT * FROM systems WHERE name = ? OR display_name = ?"
+            "SELECT * FROM systems WHERE name = ? OR display_name = ?",
         )
         .bind(name)
         .bind(name)
@@ -540,18 +540,18 @@ impl Database {
 
     // Game library methods
     pub async fn get_games_by_system(
-        &self, 
+        &self,
         system_id: i64,
         search: Option<&str>,
         genre: Option<&str>,
         only_favorites: bool,
     ) -> Result<Vec<crate::models::Game>> {
         let mut query = "SELECT * FROM games WHERE 1=1".to_string();
-        
+
         if system_id > 0 {
             query.push_str(" AND system_id = ?");
         }
-        
+
         if search.is_some() {
             query.push_str(" AND (title LIKE ? OR filename LIKE ?)");
         }
@@ -561,15 +561,15 @@ impl Database {
         if only_favorites {
             query.push_str(" AND is_favorite = 1");
         }
-        
+
         query.push_str(" ORDER BY sort_title");
 
         let mut sql = sqlx::query_as::<_, crate::models::Game>(&query);
-            
+
         if system_id > 0 {
             sql = sql.bind(system_id);
         }
-            
+
         if let Some(s) = search {
             let pattern = format!("%{}%", s);
             sql = sql.bind(pattern.clone()).bind(pattern);
@@ -579,7 +579,7 @@ impl Database {
         }
 
         let games = sql.fetch_all(&self.pool).await?;
-        
+
         // Apply secondary fuzzy sorting if search is active
         if let Some(s) = search {
             let mut scored_games: Vec<(crate::models::Game, f64)> = games
@@ -589,7 +589,7 @@ impl Database {
                     (g, sim)
                 })
                 .collect();
-            
+
             scored_games.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
             return Ok(scored_games.into_iter().map(|(g, _)| g).collect());
         }
@@ -599,7 +599,7 @@ impl Database {
 
     pub async fn get_save_states(&self, game_id: i64) -> Result<Vec<crate::models::SaveState>> {
         let states = sqlx::query_as::<_, crate::models::SaveState>(
-            "SELECT * FROM save_states WHERE game_id = ? ORDER BY slot ASC"
+            "SELECT * FROM save_states WHERE game_id = ? ORDER BY slot ASC",
         )
         .bind(game_id)
         .fetch_all(&self.pool)
@@ -615,13 +615,16 @@ impl Database {
         .fetch_all(&self.pool)
         .await?;
 
-        let result = scores.into_iter().map(|(player, score, date)| {
-            serde_json::json!({
-                "player": player,
-                "score": score,
-                "date": date
+        let result = scores
+            .into_iter()
+            .map(|(player, score, date)| {
+                serde_json::json!({
+                    "player": player,
+                    "score": score,
+                    "date": date
+                })
             })
-        }).collect();
+            .collect();
 
         Ok(result)
     }
@@ -664,7 +667,7 @@ impl Database {
             .get("is_favorite");
 
         let new_val = if current == 1 { 0 } else { 1 };
-        
+
         sqlx::query("UPDATE games SET is_favorite = ? WHERE id = ?")
             .bind(new_val)
             .bind(game_id)
@@ -744,7 +747,7 @@ impl Database {
                 total_play_time = total_play_time + ?,
                 last_played = datetime('now'),
                 updated_at = datetime('now')
-            WHERE id = ?"
+            WHERE id = ?",
         )
         .bind(play_time_seconds)
         .bind(game_id)
@@ -765,7 +768,7 @@ impl Database {
         }
 
         // Insert default systems
-        let systems = vec![
+        let systems = [
             (
                 "nes",
                 "Nintendo Entertainment System",
@@ -937,7 +940,7 @@ impl Database {
 
         let result = sqlx::query(
             "INSERT INTO sessions (game_id, started_at, coins_used, coins_inserted)
-             VALUES (?, ?, ?, ?)"
+             VALUES (?, ?, ?, ?)",
         )
         .bind(game_id)
         .bind(&now)
@@ -949,12 +952,17 @@ impl Database {
         Ok(result.last_insert_rowid())
     }
 
-    pub async fn end_game_session(&self, session_id: i64, duration_sec: i64, completed: bool) -> Result<()> {
+    pub async fn end_game_session(
+        &self,
+        session_id: i64,
+        duration_sec: i64,
+        completed: bool,
+    ) -> Result<()> {
         let now = chrono::Utc::now().to_rfc3339();
         let completed_int = if completed { 1 } else { 0 };
 
         sqlx::query(
-            "UPDATE sessions SET ended_at = ?, duration_sec = ?, completed = ? WHERE id = ?"
+            "UPDATE sessions SET ended_at = ?, duration_sec = ?, completed = ? WHERE id = ?",
         )
         .bind(&now)
         .bind(duration_sec)
@@ -1004,23 +1012,26 @@ impl Database {
     pub async fn get_recent_sessions(&self, limit: i64) -> Result<serde_json::Value> {
         let sessions = sqlx::query_as::<_, (i64, i64, String, Option<String>, i64, i64, i32)>(
             "SELECT id, game_id, started_at, ended_at, duration_sec, coins_used, completed
-             FROM sessions ORDER BY started_at DESC LIMIT ?"
+             FROM sessions ORDER BY started_at DESC LIMIT ?",
         )
         .bind(limit)
         .fetch_all(&self.pool)
         .await?;
 
-        let data: Vec<_> = sessions.iter().map(|s| {
-            serde_json::json!({
-                "id": s.0,
-                "game_id": s.1,
-                "started_at": s.2,
-                "ended_at": s.3,
-                "duration_sec": s.4,
-                "coins_used": s.5,
-                "completed": s.6 != 0
+        let data: Vec<_> = sessions
+            .iter()
+            .map(|s| {
+                serde_json::json!({
+                    "id": s.0,
+                    "game_id": s.1,
+                    "started_at": s.2,
+                    "ended_at": s.3,
+                    "duration_sec": s.4,
+                    "coins_used": s.5,
+                    "completed": s.6 != 0
+                })
             })
-        }).collect();
+            .collect();
 
         Ok(serde_json::json!(data))
     }

@@ -1,10 +1,10 @@
+use crate::db::Database;
+use crate::error::{NeoCabError, Result};
+use crate::models::Game;
 use quick_xml::de::from_str;
 use serde::Deserialize;
 use std::fs;
 use std::path::Path;
-use crate::error::{NeoCabError, Result};
-use crate::db::Database;
-use crate::models::Game;
 use std::sync::Arc;
 
 #[derive(Debug, Deserialize)]
@@ -87,7 +87,8 @@ impl UniversalImporter {
 
     pub async fn import_es2_xml(&self, xml_path: &Path, system_id: i64) -> Result<usize> {
         let content = fs::read_to_string(xml_path)?;
-        let gamelist: Gamelist = from_str(&content).map_err(|e| NeoCabError::Config(format!("XML Parse Error: {}", e)))?;
+        let gamelist: Gamelist = from_str(&content)
+            .map_err(|e| NeoCabError::Config(format!("XML Parse Error: {}", e)))?;
 
         let mut count = 0;
         for es_game in gamelist.games {
@@ -111,7 +112,11 @@ impl UniversalImporter {
                 sha1: None,
                 md5: None,
                 description: es_game.desc,
-                year: es_game.releasedate.as_ref().and_then(|d| d.get(0..4)).and_then(|s| s.parse().ok()),
+                year: es_game
+                    .releasedate
+                    .as_ref()
+                    .and_then(|d| d.get(0..4))
+                    .and_then(|s| s.parse().ok()),
                 developer: es_game.developer,
                 publisher: es_game.publisher,
                 genre: es_game.genre,
@@ -143,7 +148,8 @@ impl UniversalImporter {
 
     pub async fn import_hyperspin_xml(&self, xml_path: &Path, system_id: i64) -> Result<usize> {
         let content = fs::read_to_string(xml_path)?;
-        let menu: HyperspinMenu = from_str(&content).map_err(|e| NeoCabError::Config(format!("XML Parse Error: {}", e)))?;
+        let menu: HyperspinMenu = from_str(&content)
+            .map_err(|e| NeoCabError::Config(format!("XML Parse Error: {}", e)))?;
 
         let mut count = 0;
         for hs_game in menu.games {
@@ -195,7 +201,8 @@ impl UniversalImporter {
 
     pub async fn import_launchbox_xml(&self, xml_path: &Path, system_id: i64) -> Result<usize> {
         let content = fs::read_to_string(xml_path)?;
-        let lb_data: LaunchBoxData = from_str(&content).map_err(|e| NeoCabError::Config(format!("XML Parse Error: {}", e)))?;
+        let lb_data: LaunchBoxData = from_str(&content)
+            .map_err(|e| NeoCabError::Config(format!("XML Parse Error: {}", e)))?;
 
         let mut count = 0;
         for lb_game in lb_data.games {

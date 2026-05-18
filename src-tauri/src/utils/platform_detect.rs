@@ -36,8 +36,6 @@ pub fn detect_mode() -> RuntimeMode {
 
 #[cfg(target_os = "windows")]
 fn detect_windows_mode(_arch: &str) -> RuntimeMode {
-    
-
     // Check Windows version
     let version = get_windows_version();
     tracing::debug!("Windows version: {:?}", version);
@@ -54,10 +52,16 @@ fn detect_windows_mode(_arch: &str) -> RuntimeMode {
     } else if version.major >= 6 {
         // Windows Vista, 7, 8, 10, 11 (version 6.0+)
         if has_webview2() {
-            tracing::info!("Windows {} detected with WebView2 - using Modern mode", version.major);
+            tracing::info!(
+                "Windows {} detected with WebView2 - using Modern mode",
+                version.major
+            );
             RuntimeMode::Modern
         } else {
-            tracing::warn!("Windows {} detected WITHOUT WebView2 - falling back to Legacy mode", version.major);
+            tracing::warn!(
+                "Windows {} detected WITHOUT WebView2 - falling back to Legacy mode",
+                version.major
+            );
             RuntimeMode::Legacy
         }
     } else {
@@ -81,23 +85,27 @@ struct WindowsVersion {
 
 #[cfg(target_os = "windows")]
 fn get_windows_version() -> WindowsVersion {
-    use winreg::RegKey;
     use winreg::enums::HKEY_LOCAL_MACHINE;
+    use winreg::RegKey;
 
     match RegKey::predef(HKEY_LOCAL_MACHINE)
         .open_subkey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion")
     {
         Ok(key) => {
-            let major: String = key.get_value("CurrentMajorVersionNumber")
+            let major: String = key
+                .get_value("CurrentMajorVersionNumber")
                 .unwrap_or_else(|_| {
                     // Fallback to CurrentVersion string
-                    key.get_value("CurrentVersion").unwrap_or_else(|_| "10".to_string())
+                    key.get_value("CurrentVersion")
+                        .unwrap_or_else(|_| "10".to_string())
                 });
 
-            let minor: String = key.get_value("CurrentMinorVersionNumber")
+            let minor: String = key
+                .get_value("CurrentMinorVersionNumber")
                 .unwrap_or_else(|_| "0".to_string());
 
-            let build: String = key.get_value("CurrentBuildNumber")
+            let build: String = key
+                .get_value("CurrentBuildNumber")
                 .unwrap_or_else(|_| "0".to_string());
 
             WindowsVersion {
@@ -128,8 +136,8 @@ fn get_windows_version() -> WindowsVersion {
 
 #[cfg(target_os = "windows")]
 fn has_webview2() -> bool {
-    use winreg::RegKey;
     use winreg::enums::HKEY_LOCAL_MACHINE;
+    use winreg::RegKey;
 
     // Check for WebView2 registry entries
     let paths = vec![
@@ -147,8 +155,8 @@ fn has_webview2() -> bool {
     // Also try checking for WebView2 installation directory
     let appdata = std::env::var("LOCALAPPDATA").ok();
     if let Some(appdata_path) = appdata {
-        let webview_path = std::path::PathBuf::from(appdata_path)
-            .join("Microsoft\\EdgeWebView\\Application");
+        let webview_path =
+            std::path::PathBuf::from(appdata_path).join("Microsoft\\EdgeWebView\\Application");
         if webview_path.exists() {
             tracing::debug!("WebView2 detected at filesystem path: {:?}", webview_path);
             return true;

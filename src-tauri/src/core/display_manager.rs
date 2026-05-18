@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DisplayConfig {
@@ -29,6 +29,12 @@ pub struct DisplayManager {
     displays: Vec<DisplayConfig>,
 }
 
+impl Default for DisplayManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DisplayManager {
     pub fn new() -> Self {
         Self {
@@ -36,22 +42,28 @@ impl DisplayManager {
                 DisplayConfig {
                     id: "main".to_string(),
                     monitor: 0,
-                    width: 1920, height: 1080,
-                    rotation: 0, mirror: false,
+                    width: 1920,
+                    height: 1080,
+                    rotation: 0,
+                    mirror: false,
                     layout: Some("arcade-classic".to_string()),
                 },
                 DisplayConfig {
                     id: "marquee".to_string(),
                     monitor: 1,
-                    width: 1920, height: 480,
-                    rotation: 0, mirror: false,
+                    width: 1920,
+                    height: 480,
+                    rotation: 0,
+                    mirror: false,
                     layout: Some("marquee-default".to_string()),
                 },
             ],
         }
     }
 
-    pub fn displays(&self) -> &[DisplayConfig] { &self.displays }
+    pub fn displays(&self) -> &[DisplayConfig] {
+        &self.displays
+    }
     pub fn get(&self, id: &str) -> Option<&DisplayConfig> {
         self.displays.iter().find(|d| d.id == id)
     }

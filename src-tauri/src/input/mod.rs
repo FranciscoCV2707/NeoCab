@@ -1,10 +1,17 @@
-pub mod sdl_backend;
 pub mod gilrs_backend;
+pub mod hotplug;
 pub mod input_manager;
 pub mod joy_mapper;
-pub mod hotplug;
+pub mod sdl_backend;
 
-pub use sdl_backend::SDLBackend;
 pub use gilrs_backend::GilrsBackend;
-pub use input_manager::{InputManager, InputButton, InputEvent, InputEventType, InputDevice, InputMapping, AxisInput, ProfileAssignment};
-pub use joy_mapper::{JoyMapper, JoyProfile, JoyMapping, JoyTrigger, MappedAction, MacroStep, ArcadeAction, ResponseCurve, DeadzoneConfig, DeadzoneType, TriggerRange, StickDelayConfig, MappingSet, KeyInjector, StubInjector};
+pub use input_manager::{
+    AxisInput, InputButton, InputDevice, InputEvent, InputEventType, InputManager, InputMapping,
+    ProfileAssignment,
+};
+pub use joy_mapper::{
+    ArcadeAction, DeadzoneConfig, DeadzoneType, JoyMapper, JoyMapping, JoyProfile, JoyTrigger,
+    KeyInjector, MacroStep, MappedAction, MappingSet, ResponseCurve, StickDelayConfig,
+    StubInjector, TriggerRange,
+};
+pub use sdl_backend::SDLBackend;

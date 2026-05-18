@@ -1,7 +1,7 @@
-use tauri::State;
-use serde_json::json;
 use crate::core::OperatorPanel;
 use crate::db::Database;
+use serde_json::json;
+use tauri::State;
 
 #[tauri::command]
 pub async fn authenticate_operator(
@@ -28,9 +28,7 @@ pub async fn authenticate_operator(
 }
 
 #[tauri::command]
-pub async fn logout_operator(
-    operator_panel: State<'_, OperatorPanel>,
-) -> Result<String, String> {
+pub async fn logout_operator(operator_panel: State<'_, OperatorPanel>) -> Result<String, String> {
     operator_panel.logout().await;
     let result = json!({
         "success": true,
@@ -84,7 +82,8 @@ pub async fn get_operator_stats(
         return Err(json!({
             "success": false,
             "error": "Not authenticated"
-        }).to_string());
+        })
+        .to_string());
     }
 
     match db.get_total_coin_earnings().await {
@@ -119,7 +118,8 @@ pub async fn get_session_stats(
         return Err(json!({
             "success": false,
             "error": "Not authenticated"
-        }).to_string());
+        })
+        .to_string());
     }
 
     match db.get_total_sessions().await {
@@ -153,7 +153,8 @@ pub async fn get_system_health(
         return Err(json!({
             "success": false,
             "error": "Not authenticated"
-        }).to_string());
+        })
+        .to_string());
     }
 
     match db.get_total_games().await {

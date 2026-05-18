@@ -1,6 +1,19 @@
 import { invoke } from '@tauri-apps/api/core';
+import { toast } from '../stores/useNotificationStore';
 
 export type ScriptLanguage = 'lua' | 'javascript' | 'python';
+
+async function invokeSafe<T>(command: string, args?: Record<string, unknown>, silent = false): Promise<T | null> {
+  try {
+    return await invoke<T>(command, args);
+  } catch (e) {
+    if (!silent) {
+      console.error(`[invoke] ${command} failed:`, e);
+      toast.error(command, String(e));
+    }
+    return null;
+  }
+}
 
 export interface Script {
   id: string;
@@ -101,21 +114,21 @@ export function createSafeScriptAPI(_context: ScriptContext): ScriptAPI {
         }
       },
       setVolume: (volume) => {
-        invoke('config_set', { key: 'volume', value: volume }).catch(() => {});
+        invokeSafe('config_set', { key: 'volume', value: volume }, true);
       },
       getVolume: () => 80,
       setTheme: (themeName) => {
-        invoke('set_theme', { themeName }).catch(() => {});
+        invokeSafe('set_theme', { themeName }, true);
       },
       getTheme: () => 'default',
       log: (message) => {
         console.log(`[Script] ${message}`);
       },
       notify: (title, message, type = 'info') => {
-        invoke('show_notification', { title, message, type }).catch(() => {});
+        invokeSafe('show_notification', { title, message, type }, true);
       },
       playSound: (soundId) => {
-        invoke('play_sound', { soundId }).catch(() => {});
+        invokeSafe('play_sound', { soundId }, true);
       },
       getConfig: async (key) => {
         try {
@@ -125,7 +138,7 @@ export function createSafeScriptAPI(_context: ScriptContext): ScriptAPI {
         }
       },
       setConfig: (key, value) => {
-        invoke('config_set', { key, value }).catch(() => {});
+        invokeSafe('config_set', { key, value }, true);
       },
       getSystemInfo: () => ({
         os: 'Windows',
@@ -136,7 +149,7 @@ export function createSafeScriptAPI(_context: ScriptContext): ScriptAPI {
         memoryTotal: 0,
       }),
       exit: () => {
-        invoke('exit_app', {}).catch(() => {});
+        invokeSafe('exit_app', {}, true);
       },
     },
     json: {

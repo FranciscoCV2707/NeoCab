@@ -1,7 +1,7 @@
-use std::sync::Arc;
-use tauri::{State, Emitter};
+use crate::core::{ArcadeConfig, SessionConfig, SessionManager, SessionMode, TimedConfig};
 use serde_json::json;
-use crate::core::{SessionManager, SessionConfig, SessionMode, ArcadeConfig, TimedConfig};
+use std::sync::Arc;
+use tauri::{Emitter, State};
 
 #[tauri::command]
 pub async fn session_insert_coin(
@@ -30,7 +30,10 @@ pub async fn session_start(
 ) -> Result<String, String> {
     match session_manager.start_session(&system_name).await {
         Ok(state) => {
-            let _ = app.emit("session_started", serde_json::to_value(&state).unwrap_or_default());
+            let _ = app.emit(
+                "session_started",
+                serde_json::to_value(&state).unwrap_or_default(),
+            );
             Ok(json!({ "success": true, "state": state }).to_string())
         }
         Err(e) => Err(e.to_string()),
@@ -45,7 +48,10 @@ pub async fn session_check(
     match session_manager.check_session().await {
         Ok(state) => {
             if let crate::core::SessionState::Warning { remaining_seconds } = &state {
-                let _ = app.emit("timer_warning", json!({ "remaining_seconds": remaining_seconds }));
+                let _ = app.emit(
+                    "timer_warning",
+                    json!({ "remaining_seconds": remaining_seconds }),
+                );
             } else if let crate::core::SessionState::SessionExpired = &state {
                 let _ = app.emit("time_expired", json!({}));
             }

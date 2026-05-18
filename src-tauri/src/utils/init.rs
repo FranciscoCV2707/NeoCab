@@ -1,6 +1,6 @@
-/// Application initialization - creates required directories and default configs
-use std::path::PathBuf;
 use crate::Result;
+/// Application initialization - creates required directories and default configs
+use std::path::{Path, PathBuf};
 
 /// Returns the base directory next to the executable (portable install).
 fn base_dir() -> PathBuf {
@@ -42,7 +42,7 @@ pub async fn initialize_app_directories() -> Result<()> {
 }
 
 /// Create default config.yml if it doesn't exist
-fn create_default_config(base: &PathBuf) -> Result<()> {
+fn create_default_config(base: &Path) -> Result<()> {
     let config_path = base.join("data").join("config.yml");
 
     if config_path.exists() {
@@ -113,7 +113,7 @@ hardware:
 }
 
 /// Create default media directory structure
-fn create_default_media_structure(base: &PathBuf) -> Result<()> {
+fn create_default_media_structure(base: &Path) -> Result<()> {
     let media_systems = vec!["arcade", "nes", "snes", "genesis", "psx", "n64", "gb"];
 
     for system in media_systems {

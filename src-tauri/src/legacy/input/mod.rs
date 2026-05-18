@@ -93,8 +93,17 @@ impl InputHandler {
 impl Default for InputHandler {
     fn default() -> Self {
         Self::new().unwrap_or_else(|e| {
-            tracing::error!("Failed to initialize input: {}", e);
-            panic!("Input initialization failed");
+            tracing::error!("Failed to initialize input: {}, using no-op handler", e);
+            Self {
+                #[cfg(feature = "legacy-ui")]
+                sdl_handler: None,
+                joystick_input: JoystickInput::new().unwrap_or_else(|_| JoystickInput {
+                    axis_states: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
+                }),
+                keyboard_input: KeyboardInput::new().unwrap_or_else(|_| KeyboardInput {
+                    pressed_keys: std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashMap::new())),
+                }),
+            }
         })
     }
 }

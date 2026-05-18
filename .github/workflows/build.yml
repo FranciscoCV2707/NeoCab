@@ -29,7 +29,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Cargo check
         run: cargo check --release
@@ -42,8 +42,13 @@ jobs:
       - name: npm install
         run: npm install
 
+      - name: Run frontend tests
+        run: npm test
+        working-directory: ./
+
       - name: Build frontend
         run: npm run build
+        working-directory: ./
 
   build-windows:
     runs-on: windows-latest

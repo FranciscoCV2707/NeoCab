@@ -1,14 +1,18 @@
-use async_trait::async_trait;
 use super::injector_trait::{EmulatorConfigInjector, EmulatorSettings};
-use std::path::PathBuf;
+use async_trait::async_trait;
 use std::fs;
+use std::path::PathBuf;
 
 pub struct XeniaInjector;
 
 #[async_trait]
 impl EmulatorConfigInjector for XeniaInjector {
-    fn name(&self) -> &str { "xenia" }
-    fn display_name(&self) -> &str { "Xenia" }
+    fn name(&self) -> &str {
+        "xenia"
+    }
+    fn display_name(&self) -> &str {
+        "Xenia"
+    }
 
     fn can_handle(&self, emulator_path: &str) -> bool {
         let lower = emulator_path.to_lowercase();
@@ -43,18 +47,24 @@ impl EmulatorConfigInjector for XeniaInjector {
 
         for line in content.lines() {
             let trimmed = line.trim();
-            if trimmed.starts_with('#') || trimmed.is_empty() || trimmed.starts_with('[') { continue; }
+            if trimmed.starts_with('#') || trimmed.is_empty() || trimmed.starts_with('[') {
+                continue;
+            }
             if let Some((key, val)) = trimmed.split_once('=') {
                 let k = key.trim();
                 let v = val.trim().trim_matches('"');
                 match k {
                     "gpu" => settings.video.renderer = Some(v.to_string()),
-                    "draw_resolution_scale_x" => settings.video.resolution_scale = v.parse::<u32>().ok(),
+                    "draw_resolution_scale_x" => {
+                        settings.video.resolution_scale = v.parse::<u32>().ok()
+                    }
                     "vsync" => settings.video.vsync = Some(v == "true"),
                     "fullscreen" => settings.video.fullscreen = Some(v == "true"),
                     "aspect_ratio" => settings.video.aspect_ratio = Some(v.to_string()),
                     "volume" => settings.audio.volume = v.parse::<f32>().ok().map(|v| v / 100.0),
-                    _ => { settings.advanced.insert(k.to_string(), v.to_string()); }
+                    _ => {
+                        settings.advanced.insert(k.to_string(), v.to_string());
+                    }
                 }
             }
         }
@@ -64,10 +74,15 @@ impl EmulatorConfigInjector for XeniaInjector {
 
     async fn inject(&self, config_dir: &str, settings: &EmulatorSettings) -> Result<(), String> {
         let candidates = ["xenia-canary.config.toml", "xenia.config.toml"];
-        let config_path = candidates.iter()
+        let config_path = candidates
+            .iter()
             .find_map(|name| {
                 let p = PathBuf::from(config_dir).join(name);
-                if p.exists() { Some(p) } else { None }
+                if p.exists() {
+                    Some(p)
+                } else {
+                    None
+                }
             })
             .unwrap_or_else(|| PathBuf::from(config_dir).join("xenia.config.toml"));
 
@@ -94,15 +109,32 @@ impl EmulatorConfigInjector for XeniaInjector {
 
                 let new_val: Option<String> = match k {
                     "gpu" => settings.video.renderer.clone(),
-                    "draw_resolution_scale_x" => settings.video.resolution_scale.map(|s| s.to_string()),
-                    "vsync" => settings.video.vsync.map(|v| if v { "true".to_string() } else { "false".to_string() }),
-                    "fullscreen" => settings.video.fullscreen.map(|f| if f { "true".to_string() } else { "false".to_string() }),
+                    "draw_resolution_scale_x" => {
+                        settings.video.resolution_scale.map(|s| s.to_string())
+                    }
+                    "vsync" => settings.video.vsync.map(|v| {
+                        if v {
+                            "true".to_string()
+                        } else {
+                            "false".to_string()
+                        }
+                    }),
+                    "fullscreen" => settings.video.fullscreen.map(|f| {
+                        if f {
+                            "true".to_string()
+                        } else {
+                            "false".to_string()
+                        }
+                    }),
                     _ => settings.advanced.get(k).cloned(),
                 };
 
                 match new_val {
                     Some(val) => new_content.push_str(&format!("{} = \"{}\"\n", k, val)),
-                    None => { new_content.push_str(line); new_content.push('\n'); }
+                    None => {
+                        new_content.push_str(line);
+                        new_content.push('\n');
+                    }
                 }
             } else {
                 new_content.push_str(line);
@@ -118,7 +150,10 @@ impl EmulatorConfigInjector for XeniaInjector {
         }
         if let Some(vsync) = settings.video.vsync {
             if !keys_found.contains("vsync") {
-                new_content.push_str(&format!("vsync = {}\n", if vsync { "true" } else { "false" }));
+                new_content.push_str(&format!(
+                    "vsync = {}\n",
+                    if vsync { "true" } else { "false" }
+                ));
             }
         }
 

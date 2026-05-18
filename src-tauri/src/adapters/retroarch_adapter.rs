@@ -1,10 +1,10 @@
+use super::trait_adapter::EmulatorAdapter;
+use crate::error::{NeoCabError, Result};
 use async_trait::async_trait;
-use std::process::{Command, Child};
+use std::process::{Child, Command};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tracing::{info, warn, error};
-use crate::error::{Result, NeoCabError};
-use super::trait_adapter::EmulatorAdapter;
+use tracing::{error, info, warn};
 
 #[derive(Debug, Clone)]
 pub enum RetroArchCore {
@@ -164,7 +164,9 @@ impl EmulatorAdapter for RetroArchAdapter {
             }
         } else {
             warn!("No RetroArch process running");
-            Err(NeoCabError::System("No RetroArch process running".to_string()))
+            Err(NeoCabError::System(
+                "No RetroArch process running".to_string(),
+            ))
         }
     }
 }

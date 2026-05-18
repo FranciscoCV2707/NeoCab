@@ -1,7 +1,7 @@
-use tauri::State;
-use serde_json::json;
 use crate::core::TimerManager;
+use serde_json::json;
 use std::sync::Arc;
+use tauri::State;
 
 #[tauri::command]
 pub async fn start_timer(
@@ -29,9 +29,7 @@ pub async fn start_timer(
 }
 
 #[tauri::command]
-pub async fn pause_timer(
-    timer_manager: State<'_, Arc<TimerManager>>,
-) -> Result<String, String> {
+pub async fn pause_timer(timer_manager: State<'_, Arc<TimerManager>>) -> Result<String, String> {
     match timer_manager.pause().await {
         Ok(status) => {
             let result = json!({
@@ -53,9 +51,7 @@ pub async fn pause_timer(
 }
 
 #[tauri::command]
-pub async fn resume_timer(
-    timer_manager: State<'_, Arc<TimerManager>>,
-) -> Result<String, String> {
+pub async fn resume_timer(timer_manager: State<'_, Arc<TimerManager>>) -> Result<String, String> {
     match timer_manager.resume().await {
         Ok(status) => {
             let result = json!({
@@ -76,9 +72,7 @@ pub async fn resume_timer(
 }
 
 #[tauri::command]
-pub async fn stop_timer(
-    timer_manager: State<'_, Arc<TimerManager>>,
-) -> Result<String, String> {
+pub async fn stop_timer(timer_manager: State<'_, Arc<TimerManager>>) -> Result<String, String> {
     match timer_manager.stop().await {
         Ok(_) => {
             let result = json!({
@@ -152,9 +146,7 @@ pub async fn add_timer_time(
 }
 
 #[tauri::command]
-pub async fn is_time_up(
-    timer_manager: State<'_, Arc<TimerManager>>,
-) -> Result<String, String> {
+pub async fn is_time_up(timer_manager: State<'_, Arc<TimerManager>>) -> Result<String, String> {
     let time_up = timer_manager.is_time_up().await;
 
     let result = json!({

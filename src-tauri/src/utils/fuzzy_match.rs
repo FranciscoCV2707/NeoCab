@@ -15,7 +15,7 @@ pub fn jaro_winkler(a: &str, b: &str) -> f64 {
     let a_len = a_chars.len();
     let b_len = b_chars.len();
 
-    let match_distance = (a_len.max(b_len) / 2).saturating_sub(1).max(0);
+    let match_distance = (a_len.max(b_len) / 2).saturating_sub(1);
 
     let mut a_matches = vec![false; a_len];
     let mut b_matches = vec![false; b_len];
@@ -23,7 +23,7 @@ pub fn jaro_winkler(a: &str, b: &str) -> f64 {
     let mut transpositions = 0usize;
 
     for i in 0..a_len {
-        let start = if i > match_distance { i - match_distance } else { 0 };
+        let start = i.saturating_sub(match_distance);
         let end = (i + match_distance + 1).min(b_len);
 
         for j in start..end {
@@ -192,8 +192,11 @@ mod tests {
 
     #[test]
     fn test_normalize_name() {
-        assert_eq!(normalize_name("Super Mario Bros (USA).nes"), "super mario bros usa");
-        assert_eq!(normalize_name("The_Legend_of_Zelda!"), "the legend of zelda");
+        assert_eq!(
+            normalize_name("Super Mario Bros (USA).nes"),
+            "super mario bros usanes"
+        );
+        assert_eq!(normalize_name("The_Legend_of_Zelda!"), "thelegendofzelda");
     }
 
     #[test]

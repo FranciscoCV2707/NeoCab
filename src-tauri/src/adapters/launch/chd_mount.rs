@@ -1,14 +1,18 @@
-use async_trait::async_trait;
-use super::strategy::{LaunchStrategy, LaunchContext, LaunchResult};
-use std::process::Command;
+use super::strategy::{LaunchContext, LaunchResult, LaunchStrategy};
 use crate::error::Result;
+use async_trait::async_trait;
+use std::process::Command;
 
 pub struct ChdMountStrategy;
 
 #[async_trait]
 impl LaunchStrategy for ChdMountStrategy {
-    fn name(&self) -> &str { "chd_mount" }
-    fn priority(&self) -> u32 { 10 }
+    fn name(&self) -> &str {
+        "chd_mount"
+    }
+    fn priority(&self) -> u32 {
+        10
+    }
 
     async fn can_handle(&self, ctx: &LaunchContext) -> bool {
         let ext = ctx.rom_path.extension().and_then(|e| e.to_str());
@@ -18,10 +22,9 @@ impl LaunchStrategy for ChdMountStrategy {
     async fn launch(&self, ctx: &LaunchContext) -> Result<LaunchResult> {
         // Extract CHD to temporary .cue/.bin using chdman
         let temp_dir = std::env::temp_dir().join("neocab-chd");
-        std::fs::create_dir_all(&temp_dir)
-            .map_err(|e| crate::error::NeoCabError::InvalidInput(
-                format!("Cannot create temp dir: {}", e)
-            ))?;
+        std::fs::create_dir_all(&temp_dir).map_err(|e| {
+            crate::error::NeoCabError::InvalidInput(format!("Cannot create temp dir: {}", e))
+        })?;
 
         let output_path = temp_dir.join("game.cue");
         let input_str = ctx.rom_path.to_string_lossy();
@@ -35,16 +38,13 @@ impl LaunchStrategy for ChdMountStrategy {
             Ok(status) if status.status.success() => {
                 // Launch with extracted .cue
                 let rom_str = output_path.to_string_lossy();
-                let emu_path = ctx.emulator_path
-                    .as_ref()
-                    .ok_or_else(|| crate::error::NeoCabError::InvalidInput("No emulator path".into()))?;
+                let emu_path = ctx.emulator_path.as_ref().ok_or_else(|| {
+                    crate::error::NeoCabError::InvalidInput("No emulator path".into())
+                })?;
 
-                let child = Command::new(emu_path)
-                    .arg(&*rom_str)
-                    .spawn()
-                    .map_err(|e| crate::error::NeoCabError::InvalidInput(
-                        format!("Launch failed: {}", e)
-                    ))?;
+                let child = Command::new(emu_path).arg(&*rom_str).spawn().map_err(|e| {
+                    crate::error::NeoCabError::InvalidInput(format!("Launch failed: {}", e))
+                })?;
 
                 Ok(LaunchResult {
                     process_id: Some(child.id()),
@@ -53,7 +53,7 @@ impl LaunchStrategy for ChdMountStrategy {
                 })
             }
             _ => Err(crate::error::NeoCabError::InvalidInput(
-                "chdman extraction failed. Make sure chdman is in PATH.".into()
+                "chdman extraction failed. Make sure chdman is in PATH.".into(),
             )),
         }
     }

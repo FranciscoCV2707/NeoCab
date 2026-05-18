@@ -1,0 +1,157 @@
+.safe-quit-panel {
+  padding: 16px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.panel-header h3 {
+  margin: 0;
+}
+
+.add-rule-btn {
+  background: var(--primary-color, #0078d4);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-rule-btn:hover {
+  opacity: 0.9;
+}
+
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.rule-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: var(--surface-color, #1a1a1a);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.rule-card:hover {
+  border-color: var(--border-color, #333);
+}
+
+.rule-card.selected {
+  border-color: var(--primary-color, #0078d4);
+}
+
+.rule-info {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.rule-emulator {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.rule-time {
+  color: var(--text-secondary, #888);
+}
+
+.rule-status {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.rule-status.enabled {
+  background: #2a2;
+  color: white;
+}
+
+.rule-status.disabled {
+  background: #a22;
+  color: white;
+}
+
+.rule-editor {
+  background: var(--surface-color, #1a1a1a);
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.rule-editor h4 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.editor-field {
+  margin-bottom: 12px;
+}
+
+.editor-field label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #888);
+}
+
+.editor-field input[type="text"],
+.editor-field input[type="number"],
+.editor-field select {
+  width: 100%;
+  padding: 8px;
+  background: var(--bg-color, #0a0a0a);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  color: var(--text-color, #fff);
+}
+
+.editor-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.editor-buttons button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  background: var(--primary-color, #0078d4);
+  color: white;
+}
+
+.editor-buttons button:hover {
+  opacity: 0.9;
+}
+
+.editor-buttons button.delete-btn {
+  background: #a22;
+}
+
+.test-output {
+  margin-top: 12px;
+  padding: 8px;
+  background: #0a0a0a;
+  border-radius: 4px;
+}
+
+.test-output pre {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #888);
+}

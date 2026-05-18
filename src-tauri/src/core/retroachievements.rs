@@ -97,53 +97,93 @@ impl RetroAchievementsService {
     }
 
     pub async fn login(&self) -> Result<bool, String> {
-        let url = format!("{}/API_Login.php?u={}&p={}",
-            Self::BASE_URL, self.username, self.api_key);
+        let url = format!(
+            "{}/API_Login.php?u={}&p={}",
+            Self::BASE_URL,
+            self.username,
+            self.api_key
+        );
 
-        let resp = self.client.get(&url).send().await
+        let resp = self
+            .client
+            .get(&url)
+            .send()
+            .await
             .map_err(|e| format!("Network error: {}", e))?;
 
-        let auth: RAAuthResponse = resp.json().await
+        let auth: RAAuthResponse = resp
+            .json()
+            .await
             .map_err(|e| format!("Parse error: {}", e))?;
 
         Ok(auth.Success)
     }
 
     pub async fn get_game_achievements(&self, game_hash: &str) -> Result<Vec<Achievement>, String> {
-        let url = format!("{}/API_GetGameExtended.php?z={}&y={}&g={}",
-            Self::BASE_URL, self.username, self.api_key, game_hash);
+        let url = format!(
+            "{}/API_GetGameExtended.php?z={}&y={}&g={}",
+            Self::BASE_URL,
+            self.username,
+            self.api_key,
+            game_hash
+        );
 
-        let resp = self.client.get(&url).send().await
+        let resp = self
+            .client
+            .get(&url)
+            .send()
+            .await
             .map_err(|e| format!("Network error: {}", e))?;
 
-        let game_data: RAGameResponse = resp.json().await
+        let game_data: RAGameResponse = resp
+            .json()
+            .await
             .map_err(|e| format!("Parse error: {}", e))?;
 
         let achievements = game_data.Achievements.unwrap_or_default();
-        let result: Vec<Achievement> = achievements.iter().map(|(_, ach)| {
-            Achievement {
+        let result: Vec<Achievement> = achievements
+            .values()
+            .map(|ach| Achievement {
                 id: ach.ID.as_ref().and_then(|s| s.parse().ok()).unwrap_or(0),
                 title: ach.Title.clone().unwrap_or_default(),
                 description: ach.Description.clone().unwrap_or_default(),
                 badge_name: ach.BadgeName.clone().unwrap_or_default(),
-                points: ach.Points.as_ref().and_then(|s| s.parse().ok()).unwrap_or(0),
+                points: ach
+                    .Points
+                    .as_ref()
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(0),
                 unlocked: ach.DateEarned.is_some() || ach.DateEarnedHardcore.is_some(),
                 unlocked_at: ach.DateEarned.clone().or(ach.DateEarnedHardcore.clone()),
-                category: ach.AchievementType.clone().unwrap_or_else(|| "achievement".to_string()),
-            }
-        }).collect();
+                category: ach
+                    .AchievementType
+                    .clone()
+                    .unwrap_or_else(|| "achievement".to_string()),
+            })
+            .collect();
 
         Ok(result)
     }
 
     pub async fn get_user_summary(&self) -> Result<UserSummary, String> {
-        let url = format!("{}/API_GetUserSummary.php?z={}&y={}&u={}",
-            Self::BASE_URL, self.username, self.api_key, self.username);
+        let url = format!(
+            "{}/API_GetUserSummary.php?z={}&y={}&u={}",
+            Self::BASE_URL,
+            self.username,
+            self.api_key,
+            self.username
+        );
 
-        let resp = self.client.get(&url).send().await
+        let resp = self
+            .client
+            .get(&url)
+            .send()
+            .await
             .map_err(|e| format!("Network error: {}", e))?;
 
-        let summary: RASummary = resp.json().await
+        let summary: RASummary = resp
+            .json()
+            .await
             .map_err(|e| format!("Parse error: {}", e))?;
 
         Ok(UserSummary {
@@ -162,23 +202,25 @@ impl RetroAchievementsService {
             return Err("retroarch.cfg not found".to_string());
         }
 
-        let content = std::fs::read_to_string(&cfg_path)
-            .map_err(|e| format!("Cannot read: {}", e))?;
+        let content =
+            std::fs::read_to_string(&cfg_path).map_err(|e| format!("Cannot read: {}", e))?;
 
         let mut lines: Vec<String> = content.lines().map(|l| l.to_string()).collect();
         let replacements = [
-            ("cheevos_enable", format!("\"true\"")),
+            ("cheevos_enable", "\"true\"".to_string()),
             ("cheevos_username", format!("\"{}\"", self.username)),
             ("cheevos_password", format!("\"{}\"", self.api_key)),
-            ("cheevos_badge_visible", format!("\"true\"")),
-            ("cheevos_leaderboards_enable", format!("\"true\"")),
+            ("cheevos_badge_visible", "\"true\"".to_string()),
+            ("cheevos_leaderboards_enable", "\"true\"".to_string()),
         ];
 
         for (key, val) in &replacements {
             let mut found = false;
             for line in lines.iter_mut() {
                 let trimmed = line.trim();
-                if trimmed.starts_with('#') { continue; }
+                if trimmed.starts_with('#') {
+                    continue;
+                }
                 if let Some((k, _)) = trimmed.split_once('=') {
                     if k.trim() == *key {
                         *line = format!("{} = {}", key, val);
@@ -192,8 +234,7 @@ impl RetroAchievementsService {
             }
         }
 
-        std::fs::write(&cfg_path, lines.join("\n"))
-            .map_err(|e| format!("Cannot write: {}", e))?;
+        std::fs::write(&cfg_path, lines.join("\n")).map_err(|e| format!("Cannot write: {}", e))?;
 
         info!("RetroAchievements credentials injected into retroarch.cfg");
         Ok(())

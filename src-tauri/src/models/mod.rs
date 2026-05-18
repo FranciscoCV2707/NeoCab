@@ -1,15 +1,15 @@
-pub mod game;
-pub mod system;
 pub mod emulator;
-pub mod session;
-pub mod profile;
+pub mod game;
 pub mod input_device;
+pub mod profile;
 pub mod save_state;
+pub mod session;
+pub mod system;
 
-pub use game::Game;
-pub use system::System;
 pub use emulator::Emulator;
-pub use session::Session;
-pub use profile::Profile;
+pub use game::Game;
 pub use input_device::InputDevice;
+pub use profile::Profile;
 pub use save_state::SaveState;
+pub use session::Session;
+pub use system::System;

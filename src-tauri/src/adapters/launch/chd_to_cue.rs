@@ -1,13 +1,17 @@
-use async_trait::async_trait;
-use super::strategy::{LaunchStrategy, LaunchContext, LaunchResult};
+use super::strategy::{LaunchContext, LaunchResult, LaunchStrategy};
 use crate::error::Result;
+use async_trait::async_trait;
 
 pub struct ChdToCueStrategy;
 
 #[async_trait]
 impl LaunchStrategy for ChdToCueStrategy {
-    fn name(&self) -> &str { "chd_to_cue" }
-    fn priority(&self) -> u32 { 15 }
+    fn name(&self) -> &str {
+        "chd_to_cue"
+    }
+    fn priority(&self) -> u32 {
+        15
+    }
 
     async fn can_handle(&self, ctx: &LaunchContext) -> bool {
         ctx.rom_path.extension().and_then(|e| e.to_str()) == Some("chd")
@@ -24,20 +28,21 @@ impl LaunchStrategy for ChdToCueStrategy {
         std::process::Command::new("chdman")
             .args(["extractcd", "-i", &input, "-o", &output])
             .output()
-            .map_err(|_| crate::error::NeoCabError::InvalidInput(
-                "chdman not found in PATH".into()
-            ))?;
+            .map_err(|_| {
+                crate::error::NeoCabError::InvalidInput("chdman not found in PATH".into())
+            })?;
 
-        let emu = ctx.emulator_path
+        let emu = ctx
+            .emulator_path
             .as_ref()
             .ok_or_else(|| crate::error::NeoCabError::InvalidInput("No emulator".into()))?;
 
         let child = std::process::Command::new(emu)
             .arg(&*output)
             .spawn()
-            .map_err(|e| crate::error::NeoCabError::InvalidInput(
-                format!("Launch failed: {}", e)
-            ))?;
+            .map_err(|e| {
+                crate::error::NeoCabError::InvalidInput(format!("Launch failed: {}", e))
+            })?;
 
         Ok(LaunchResult {
             process_id: Some(child.id()),

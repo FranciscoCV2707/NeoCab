@@ -1,5 +1,5 @@
-use std::process::Command;
 use crate::error::Result;
+use std::process::Command;
 use tracing::info;
 
 pub struct AutobootManager {
@@ -24,24 +24,17 @@ impl AutobootManager {
         let exe_path = self.app_path.replace("\\", "\\\\");
 
         let output = Command::new("reg")
-            .args(&[
-                "add",
-                reg_path,
-                "/v",
-                value_name,
-                "/d",
-                &exe_path,
-                "/f",
-            ])
+            .args(["add", reg_path, "/v", value_name, "/d", &exe_path, "/f"])
             .output()?;
 
         if output.status.success() {
             info!("Autoboot enabled for {}", self.app_name);
             Ok(())
         } else {
-            Err(crate::error::NeoCabError::InvalidInput(
-                format!("Failed to enable autoboot: {:?}", String::from_utf8_lossy(&output.stderr)),
-            ))
+            Err(crate::error::NeoCabError::InvalidInput(format!(
+                "Failed to enable autoboot: {:?}",
+                String::from_utf8_lossy(&output.stderr)
+            )))
         }
     }
 
@@ -55,7 +48,9 @@ impl AutobootManager {
             );
 
             let autostart_dir = dirs::config_dir()
-                .ok_or_else(|| crate::error::NeoCabError::InvalidInput("Config dir not found".to_string()))?
+                .ok_or_else(|| {
+                    crate::error::NeoCabError::InvalidInput("Config dir not found".to_string())
+                })?
                 .join("autostart");
 
             std::fs::create_dir_all(&autostart_dir)?;
@@ -81,16 +76,17 @@ impl AutobootManager {
         let value_name = &self.app_name;
 
         let output = Command::new("reg")
-            .args(&["delete", reg_path, "/v", value_name, "/f"])
+            .args(["delete", reg_path, "/v", value_name, "/f"])
             .output()?;
 
         if output.status.success() {
             info!("Autoboot disabled for {}", self.app_name);
             Ok(())
         } else {
-            Err(crate::error::NeoCabError::InvalidInput(
-                format!("Failed to disable autoboot: {:?}", String::from_utf8_lossy(&output.stderr)),
-            ))
+            Err(crate::error::NeoCabError::InvalidInput(format!(
+                "Failed to disable autoboot: {:?}",
+                String::from_utf8_lossy(&output.stderr)
+            )))
         }
     }
 
@@ -99,7 +95,9 @@ impl AutobootManager {
         #[cfg(target_os = "linux")]
         {
             let autostart_dir = dirs::config_dir()
-                .ok_or_else(|| crate::error::NeoCabError::InvalidInput("Config dir not found".to_string()))?
+                .ok_or_else(|| {
+                    crate::error::NeoCabError::InvalidInput("Config dir not found".to_string())
+                })?
                 .join("autostart");
 
             let file_path = autostart_dir.join(format!("{}.desktop", self.app_name));
@@ -124,7 +122,7 @@ impl AutobootManager {
         let value_name = &self.app_name;
 
         let output = Command::new("reg")
-            .args(&["query", reg_path, "/v", value_name])
+            .args(["query", reg_path, "/v", value_name])
             .output()?;
 
         Ok(output.status.success())
@@ -135,7 +133,9 @@ impl AutobootManager {
         #[cfg(target_os = "linux")]
         {
             let autostart_dir = dirs::config_dir()
-                .ok_or_else(|| crate::error::NeoCabError::InvalidInput("Config dir not found".to_string()))?
+                .ok_or_else(|| {
+                    crate::error::NeoCabError::InvalidInput("Config dir not found".to_string())
+                })?
                 .join("autostart");
 
             let file_path = autostart_dir.join(format!("{}.desktop", self.app_name));
@@ -182,19 +182,13 @@ mod tests {
 
     #[test]
     fn test_autoboot_manager_creation() {
-        let manager = AutobootManager::new(
-            "TestApp".to_string(),
-            "/path/to/app".to_string(),
-        );
+        let manager = AutobootManager::new("TestApp".to_string(), "/path/to/app".to_string());
         assert!(!manager.is_kiosk_mode_enabled());
     }
 
     #[test]
     fn test_kiosk_mode_toggle() {
-        let mut manager = AutobootManager::new(
-            "TestApp".to_string(),
-            "/path/to/app".to_string(),
-        );
+        let mut manager = AutobootManager::new("TestApp".to_string(), "/path/to/app".to_string());
 
         let _ = manager.enable_kiosk_mode();
         assert!(manager.is_kiosk_mode_enabled());

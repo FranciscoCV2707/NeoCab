@@ -1,13 +1,13 @@
-use std::path::PathBuf;
-use std::fs;
-use std::sync::Arc;
-use std::collections::HashMap;
-use std::io::Write;
-use tokio::sync::RwLock;
-use serde_json::json;
-use tracing::{info, error, debug};
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
+use std::collections::HashMap;
+use std::fs;
+use std::io::Write;
+use std::path::PathBuf;
+use std::sync::Arc;
+use tokio::sync::RwLock;
+use tracing::{debug, error, info};
 
 /// Theme structure matching JSON schema
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -225,11 +225,31 @@ impl ThemeManager {
         }
 
         let bundled_themes = [
-            ("arcade-classic", include_str!("../../bundled-themes/arcade-classic/theme.json"), include_str!("../../bundled-themes/arcade-classic/layout.json")),
-            ("neon-future", include_str!("../../bundled-themes/neon-future/theme.json"), include_str!("../../bundled-themes/neon-future/layout.json")),
-            ("minimal-clean", include_str!("../../bundled-themes/minimal-clean/theme.json"), include_str!("../../bundled-themes/minimal-clean/layout.json")),
-            ("retro-crt", include_str!("../../bundled-themes/retro-crt/theme.json"), include_str!("../../bundled-themes/retro-crt/layout.json")),
-            ("cyberpunk", include_str!("../../bundled-themes/cyberpunk/theme.json"), include_str!("../../bundled-themes/cyberpunk/layout.json")),
+            (
+                "arcade-classic",
+                include_str!("../../bundled-themes/arcade-classic/theme.json"),
+                include_str!("../../bundled-themes/arcade-classic/layout.json"),
+            ),
+            (
+                "neon-future",
+                include_str!("../../bundled-themes/neon-future/theme.json"),
+                include_str!("../../bundled-themes/neon-future/layout.json"),
+            ),
+            (
+                "minimal-clean",
+                include_str!("../../bundled-themes/minimal-clean/theme.json"),
+                include_str!("../../bundled-themes/minimal-clean/layout.json"),
+            ),
+            (
+                "retro-crt",
+                include_str!("../../bundled-themes/retro-crt/theme.json"),
+                include_str!("../../bundled-themes/retro-crt/layout.json"),
+            ),
+            (
+                "cyberpunk",
+                include_str!("../../bundled-themes/cyberpunk/theme.json"),
+                include_str!("../../bundled-themes/cyberpunk/layout.json"),
+            ),
         ];
 
         let mut installed = 0;
@@ -266,18 +286,18 @@ impl ThemeManager {
 
         if !theme_path.exists() {
             error!("Theme file not found: {:?}", theme_path);
-            return Err(crate::error::NeoCabError::System(
-                format!("Theme '{}' not found", name),
-            ));
+            return Err(crate::error::NeoCabError::System(format!(
+                "Theme '{}' not found",
+                name
+            )));
         }
 
         let json_str = fs::read_to_string(&theme_path).map_err(|e| {
             crate::error::NeoCabError::System(format!("Failed to read theme: {}", e))
         })?;
 
-        let theme: Theme = serde_json::from_str(&json_str).map_err(|e| {
-            crate::error::NeoCabError::System(format!("Invalid theme JSON: {}", e))
-        })?;
+        let theme: Theme = serde_json::from_str(&json_str)
+            .map_err(|e| crate::error::NeoCabError::System(format!("Invalid theme JSON: {}", e)))?;
 
         info!("Loaded theme: {}", theme.name);
         Ok(theme)
@@ -319,24 +339,22 @@ impl ThemeManager {
                 let theme_json = path.join("theme.json");
                 if theme_json.exists() {
                     match fs::read_to_string(&theme_json) {
-                        Ok(json_str) => {
-                            match serde_json::from_str::<Theme>(&json_str) {
-                                Ok(theme) => {
-                                    let preview_path =
-                                        path.join("preview.png").to_str().map(String::from);
-                                    themes.push(ThemeInfo {
-                                        name: theme.name,
-                                        author: theme.author,
-                                        version: theme.version,
-                                        description: theme.description,
-                                        preview_path,
-                                    });
-                                }
-                                Err(e) => {
-                                    error!("Failed to parse theme: {}", e);
-                                }
+                        Ok(json_str) => match serde_json::from_str::<Theme>(&json_str) {
+                            Ok(theme) => {
+                                let preview_path =
+                                    path.join("preview.png").to_str().map(String::from);
+                                themes.push(ThemeInfo {
+                                    name: theme.name,
+                                    author: theme.author,
+                                    version: theme.version,
+                                    description: theme.description,
+                                    preview_path,
+                                });
                             }
-                        }
+                            Err(e) => {
+                                error!("Failed to parse theme: {}", e);
+                            }
+                        },
                         Err(e) => {
                             error!("Failed to read theme file: {}", e);
                         }
@@ -392,9 +410,10 @@ impl ThemeManager {
         let theme_dir = self.themes_dir.join(name);
 
         if !theme_dir.exists() {
-            return Err(crate::error::NeoCabError::System(
-                format!("Theme '{}' not found", name),
-            ));
+            return Err(crate::error::NeoCabError::System(format!(
+                "Theme '{}' not found",
+                name
+            )));
         }
 
         let export_path = self.themes_dir.join(format!("{}.neotheme", name));
@@ -413,9 +432,10 @@ impl ThemeManager {
                 crate::error::NeoCabError::System(format!("Failed to read theme.json: {}", e))
             })?;
 
-            zip.start_file("theme.json", Default::default()).map_err(|e| {
-                crate::error::NeoCabError::System(format!("Failed to add to ZIP: {}", e))
-            })?;
+            zip.start_file("theme.json", Default::default())
+                .map_err(|e| {
+                    crate::error::NeoCabError::System(format!("Failed to add to ZIP: {}", e))
+                })?;
             zip.write_all(content.as_bytes()).map_err(|e| {
                 crate::error::NeoCabError::System(format!("Failed to write ZIP: {}", e))
             })?;
@@ -428,9 +448,13 @@ impl ThemeManager {
                 crate::error::NeoCabError::System(format!("Failed to read preview: {}", e))
             })?;
 
-            zip.start_file("preview.png", Default::default()).map_err(|e| {
-                crate::error::NeoCabError::System(format!("Failed to add preview to ZIP: {}", e))
-            })?;
+            zip.start_file("preview.png", Default::default())
+                .map_err(|e| {
+                    crate::error::NeoCabError::System(format!(
+                        "Failed to add preview to ZIP: {}",
+                        e
+                    ))
+                })?;
             zip.write_all(&preview_data).map_err(|e| {
                 crate::error::NeoCabError::System(format!("Failed to write preview ZIP: {}", e))
             })?;
@@ -468,13 +492,11 @@ impl ThemeManager {
         })?;
 
         // Extract ZIP contents
-        let file = fs::File::open(&source).map_err(|e| {
-            crate::error::NeoCabError::System(format!("Failed to open ZIP: {}", e))
-        })?;
+        let file = fs::File::open(&source)
+            .map_err(|e| crate::error::NeoCabError::System(format!("Failed to open ZIP: {}", e)))?;
 
-        let mut archive = zip::ZipArchive::new(file).map_err(|e| {
-            crate::error::NeoCabError::System(format!("Failed to read ZIP: {}", e))
-        })?;
+        let mut archive = zip::ZipArchive::new(file)
+            .map_err(|e| crate::error::NeoCabError::System(format!("Failed to read ZIP: {}", e)))?;
 
         for i in 0..archive.len() {
             let mut file = archive.by_index(i).map_err(|e| {
@@ -580,7 +602,11 @@ mod tests {
             accent: "#0000ff".to_string(),
             text: "#ffffff".to_string(),
             background: "#000000".to_string(),
+            surface: "#111111".to_string(),
+            border: "#333333".to_string(),
+            highlight: "#ffff00".to_string(),
             success: "#00ff00".to_string(),
+            warning: "#ffaa00".to_string(),
             error: "#ff0000".to_string(),
         };
         assert_eq!(colors.primary, "#ff0000");

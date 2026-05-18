@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use tracing::info;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -29,14 +29,22 @@ impl SafeQuitRule {
 pub struct SafeQuitManager;
 
 impl SafeQuitManager {
-    pub fn should_activate_attract(game_active_seconds: u64, rules: &[SafeQuitRule], emulator: &str) -> bool {
-        let relevant: Vec<&SafeQuitRule> = rules.iter()
+    pub fn should_activate_attract(
+        game_active_seconds: u64,
+        rules: &[SafeQuitRule],
+        emulator: &str,
+    ) -> bool {
+        let relevant: Vec<&SafeQuitRule> = rules
+            .iter()
             .filter(|r| r.enabled && r.emulator == emulator && r.monitor_type == "timeout")
             .collect();
 
         for rule in &relevant {
             if game_active_seconds >= rule.timeout_seconds as u64 {
-                info!("SafeQuit: {} seconds exceeded for {}, showing attract", rule.timeout_seconds, emulator);
+                info!(
+                    "SafeQuit: {} seconds exceeded for {}, showing attract",
+                    rule.timeout_seconds, emulator
+                );
                 return true;
             }
         }
@@ -44,7 +52,8 @@ impl SafeQuitManager {
     }
 
     pub fn get_action(rules: &[SafeQuitRule], emulator: &str) -> String {
-        rules.iter()
+        rules
+            .iter()
             .find(|r| r.enabled && r.emulator == emulator)
             .map(|r| r.action.clone())
             .unwrap_or_else(|| "ShowAttract".to_string())

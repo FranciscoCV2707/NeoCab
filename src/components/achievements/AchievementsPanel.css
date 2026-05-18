@@ -1,0 +1,165 @@
+.achievements-panel {
+  padding: 20px;
+  background: var(--background, #0a0a0a);
+  border-radius: 8px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.panel-header h3 {
+  margin: 0;
+  color: var(--text, #fff);
+  font-size: 18px;
+}
+
+.panel-description {
+  color: var(--text-secondary, #888);
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  color: var(--text, #fff);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.form-group input {
+  padding: 10px 12px;
+  background: var(--surface, #1a1a1a);
+  border: 1px solid var(--border, #333);
+  border-radius: 6px;
+  color: var(--text, #fff);
+  font-size: 14px;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary, #ff6b00);
+}
+
+.error-message {
+  padding: 10px;
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  border-radius: 6px;
+  color: #ff4444;
+  font-size: 13px;
+}
+
+.login-btn {
+  padding: 12px 20px;
+  background: var(--primary, #ff6b00);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.login-btn:hover:not(:disabled) {
+  background: var(--primary-hover, #ff8533);
+}
+
+.login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.help-text {
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+  text-align: center;
+}
+
+.help-text a {
+  color: var(--primary, #ff6b00);
+  text-decoration: none;
+}
+
+.help-text a:hover {
+  text-decoration: underline;
+}
+
+.logout-btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid var(--border, #333);
+  border-radius: 6px;
+  color: var(--text, #fff);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.user-info {
+  background: var(--surface, #1a1a1a);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border, #333);
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text, #fff);
+}
+
+.user-rank {
+  font-size: 13px;
+  color: var(--primary, #ff6b00);
+  font-weight: 500;
+}
+
+.user-stats {
+  display: flex;
+  gap: 24px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text, #fff);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+}

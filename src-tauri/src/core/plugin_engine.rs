@@ -1,7 +1,9 @@
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use tracing::info;
 
 /// Plugin written in Lua. Uses a safe sandbox with limited API.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Plugin {
     pub name: String,
     pub author: Option<String>,
@@ -19,7 +21,10 @@ pub struct PluginEngine {
 
 impl PluginEngine {
     pub fn new(plugin_dir: PathBuf) -> Self {
-        Self { plugins: Vec::new(), plugin_dir }
+        Self {
+            plugins: Vec::new(),
+            plugin_dir,
+        }
     }
 
     pub fn discover(&mut self) -> Vec<String> {
@@ -34,7 +39,8 @@ impl PluginEngine {
             for entry in entries.flatten() {
                 let path = entry.path();
                 if path.extension().and_then(|e| e.to_str()) == Some("lua") {
-                    let name = path.file_stem()
+                    let name = path
+                        .file_stem()
                         .and_then(|s| s.to_str())
                         .unwrap_or("unknown")
                         .to_string();
@@ -61,8 +67,12 @@ impl PluginEngine {
         discovered
     }
 
-    pub fn list(&self) -> &[Plugin] { &self.plugins }
-    pub fn list_mut(&mut self) -> &mut Vec<Plugin> { &mut self.plugins }
+    pub fn list(&self) -> &[Plugin] {
+        &self.plugins
+    }
+    pub fn list_mut(&mut self) -> &mut Vec<Plugin> {
+        &mut self.plugins
+    }
 
     pub fn get(&self, name: &str) -> Option<&Plugin> {
         self.plugins.iter().find(|p| p.name == name)
@@ -72,13 +82,17 @@ impl PluginEngine {
         if let Some(p) = self.plugins.iter_mut().find(|p| p.name == name) {
             p.enabled = true;
             true
-        } else { false }
+        } else {
+            false
+        }
     }
 
     pub fn disable(&mut self, name: &str) -> bool {
         if let Some(p) = self.plugins.iter_mut().find(|p| p.name == name) {
             p.enabled = false;
             true
-        } else { false }
+        } else {
+            false
+        }
     }
 }

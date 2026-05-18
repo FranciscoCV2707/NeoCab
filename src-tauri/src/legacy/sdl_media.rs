@@ -17,7 +17,10 @@ impl MediaLoader {
         tracing::info!("  Theme path: {}", theme_path.display());
         tracing::info!("  Media path: {}", media_path.display());
 
-        Ok(Self { theme_path, media_path })
+        Ok(Self {
+            theme_path,
+            media_path,
+        })
     }
 
     /// Get theme folder path
@@ -92,11 +95,11 @@ impl MediaLoader {
     /// Get theme colors (fallback arcade colors if theme not available)
     pub fn get_theme_colors(&self) -> ThemeColors {
         ThemeColors {
-            primary: (255, 107, 53),      // Arcade orange
-            secondary: (33, 150, 243),    // Blue
-            text_primary: (224, 224, 224), // Light gray
+            primary: (255, 107, 53),         // Arcade orange
+            secondary: (33, 150, 243),       // Blue
+            text_primary: (224, 224, 224),   // Light gray
             text_secondary: (153, 153, 153), // Medium gray
-            background: (15, 15, 15),    // Nearly black
+            background: (15, 15, 15),        // Nearly black
         }
     }
 }

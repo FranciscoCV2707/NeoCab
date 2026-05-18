@@ -1,6 +1,6 @@
-use tauri::State;
-use serde_json::json;
 use crate::core::MediaManager;
+use serde_json::json;
+use tauri::State;
 
 #[tauri::command]
 pub async fn scan_media(media_manager: State<'_, MediaManager>) -> Result<String, String> {
@@ -201,8 +201,8 @@ pub async fn trigger_media_rescan(
     }
 }
 use crate::db::Database;
-use std::sync::Arc;
 use crate::utils::fuzzy_match;
+use std::sync::Arc;
 
 #[tauri::command]
 pub async fn find_cover_art(
@@ -249,7 +249,7 @@ pub async fn get_all_game_media(
     media_manager: State<'_, MediaManager>,
 ) -> Result<String, String> {
     let mut media = json!({});
-    
+
     let types = vec![
         ("wheel", crate::core::MediaType::Wheel),
         ("box_art", crate::core::MediaType::BoxArt),
@@ -268,7 +268,8 @@ pub async fn get_all_game_media(
     Ok(json!({
         "success": true,
         "media": media
-    }).to_string())
+    })
+    .to_string())
 }
 
 #[tauri::command]
@@ -278,7 +279,7 @@ pub async fn get_batch_media(
     media_manager: State<'_, MediaManager>,
 ) -> Result<String, String> {
     let mut results = json!({});
-    
+
     let types = vec![
         ("wheel", crate::core::MediaType::Wheel),
         ("box_art", crate::core::MediaType::BoxArt),
@@ -301,5 +302,6 @@ pub async fn get_batch_media(
     Ok(json!({
         "success": true,
         "results": results
-    }).to_string())
+    })
+    .to_string())
 }

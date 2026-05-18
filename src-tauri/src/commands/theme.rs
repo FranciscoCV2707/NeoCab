@@ -1,8 +1,8 @@
-use tauri::State;
-use serde_json::json;
-use crate::core::{ThemeManager, Theme};
+use crate::core::{Theme, ThemeManager};
 use crate::db::Database;
+use serde_json::json;
 use std::sync::Arc;
+use tauri::State;
 
 #[tauri::command]
 pub async fn set_theme(
@@ -10,25 +10,23 @@ pub async fn set_theme(
     theme_manager: State<'_, ThemeManager>,
 ) -> Result<String, String> {
     match theme_manager.load_theme(&theme_name).await {
-        Ok(theme) => {
-            match theme_manager.set_theme(theme).await {
-                Ok(_) => {
-                    let result = json!({
-                        "success": true,
-                        "message": format!("Theme changed to {}", theme_name),
-                        "theme": theme_name
-                    });
-                    Ok(result.to_string())
-                }
-                Err(e) => {
-                    let error = json!({
-                        "success": false,
-                        "error": e.to_string()
-                    });
-                    Err(error.to_string())
-                }
+        Ok(theme) => match theme_manager.set_theme(theme).await {
+            Ok(_) => {
+                let result = json!({
+                    "success": true,
+                    "message": format!("Theme changed to {}", theme_name),
+                    "theme": theme_name
+                });
+                Ok(result.to_string())
             }
-        }
+            Err(e) => {
+                let error = json!({
+                    "success": false,
+                    "error": e.to_string()
+                });
+                Err(error.to_string())
+            }
+        },
         Err(e) => {
             let error = json!({
                 "success": false,
@@ -40,9 +38,7 @@ pub async fn set_theme(
 }
 
 #[tauri::command]
-pub async fn get_current_theme(
-    theme_manager: State<'_, ThemeManager>,
-) -> Result<String, String> {
+pub async fn get_current_theme(theme_manager: State<'_, ThemeManager>) -> Result<String, String> {
     let theme = theme_manager.get_current_theme().await;
 
     let result = json!({
@@ -104,9 +100,7 @@ pub async fn get_current_theme(
 }
 
 #[tauri::command]
-pub async fn get_theme_css(
-    theme_manager: State<'_, ThemeManager>,
-) -> Result<String, String> {
+pub async fn get_theme_css(theme_manager: State<'_, ThemeManager>) -> Result<String, String> {
     let theme = theme_manager.get_current_theme().await;
 
     let css = format!(
@@ -166,7 +160,8 @@ pub async fn set_system_theme(
     theme: serde_json::Value,
     db: State<'_, Arc<Database>>,
 ) -> Result<String, String> {
-    let theme_name = theme.get("name")
+    let theme_name = theme
+        .get("name")
         .and_then(|v| v.as_str())
         .unwrap_or("default")
         .to_string();
@@ -216,12 +211,11 @@ pub async fn remove_system_theme(
 }
 
 #[tauri::command]
-pub async fn list_system_themes(
-    theme_manager: State<'_, ThemeManager>,
-) -> Result<String, String> {
+pub async fn list_system_themes(theme_manager: State<'_, ThemeManager>) -> Result<String, String> {
     match theme_manager.list_system_themes().await {
         Ok(themes) => {
-            let theme_vec: Vec<Vec<String>> = themes.into_iter()
+            let theme_vec: Vec<Vec<String>> = themes
+                .into_iter()
                 .map(|(system, theme)| vec![system, theme])
                 .collect();
 
@@ -350,24 +344,22 @@ pub async fn apply_theme(
     theme_manager: State<'_, ThemeManager>,
 ) -> Result<String, String> {
     match theme_manager.load_theme(&name).await {
-        Ok(theme) => {
-            match theme_manager.set_theme(theme).await {
-                Ok(_) => {
-                    let result = json!({
-                        "success": true,
-                        "message": format!("Theme applied: {}", name)
-                    });
-                    Ok(result.to_string())
-                }
-                Err(e) => {
-                    let error = json!({
-                        "success": false,
-                        "error": e.to_string()
-                    });
-                    Err(error.to_string())
-                }
+        Ok(theme) => match theme_manager.set_theme(theme).await {
+            Ok(_) => {
+                let result = json!({
+                    "success": true,
+                    "message": format!("Theme applied: {}", name)
+                });
+                Ok(result.to_string())
             }
-        }
+            Err(e) => {
+                let error = json!({
+                    "success": false,
+                    "error": e.to_string()
+                });
+                Err(error.to_string())
+            }
+        },
         Err(e) => {
             let error = json!({
                 "success": false,
@@ -379,9 +371,7 @@ pub async fn apply_theme(
 }
 
 #[tauri::command]
-pub async fn list_themes(
-    theme_manager: State<'_, ThemeManager>,
-) -> Result<String, String> {
+pub async fn list_themes(theme_manager: State<'_, ThemeManager>) -> Result<String, String> {
     match theme_manager.list_themes().await {
         Ok(themes) => {
             let result = json!({
@@ -427,10 +417,7 @@ pub async fn set_game_theme(
 }
 
 #[tauri::command]
-pub async fn get_game_theme(
-    game_id: i64,
-    db: State<'_, Arc<Database>>,
-) -> Result<String, String> {
+pub async fn get_game_theme(game_id: i64, db: State<'_, Arc<Database>>) -> Result<String, String> {
     match db.get_game_theme(game_id).await {
         Ok(theme) => {
             let result = json!({
@@ -473,12 +460,11 @@ pub async fn remove_game_theme(
 }
 
 #[tauri::command]
-pub async fn get_all_game_themes(
-    db: State<'_, Arc<Database>>,
-) -> Result<String, String> {
+pub async fn get_all_game_themes(db: State<'_, Arc<Database>>) -> Result<String, String> {
     match db.get_all_game_themes().await {
         Ok(themes) => {
-            let theme_vec: Vec<serde_json::Value> = themes.into_iter()
+            let theme_vec: Vec<serde_json::Value> = themes
+                .into_iter()
                 .map(|(game_id, theme)| json!({ "game_id": game_id, "theme": theme }))
                 .collect();
 

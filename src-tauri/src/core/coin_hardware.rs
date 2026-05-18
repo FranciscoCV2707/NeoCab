@@ -1,9 +1,9 @@
+use crate::core::CoinManager;
+use crate::error::Result;
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::mpsc;
-use tracing::{info, error, debug};
-use crate::error::Result;
-use crate::core::CoinManager;
-use serde::{Deserialize, Serialize};
+use tracing::{debug, error, info};
 
 /// Hardware integration for coin detection and management
 /// Supports GPIO (RPi) and Arduino serial communication
@@ -76,7 +76,10 @@ impl CoinHardwareExt for CoinManager {
             HardwareType::Arduino => {
                 info!(
                     "Starting Arduino monitoring on port: {}",
-                    config.serial_port.as_ref().unwrap_or(&"Unknown".to_string())
+                    config
+                        .serial_port
+                        .as_ref()
+                        .unwrap_or(&"Unknown".to_string())
                 );
                 // Arduino monitoring would be started here
                 // In actual implementation, spawn polling task
@@ -162,10 +165,7 @@ impl HardwareMonitor {
 
         running.store(true, std::sync::atomic::Ordering::SeqCst);
 
-        info!(
-            "Arduino monitoring started: port={}, baud={}",
-            port, baud
-        );
+        info!("Arduino monitoring started: port={}, baud={}", port, baud);
 
         // In production, this would open serial port and poll for 'C' commands
         // For now, return placeholder

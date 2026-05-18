@@ -106,7 +106,12 @@ impl ShaderManager {
 
                 // Check for Linux installation path
                 if let Some(parent) = exe_dir.parent() {
-                    let linux_path = parent.join("usr").join("share").join("neocab").join("config").join("shaders");
+                    let linux_path = parent
+                        .join("usr")
+                        .join("share")
+                        .join("neocab")
+                        .join("config")
+                        .join("shaders");
                     if linux_path.exists() {
                         return Some(linux_path);
                     }
@@ -120,13 +125,7 @@ impl ShaderManager {
             PathBuf::from("/opt/neocab/config/shaders"),
         ];
 
-        for path in common_paths {
-            if path.exists() {
-                return Some(path);
-            }
-        }
-
-        None
+        common_paths.into_iter().find(|path| path.exists())
     }
 
     fn default_parameters() -> HashMap<String, f32> {
@@ -263,7 +262,7 @@ impl ShaderManager {
             && event
                 .paths
                 .iter()
-                .any(|path| path.extension().map_or(false, |ext| ext == "glsl"))
+                .any(|path| path.extension().is_some_and(|ext| ext == "glsl"))
     }
 
     /// Get default CRT shader
@@ -449,7 +448,7 @@ impl ShaderManager {
                 if let Ok(mut entries) = fs::read_dir(install_path).await {
                     while let Ok(Some(entry)) = entries.next_entry().await {
                         let path = entry.path();
-                        if path.extension().map_or(false, |ext| ext == "glsl") {
+                        if path.extension().is_some_and(|ext| ext == "glsl") {
                             custom_paths.push(path);
                         }
                     }
@@ -472,7 +471,7 @@ impl ShaderManager {
             if let Ok(mut entries) = fs::read_dir(&self.custom_shaders_path).await {
                 while let Ok(Some(entry)) = entries.next_entry().await {
                     let path = entry.path();
-                    if path.extension().map_or(false, |ext| ext == "glsl") {
+                    if path.extension().is_some_and(|ext| ext == "glsl") {
                         custom_paths.push(path);
                     }
                 }

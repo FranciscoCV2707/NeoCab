@@ -1,9 +1,9 @@
-use std::path::Path;
-use std::sync::Arc;
-use tracing::{info, warn};
 use crate::db::Database;
 use crate::error::Result;
 use crate::models::Game;
+use std::path::Path;
+use std::sync::Arc;
+use tracing::{info, warn};
 
 pub struct GameLibrary {
     db: Arc<Database>,
@@ -23,20 +23,28 @@ impl GameLibrary {
     ) -> Result<Vec<crate::models::Game>> {
         match system_name {
             "virtual-all" => {
-                return self.db.get_games_by_system(0, search, genre, only_favorites).await;
+                return self
+                    .db
+                    .get_games_by_system(0, search, genre, only_favorites)
+                    .await;
             }
             "virtual-favorites" => {
                 return self.db.get_games_by_system(0, search, genre, true).await;
             }
             "virtual-recent" => {
-                return self.db.get_games_by_system(0, search, genre, only_favorites).await;
+                return self
+                    .db
+                    .get_games_by_system(0, search, genre, only_favorites)
+                    .await;
             }
             _ => {}
         }
 
         let system = self.db.get_system_by_name(system_name).await?;
         if let Some(sys) = system {
-            self.db.get_games_by_system(sys.id, search, genre, only_favorites).await
+            self.db
+                .get_games_by_system(sys.id, search, genre, only_favorites)
+                .await
         } else {
             Ok(vec![])
         }
@@ -44,7 +52,7 @@ impl GameLibrary {
 
     pub async fn scan_roms<F>(&self, roms_dir: &Path, on_progress: F) -> Result<usize>
     where
-        F: Fn(usize, usize, &str) + Send + Sync + 'static
+        F: Fn(usize, usize, &str) + Send + Sync + 'static,
     {
         info!("Starting async ROM scan in {:?}", roms_dir);
 
@@ -75,7 +83,9 @@ impl GameLibrary {
                 .filter_map(|e| e.ok())
                 .filter(|e| e.file_type().is_file())
                 .filter(|e| {
-                    let ext = e.path().extension()
+                    let ext = e
+                        .path()
+                        .extension()
                         .and_then(|e| e.to_str())
                         .map(|e| e.to_lowercase());
                     ext.map(|e| supported.contains(&e)).unwrap_or(false)
@@ -90,9 +100,7 @@ impl GameLibrary {
 
         for (i, entry) in files.iter().enumerate() {
             let path = entry.path();
-            let file_name = path.file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("");
+            let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
 
             on_progress(i + 1, total_files, file_name);
 
@@ -123,13 +131,15 @@ impl GameLibrary {
         let mut file = tokio::fs::File::open(path).await?;
         let mut hasher = crc32fast::Hasher::new();
         let mut buffer = [0u8; 8192];
-        
+
         loop {
             let n = file.read(&mut buffer).await?;
-            if n == 0 { break; }
+            if n == 0 {
+                break;
+            }
             hasher.update(&buffer[..n]);
         }
-        
+
         let crc32 = format!("{:08x}", hasher.finalize());
 
         if self.db.get_game_by_crc32(&crc32).await?.is_some() {
@@ -200,8 +210,9 @@ impl GameLibrary {
             }
         }
 
-        systems.first().map(|s| s.id).ok_or_else(|| {
-            sqlx::Error::RowNotFound.into()
-        })
+        systems
+            .first()
+            .map(|s| s.id)
+            .ok_or_else(|| sqlx::Error::RowNotFound.into())
     }
 }

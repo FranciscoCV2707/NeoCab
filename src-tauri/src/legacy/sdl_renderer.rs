@@ -1,8 +1,8 @@
 use crate::Result;
-use sdl2::Sdl;
-use sdl2::video::Window;
-use sdl2::render::Canvas;
 use sdl2::pixels::Color;
+use sdl2::render::Canvas;
+use sdl2::video::Window;
+use sdl2::Sdl;
 
 /// SDL2-based renderer for legacy Windows XP mode
 pub struct Renderer {
@@ -23,19 +23,21 @@ impl Renderer {
         let sdl_context = sdl2::init()
             .map_err(|e| crate::error::NeoCabError::Custom(format!("SDL2 init failed: {}", e)))?;
 
-        let video_subsystem = sdl_context.video()
-            .map_err(|e| crate::error::NeoCabError::Custom(format!("SDL2 video init failed: {}", e)))?;
+        let video_subsystem = sdl_context.video().map_err(|e| {
+            crate::error::NeoCabError::Custom(format!("SDL2 video init failed: {}", e))
+        })?;
 
         let window = video_subsystem
             .window("NeoCab - Legacy Mode (Windows XP)", width, height)
             .position_centered()
             .build()
-            .map_err(|e| crate::error::NeoCabError::Custom(format!("Window creation failed: {}", e)))?;
+            .map_err(|e| {
+                crate::error::NeoCabError::Custom(format!("Window creation failed: {}", e))
+            })?;
 
-        let canvas = window
-            .into_canvas()
-            .build()
-            .map_err(|e| crate::error::NeoCabError::Custom(format!("Canvas creation failed: {}", e)))?;
+        let canvas = window.into_canvas().build().map_err(|e| {
+            crate::error::NeoCabError::Custom(format!("Canvas creation failed: {}", e))
+        })?;
 
         tracing::info!("SDL2 Renderer initialized successfully");
 
@@ -69,16 +71,24 @@ impl Renderer {
 
         // Draw basic arcade-themed background
         self.canvas.set_draw_color(Color::RGB(15, 15, 15));
-        self.canvas.fill_rect(sdl2::rect::Rect::new(0, 0, self.width, self.height))
+        self.canvas
+            .fill_rect(sdl2::rect::Rect::new(0, 0, self.width, self.height))
             .map_err(|e| crate::error::NeoCabError::Custom(format!("Render error: {}", e)))?;
 
         // Draw arcade orange accent border (top)
         self.canvas.set_draw_color(Color::RGB(255, 107, 53));
-        self.canvas.fill_rect(sdl2::rect::Rect::new(0, 0, self.width, 4))
+        self.canvas
+            .fill_rect(sdl2::rect::Rect::new(0, 0, self.width, 4))
             .map_err(|e| crate::error::NeoCabError::Custom(format!("Render error: {}", e)))?;
 
         // Draw arcade orange accent border (bottom)
-        self.canvas.fill_rect(sdl2::rect::Rect::new(0, (self.height - 4) as i32, self.width, 4))
+        self.canvas
+            .fill_rect(sdl2::rect::Rect::new(
+                0,
+                (self.height - 4) as i32,
+                self.width,
+                4,
+            ))
             .map_err(|e| crate::error::NeoCabError::Custom(format!("Render error: {}", e)))?;
 
         // TODO: Add text rendering using SDL2_ttf when available

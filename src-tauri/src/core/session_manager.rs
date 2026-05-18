@@ -1,11 +1,11 @@
+use crate::core::coin_manager::CoinManager;
+use crate::core::config_manager::{ConfigManager, GameMode, SystemGameConfig};
+use crate::core::timer_manager::TimerManager;
+use crate::error::Result;
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use serde::{Deserialize, Serialize};
 use tracing::info;
-use crate::error::Result;
-use crate::core::coin_manager::CoinManager;
-use crate::core::timer_manager::TimerManager;
-use crate::core::config_manager::{ConfigManager, GameMode, SystemGameConfig};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
@@ -181,7 +181,10 @@ impl SessionManager {
         let session_config = SessionConfig::from_system_config(&sys_config);
         let mut config = self.session_config.write().await;
         *config = session_config.clone();
-        info!("Session mode set to {:?} for system {}", session_config.mode, system_name);
+        info!(
+            "Session mode set to {:?} for system {}",
+            session_config.mode, system_name
+        );
         Ok(session_config)
     }
 
@@ -193,8 +196,13 @@ impl SessionManager {
                 if config.arcade.free_play {
                     return Ok(SessionState::NoRestriction);
                 }
-                let state = self.coin_manager.add_coins(config.arcade.coins_per_credit).await?;
-                Ok(SessionState::CreditAdded { credits: state.total_balance })
+                let state = self
+                    .coin_manager
+                    .add_coins(config.arcade.coins_per_credit)
+                    .await?;
+                Ok(SessionState::CreditAdded {
+                    credits: state.total_balance,
+                })
             }
             SessionMode::Timed => {
                 let seconds = config.timed.minutes_per_credit * 60;
@@ -204,7 +212,9 @@ impl SessionManager {
             SessionMode::Unlimited => Ok(SessionState::NoRestriction),
             SessionMode::Token => {
                 let state = self.coin_manager.add_coins(1).await?;
-                Ok(SessionState::CreditAdded { credits: state.total_balance })
+                Ok(SessionState::CreditAdded {
+                    credits: state.total_balance,
+                })
             }
         }
     }
@@ -217,16 +227,22 @@ impl SessionManager {
                 if config.arcade.free_play {
                     let seconds = config.arcade.time_per_credit_minutes * 60;
                     self.timer_manager.start(seconds as i64).await?;
-                    return Ok(SessionState::SessionStarted { total_seconds: seconds });
+                    return Ok(SessionState::SessionStarted {
+                        total_seconds: seconds,
+                    });
                 }
                 let balance = self.coin_manager.get_balance().await;
                 if balance.total_balance < config.arcade.coins_per_credit {
                     return Ok(SessionState::NoCredits);
                 }
-                self.coin_manager.use_coins(config.arcade.coins_per_credit).await?;
+                self.coin_manager
+                    .use_coins(config.arcade.coins_per_credit)
+                    .await?;
                 let seconds = config.arcade.time_per_credit_minutes * 60;
                 self.timer_manager.start(seconds as i64).await?;
-                Ok(SessionState::SessionStarted { total_seconds: seconds })
+                Ok(SessionState::SessionStarted {
+                    total_seconds: seconds,
+                })
             }
             SessionMode::Timed => {
                 let remaining = self.timer_manager.get_remaining_seconds().await;
@@ -234,11 +250,11 @@ impl SessionManager {
                     return Ok(SessionState::NoTime);
                 }
                 self.timer_manager.start(remaining).await?;
-                Ok(SessionState::SessionStarted { total_seconds: remaining as u32 })
+                Ok(SessionState::SessionStarted {
+                    total_seconds: remaining as u32,
+                })
             }
-            SessionMode::Unlimited => {
-                Ok(SessionState::NoRestriction)
-            }
+            SessionMode::Unlimited => Ok(SessionState::NoRestriction),
             SessionMode::Token => {
                 let balance = self.coin_manager.get_balance().await;
                 if balance.total_balance < 1 {
@@ -247,7 +263,9 @@ impl SessionManager {
                 self.coin_manager.use_coins(1).await?;
                 let seconds = config.timed.minutes_per_credit * 60;
                 self.timer_manager.start(seconds as i64).await?;
-                Ok(SessionState::SessionStarted { total_seconds: seconds })
+                Ok(SessionState::SessionStarted {
+                    total_seconds: seconds,
+                })
             }
         }
     }
@@ -278,24 +296,32 @@ impl SessionManager {
     pub async fn pause_session(&self) -> Result<SessionState> {
         let config = self.session_config.read().await;
         if !config.timed.pause_allowed {
-            return Err(crate::error::NeoCabError::System("Pause not allowed".to_string()));
+            return Err(crate::error::NeoCabError::System(
+                "Pause not allowed".to_string(),
+            ));
         }
 
         let mut pause_count = self.pause_count.write().await;
         if *pause_count >= config.timed.pause_max_count {
-            return Err(crate::error::NeoCabError::System("Max pauses reached".to_string()));
+            return Err(crate::error::NeoCabError::System(
+                "Max pauses reached".to_string(),
+            ));
         }
 
         self.timer_manager.pause().await?;
         *pause_count += 1;
         let remaining = self.timer_manager.get_remaining_seconds().await;
-        Ok(SessionState::Paused { remaining_seconds: remaining as u32 })
+        Ok(SessionState::Paused {
+            remaining_seconds: remaining as u32,
+        })
     }
 
     pub async fn resume_session(&self) -> Result<SessionState> {
         self.timer_manager.resume().await?;
         let remaining = self.timer_manager.get_remaining_seconds().await;
-        Ok(SessionState::Active { remaining_seconds: remaining as u32 })
+        Ok(SessionState::Active {
+            remaining_seconds: remaining as u32,
+        })
     }
 
     pub async fn end_session(&self) -> Result<SessionState> {
@@ -308,7 +334,9 @@ impl SessionManager {
     pub async fn add_time(&self, minutes: u32) -> Result<SessionState> {
         let seconds = (minutes * 60) as i64;
         self.timer_manager.add_time(seconds).await?;
-        Ok(SessionState::TimeAdded { seconds: minutes * 60 })
+        Ok(SessionState::TimeAdded {
+            seconds: minutes * 60,
+        })
     }
 
     pub async fn get_status(&self) -> Result<SessionStatus> {

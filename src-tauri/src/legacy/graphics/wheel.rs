@@ -114,14 +114,54 @@ impl WheelRenderer {
 
         while x >= y {
             // Draw octants
-            canvas.draw_line(Point::new(center_x + x, center_y + y), Point::new(center_x + x, center_y + y)).ok();
-            canvas.draw_line(Point::new(center_x - x, center_y + y), Point::new(center_x - x, center_y + y)).ok();
-            canvas.draw_line(Point::new(center_x + x, center_y - y), Point::new(center_x + x, center_y - y)).ok();
-            canvas.draw_line(Point::new(center_x - x, center_y - y), Point::new(center_x - x, center_y - y)).ok();
-            canvas.draw_line(Point::new(center_x + y, center_y + x), Point::new(center_x + y, center_y + x)).ok();
-            canvas.draw_line(Point::new(center_x - y, center_y + x), Point::new(center_x - y, center_y + x)).ok();
-            canvas.draw_line(Point::new(center_x + y, center_y - x), Point::new(center_x + y, center_y - x)).ok();
-            canvas.draw_line(Point::new(center_x - y, center_y - x), Point::new(center_x - y, center_y - x)).ok();
+            canvas
+                .draw_line(
+                    Point::new(center_x + x, center_y + y),
+                    Point::new(center_x + x, center_y + y),
+                )
+                .ok();
+            canvas
+                .draw_line(
+                    Point::new(center_x - x, center_y + y),
+                    Point::new(center_x - x, center_y + y),
+                )
+                .ok();
+            canvas
+                .draw_line(
+                    Point::new(center_x + x, center_y - y),
+                    Point::new(center_x + x, center_y - y),
+                )
+                .ok();
+            canvas
+                .draw_line(
+                    Point::new(center_x - x, center_y - y),
+                    Point::new(center_x - x, center_y - y),
+                )
+                .ok();
+            canvas
+                .draw_line(
+                    Point::new(center_x + y, center_y + x),
+                    Point::new(center_x + y, center_y + x),
+                )
+                .ok();
+            canvas
+                .draw_line(
+                    Point::new(center_x - y, center_y + x),
+                    Point::new(center_x - y, center_y + x),
+                )
+                .ok();
+            canvas
+                .draw_line(
+                    Point::new(center_x + y, center_y - x),
+                    Point::new(center_x + y, center_y - x),
+                )
+                .ok();
+            canvas
+                .draw_line(
+                    Point::new(center_x - y, center_y - x),
+                    Point::new(center_x - y, center_y - x),
+                )
+                .ok();
 
             if p < 0 {
                 p += 2 * y + 1;

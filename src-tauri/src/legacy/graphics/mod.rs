@@ -1,10 +1,10 @@
 pub mod renderer;
-pub mod wheel;
 pub mod ui;
+pub mod wheel;
 
 pub use renderer::Renderer;
-pub use wheel::WheelRenderer;
 pub use ui::UIRenderer;
+pub use wheel::WheelRenderer;
 
 use crate::Result;
 

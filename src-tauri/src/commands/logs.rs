@@ -1,30 +1,29 @@
+use crate::error::Result;
+use serde_json::json;
 use std::fs;
 use std::path::PathBuf;
-use serde_json::json;
-use crate::error::Result;
 
 fn get_logs_dir() -> PathBuf {
     PathBuf::from("./data/logs")
 }
 
 #[tauri::command]
-pub async fn read_log_file(
-    filename: Option<String>,
-) -> Result<String> {
+pub async fn read_log_file(filename: Option<String>) -> Result<String> {
     let logs_dir = get_logs_dir();
 
     let log_file = if let Some(name) = filename {
         logs_dir.join(&name)
     } else {
         // Find the most recent log file
-        let entries = fs::read_dir(&logs_dir)
-            .map_err(|e| crate::error::NeoCabError::System(format!("Failed to read logs directory: {}", e)))?;
+        let entries = fs::read_dir(&logs_dir).map_err(|e| {
+            crate::error::NeoCabError::System(format!("Failed to read logs directory: {}", e))
+        })?;
 
         let mut log_files: Vec<_> = entries
             .filter_map(|entry| {
                 entry.ok().and_then(|e| {
                     let path = e.path();
-                    if path.is_file() && path.extension().map_or(false, |ext| ext == "log") {
+                    if path.is_file() && path.extension().is_some_and(|ext| ext == "log") {
                         Some(path)
                     } else {
                         None
@@ -49,8 +48,9 @@ pub async fn read_log_file(
     };
 
     // Read the file
-    let content = fs::read_to_string(&log_file)
-        .map_err(|e| crate::error::NeoCabError::System(format!("Failed to read log file: {}", e)))?;
+    let content = fs::read_to_string(&log_file).map_err(|e| {
+        crate::error::NeoCabError::System(format!("Failed to read log file: {}", e))
+    })?;
 
     Ok(content)
 }
@@ -68,36 +68,35 @@ pub async fn list_log_files() -> Result<String> {
         return Ok(empty_list.to_string());
     }
 
-    let entries = fs::read_dir(&logs_dir)
-        .map_err(|e| crate::error::NeoCabError::System(format!("Failed to read logs directory: {}", e)))?;
+    let entries = fs::read_dir(&logs_dir).map_err(|e| {
+        crate::error::NeoCabError::System(format!("Failed to read logs directory: {}", e))
+    })?;
 
     let mut files = Vec::new();
 
-    for entry in entries {
-        if let Ok(entry) = entry {
-            let path = entry.path();
-            if path.is_file() && path.extension().map_or(false, |ext| ext == "log") {
-                if let Ok(metadata) = fs::metadata(&path) {
-                    let filename = path
-                        .file_name()
-                        .and_then(|n| n.to_str())
-                        .unwrap_or("unknown")
-                        .to_string();
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_file() && path.extension().is_some_and(|ext| ext == "log") {
+            if let Ok(metadata) = fs::metadata(&path) {
+                let filename = path
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .unwrap_or("unknown")
+                    .to_string();
 
-                    let size = metadata.len();
-                    let modified = metadata
-                        .modified()
-                        .ok()
-                        .and_then(|time| time.duration_since(std::time::UNIX_EPOCH).ok())
-                        .map(|duration| duration.as_secs())
-                        .unwrap_or(0);
+                let size = metadata.len();
+                let modified = metadata
+                    .modified()
+                    .ok()
+                    .and_then(|time| time.duration_since(std::time::UNIX_EPOCH).ok())
+                    .map(|duration| duration.as_secs())
+                    .unwrap_or(0);
 
-                    files.push(json!({
-                        "filename": filename,
-                        "size": size,
-                        "modified_timestamp": modified,
-                    }));
-                }
+                files.push(json!({
+                    "filename": filename,
+                    "size": size,
+                    "modified_timestamp": modified,
+                }));
             }
         }
     }
@@ -130,20 +129,19 @@ pub async fn clear_logs() -> Result<String> {
         return Ok(result.to_string());
     }
 
-    let entries = fs::read_dir(&logs_dir)
-        .map_err(|e| crate::error::NeoCabError::System(format!("Failed to read logs directory: {}", e)))?;
+    let entries = fs::read_dir(&logs_dir).map_err(|e| {
+        crate::error::NeoCabError::System(format!("Failed to read logs directory: {}", e))
+    })?;
 
     let mut deleted_count = 0;
     let mut errors = Vec::new();
 
-    for entry in entries {
-        if let Ok(entry) = entry {
-            let path = entry.path();
-            if path.is_file() && path.extension().map_or(false, |ext| ext == "log") {
-                match fs::remove_file(&path) {
-                    Ok(_) => deleted_count += 1,
-                    Err(e) => errors.push(format!("Failed to delete {:?}: {}", path, e)),
-                }
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_file() && path.extension().is_some_and(|ext| ext == "log") {
+            match fs::remove_file(&path) {
+                Ok(_) => deleted_count += 1,
+                Err(e) => errors.push(format!("Failed to delete {:?}: {}", path, e)),
             }
         }
     }
@@ -158,10 +156,7 @@ pub async fn clear_logs() -> Result<String> {
 }
 
 #[tauri::command]
-pub async fn get_log_tail(
-    lines: Option<usize>,
-    filename: Option<String>,
-) -> Result<String> {
+pub async fn get_log_tail(lines: Option<usize>, filename: Option<String>) -> Result<String> {
     let logs_dir = get_logs_dir();
     let line_count = lines.unwrap_or(100).min(1000); // Max 1000 lines
 
@@ -169,14 +164,15 @@ pub async fn get_log_tail(
         logs_dir.join(&name)
     } else {
         // Find the most recent log file
-        let entries = fs::read_dir(&logs_dir)
-            .map_err(|e| crate::error::NeoCabError::System(format!("Failed to read logs directory: {}", e)))?;
+        let entries = fs::read_dir(&logs_dir).map_err(|e| {
+            crate::error::NeoCabError::System(format!("Failed to read logs directory: {}", e))
+        })?;
 
         let mut log_files: Vec<_> = entries
             .filter_map(|entry| {
                 entry.ok().and_then(|e| {
                     let path = e.path();
-                    if path.is_file() && path.extension().map_or(false, |ext| ext == "log") {
+                    if path.is_file() && path.extension().is_some_and(|ext| ext == "log") {
                         Some(path)
                     } else {
                         None
@@ -199,8 +195,9 @@ pub async fn get_log_tail(
         log_files.pop().unwrap()
     };
 
-    let content = fs::read_to_string(&log_file)
-        .map_err(|e| crate::error::NeoCabError::System(format!("Failed to read log file: {}", e)))?;
+    let content = fs::read_to_string(&log_file).map_err(|e| {
+        crate::error::NeoCabError::System(format!("Failed to read log file: {}", e))
+    })?;
 
     // Get last N lines
     let lines_vec: Vec<&str> = content.lines().collect();

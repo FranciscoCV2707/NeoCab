@@ -1,8 +1,8 @@
+use crate::error::Result;
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use serde::{Deserialize, Serialize};
 use tracing::info;
-use crate::error::Result;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AuthLevel {
@@ -74,9 +74,10 @@ impl OperatorPanel {
             Ok(true)
         } else {
             *failed += 1;
-            Err(crate::error::NeoCabError::InvalidInput(
-                format!("Invalid PIN. {} attempts remaining", self.max_attempts - *failed),
-            ))
+            Err(crate::error::NeoCabError::InvalidInput(format!(
+                "Invalid PIN. {} attempts remaining",
+                self.max_attempts - *failed
+            )))
         }
     }
 

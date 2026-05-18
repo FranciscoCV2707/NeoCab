@@ -1,12 +1,14 @@
 pub mod graphics;
-pub mod input;
-pub mod media;
-pub mod event_loop;
+pub mod sdl_event_loop;
+pub mod sdl_input;
+pub mod sdl_media;
+pub mod sdl_renderer;
 
-pub use graphics::Renderer;
-pub use input::{InputHandler, InputEvent};
-pub use media::MediaLoader;
-pub use event_loop::{EventLoop, LegacyGameState};
+pub use graphics::{colors, DisplayConfig, FrameBuffer, Renderer, UIRenderer, WheelRenderer};
+pub use sdl_event_loop::{EventLoop, LegacyGameState};
+pub use sdl_input::{InputEvent, InputHandler};
+pub use sdl_media::MediaLoader;
+pub use sdl_renderer::Renderer as SdlRenderer;
 
 use crate::Result;
 use std::sync::Arc;
@@ -37,8 +39,8 @@ impl LegacyApp {
         let theme_path = config_path.join("config").join("themes");
         let media_path = config_path.join("config").join("media");
 
-        let media = MediaLoader::new(&theme_path, &media_path)
-            .unwrap_or_else(|_| MediaLoader::default());
+        let media =
+            MediaLoader::new(&theme_path, &media_path).unwrap_or_else(|_| MediaLoader::default());
 
         tracing::info!("Legacy application initialized successfully");
 
@@ -53,6 +55,8 @@ impl LegacyApp {
     /// Run legacy event loop
     pub async fn run(&mut self) -> Result<()> {
         tracing::info!("Starting legacy event loop");
-        self.event_loop.run(&mut self.renderer, &mut self.input_handler).await
+        self.event_loop
+            .run(&mut self.renderer, &mut self.input_handler)
+            .await
     }
 }
