@@ -27,6 +27,7 @@ pub struct UserSummary {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[allow(dead_code)]
+#[allow(non_snake_case)]
 struct RAAuthResponse {
     Success: bool,
     User: Option<String>,
@@ -37,6 +38,7 @@ struct RAAuthResponse {
 
 #[derive(Debug, Clone, Deserialize)]
 #[allow(dead_code)]
+#[allow(non_snake_case)]
 struct RAGameResponse {
     GameID: Option<u32>,
     Title: Option<String>,
@@ -45,6 +47,7 @@ struct RAGameResponse {
 
 #[derive(Debug, Clone, Deserialize)]
 #[allow(dead_code)]
+#[allow(non_snake_case)]
 struct RAAchievement {
     ID: Option<String>,
     Title: Option<String>,
@@ -54,6 +57,18 @@ struct RAAchievement {
     DateEarned: Option<String>,
     DateEarnedHardcore: Option<String>,
     AchievementType: Option<String>,
+}
+
+#[allow(dead_code)]
+#[allow(non_snake_case)]
+#[derive(Debug, Clone, Deserialize)]
+struct RASummary {
+    RecentlyPlayedCount: Option<u32>,
+    MemberSince: Option<String>,
+    Motto: Option<String>,
+    TotalPoints: Option<String>,
+    TotalTruePoints: Option<String>,
+    UserWallActive: Option<bool>,
 }
 
 pub struct RetroAchievementsService {
@@ -127,16 +142,6 @@ impl RetroAchievementsService {
 
         let resp = self.client.get(&url).send().await
             .map_err(|e| format!("Network error: {}", e))?;
-
-        #[derive(Deserialize)]
-        struct RASummary {
-            RecentlyPlayedCount: Option<u32>,
-            MemberSince: Option<String>,
-            Motto: Option<String>,
-            TotalPoints: Option<String>,
-            TotalTruePoints: Option<String>,
-            UserWallActive: Option<bool>,
-        }
 
         let summary: RASummary = resp.json().await
             .map_err(|e| format!("Parse error: {}", e))?;

@@ -1,7 +1,6 @@
 use tauri::State;
 use serde_json::json;
 use crate::core::MediaManager;
-use std::path::PathBuf;
 
 #[tauri::command]
 pub async fn scan_media(media_manager: State<'_, MediaManager>) -> Result<String, String> {
@@ -209,9 +208,9 @@ use crate::utils::fuzzy_match;
 pub async fn find_cover_art(
     game_title: String,
     system_name: String,
-    game_crc32: Option<String>,
+    _game_crc32: Option<String>,
     games_dir: String,
-    db: tauri::State<'_, Arc<Database>>,
+    _db: tauri::State<'_, Arc<Database>>,
 ) -> Result<String, String> {
     let artwork_dir = std::path::Path::new(&games_dir)
         .join("images")

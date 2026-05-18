@@ -1,0 +1,186 @@
+.launch-options {
+  background: var(--surface, #1a1a2e);
+  border: 1px solid var(--border, #333);
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 500px;
+}
+
+.launch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.launch-header h3 {
+  margin: 0;
+  color: var(--text, #fff);
+  font-size: 18px;
+}
+
+.launch-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #888);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.launch-close:hover {
+  color: var(--text, #fff);
+}
+
+.launch-strategies h4,
+.launch-advanced h4,
+.strategy-toggles h4 {
+  margin: 0 0 12px 0;
+  color: var(--text-muted, #888);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.strategy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.strategy-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--surface-hover, #252540);
+  border: 1px solid var(--border, #333);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.strategy-item:hover {
+  background: var(--surface-active, #303050);
+}
+
+.strategy-item.selected {
+  border-color: var(--accent, #6366f1);
+  background: var(--accent-dim, rgba(99, 102, 241, 0.15));
+}
+
+.strategy-item input {
+  cursor: pointer;
+}
+
+.strategy-name {
+  flex: 1;
+  color: var(--text, #fff);
+  font-size: 14px;
+}
+
+.strategy-priority {
+  color: var(--text-muted, #888);
+  font-size: 12px;
+}
+
+.launch-advanced {
+  margin-bottom: 20px;
+}
+
+.command-args label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-muted, #888);
+  font-size: 12px;
+}
+
+.command-args input {
+  background: var(--surface-hover, #252540);
+  border: 1px solid var(--border, #333);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: var(--text, #fff);
+  font-size: 13px;
+  font-family: monospace;
+}
+
+.command-args input:focus {
+  outline: none;
+  border-color: var(--accent, #6366f1);
+}
+
+.launch-error {
+  background: var(--error-dim, rgba(239, 68, 68, 0.15));
+  border: 1px solid var(--error, #ef4444);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+  color: var(--error, #ef4444);
+  font-size: 13px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.btn-cancel,
+.btn-launch {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-cancel {
+  background: var(--surface-hover, #252540);
+  color: var(--text, #fff);
+  border: 1px solid var(--border, #333);
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: var(--surface-active, #303050);
+}
+
+.btn-launch {
+  background: var(--success, #22c55e);
+  color: white;
+}
+
+.btn-launch:hover:not(:disabled) {
+  background: #16a34a;
+}
+
+.btn-cancel:disabled,
+.btn-launch:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.strategy-toggles {
+  padding-top: 16px;
+  border-top: 1px solid var(--border, #333);
+}
+
+.strategy-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  color: var(--text, #fff);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.strategy-toggle input {
+  cursor: pointer;
+}

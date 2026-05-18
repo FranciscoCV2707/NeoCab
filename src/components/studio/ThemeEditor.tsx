@@ -1,6 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import './ThemeEditor.css';
+
+interface ThemeInfo {
+  id: number;
+  name: string;
+  path: string;
+}
 
 interface ThemeColors {
   primary: string;
@@ -245,7 +251,7 @@ export const ThemeEditor: React.FC = () => {
       const result = await invoke<string>('list_themes');
       const parsed = JSON.parse(result);
       if (parsed.success) {
-        setThemes(parsed.themes.map((t: any) => t.name));
+        setThemes(parsed.themes.map((t: ThemeInfo) => t.name));
       }
     } catch (err) {
       console.error('Failed to load themes:', err);
@@ -317,8 +323,9 @@ export const ThemeEditor: React.FC = () => {
       } else {
         setMessage(`Error: ${parsed.error}`);
       }
-    } catch (err: any) {
-      setMessage(`Error saving theme: ${err}`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setMessage(`Error saving theme: ${message}`);
     } finally {
       setSaving(false);
       setTimeout(() => setMessage(null), 5000);

@@ -1,8 +1,6 @@
-use std::collections::HashMap;
 use std::env;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use tracing::info;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct EmulatorInfo {

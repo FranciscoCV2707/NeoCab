@@ -1,5 +1,3 @@
-use std::sync::Arc;
-use std::time::{Duration, Instant};
 use tokio::sync::mpsc;
 use crate::error::{NeoCabError, Result};
 use crate::core::coin_manager::CoinEvent;

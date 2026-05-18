@@ -34,6 +34,7 @@ impl QualityLevel {
 
 pub struct VideoPipeline {
     current: QualityLevel,
+    #[allow(dead_code)]
     last_fps_check: Instant,
     fps_samples: Vec<f64>,
 }

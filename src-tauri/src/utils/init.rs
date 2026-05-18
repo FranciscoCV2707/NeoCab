@@ -165,7 +165,7 @@ pub fn get_data_dir() -> PathBuf {
 
 /// Run startup validations (non-fatal warnings)
 pub fn run_startup_validations() {
-    let base = base_dir();
+    let _base = base_dir();
     let exe = std::env::current_exe().ok();
 
     // Check if running from temp directory

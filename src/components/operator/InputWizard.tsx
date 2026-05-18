@@ -11,7 +11,7 @@ interface JoyTrigger {
 
 interface JoyMapping {
     trigger: JoyTrigger;
-    action: { type: 'Key' | 'ArcadeAction'; value: string };
+    action: { type: string; value: string };
 }
 
 const STEPS = [
@@ -56,7 +56,7 @@ export const InputWizard: React.FC = () => {
             if (trigger) {
                 const newMapping: JoyMapping = {
                     trigger,
-                    action: STEPS[currentStep].action as any
+                    action: STEPS[currentStep].action
                 };
                 
                 setMappings([...mappings, newMapping]);

@@ -5,13 +5,22 @@ import { invoke } from '@tauri-apps/api/core';
 import './NetworkPanel.css';
 
 export const NetworkPanel: React.FC = () => {
-    const [discoveredCabinets, setDiscoveredCabinets] = useState<any[]>([]);
     const [role, setRole] = useState<string>('master');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [masterIp, setMasterIp] = useState<string | null>(null);
     const [syncing, setSyncing] = useState(false);
     const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
+
+    interface CabinetInfo {
+        id: string;
+        name: string;
+        ip: string;
+        port: number;
+        is_master: boolean;
+    }
+
+    const _discoveredCabinets: CabinetInfo[] = [];
+    const _loading = false;
+    const _error: string | null = null;
 
     const changeRole = async (newRole: string) => {
         setRole(newRole);
@@ -57,7 +66,7 @@ export const NetworkPanel: React.FC = () => {
                 <h2>Red de Gabinetes</h2>
                 <div className="role-selector">
                     <label>Modo de Red:</label>
-                    <select value={role} onChange={handleRoleChange} disabled={loading}>
+                    <select value={role} onChange={handleRoleChange} disabled={_loading}>
                         <option value="Standalone">Independiente (Standalone)</option>
                         <option value="Master">Maestro (Master)</option>
                         <option value="Client">Cliente (Client)</option>
@@ -65,11 +74,11 @@ export const NetworkPanel: React.FC = () => {
                 </div>
             </header>
 
-            {error && <div className="error-message">{error}</div>}
+            {_error && <div className="error-message">{_error}</div>}
 
             <div className="cabinet-list-container">
-                <h3>Gabinetes Detectados ({discoveredCabinets.length})</h3>
-                {discoveredCabinets.length === 0 ? (
+                <h3>Gabinetes Detectados ({_discoveredCabinets.length})</h3>
+                {_discoveredCabinets.length === 0 ? (
                     <div className="empty-state">
                         <p>Buscando otros gabinetes en la red local...</p>
                         <div className="loader"></div>
@@ -86,7 +95,7 @@ export const NetworkPanel: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {discoveredCabinets.map((cabinet) => (
+                            {_discoveredCabinets.map((cabinet: CabinetInfo) => (
                                 <tr key={cabinet.id} className={cabinet.is_master ? 'master-row' : ''}>
                                     <td>{cabinet.name} {cabinet.is_master && <span className="badge">MASTER</span>}</td>
                                     <td>{cabinet.ip}</td>

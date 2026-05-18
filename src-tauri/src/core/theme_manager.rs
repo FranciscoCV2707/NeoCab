@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::collections::HashMap;
 use std::io::Write;
 use tokio::sync::RwLock;
-use serde_json::{json, Value};
+use serde_json::json;
 use tracing::{info, error, debug};
 use crate::error::Result;
 use serde::{Deserialize, Serialize};

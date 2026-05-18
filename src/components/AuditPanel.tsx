@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { t } from "../i18n";
 import "./AuditPanel.css";
 
 interface AuditResult {

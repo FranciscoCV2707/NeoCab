@@ -14,6 +14,7 @@ struct Gamelist {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct EsGame {
     path: String,
     name: String,

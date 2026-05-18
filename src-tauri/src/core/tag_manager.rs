@@ -1,5 +1,4 @@
 use serde::{Serialize, Deserialize};
-use tracing::info;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Tag {

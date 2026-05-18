@@ -56,8 +56,9 @@ export const SessionConfig: React.FC<SessionConfigProps> = ({ systemName }) => {
       };
       await invoke('session_set_config', { config: JSON.stringify(config) });
       setMessage('Configuration saved successfully!');
-    } catch (err: any) {
-      setMessage(`Error: ${err}`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setMessage(`Error: ${message}`);
     } finally {
       setSaving(false);
       setTimeout(() => setMessage(null), 3000);
@@ -72,8 +73,9 @@ export const SessionConfig: React.FC<SessionConfigProps> = ({ systemName }) => {
     try {
       await invoke('session_set_system_mode', { systemName });
       setMessage(`Mode applied to ${systemName}`);
-    } catch (err: any) {
-      setMessage(`Error: ${err}`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setMessage(`Error: ${message}`);
     }
     setTimeout(() => setMessage(null), 3000);
   };

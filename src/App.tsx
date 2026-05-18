@@ -10,7 +10,7 @@ import { useSystemStore } from "./stores/useSystemStore";
 import { initThemeHotkey } from "./stores/useThemeStore";
 import { useGameStore } from "./stores/useGameStore";
 import { useUIStore, initUIListeners } from "./stores/useUIStore";
-import { Game, SaveState } from "./stores/types";
+import { Game, SaveState, System } from "./stores/types";
 import { FadeOverlay } from "./components/launcher/FadeOverlay";
 import { PauseMenu } from "./components/launcher/PauseMenu";
 import { ViewTransition } from "./components/ViewTransition";
@@ -20,11 +20,13 @@ import MainMenu from "./components/MainMenu";
 import AttractMode from "./components/AttractMode";
 import SaveStateModal from "./components/SaveStateModal";
 import { OperatorPanel } from "./components/operator/OperatorPanel";
+import { ToastContainer } from "./components/Toast";
+import { toast } from "./stores/useNotificationStore";
 import "./App.css";
 
 export default function App() {
   const { currentTheme } = useTheme();
-  const { t, locale, changeLocale } = useTranslation();
+  const { locale, changeLocale } = useTranslation();
   const { playSound, playBGM, stopBGM } = useAudio();
 
   const systems = useSystemStore((s) => s.systems);
@@ -50,7 +52,6 @@ export default function App() {
   const saveStatesList = useUIStore((s) => s.saveStatesList);
   const fadeInfo = useUIStore((s) => s.fadeInfo);
   const setView = useUIStore((s) => s.setView);
-  const setFadeVisible = useUIStore((s) => s.setFadeVisible);
   const setPauseVisible = useUIStore((s) => s.setPauseVisible);
   const setAttractMode = useUIStore((s) => s.setAttractMode);
   const showSaveStateForGame = useUIStore((s) => s.showSaveStateForGame);
@@ -72,13 +73,12 @@ export default function App() {
       );
     })();
     return () => { unlisten.then((f) => f()); };
-  }, []);
+  }, [loadSystems, setScanProgress]);
 
   useEffect(() => {
     if (currentView !== "games") playBGM();
   }, [currentView, playBGM]);
 
-  // Theme application
   useEffect(() => {
     if (!currentTheme) return;
     const root = document.documentElement;
@@ -117,7 +117,6 @@ export default function App() {
     body.className = `theme-${(currentTheme.name || "default").toLowerCase().replace(/\s+/g, "-")}`;
   }, [currentTheme]);
 
-  // Attract mode timer
   const attractTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resetAttractTimer = useCallback(() => {
     if (attractTimer.current) clearTimeout(attractTimer.current);
@@ -153,14 +152,14 @@ export default function App() {
     }
   };
 
-  const handleSelectSystem = async (system: any) => {
+  const handleSelectSystem = useCallback(async (system: System) => {
     playSound("select");
     selectSystem(system);
     setView("games");
     await loadGames(system.name);
-  };
+  }, [playSound, selectSystem, setView, loadGames]);
 
-  const handlePlayGame = async (game: Game) => {
+  const handlePlayGame = useCallback(async (game: Game) => {
     playSound("select");
     try {
       const states = await invoke<SaveState[]>("get_save_states", { gameId: game.id });
@@ -172,20 +171,21 @@ export default function App() {
     } catch {
       executeLaunch(game, null);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playSound, showSaveStateForGame]);
 
-  const executeLaunch = async (game: Game, _saveState: SaveState | null) => {
+  const executeLaunch = useCallback(async (game: Game, _saveState: SaveState | null) => {
     hideSaveStateModal();
     playSound("start");
     stopBGM();
     try {
       const emulator = selectedSystem?.name || "mame";
       await invoke("launch_game", { gameId: game.id.toString(), emulator });
-    } catch (error) {
+    } catch {
       playSound("error");
       playBGM();
     }
-  };
+  }, [hideSaveStateModal, playSound, stopBGM, selectedSystem, playBGM]);
 
   useEffect(() => {
     const unlisten = listen("game_launch_finished", () => {
@@ -196,11 +196,11 @@ export default function App() {
     };
   }, [playBGM]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     playSound("back");
     if (currentView === "games") { setView("systems"); setFocusedIndex(0); }
     else if (currentView === "systems") { setView("menu"); setFocusedIndex(0); }
-  };
+  }, [currentView, playSound, setView, setFocusedIndex]);
 
   const handleUnifiedAction = useCallback((action: InputAction) => {
     resetAttractTimer();
@@ -220,13 +220,28 @@ export default function App() {
         if (action === "down") setFocusedIndex(Math.min(games.length - 1, focusedIndex + 1));
         if (action === "confirm" && games[focusedIndex]) handlePlayGame(games[focusedIndex]);
         if (action === "back") handleBack();
-        if (action === "coin") invoke("session_insert_coin").catch(() => {});
+        if (action === "coin") {
+          invoke<string>("session_insert_coin")
+            .then((result) => {
+              try {
+                const data = JSON.parse(result);
+                if (data.success) {
+                  toast.success("Moneda insertada", `Créditos: ${data.credits || 0}`);
+                }
+              } catch {
+                toast.success("Moneda insertada", "");
+              }
+            })
+            .catch(() => {
+              toast.error("Error", "No se pudo insertar la moneda");
+            });
+        }
         break;
       case "operator":
         if (action === "back") setView("menu");
         break;
     }
-  }, [currentView, focusedIndex, systems, games, resetAttractTimer, playSound]);
+  }, [currentView, focusedIndex, systems, games, resetAttractTimer, playSound, handleBack, handlePlayGame, handleSelectSystem, setFocusedIndex, setView]);
 
   useUnifiedInput({ onAction: handleUnifiedAction });
 
@@ -302,6 +317,7 @@ export default function App() {
           onCancel={() => hideSaveStateModal()}
         />
       )}
+      <ToastContainer />
     </div>
   );
 }

@@ -422,7 +422,7 @@ pub async fn import_antimicrox_profile(
 
 #[tauri::command]
 pub async fn set_device_deadzone(
-    device_id: u32,
+    _device_id: u32,
     deadzone_type: String,
     value: f32,
     anti_deadzone: Option<f32>,

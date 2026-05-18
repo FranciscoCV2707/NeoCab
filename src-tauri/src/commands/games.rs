@@ -6,7 +6,6 @@ use std::path::PathBuf;
 use crate::db::Database;
 use std::sync::Arc;
 use std::path::Path;
-use crate::core::network_manager::NetworkManager;
 
 #[tauri::command]
 pub async fn list_games(

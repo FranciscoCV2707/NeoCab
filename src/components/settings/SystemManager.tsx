@@ -280,7 +280,7 @@ const SystemConfigEditor: React.FC<SystemConfigEditorProps> = ({
         <select
           value={editedConfig.mode}
           onChange={(e) =>
-            setEditedConfig({ ...editedConfig, mode: e.target.value as any })
+            setEditedConfig({ ...editedConfig, mode: e.target.value as SystemConfig['mode'] })
           }
         >
           <option value="arcade">Arcade (3 min)</option>

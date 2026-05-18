@@ -62,7 +62,7 @@ export const LaunchScriptEditor: React.FC<LaunchScriptEditorProps> = ({
               <strong>Example (Windows):</strong> <code>dir %ROM_PATH%</code>
             </li>
             <li>
-              <strong>Example (Linux):</strong> <code>ls "$ROM_PATH"</code>
+              <strong>Example (Linux):</strong> <code>ls &quot;$ROM_PATH&quot;</code>
             </li>
           </ul>
         </div>

@@ -35,8 +35,8 @@ pub fn detect_mode() -> RuntimeMode {
 }
 
 #[cfg(target_os = "windows")]
-fn detect_windows_mode(arch: &str) -> RuntimeMode {
-    use std::collections::HashMap;
+fn detect_windows_mode(_arch: &str) -> RuntimeMode {
+    
 
     // Check Windows version
     let version = get_windows_version();
@@ -72,6 +72,7 @@ fn detect_windows_mode(_arch: &str) -> RuntimeMode {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct WindowsVersion {
     major: u32,
     minor: u32,

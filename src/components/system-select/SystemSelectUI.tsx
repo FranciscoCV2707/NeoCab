@@ -26,12 +26,6 @@ export const SystemSelectUI: React.FC<SystemSelectUIProps> = ({
 }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const handleSelect = () => {
-    if (systems[selectedIndex]) {
-      onSystemSelect(systems[selectedIndex]);
-    }
-  };
-
   return (
     <div className="system-select-ui">
       <div className="system-grid">

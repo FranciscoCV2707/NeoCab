@@ -14,7 +14,7 @@ interface SystemStore {
   setScanProgress: (msg: string) => void;
 }
 
-export const useSystemStore = create<SystemStore>((set, get) => ({
+export const useSystemStore = create<SystemStore>((set) => ({
   systems: [],
   selectedSystem: null,
   loading: false,

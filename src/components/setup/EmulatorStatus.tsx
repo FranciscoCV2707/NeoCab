@@ -26,8 +26,9 @@ export const EmulatorStatus: React.FC = () => {
       if (parsed.success) {
         setEmulators(parsed.emulators || []);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to detect emulators');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message || 'Failed to detect emulators');
     } finally {
       setLoading(false);
     }

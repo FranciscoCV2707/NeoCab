@@ -39,7 +39,7 @@ export const WelcomeStep: React.FC = () => {
           <ul>
             <li>Ensure ROMs are organized in system-specific folders (MAME/, NES/, SNES/, etc.)</li>
             <li>Media should follow HyperSpin structure (media/System/Images/)</li>
-            <li>Operator PIN is 4 digits - choose something you'll remember</li>
+            <li>Operator PIN is 4 digits - choose something you&apos;ll remember</li>
             <li>Input configuration can be changed anytime in settings</li>
             <li>You can run this wizard again from Settings → Setup Wizard</li>
           </ul>

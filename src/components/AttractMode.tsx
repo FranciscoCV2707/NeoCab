@@ -27,7 +27,7 @@ export default function AttractMode({ games, onPlayGame, onExit }: AttractModePr
     // Pick a random game initially
     const initialIndex = Math.floor(Math.random() * videoGames.length);
     setCurrentGameIndex(initialIndex);
-  }, []);
+  }, [videoGames.length, onExit]);
 
   const handleVideoEnded = () => {
     // Pick the next random game

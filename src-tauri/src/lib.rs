@@ -14,10 +14,9 @@ pub use error::{NeoCabError, Result};
 use tauri::Manager;
 use std::sync::Arc;
 use std::path::PathBuf;
-use utils::RuntimeMode;
 
 fn determine_shader_path() -> PathBuf {
-    use std::path::Path;
+    
 
     // Priority order for shader discovery:
     // 1. Bundled installation paths (Windows/Linux post-install)
@@ -87,9 +86,9 @@ pub fn run_with_config(kiosk_config: core::kiosk_config::KioskConfig) {
     let runtime_mode = utils::detect_mode();
     let system_info = utils::get_system_info();
 
-    use std::sync::Arc;
-    use tauri::Manager;
-    use tracing::info;
+    
+    
+    
 
     tracing::info!("================================================");
     tracing::info!("NeoCab v1.0 Starting");
@@ -169,6 +168,7 @@ fn run_legacy_app() {
 }
 
 #[cfg(not(feature = "legacy-ui"))]
+#[allow(dead_code)]
 fn run_legacy_app() {
     eprintln!("Legacy mode requested but legacy-ui feature not enabled");
     eprintln!("Rebuild with: cargo build --features legacy-ui");
@@ -547,7 +547,7 @@ async fn initialize_app() -> Result<(
 )> {
     let base = get_base_dir();
     let data_dir = base.join("data");
-    let config_dir = base.join("config");
+    let _config_dir = base.join("config");
 
     tracing::info!("Base directory: {}", base.display());
 
@@ -576,7 +576,7 @@ async fn initialize_app() -> Result<(
     let input_manager = input::InputManager::new();
     
     let operator_pin = config_manager_arc.get_string("operator_pin").await.unwrap_or_else(|_| "0000".to_string());
-    let operator_panel = core::OperatorPanel::new(operator_pin, Some(config_manager_arc.clone()));
+    let operator_panel = core::OperatorPanel::new(operator_pin);
     
     let autoboot_manager = core::AutobootManager::default();
     let theme_manager = core::ThemeManager::new(data_dir.join("themes"));

@@ -41,6 +41,9 @@ pub enum NeoCabError {
 
     #[error("Unknown error")]
     Unknown,
+
+    #[error("Other error: {0}")]
+    Other(String),
 }
 
 impl Serialize for NeoCabError {

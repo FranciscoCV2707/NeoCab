@@ -18,7 +18,7 @@ export function useAudio() {
   // Initialize Web Audio API and pre-load sounds
   useEffect(() => {
     try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioContextClass = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (AudioContextClass) {
         audioContext.current = new AudioContextClass();
         
