@@ -208,9 +208,7 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
                     app.manage(config_manager_arc);
                     app.manage(network_manager);
                     app.manage(commands::SafeQuitState::default());
-                    app.manage(commands::PluginState(std::sync::Mutex::new(
-                        core::plugin_engine::PluginEngine::new(PathBuf::from("./data/plugins")),
-                    )));
+                    app.manage(core::plugin_engine::PluginState::default());
 
                     // Show marquee window on start if it exists
                     if let Some(marquee) = app.get_webview_window("marquee") {
