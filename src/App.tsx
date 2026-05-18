@@ -20,6 +20,8 @@ import MainMenu from "./components/MainMenu";
 import AttractMode from "./components/AttractMode";
 import SaveStateModal from "./components/SaveStateModal";
 import { OperatorPanel } from "./components/operator/OperatorPanel";
+import { ToastContainer } from "./components/Toast";
+import { toast } from "./stores/useNotificationStore";
 import "./App.css";
 
 export default function App() {
@@ -220,7 +222,22 @@ export default function App() {
         if (action === "down") setFocusedIndex(Math.min(games.length - 1, focusedIndex + 1));
         if (action === "confirm" && games[focusedIndex]) handlePlayGame(games[focusedIndex]);
         if (action === "back") handleBack();
-        if (action === "coin") invoke("session_insert_coin").catch(() => {});
+        if (action === "coin") {
+          invoke<string>("session_insert_coin")
+            .then((result) => {
+              try {
+                const data = JSON.parse(result);
+                if (data.success) {
+                  toast.success("Moneda insertada", `Créditos: ${data.credits || 0}`);
+                }
+              } catch {
+                toast.success("Moneda insertada", "");
+              }
+            })
+            .catch(() => {
+              toast.error("Error", "No se pudo insertar la moneda");
+            });
+        }
         break;
       case "operator":
         if (action === "back") setView("menu");
@@ -302,6 +319,7 @@ export default function App() {
           onCancel={() => hideSaveStateModal()}
         />
       )}
+      <ToastContainer />
     </div>
   );
 }

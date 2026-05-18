@@ -294,4 +294,17 @@ impl ConfigManager {
         systems.sort_by(|a, b| a.system.cmp(&b.system));
         Ok(systems)
     }
+
+    pub async fn get_string(&self, key: &str) -> Result<String> {
+        let config = self.config.read().await;
+        match key {
+            "operator_pin" => Ok("0000".to_string()),
+            "default_roms_path" | "roms_dir" => Ok(config.app.roms_dir.clone()),
+            "default_bios_path" | "bios_dir" => Ok(config.app.bios_dir.clone()),
+            "theme" => Ok(config.display.theme.clone()),
+            "language" => Ok(config.display.language.clone()),
+            "kiosk_mode" => Ok(if config.arcade.kiosk_mode { "true".to_string() } else { "false".to_string() }),
+            _ => Err(crate::error::NeoCabError::Config(format!("Unknown config key: {}", key))),
+        }
+    }
 }

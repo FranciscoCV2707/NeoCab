@@ -576,7 +576,7 @@ async fn initialize_app() -> Result<(
     let input_manager = input::InputManager::new();
     
     let operator_pin = config_manager_arc.get_string("operator_pin").await.unwrap_or_else(|_| "0000".to_string());
-    let operator_panel = core::OperatorPanel::new(operator_pin, Some(config_manager_arc.clone()));
+    let operator_panel = core::OperatorPanel::new(operator_pin);
     
     let autoboot_manager = core::AutobootManager::default();
     let theme_manager = core::ThemeManager::new(data_dir.join("themes"));
