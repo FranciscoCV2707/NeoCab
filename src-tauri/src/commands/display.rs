@@ -9,7 +9,10 @@ pub struct DisplayConfig {
 
 #[tauri::command]
 pub async fn get_display_config() -> Result<DisplayConfig, String> {
-    Ok(DisplayConfig { rotation: 0, fullscreen: true })
+    Ok(DisplayConfig {
+        rotation: 0,
+        fullscreen: true,
+    })
 }
 
 #[tauri::command]
@@ -20,7 +23,7 @@ pub async fn set_display_rotation(rotation: u32) -> Result<(), String> {
         // Use Display Switch utility or registry
         std::process::Command::new("DisplaySwitch.exe")
             .arg("/rotate")
-            .arg(&rotation.to_string())
+            .arg(rotation.to_string())
             .output()
             .ok();
     }

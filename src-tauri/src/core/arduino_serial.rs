@@ -73,9 +73,7 @@ impl ArduinoInterface {
     #[cfg(feature = "hardware-arduino")]
     pub fn detect_coins(&mut self) -> Result<u32> {
         if !self.is_connected {
-            return Err(NeoCabError::System(
-                "Arduino not connected".to_string(),
-            ));
+            return Err(NeoCabError::System("Arduino not connected".to_string()));
         }
 
         if let Some(port) = &mut self.port {
@@ -86,9 +84,8 @@ impl ArduinoInterface {
 
             // Read response: 4 bytes (u32 little-endian)
             let mut buffer = [0u8; 4];
-            port.read_exact(&mut buffer).map_err(|e| {
-                NeoCabError::System(format!("Failed to read from Arduino: {}", e))
-            })?;
+            port.read_exact(&mut buffer)
+                .map_err(|e| NeoCabError::System(format!("Failed to read from Arduino: {}", e)))?;
 
             let coin_count = u32::from_le_bytes(buffer);
             tracing::debug!("Coin count from Arduino: {}", coin_count);
@@ -112,17 +109,14 @@ impl ArduinoInterface {
     #[cfg(feature = "hardware-arduino")]
     pub fn trigger_solenoid(&mut self, output_id: u8) -> Result<()> {
         if !self.is_connected {
-            return Err(NeoCabError::System(
-                "Arduino not connected".to_string(),
-            ));
+            return Err(NeoCabError::System("Arduino not connected".to_string()));
         }
 
         if let Some(port) = &mut self.port {
             // Send command: 'S' (solenoid) + output ID
             let command = [b'S', output_id];
-            port.write_all(&command).map_err(|e| {
-                NeoCabError::System(format!("Failed to trigger solenoid: {}", e))
-            })?;
+            port.write_all(&command)
+                .map_err(|e| NeoCabError::System(format!("Failed to trigger solenoid: {}", e)))?;
 
             tracing::info!("Solenoid {} triggered", output_id);
             Ok(())
@@ -135,7 +129,10 @@ impl ArduinoInterface {
 
     #[cfg(not(feature = "hardware-arduino"))]
     pub fn trigger_solenoid(&mut self, output_id: u8) -> Result<()> {
-        tracing::debug!("Mock solenoid trigger (Arduino feature disabled): {}", output_id);
+        tracing::debug!(
+            "Mock solenoid trigger (Arduino feature disabled): {}",
+            output_id
+        );
         Ok(())
     }
 
@@ -147,15 +144,13 @@ impl ArduinoInterface {
         {
             if let Some(port) = &mut self.port {
                 // Send ping: 'P'
-                port.write_all(b"P").map_err(|e| {
-                    NeoCabError::System(format!("Failed to send ping: {}", e))
-                })?;
+                port.write_all(b"P")
+                    .map_err(|e| NeoCabError::System(format!("Failed to send ping: {}", e)))?;
 
                 // Read pong response: 'O'
                 let mut buffer = [0u8; 1];
-                port.read_exact(&mut buffer).map_err(|e| {
-                    NeoCabError::System(format!("No pong response: {}", e))
-                })?;
+                port.read_exact(&mut buffer)
+                    .map_err(|e| NeoCabError::System(format!("No pong response: {}", e)))?;
 
                 let success = buffer[0] == b'O';
                 tracing::info!("Arduino test {}", if success { "passed" } else { "failed" });

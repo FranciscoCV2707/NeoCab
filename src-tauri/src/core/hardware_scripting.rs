@@ -1,10 +1,10 @@
+use crate::core::arduino_serial::ArduinoInterface;
+use crate::error::{NeoCabError, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use tracing::{info, warn};
-use crate::error::{NeoCabError, Result};
-use crate::core::arduino_serial::ArduinoInterface;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum HardwareEvent {
@@ -18,10 +18,23 @@ pub enum HardwareEvent {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum HardwareAction {
-    TriggerSolenoid { output_id: u8, duration_ms: u32 },
-    SetLED { pin: u8, color_hex: Option<String>, state: bool },
-    PlaySound { sound_id: u8 },
-    BlinkLED { pin: u8, times: u32, interval_ms: u32 },
+    TriggerSolenoid {
+        output_id: u8,
+        duration_ms: u32,
+    },
+    SetLED {
+        pin: u8,
+        color_hex: Option<String>,
+        state: bool,
+    },
+    PlaySound {
+        sound_id: u8,
+    },
+    BlinkLED {
+        pin: u8,
+        times: u32,
+        interval_ms: u32,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,6 +47,12 @@ pub struct HardwareScript {
 pub struct HardwareScriptEngine {
     script: Option<HardwareScript>,
     arduino: Option<std::sync::Arc<tokio::sync::Mutex<ArduinoInterface>>>,
+}
+
+impl Default for HardwareScriptEngine {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl HardwareScriptEngine {
@@ -98,17 +117,28 @@ impl HardwareScriptEngine {
         let _lock = arduino.lock().await;
 
         match action {
-            HardwareAction::TriggerSolenoid { output_id, duration_ms: _ } => {
+            HardwareAction::TriggerSolenoid {
+                output_id,
+                duration_ms: _,
+            } => {
                 info!("Executing TriggerSolenoid on ID {}", output_id);
                 // Custom trigger implementation
                 #[cfg(feature = "hardware-arduino")]
                 let _ = lock.trigger_solenoid(*output_id);
             }
-            HardwareAction::SetLED { pin, color_hex: _, state } => {
+            HardwareAction::SetLED {
+                pin,
+                color_hex: _,
+                state,
+            } => {
                 info!("Executing SetLED on pin {} to state {}", pin, state);
                 // Send specific LED command to Arduino
             }
-            HardwareAction::BlinkLED { pin, times, interval_ms: _ } => {
+            HardwareAction::BlinkLED {
+                pin,
+                times,
+                interval_ms: _,
+            } => {
                 info!("Executing BlinkLED on pin {} {} times", pin, times);
             }
             HardwareAction::PlaySound { sound_id } => {

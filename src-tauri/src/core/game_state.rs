@@ -74,7 +74,10 @@ impl GameStateManager {
             })?;
             if let Some(paused_time) = *paused {
                 let pause_duration = paused_time.elapsed();
-                tracing::info!("Game resumed (paused for {:.2}s)", pause_duration.as_secs_f32());
+                tracing::info!(
+                    "Game resumed (paused for {:.2}s)",
+                    pause_duration.as_secs_f32()
+                );
             }
             *paused = None;
         }

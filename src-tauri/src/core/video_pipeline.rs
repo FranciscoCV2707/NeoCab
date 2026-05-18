@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::time::Instant;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -39,6 +39,12 @@ pub struct VideoPipeline {
     fps_samples: Vec<f64>,
 }
 
+impl Default for VideoPipeline {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl VideoPipeline {
     pub fn new() -> Self {
         Self {
@@ -48,7 +54,9 @@ impl VideoPipeline {
         }
     }
 
-    pub fn current(&self) -> &QualityLevel { &self.current }
+    pub fn current(&self) -> &QualityLevel {
+        &self.current
+    }
 
     pub fn record_frame(&mut self, delta_secs: f64) {
         if delta_secs > 0.0 {
@@ -61,7 +69,9 @@ impl VideoPipeline {
     }
 
     pub fn avg_fps(&self) -> f64 {
-        if self.fps_samples.is_empty() { return 60.0; }
+        if self.fps_samples.is_empty() {
+            return 60.0;
+        }
         self.fps_samples.iter().sum::<f64>() / self.fps_samples.len() as f64
     }
 

@@ -1,7 +1,7 @@
-use tauri::State;
-use serde_json::json;
 use crate::core::CoinManager;
+use serde_json::json;
 use std::sync::Arc;
+use tauri::State;
 
 #[tauri::command]
 pub async fn add_coins(
@@ -29,9 +29,7 @@ pub async fn add_coins(
 }
 
 #[tauri::command]
-pub async fn get_coin_balance(
-    coin_manager: State<'_, Arc<CoinManager>>,
-) -> Result<String, String> {
+pub async fn get_coin_balance(coin_manager: State<'_, Arc<CoinManager>>) -> Result<String, String> {
     let state = coin_manager.get_balance().await;
 
     let result = json!({
@@ -73,9 +71,7 @@ pub async fn start_game(
 }
 
 #[tauri::command]
-pub async fn end_game(
-    coin_manager: State<'_, Arc<CoinManager>>,
-) -> Result<String, String> {
+pub async fn end_game(coin_manager: State<'_, Arc<CoinManager>>) -> Result<String, String> {
     match coin_manager.end_game().await {
         Ok(_) => {
             let result = json!({
@@ -119,9 +115,7 @@ pub async fn return_coins(
 }
 
 #[tauri::command]
-pub async fn get_earnings(
-    coin_manager: State<'_, Arc<CoinManager>>,
-) -> Result<String, String> {
+pub async fn get_earnings(coin_manager: State<'_, Arc<CoinManager>>) -> Result<String, String> {
     match coin_manager.get_earnings().await {
         Ok(total) => {
             let result = json!({

@@ -11,13 +11,11 @@ pub mod utils;
 pub mod legacy;
 
 pub use error::{NeoCabError, Result};
-use tauri::Manager;
-use std::sync::Arc;
 use std::path::PathBuf;
+use std::sync::Arc;
+use tauri::Manager;
 
 fn determine_shader_path() -> PathBuf {
-    
-
     // Priority order for shader discovery:
     // 1. Bundled installation paths (Windows/Linux post-install)
     // 2. Development paths
@@ -85,10 +83,6 @@ pub fn run_with_config(kiosk_config: core::kiosk_config::KioskConfig) {
     // Detect runtime mode (Modern or Legacy)
     let runtime_mode = utils::detect_mode();
     let system_info = utils::get_system_info();
-
-    
-    
-    
 
     tracing::info!("================================================");
     tracing::info!("NeoCab v1.0 Starting");
@@ -177,7 +171,7 @@ fn run_legacy_app() {
 
 /// Run modern Tauri application
 fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
-    let _ = tauri::Builder::default()
+    tauri::Builder::default()
         .setup(|app| {
             let result = tauri::async_runtime::block_on(initialize_app());
 
@@ -213,6 +207,10 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
                     app.manage(shader_manager);
                     app.manage(config_manager_arc);
                     app.manage(network_manager);
+                    app.manage(commands::SafeQuitState::default());
+                    app.manage(commands::PluginState(std::sync::Mutex::new(
+                        core::plugin_engine::PluginEngine::new(PathBuf::from("./data/plugins")),
+                    )));
 
                     // Show marquee window on start if it exists
                     if let Some(marquee) = app.get_webview_window("marquee") {
@@ -411,6 +409,7 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
             commands::get_log_tail,
             // Kiosk
             commands::get_kiosk_config,
+            commands::get_available_systems,
             // Tags
             commands::list_tags,
             commands::create_tag,
@@ -482,7 +481,9 @@ fn init_logging() {
 }
 
 fn cleanup_old_logs(logs_dir: &std::path::Path, max_days: u64) {
-    let Ok(entries) = std::fs::read_dir(logs_dir) else { return; };
+    let Ok(entries) = std::fs::read_dir(logs_dir) else {
+        return;
+    };
     let now = std::time::SystemTime::now();
 
     for entry in entries.flatten() {
@@ -500,7 +501,8 @@ fn cleanup_old_logs(logs_dir: &std::path::Path, max_days: u64) {
                             if let Ok(content) = std::fs::read_to_string(&path) {
                                 use std::io::Write;
                                 let mut encoder = flate2::write::GzEncoder::new(
-                                    Vec::new(), flate2::Compression::default(),
+                                    Vec::new(),
+                                    flate2::Compression::default(),
                                 );
                                 if encoder.write_all(content.as_bytes()).is_ok() {
                                     if let Ok(compressed) = encoder.finish() {
@@ -552,7 +554,13 @@ async fn initialize_app() -> Result<(
     tracing::info!("Base directory: {}", base.display());
 
     let db = std::sync::Arc::new(
-        db::Database::new(data_dir.join("neocab.db").to_str().unwrap_or("./data/neocab.db")).await?
+        db::Database::new(
+            data_dir
+                .join("neocab.db")
+                .to_str()
+                .unwrap_or("./data/neocab.db"),
+        )
+        .await?,
     );
     db.init_default_systems().await?;
 
@@ -574,16 +582,22 @@ async fn initialize_app() -> Result<(
     );
     let session_manager_arc = Arc::new(session_manager);
     let input_manager = input::InputManager::new();
-    
-    let operator_pin = config_manager_arc.get_string("operator_pin").await.unwrap_or_else(|_| "0000".to_string());
+
+    let operator_pin = config_manager_arc
+        .get_string("operator_pin")
+        .await
+        .unwrap_or_else(|_| "0000".to_string());
     let operator_panel = core::OperatorPanel::new(operator_pin);
-    
+
     let autoboot_manager = core::AutobootManager::default();
     let theme_manager = core::ThemeManager::new(data_dir.join("themes"));
-    theme_manager.install_bundled_themes().map_err(|e| {
-        tracing::warn!("Failed to install bundled themes: {}", e);
-        e
-    }).ok();
+    theme_manager
+        .install_bundled_themes()
+        .map_err(|e| {
+            tracing::warn!("Failed to install bundled themes: {}", e);
+            e
+        })
+        .ok();
     let media_manager = core::MediaManager::new(data_dir.clone(), 256 * 1024 * 1024);
 
     // Start media folder watching for automatic rescans
@@ -595,20 +609,14 @@ async fn initialize_app() -> Result<(
 
     // Determine shader path: bundled first, then fallback to development paths
     let shader_path = determine_shader_path();
-    let shader_manager = core::ShaderManager::with_custom_path(
-        shader_path.clone(),
-        shader_path.clone(),
-    );
+    let shader_manager =
+        core::ShaderManager::with_custom_path(shader_path.clone(), shader_path.clone());
 
     // Phase 7: Network Manager
     let cabinet_id = uuid::Uuid::new_v4().to_string(); // In a real app, this should be persistent
-    let network_manager = core::NetworkManager::new(
-        cabinet_id,
-        "NeoCab-Gabinete".to_string(),
-        8080,
-        db.clone()
-    )?;
-    
+    let network_manager =
+        core::NetworkManager::new(cabinet_id, "NeoCab-Gabinete".to_string(), 8080, db.clone())?;
+
     // Auto-start discovery, advertising and API server
     let _ = network_manager.start_server();
     let _ = network_manager.start_advertising();

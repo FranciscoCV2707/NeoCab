@@ -1,11 +1,11 @@
+use crate::db::Database;
+use crate::error::Result;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::collections::HashMap;
 use tokio::sync::RwLock;
 use tracing::info;
-use crate::error::Result;
-use crate::db::Database;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
@@ -117,13 +117,34 @@ pub struct EmulatorsSettings {
 impl Default for AppConfig {
     fn default() -> Self {
         let mut systems = HashMap::new();
-        systems.insert("mame".to_string(), SystemGameConfig::new("mame".to_string(), GameMode::Arcade));
-        systems.insert("nes".to_string(), SystemGameConfig::new("nes".to_string(), GameMode::Console));
-        systems.insert("snes".to_string(), SystemGameConfig::new("snes".to_string(), GameMode::Console));
-        systems.insert("genesis".to_string(), SystemGameConfig::new("genesis".to_string(), GameMode::Console));
-        systems.insert("gbc".to_string(), SystemGameConfig::new("gbc".to_string(), GameMode::Console));
-        systems.insert("ps1".to_string(), SystemGameConfig::new("ps1".to_string(), GameMode::Console));
-        systems.insert("n64".to_string(), SystemGameConfig::new("n64".to_string(), GameMode::Console));
+        systems.insert(
+            "mame".to_string(),
+            SystemGameConfig::new("mame".to_string(), GameMode::Arcade),
+        );
+        systems.insert(
+            "nes".to_string(),
+            SystemGameConfig::new("nes".to_string(), GameMode::Console),
+        );
+        systems.insert(
+            "snes".to_string(),
+            SystemGameConfig::new("snes".to_string(), GameMode::Console),
+        );
+        systems.insert(
+            "genesis".to_string(),
+            SystemGameConfig::new("genesis".to_string(), GameMode::Console),
+        );
+        systems.insert(
+            "gbc".to_string(),
+            SystemGameConfig::new("gbc".to_string(), GameMode::Console),
+        );
+        systems.insert(
+            "ps1".to_string(),
+            SystemGameConfig::new("ps1".to_string(), GameMode::Console),
+        );
+        systems.insert(
+            "n64".to_string(),
+            SystemGameConfig::new("n64".to_string(), GameMode::Console),
+        );
 
         Self {
             app: AppSettings {
@@ -208,10 +229,7 @@ impl ConfigManager {
         }
     }
 
-    async fn apply_db_overrides(
-        config: AppConfig,
-        _db: &Database,
-    ) -> Result<AppConfig> {
+    async fn apply_db_overrides(config: AppConfig, _db: &Database) -> Result<AppConfig> {
         // Load any database overrides (Semana 2 config table)
         // For now, just return the config as-is
         // In production, query config table and override values
@@ -224,7 +242,9 @@ impl ConfigManager {
 
     pub async fn reload(&self) -> Result<()> {
         let new_config = Self::load_from_file(&self.config_path);
-        let new_config = Self::apply_db_overrides(new_config, &self.db).await.ok()
+        let new_config = Self::apply_db_overrides(new_config, &self.db)
+            .await
+            .ok()
             .unwrap_or_default();
 
         let mut config = self.config.write().await;
@@ -241,10 +261,16 @@ impl ConfigManager {
             "theme" => config.display.theme = value.clone(),
             "language" => config.display.language = value.clone(),
             "kiosk_mode" => {
-                config.arcade.kiosk_mode = value.parse()
-                    .map_err(|_| crate::error::NeoCabError::Config("Invalid boolean".to_string()))?;
+                config.arcade.kiosk_mode = value.parse().map_err(|_| {
+                    crate::error::NeoCabError::Config("Invalid boolean".to_string())
+                })?;
             }
-            _ => return Err(crate::error::NeoCabError::Config(format!("Unknown setting: {}", key))),
+            _ => {
+                return Err(crate::error::NeoCabError::Config(format!(
+                    "Unknown setting: {}",
+                    key
+                )))
+            }
         }
 
         // Persist to database
@@ -256,8 +282,9 @@ impl ConfigManager {
 
     pub async fn save_to_file(&self) -> Result<()> {
         let config = self.config.read().await;
-        let yaml = serde_yaml::to_string(&*config)
-            .map_err(|e| crate::error::NeoCabError::Config(format!("YAML serialize error: {}", e)))?;
+        let yaml = serde_yaml::to_string(&*config).map_err(|e| {
+            crate::error::NeoCabError::Config(format!("YAML serialize error: {}", e))
+        })?;
 
         std::fs::write(&self.config_path, yaml)?;
         info!("Config saved to {:?}", self.config_path);
@@ -266,12 +293,16 @@ impl ConfigManager {
 
     pub async fn save_system_config(&self, config: SystemGameConfig) -> Result<()> {
         let mut app_config = self.config.write().await;
-        app_config.systems.insert(config.system.clone(), config.clone());
+        app_config
+            .systems
+            .insert(config.system.clone(), config.clone());
 
-        self.db.set_config(
-            &format!("system_{}", config.system),
-            &serde_json::to_string(&config)?
-        ).await?;
+        self.db
+            .set_config(
+                &format!("system_{}", config.system),
+                &serde_json::to_string(&config)?,
+            )
+            .await?;
 
         info!("System config saved for: {}", config.system);
         Ok(())
@@ -303,8 +334,15 @@ impl ConfigManager {
             "default_bios_path" | "bios_dir" => Ok(config.app.bios_dir.clone()),
             "theme" => Ok(config.display.theme.clone()),
             "language" => Ok(config.display.language.clone()),
-            "kiosk_mode" => Ok(if config.arcade.kiosk_mode { "true".to_string() } else { "false".to_string() }),
-            _ => Err(crate::error::NeoCabError::Config(format!("Unknown config key: {}", key))),
+            "kiosk_mode" => Ok(if config.arcade.kiosk_mode {
+                "true".to_string()
+            } else {
+                "false".to_string()
+            }),
+            _ => Err(crate::error::NeoCabError::Config(format!(
+                "Unknown config key: {}",
+                key
+            ))),
         }
     }
 }

@@ -1,6 +1,6 @@
+use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
-use tracing::{info, debug};
-use serde::{Serialize, Deserialize};
+use tracing::{debug, info};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EmulatorInfo {
@@ -16,27 +16,18 @@ pub struct EmulatorDetector;
 impl EmulatorDetector {
     /// Detect all known emulators on the system
     pub fn detect_all() -> Vec<EmulatorInfo> {
-        let mut found = Vec::new();
-
-        // MAME
-        found.push(Self::detect_mame());
-
-        // RetroArch
-        found.push(Self::detect_retroarch());
-
-        // Dolphin (GameCube/Wii)
-        found.push(Self::detect_dolphin());
-
-        // PCSX2 (PS2)
-        found.push(Self::detect_pcsx2());
-
-        // Citra (Nintendo 3DS)
-        found.push(Self::detect_citra());
-
-        // Yuzu (Nintendo Switch)
-        found.push(Self::detect_yuzu());
-
-        info!("Detected emulators: {}/6 installed", found.iter().filter(|e| e.installed).count());
+        let found = vec![
+            Self::detect_mame(),
+            Self::detect_retroarch(),
+            Self::detect_dolphin(),
+            Self::detect_pcsx2(),
+            Self::detect_citra(),
+            Self::detect_yuzu(),
+        ];
+        info!(
+            "Detected emulators: {}/6 installed",
+            found.iter().filter(|e| e.installed).count()
+        );
         found
     }
 
@@ -46,7 +37,11 @@ impl EmulatorDetector {
         let path = Self::find_in_path(command);
 
         let installed = path.is_some();
-        debug!("MAME: {} ({})", if installed { "found" } else { "not found" }, command);
+        debug!(
+            "MAME: {} ({})",
+            if installed { "found" } else { "not found" },
+            command
+        );
 
         EmulatorInfo {
             name: name.to_string(),
@@ -59,11 +54,19 @@ impl EmulatorDetector {
 
     fn detect_retroarch() -> EmulatorInfo {
         let name = "RetroArch";
-        let command = if cfg!(windows) { "retroarch.exe" } else { "retroarch" };
+        let command = if cfg!(windows) {
+            "retroarch.exe"
+        } else {
+            "retroarch"
+        };
         let path = Self::find_in_path(command);
 
         let installed = path.is_some();
-        debug!("RetroArch: {} ({})", if installed { "found" } else { "not found" }, command);
+        debug!(
+            "RetroArch: {} ({})",
+            if installed { "found" } else { "not found" },
+            command
+        );
 
         EmulatorInfo {
             name: name.to_string(),
@@ -76,11 +79,19 @@ impl EmulatorDetector {
 
     fn detect_dolphin() -> EmulatorInfo {
         let name = "Dolphin";
-        let command = if cfg!(windows) { "Dolphin.exe" } else { "dolphin-emu" };
+        let command = if cfg!(windows) {
+            "Dolphin.exe"
+        } else {
+            "dolphin-emu"
+        };
         let path = Self::find_in_path(command);
 
         let installed = path.is_some();
-        debug!("Dolphin: {} ({})", if installed { "found" } else { "not found" }, command);
+        debug!(
+            "Dolphin: {} ({})",
+            if installed { "found" } else { "not found" },
+            command
+        );
 
         EmulatorInfo {
             name: name.to_string(),
@@ -97,7 +108,11 @@ impl EmulatorDetector {
         let path = Self::find_in_path(command);
 
         let installed = path.is_some();
-        debug!("PCSX2: {} ({})", if installed { "found" } else { "not found" }, command);
+        debug!(
+            "PCSX2: {} ({})",
+            if installed { "found" } else { "not found" },
+            command
+        );
 
         EmulatorInfo {
             name: name.to_string(),
@@ -114,7 +129,11 @@ impl EmulatorDetector {
         let path = Self::find_in_path(command);
 
         let installed = path.is_some();
-        debug!("Citra: {} ({})", if installed { "found" } else { "not found" }, command);
+        debug!(
+            "Citra: {} ({})",
+            if installed { "found" } else { "not found" },
+            command
+        );
 
         EmulatorInfo {
             name: name.to_string(),
@@ -131,7 +150,11 @@ impl EmulatorDetector {
         let path = Self::find_in_path(command);
 
         let installed = path.is_some();
-        debug!("Yuzu: {} ({})", if installed { "found" } else { "not found" }, command);
+        debug!(
+            "Yuzu: {} ({})",
+            if installed { "found" } else { "not found" },
+            command
+        );
 
         EmulatorInfo {
             name: name.to_string(),
@@ -160,9 +183,15 @@ impl EmulatorDetector {
             let program_files_x86 = std::env::var("ProgramFiles(x86)").ok();
 
             let common_paths = vec![
-                program_files.as_ref().map(|p| PathBuf::from(p).join("MAME")),
-                program_files_x86.as_ref().map(|p| PathBuf::from(p).join("RetroArch")),
-                program_files.as_ref().map(|p| PathBuf::from(p).join("Dolphin")),
+                program_files
+                    .as_ref()
+                    .map(|p| PathBuf::from(p).join("MAME")),
+                program_files_x86
+                    .as_ref()
+                    .map(|p| PathBuf::from(p).join("RetroArch")),
+                program_files
+                    .as_ref()
+                    .map(|p| PathBuf::from(p).join("Dolphin")),
             ];
 
             for maybe_path in common_paths.into_iter().flatten() {

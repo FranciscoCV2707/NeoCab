@@ -13,12 +13,12 @@ pub struct EmulatorSettings {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct VideoSettings {
-    pub renderer: Option<String>,       // "opengl", "vulkan", "direct3d", "software"
-    pub resolution_scale: Option<u32>,  // 1x, 2x, 3x, 4x
+    pub renderer: Option<String>, // "opengl", "vulkan", "direct3d", "software"
+    pub resolution_scale: Option<u32>, // 1x, 2x, 3x, 4x
     pub vsync: Option<bool>,
     pub fullscreen: Option<bool>,
-    pub aspect_ratio: Option<String>,   // "4:3", "16:9", "16:10"
-    pub rotation: Option<u32>,          // 0, 90, 180, 270
+    pub aspect_ratio: Option<String>, // "4:3", "16:9", "16:10"
+    pub rotation: Option<u32>,        // 0, 90, 180, 270
     pub brightness: Option<f32>,
     pub contrast: Option<f32>,
     pub gamma: Option<f32>,
@@ -26,11 +26,11 @@ pub struct VideoSettings {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AudioSettings {
-    pub backend: Option<String>,        // "alsa", "pulse", "wasapi", "xaudio2"
+    pub backend: Option<String>, // "alsa", "pulse", "wasapi", "xaudio2"
     pub device: Option<String>,
-    pub volume: Option<f32>,            // 0.0 - 1.0
-    pub samplerate: Option<u32>,        // 44100, 48000, 96000
-    pub latency: Option<u32>,           // ms
+    pub volume: Option<f32>,     // 0.0 - 1.0
+    pub samplerate: Option<u32>, // 44100, 48000, 96000
+    pub latency: Option<u32>,    // ms
     pub normalize: Option<bool>,
 }
 

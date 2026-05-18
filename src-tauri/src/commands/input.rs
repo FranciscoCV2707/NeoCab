@@ -1,11 +1,9 @@
-use tauri::State;
-use serde_json::json;
 use crate::input::InputManager;
+use serde_json::json;
+use tauri::State;
 
 #[tauri::command]
-pub async fn get_input_devices(
-    input_manager: State<'_, InputManager>,
-) -> Result<String, String> {
+pub async fn get_input_devices(input_manager: State<'_, InputManager>) -> Result<String, String> {
     match input_manager.get_devices().await {
         Ok(devices) => {
             let result = json!({
@@ -75,9 +73,7 @@ pub async fn set_deadzone(
 }
 
 #[tauri::command]
-pub async fn get_deadzone(
-    input_manager: State<'_, InputManager>,
-) -> Result<String, String> {
+pub async fn get_deadzone(input_manager: State<'_, InputManager>) -> Result<String, String> {
     let deadzone = input_manager.get_deadzone().await;
 
     let result = json!({
@@ -113,9 +109,7 @@ pub async fn set_input_enabled(
 }
 
 #[tauri::command]
-pub async fn is_input_enabled(
-    input_manager: State<'_, InputManager>,
-) -> Result<String, String> {
+pub async fn is_input_enabled(input_manager: State<'_, InputManager>) -> Result<String, String> {
     let enabled = input_manager.is_enabled().await;
 
     let result = json!({
@@ -132,7 +126,7 @@ pub async fn start_recording_input(
     action_value: String,
     input_manager: State<'_, InputManager>,
 ) -> Result<(), String> {
-    use crate::input::joy_mapper::{MappedAction, ArcadeAction};
+    use crate::input::joy_mapper::{ArcadeAction, MappedAction};
 
     let action = match action_type.as_str() {
         "Key" => MappedAction::Key(action_value),
@@ -208,7 +202,7 @@ pub async fn get_connected_devices(
             });
             Ok(result.to_string())
         }
-        Err(e) => Err(json!({"success": false, "error": e.to_string()}).to_string())
+        Err(e) => Err(json!({"success": false, "error": e.to_string()}).to_string()),
     }
 }
 
@@ -229,9 +223,7 @@ pub async fn set_input_context(
 }
 
 #[tauri::command]
-pub async fn get_input_context(
-    input_manager: State<'_, InputManager>,
-) -> Result<String, String> {
+pub async fn get_input_context(input_manager: State<'_, InputManager>) -> Result<String, String> {
     let (system, game) = input_manager.get_context().await;
     let result = json!({
         "success": true,
@@ -255,7 +247,7 @@ pub async fn add_profile_assignment(
     };
     match input_manager.add_profile_assignment(assignment).await {
         Ok(_) => Ok(json!({"success": true, "message": "Profile assignment added"}).to_string()),
-        Err(e) => Err(json!({"success": false, "error": e.to_string()}).to_string())
+        Err(e) => Err(json!({"success": false, "error": e.to_string()}).to_string()),
     }
 }
 
@@ -272,7 +264,7 @@ pub async fn get_profile_assignments(
             });
             Ok(result.to_string())
         }
-        Err(e) => Err(json!({"success": false, "error": e.to_string()}).to_string())
+        Err(e) => Err(json!({"success": false, "error": e.to_string()}).to_string()),
     }
 }
 
@@ -282,9 +274,12 @@ pub async fn remove_profile_assignment(
     identifier: String,
     input_manager: State<'_, InputManager>,
 ) -> Result<String, String> {
-    match input_manager.remove_profile_assignment(&scope, &identifier).await {
+    match input_manager
+        .remove_profile_assignment(&scope, &identifier)
+        .await
+    {
         Ok(_) => Ok(json!({"success": true, "message": "Profile assignment removed"}).to_string()),
-        Err(e) => Err(json!({"success": false, "error": e.to_string()}).to_string())
+        Err(e) => Err(json!({"success": false, "error": e.to_string()}).to_string()),
     }
 }
 
@@ -299,15 +294,16 @@ pub async fn load_input_profile(
     }
     let mut mapper = input_manager.joy_mapper.write().await;
     match mapper.load_profile_from_file(&path) {
-        Ok(_) => Ok(json!({"success": true, "message": format!("Profile loaded: {}", profile_name)}).to_string()),
-        Err(e) => Err(json!({"success": false, "error": e}).to_string())
+        Ok(_) => Ok(
+            json!({"success": true, "message": format!("Profile loaded: {}", profile_name)})
+                .to_string(),
+        ),
+        Err(e) => Err(json!({"success": false, "error": e}).to_string()),
     }
 }
 
 #[tauri::command]
-pub async fn get_active_profile(
-    input_manager: State<'_, InputManager>,
-) -> Result<String, String> {
+pub async fn get_active_profile(input_manager: State<'_, InputManager>) -> Result<String, String> {
     let mapper = input_manager.joy_mapper.read().await;
     if let Some(profile) = mapper.get_active_profile() {
         let result = json!({
@@ -373,7 +369,8 @@ pub async fn create_profile_from_template(
         "success": true,
         "message": format!("Profile created from template: {}", template),
         "path": path.to_string_lossy()
-    }).to_string())
+    })
+    .to_string())
 }
 
 #[tauri::command]
@@ -401,7 +398,8 @@ pub async fn import_antimicrox_profile(
         Ok(mut profile) => {
             profile.name = profile_name.clone();
             let yaml = serde_yaml::to_string(&profile).map_err(|e| e.to_string())?;
-            let path = std::path::PathBuf::from(format!("config/joy_profiles/{}.yml", profile_name));
+            let path =
+                std::path::PathBuf::from(format!("config/joy_profiles/{}.yml", profile_name));
 
             if let Err(e) = std::fs::write(&path, yaml) {
                 return Err(json!({"success": false, "error": e.to_string()}).to_string());
@@ -414,9 +412,10 @@ pub async fn import_antimicrox_profile(
                 "success": true,
                 "message": "AntiMicroX profile imported",
                 "path": path.to_string_lossy()
-            }).to_string())
+            })
+            .to_string())
         }
-        Err(e) => Err(json!({"success": false, "error": e}).to_string())
+        Err(e) => Err(json!({"success": false, "error": e}).to_string()),
     }
 }
 
@@ -463,10 +462,15 @@ pub async fn set_response_curve(
 
     let curve = match curve_type.as_str() {
         "linear" => ResponseCurve::Linear,
-        "exponential" => ResponseCurve::Exponential { factor: factor.unwrap_or(2.0) },
-        "digital" => ResponseCurve::Digital { threshold: factor.unwrap_or(0.7) },
+        "exponential" => ResponseCurve::Exponential {
+            factor: factor.unwrap_or(2.0),
+        },
+        "digital" => ResponseCurve::Digital {
+            threshold: factor.unwrap_or(0.7),
+        },
         "spline" => ResponseCurve::Spline {
-            control_points: control_points.unwrap_or_else(|| vec![(0.0, 0.0), (0.5, 0.3), (1.0, 1.0)]),
+            control_points: control_points
+                .unwrap_or_else(|| vec![(0.0, 0.0), (0.5, 0.3), (1.0, 1.0)]),
         },
         _ => return Err(json!({"success": false, "error": "Invalid curve type"}).to_string()),
     };

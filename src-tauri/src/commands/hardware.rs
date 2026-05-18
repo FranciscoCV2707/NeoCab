@@ -1,5 +1,5 @@
-use serde_json::json;
 use crate::core::ArduinoInterface;
+use serde_json::json;
 
 #[tauri::command]
 #[cfg(target_os = "linux")]
@@ -47,22 +47,20 @@ pub async fn test_arduino_connection(
     {
         let mut arduino = ArduinoInterface::new(port_name, baud_rate);
         match arduino.connect() {
-            Ok(_) => {
-                match arduino.test_connection() {
-                    Ok(success) => {
-                        let _ = arduino.disconnect();
-                        let result = json!({
-                            "success": success,
-                            "message": if success { "Arduino test passed" } else { "Arduino test failed" }
-                        });
-                        Ok(result.to_string())
-                    }
-                    Err(e) => {
-                        let _ = arduino.disconnect();
-                        Err(json!({"error": e.to_string()}).to_string())
-                    }
+            Ok(_) => match arduino.test_connection() {
+                Ok(success) => {
+                    let _ = arduino.disconnect();
+                    let result = json!({
+                        "success": success,
+                        "message": if success { "Arduino test passed" } else { "Arduino test failed" }
+                    });
+                    Ok(result.to_string())
                 }
-            }
+                Err(e) => {
+                    let _ = arduino.disconnect();
+                    Err(json!({"error": e.to_string()}).to_string())
+                }
+            },
             Err(e) => {
                 let error = json!({"error": e.to_string()});
                 Err(error.to_string())
@@ -99,8 +97,8 @@ pub async fn calibrate_coin_detection(
     pulse_threshold_ms: u32,
 ) -> Result<String, String> {
     // Validate calibration values
-    let debounce = debounce_ms.max(10).min(100);
-    let pulse = pulse_threshold_ms.max(50).min(500);
+    let debounce = debounce_ms.clamp(10, 100);
+    let pulse = pulse_threshold_ms.clamp(50, 500);
 
     let result = json!({
         "success": true,
@@ -138,7 +136,7 @@ pub async fn start_hardware_monitoring(
     serial_port: Option<String>,
     baud_rate: Option<u32>,
 ) -> Result<String, String> {
-    use crate::core::{HardwareType, HardwareConfig};
+    use crate::core::{HardwareConfig, HardwareType};
 
     let hw_type = match hardware_type.as_str() {
         "gpio" => HardwareType::GPIO,

@@ -1,6 +1,6 @@
-use tokio::sync::mpsc;
-use crate::error::{NeoCabError, Result};
 use crate::core::coin_manager::CoinEvent;
+use crate::error::{NeoCabError, Result};
+use tokio::sync::mpsc;
 
 /// GPIO Coin Detection for Raspberry Pi
 /// Monitors GPIO pin for coin pulses and converts to coin events
@@ -18,13 +18,10 @@ pub struct GPIOCoinDetector;
 
 #[cfg(target_os = "linux")]
 impl GPIOCoinDetector {
-    pub fn new(
-        gpio_pin: u32,
-        coin_channel: mpsc::UnboundedSender<CoinEvent>,
-    ) -> Self {
+    pub fn new(gpio_pin: u32, coin_channel: mpsc::UnboundedSender<CoinEvent>) -> Self {
         Self {
             gpio_pin,
-            debounce_ms: 20,    // Debounce duration
+            debounce_ms: 20,         // Debounce duration
             pulse_threshold_ms: 100, // Minimum pulse hold time
             coin_channel,
             is_running: Arc::new(std::sync::atomic::AtomicBool::new(false)),
@@ -70,9 +67,9 @@ impl GPIOCoinDetector {
             gpio_pin: Some(self.gpio_pin),
         };
 
-        self.coin_channel.send(event).map_err(|e| {
-            NeoCabError::System(format!("Failed to send coin event: {}", e))
-        })?;
+        self.coin_channel
+            .send(event)
+            .map_err(|e| NeoCabError::System(format!("Failed to send coin event: {}", e)))?;
 
         Ok(())
     }
@@ -161,7 +158,7 @@ impl Default for GPIOConfig {
     fn default() -> Self {
         Self {
             enabled: false,
-            gpio_pin: 4,  // BCM GPIO 4 (default RPi pin)
+            gpio_pin: 4, // BCM GPIO 4 (default RPi pin)
             debounce_ms: 20,
             pulse_threshold_ms: 100,
         }

@@ -1,6 +1,6 @@
+use crate::error::NeoCabError;
 /// Setup wizard commands for first-run configuration
 use crate::Result;
-use crate::error::NeoCabError;
 use std::path::PathBuf;
 
 /// Check if application needs setup wizard (first run)
@@ -13,7 +13,8 @@ pub fn needs_setup() -> bool {
 #[tauri::command]
 pub fn get_available_emulators() -> Result<Vec<String>> {
     let detected = crate::utils::EmulatorDetector::detect_all();
-    let names: Vec<String> = detected.iter()
+    let names: Vec<String> = detected
+        .iter()
         .filter(|e| e.installed)
         .map(|e| e.name.clone())
         .collect();

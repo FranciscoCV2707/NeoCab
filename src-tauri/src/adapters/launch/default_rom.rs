@@ -1,24 +1,32 @@
-use async_trait::async_trait;
-use super::strategy::{LaunchStrategy, LaunchContext, LaunchResult};
-use std::process::Command;
+use super::strategy::{LaunchContext, LaunchResult, LaunchStrategy};
 use crate::error::Result;
+use async_trait::async_trait;
+use std::process::Command;
 
 pub struct DefaultRomStrategy;
 
 #[async_trait]
 impl LaunchStrategy for DefaultRomStrategy {
-    fn name(&self) -> &str { "default_rom" }
-    fn priority(&self) -> u32 { 999 }
+    fn name(&self) -> &str {
+        "default_rom"
+    }
+    fn priority(&self) -> u32 {
+        999
+    }
 
-    async fn can_handle(&self, _ctx: &LaunchContext) -> bool { true }
+    async fn can_handle(&self, _ctx: &LaunchContext) -> bool {
+        true
+    }
 
     async fn launch(&self, ctx: &LaunchContext) -> Result<LaunchResult> {
-        let emu_path = ctx.emulator_path
+        let emu_path = ctx
+            .emulator_path
             .as_ref()
             .ok_or_else(|| crate::error::NeoCabError::InvalidInput("No emulator path".into()))?;
 
         let rom_str = ctx.rom_path.to_string_lossy();
-        let args_str = ctx.emulator_args
+        let args_str = ctx
+            .emulator_args
             .as_deref()
             .unwrap_or("%rom%")
             .replace("%rom%", &rom_str)
@@ -28,9 +36,9 @@ impl LaunchStrategy for DefaultRomStrategy {
         let child = Command::new(emu_path)
             .args(args_str.split_whitespace())
             .spawn()
-            .map_err(|e| crate::error::NeoCabError::InvalidInput(
-                format!("Launch failed: {}", e)
-            ))?;
+            .map_err(|e| {
+                crate::error::NeoCabError::InvalidInput(format!("Launch failed: {}", e))
+            })?;
 
         Ok(LaunchResult {
             process_id: Some(child.id()),

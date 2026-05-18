@@ -1,12 +1,12 @@
 use crate::error::{NeoCabError, Result};
+use notify::EventKind;
+use notify::{RecommendedWatcher, RecursiveMode, Watcher};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tokio::fs;
 use tokio::sync::RwLock;
-use notify::{Watcher, RecommendedWatcher, RecursiveMode};
-use notify::EventKind;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MediaFile {
@@ -85,21 +85,13 @@ impl MediaManager {
         let systems_path = self.media_path.join("media");
 
         if !systems_path.exists() {
-            fs::create_dir_all(&systems_path)
-                .await
-                ?;
+            fs::create_dir_all(&systems_path).await?;
             return Ok(library);
         }
 
-        let mut entries = fs::read_dir(&systems_path)
-            .await
-            ?;
+        let mut entries = fs::read_dir(&systems_path).await?;
 
-        while let Some(system_entry) = entries
-            .next_entry()
-            .await
-            ?
-        {
+        while let Some(system_entry) = entries.next_entry().await? {
             let system_path = system_entry.path();
 
             if system_path.is_dir() {
@@ -207,17 +199,13 @@ impl MediaManager {
                     tracing::info!("Media folder watcher started: {:?}", media_path);
 
                     // Process events
-                    for res in rx {
-                        if let Ok(event) = res {
-                            match event.kind {
-                                EventKind::Create(_)
-                                | EventKind::Modify(_)
-                                | EventKind::Remove(_) => {
-                                    tracing::debug!("Media folder change detected");
-                                    on_change_clone();
-                                }
-                                _ => {}
+                    for event in rx.into_iter().flatten() {
+                        match event.kind {
+                            EventKind::Create(_) | EventKind::Modify(_) | EventKind::Remove(_) => {
+                                tracing::debug!("Media folder change detected");
+                                on_change_clone();
                             }
+                            _ => {}
                         }
                     }
                 }
@@ -250,7 +238,8 @@ impl MediaManager {
                 }
                 tracing::info!("Media folder changed - cache invalidated");
             });
-        }).await
+        })
+        .await
     }
 
     /// Stop watching media directory
@@ -281,7 +270,6 @@ impl MediaManager {
         Ok(())
     }
 
-
     async fn scan_directory(
         &self,
         dir_path: &Path,
@@ -289,15 +277,9 @@ impl MediaManager {
         system_name: &str,
         library: &mut MediaLibrary,
     ) -> Result<()> {
-        let mut entries = fs::read_dir(dir_path)
-            .await
-            ?;
+        let mut entries = fs::read_dir(dir_path).await?;
 
-        while let Some(entry) = entries
-            .next_entry()
-            .await
-            ?
-        {
+        while let Some(entry) = entries.next_entry().await? {
             let path = entry.path();
 
             if self.is_supported_image(&path) {
@@ -323,32 +305,32 @@ impl MediaManager {
                         MediaType::Wheel => library
                             .wheels
                             .entry(system_name.to_string())
-                            .or_insert_with(Vec::new)
+                            .or_default()
                             .push(media_file),
                         MediaType::BoxArt => library
                             .box_art
                             .entry(system_name.to_string())
-                            .or_insert_with(Vec::new)
+                            .or_default()
                             .push(media_file),
                         MediaType::Background => library
                             .backgrounds
                             .entry(system_name.to_string())
-                            .or_insert_with(Vec::new)
+                            .or_default()
                             .push(media_file),
                         MediaType::Screenshot => library
                             .screenshots
                             .entry(system_name.to_string())
-                            .or_insert_with(Vec::new)
+                            .or_default()
                             .push(media_file),
                         MediaType::Video => library
                             .videos
                             .entry(system_name.to_string())
-                            .or_insert_with(Vec::new)
+                            .or_default()
                             .push(media_file),
                         MediaType::Marquee => library
                             .marquees
                             .entry(system_name.to_string())
-                            .or_insert_with(Vec::new)
+                            .or_default()
                             .push(media_file),
                         MediaType::Custom => {}
                     }
@@ -360,7 +342,12 @@ impl MediaManager {
     }
 
     /// Get media file for specific game
-    pub async fn get_media(&self, system: &str, game_name: &str, media_type: MediaType) -> Result<Option<PathBuf>> {
+    pub async fn get_media(
+        &self,
+        system: &str,
+        game_name: &str,
+        media_type: MediaType,
+    ) -> Result<Option<PathBuf>> {
         let library = self.scan_media().await?;
 
         let map = match media_type {
@@ -395,7 +382,12 @@ impl MediaManager {
         let videos_count = library.videos.values().map(|v| v.len()).sum::<usize>() as u64;
         let marquees_count = library.marquees.values().map(|v| v.len()).sum::<usize>() as u64;
 
-        let total_files = wheels_count + box_art_count + backgrounds_count + screenshots_count + videos_count + marquees_count;
+        let total_files = wheels_count
+            + box_art_count
+            + backgrounds_count
+            + screenshots_count
+            + videos_count
+            + marquees_count;
 
         Ok(MediaStats {
             total_files,
@@ -420,15 +412,9 @@ impl MediaManager {
         }
 
         let mut files_organized = 0u64;
-        let mut entries = fs::read_dir(&source_path)
-            .await
-            ?;
+        let mut entries = fs::read_dir(&source_path).await?;
 
-        while let Some(entry) = entries
-            .next_entry()
-            .await
-            ?
-        {
+        while let Some(entry) = entries.next_entry().await? {
             let path = entry.path();
 
             if self.is_supported_image(&path) {
@@ -457,14 +443,10 @@ impl MediaManager {
                         } else {
                             dest_dir.join(type_dir)
                         };
-                        fs::create_dir_all(&dest)
-                            .await
-                            ?;
+                        fs::create_dir_all(&dest).await?;
 
                         let target_file = dest.join(file_name);
-                        fs::copy(&path, &target_file)
-                            .await
-                            ?;
+                        fs::copy(&path, &target_file).await?;
 
                         files_organized += 1;
                     }
@@ -498,10 +480,17 @@ impl MediaManager {
 
     /// Check if file is a supported image or video format
     fn is_supported_image(&self, path: &Path) -> bool {
-        match path.extension().and_then(|e| e.to_str()) {
-            Some("png") | Some("jpg") | Some("jpeg") | Some("gif") | Some("webp") | Some("mp4") | Some("mkv") | Some("avi") => true,
-            _ => false,
-        }
+        matches!(
+            path.extension().and_then(|e| e.to_str()),
+            Some("png")
+                | Some("jpg")
+                | Some("jpeg")
+                | Some("gif")
+                | Some("webp")
+                | Some("mp4")
+                | Some("mkv")
+                | Some("avi")
+        )
     }
 
     /// Get media library for a specific system
@@ -519,21 +508,19 @@ impl MediaManager {
         };
 
         if let Some(wheels) = library.wheels.get(system) {
-            filtered
-                .wheels
-                .insert(system.to_string(), wheels.clone());
+            filtered.wheels.insert(system.to_string(), wheels.clone());
             filtered.total_size += wheels.iter().map(|f| f.file_size).sum::<u64>();
         }
 
         if let Some(boxes) = library.box_art.get(system) {
-            filtered
-                .box_art
-                .insert(system.to_string(), boxes.clone());
+            filtered.box_art.insert(system.to_string(), boxes.clone());
             filtered.total_size += boxes.iter().map(|f| f.file_size).sum::<u64>();
         }
 
         if let Some(backgrounds) = library.backgrounds.get(system) {
-            filtered.backgrounds.insert(system.to_string(), backgrounds.clone());
+            filtered
+                .backgrounds
+                .insert(system.to_string(), backgrounds.clone());
             filtered.total_size += backgrounds.iter().map(|f| f.file_size).sum::<u64>();
         }
 
@@ -545,9 +532,7 @@ impl MediaManager {
         }
 
         if let Some(videos) = library.videos.get(system) {
-            filtered
-                .videos
-                .insert(system.to_string(), videos.clone());
+            filtered.videos.insert(system.to_string(), videos.clone());
             filtered.total_size += videos.iter().map(|f| f.file_size).sum::<u64>();
         }
 
@@ -570,10 +555,22 @@ mod tests {
     fn test_infer_media_type() {
         let manager = MediaManager::new(PathBuf::from("/tmp"), 1024 * 1024 * 256);
 
-        assert_eq!(manager.infer_media_type("mame_pacman_wheel.png"), MediaType::Wheel);
-        assert_eq!(manager.infer_media_type("nes_mario_box.jpg"), MediaType::BoxArt);
-        assert_eq!(manager.infer_media_type("snes_zelda_background.png"), MediaType::Background);
-        assert_eq!(manager.infer_media_type("ps1_ff7_screenshot.jpg"), MediaType::Screenshot);
+        assert_eq!(
+            manager.infer_media_type("mame_pacman_wheel.png"),
+            MediaType::Wheel
+        );
+        assert_eq!(
+            manager.infer_media_type("nes_mario_box.jpg"),
+            MediaType::BoxArt
+        );
+        assert_eq!(
+            manager.infer_media_type("snes_zelda_background.png"),
+            MediaType::Background
+        );
+        assert_eq!(
+            manager.infer_media_type("ps1_ff7_screenshot.jpg"),
+            MediaType::Screenshot
+        );
     }
 
     #[test]

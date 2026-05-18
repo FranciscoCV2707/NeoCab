@@ -1,5 +1,5 @@
-use serde_json::json;
 use crate::adapters::config_injectors::{self, EmulatorSettings};
+use serde_json::json;
 
 #[derive(serde::Serialize)]
 pub struct InjectorInfo {
@@ -10,7 +10,10 @@ pub struct InjectorInfo {
 #[tauri::command]
 pub async fn list_config_injectors() -> Result<Vec<InjectorInfo>, String> {
     let injectors = config_injectors::list_injectors();
-    Ok(injectors.into_iter().map(|(name, display_name)| InjectorInfo { name, display_name }).collect())
+    Ok(injectors
+        .into_iter()
+        .map(|(name, display_name)| InjectorInfo { name, display_name })
+        .collect())
 }
 
 #[tauri::command]
@@ -34,7 +37,10 @@ pub async fn detect_config_injector(emulator_path: String) -> Result<String, Str
 }
 
 #[tauri::command]
-pub async fn read_emulator_config(emulator_path: String, config_dir: Option<String>) -> Result<String, String> {
+pub async fn read_emulator_config(
+    emulator_path: String,
+    config_dir: Option<String>,
+) -> Result<String, String> {
     let inj = config_injectors::find_injector(&emulator_path)
         .ok_or_else(|| format!("No config injector found for {}", emulator_path))?;
 
@@ -44,7 +50,7 @@ pub async fn read_emulator_config(emulator_path: String, config_dir: Option<Stri
     };
 
     let settings = inj.read_current(&cfg_dir).await?;
-    Ok(serde_json::to_string(&settings).map_err(|e| e.to_string())?)
+    serde_json::to_string(&settings).map_err(|e| e.to_string())
 }
 
 #[tauri::command]

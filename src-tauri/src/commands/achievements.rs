@@ -1,5 +1,5 @@
-use serde::Serialize;
 use crate::core::retroachievements::{self, Achievement, UserSummary};
+use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct AuthStatus {
@@ -12,7 +12,10 @@ pub async fn ra_login(username: String, api_key: String) -> Result<AuthStatus, S
     let service = retroachievements::RetroAchievementsService::new(username.clone(), api_key);
     let success = service.login().await?;
     if success {
-        Ok(AuthStatus { configured: true, username })
+        Ok(AuthStatus {
+            configured: true,
+            username,
+        })
     } else {
         Err("Invalid RetroAchievements credentials".to_string())
     }
@@ -29,10 +32,7 @@ pub async fn ra_get_game_achievements(
 }
 
 #[tauri::command]
-pub async fn ra_get_user_summary(
-    username: String,
-    api_key: String,
-) -> Result<UserSummary, String> {
+pub async fn ra_get_user_summary(username: String, api_key: String) -> Result<UserSummary, String> {
     let service = retroachievements::RetroAchievementsService::new(username, api_key);
     service.get_user_summary().await
 }

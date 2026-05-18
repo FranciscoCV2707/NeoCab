@@ -7,7 +7,10 @@ fn main() {
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
 
     // Compile-time feature logging
-    println!("cargo:warning=Building NeoCab for {} ({})", target_os, target_arch);
+    println!(
+        "cargo:warning=Building NeoCab for {} ({})",
+        target_os, target_arch
+    );
 
     #[cfg(feature = "modern-ui")]
     println!("cargo:warning=Feature: modern-ui (Tauri + React + WebView2)");

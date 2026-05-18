@@ -1,13 +1,13 @@
-use std::sync::Arc;
+use crate::adapters::launch::{self, LaunchContext, LaunchResult, LaunchStrategy};
+use crate::adapters::{EmulatorAdapter, MameAdapter};
+use crate::db::Database;
+use crate::error::{NeoCabError, Result};
+use crate::models::Game;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use tracing::{info, warn};
-use crate::error::{Result, NeoCabError};
-use crate::adapters::{EmulatorAdapter, MameAdapter};
-use crate::adapters::launch::{self, LaunchStrategy, LaunchContext, LaunchResult};
-use crate::db::Database;
-use crate::models::Game;
 use std::process::Command;
+use std::sync::Arc;
+use tracing::{info, warn};
 
 pub struct EmulatorManager {
     adapters: HashMap<String, Arc<dyn EmulatorAdapter>>,
@@ -35,19 +35,17 @@ impl EmulatorManager {
         self.adapters.keys().cloned().collect()
     }
 
-    pub async fn launch_game(
-        &self,
-        game: &Game,
-        emulator_name: &str,
-    ) -> Result<()> {
-        info!("Launching game: {} with emulator: {}", game.title, emulator_name);
+    pub async fn launch_game(&self, game: &Game, emulator_name: &str) -> Result<()> {
+        info!(
+            "Launching game: {} with emulator: {}",
+            game.title, emulator_name
+        );
 
         // Get emulator adapter
-        let adapter = self.get_adapter(emulator_name)
-            .ok_or_else(|| {
-                warn!("Emulator not found: {}", emulator_name);
-                NeoCabError::EmulatorNotFound(emulator_name.to_string())
-            })?;
+        let adapter = self.get_adapter(emulator_name).ok_or_else(|| {
+            warn!("Emulator not found: {}", emulator_name);
+            NeoCabError::EmulatorNotFound(emulator_name.to_string())
+        })?;
 
         // Launch the game
         adapter.launch(&game.rom_path).await?;
@@ -108,7 +106,7 @@ impl EmulatorManager {
         #[cfg(target_os = "windows")]
         {
             let status = Command::new("cmd")
-                .args(&["/C", script])
+                .args(["/C", script])
                 .env("ROM_PATH", rom_path)
                 .status()
                 .map_err(|e| NeoCabError::System(format!("Failed to execute script: {}", e)))?;
@@ -135,8 +133,13 @@ impl EmulatorManager {
     }
 
     /// Launch using the strategy pipeline
-    pub async fn launch_with_pipeline(&self, game: &Game, emulator_name: &str) -> Result<LaunchResult> {
-        let emulator_path = self.get_adapter_path(emulator_name)
+    pub async fn launch_with_pipeline(
+        &self,
+        game: &Game,
+        emulator_name: &str,
+    ) -> Result<LaunchResult> {
+        let emulator_path = self
+            .get_adapter_path(emulator_name)
             .ok_or_else(|| NeoCabError::EmulatorNotFound(emulator_name.to_string()))?;
 
         let strategies: Vec<Box<dyn LaunchStrategy>> = vec![
@@ -172,11 +175,10 @@ impl EmulatorManager {
     pub async fn stop_game(&self, emulator_name: &str) -> Result<()> {
         info!("Stopping game on emulator: {}", emulator_name);
 
-        let adapter = self.get_adapter(emulator_name)
-            .ok_or_else(|| {
-                warn!("Emulator not found: {}", emulator_name);
-                NeoCabError::EmulatorNotFound(emulator_name.to_string())
-            })?;
+        let adapter = self.get_adapter(emulator_name).ok_or_else(|| {
+            warn!("Emulator not found: {}", emulator_name);
+            NeoCabError::EmulatorNotFound(emulator_name.to_string())
+        })?;
 
         adapter.stop().await?;
         Ok(())
@@ -186,10 +188,7 @@ impl EmulatorManager {
         info!("Initializing default emulators");
 
         // MAME (arcade)
-        let mame = Arc::new(MameAdapter::new(
-            "mame".to_string(),
-            "0.262".to_string(),
-        ));
+        let mame = Arc::new(MameAdapter::new("mame".to_string(), "0.262".to_string()));
         self.register_adapter("mame".to_string(), mame);
 
         // RetroArch with cores

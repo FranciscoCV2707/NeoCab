@@ -13,9 +13,7 @@ impl PcsxReduxAdapter {
 
     pub async fn launch(&mut self, rom_path: &str) -> Result<()> {
         let args = vec![rom_path];
-        let child = Command::new("pcsx-redux")
-            .args(&args)
-            .spawn()?;
+        let child = Command::new("pcsx-redux").args(&args).spawn()?;
 
         self.process = Some(child);
         info!("PCSX-Redux launched for: {}", rom_path);

@@ -1,9 +1,9 @@
-use serde_json::json;
-use tauri::State;
-use std::sync::Arc;
-use crate::core::ConfigManager;
 use crate::core::config_manager::SystemGameConfig;
+use crate::core::ConfigManager;
 use crate::utils::EmulatorDetector;
+use serde_json::json;
+use std::sync::Arc;
+use tauri::State;
 
 #[tauri::command]
 pub fn get_config() -> String {

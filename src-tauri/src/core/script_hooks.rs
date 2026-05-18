@@ -16,6 +16,7 @@ pub enum ScriptEvent {
 }
 
 impl ScriptEvent {
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Option<Self> {
         match s {
             "quit" => Some(Self::Quit),
@@ -36,9 +37,17 @@ pub struct ScriptHookManager {
     scripts: HashMap<ScriptEvent, String>,
 }
 
+impl Default for ScriptHookManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ScriptHookManager {
     pub fn new() -> Self {
-        Self { scripts: HashMap::new() }
+        Self {
+            scripts: HashMap::new(),
+        }
     }
 
     pub fn register(&mut self, event: ScriptEvent, script_path: String) {
@@ -74,7 +83,9 @@ impl ScriptHookManager {
                 .env("NEOCAB_GAME_TITLE", game_title.unwrap_or(""))
                 .spawn();
             match result {
-                Ok(mut child) => { let _ = child.wait(); },
+                Ok(mut child) => {
+                    let _ = child.wait();
+                }
                 Err(e) => tracing::warn!("Script hook failed: {}", e),
             }
         } else {
@@ -84,7 +95,9 @@ impl ScriptHookManager {
                 .env("NEOCAB_GAME_TITLE", game_title.unwrap_or(""))
                 .spawn();
             match result {
-                Ok(mut child) => { let _ = child.wait(); },
+                Ok(mut child) => {
+                    let _ = child.wait();
+                }
                 Err(e) => tracing::warn!("Script hook failed: {}", e),
             }
         }

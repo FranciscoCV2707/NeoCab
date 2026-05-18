@@ -1,6 +1,6 @@
-use tauri::State;
-use std::sync::Arc;
 use crate::core::EmulatorManager;
+use std::sync::Arc;
+use tauri::State;
 
 #[tauri::command]
 pub async fn launch_game_with_monitoring(

@@ -1,0 +1,153 @@
+.config-injector-panel {
+  padding: 20px;
+  background: var(--background, #0a0a0a);
+  border-radius: 8px;
+}
+
+.panel-header {
+  margin-bottom: 20px;
+}
+
+.panel-header h3 {
+  margin: 0;
+  color: var(--text, #fff);
+  font-size: 18px;
+}
+
+.injector-selector {
+  margin-bottom: 16px;
+}
+
+.injector-selector label,
+.emulator-path label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text, #fff);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.injector-selector select {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--surface, #1a1a1a);
+  border: 1px solid var(--border, #333);
+  border-radius: 6px;
+  color: var(--text, #fff);
+  font-size: 14px;
+}
+
+.emulator-path .path-input {
+  display: flex;
+  gap: 8px;
+}
+
+.emulator-path input {
+  flex: 1;
+  padding: 10px 12px;
+  background: var(--surface, #1a1a1a);
+  border: 1px solid var(--border, #333);
+  border-radius: 6px;
+  color: var(--text, #fff);
+  font-size: 14px;
+}
+
+.emulator-path button {
+  padding: 10px 20px;
+  background: var(--secondary, #333);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.emulator-path button:hover:not(:disabled) {
+  background: var(--secondary-hover, #444);
+}
+
+.emulator-path button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.config-actions {
+  margin-top: 16px;
+}
+
+.config-actions button {
+  padding: 10px 20px;
+  background: var(--primary, #ff6b00);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.config-editor {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border, #333);
+}
+
+.config-editor h4 {
+  margin: 0 0 16px 0;
+  color: var(--text, #fff);
+  font-size: 14px;
+}
+
+.config-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.config-section {
+  background: var(--surface, #1a1a1a);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.config-section h5 {
+  margin: 0 0 8px 0;
+  color: var(--text, #fff);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.config-section pre {
+  margin: 0;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  color: var(--text-secondary, #888);
+  font-size: 12px;
+  overflow-x: auto;
+}
+
+.inject-btn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 12px 20px;
+  background: var(--success, #00cc66);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.inject-btn:hover:not(:disabled) {
+  background: var(--success-hover, #00dd77);
+}
+
+.inject-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

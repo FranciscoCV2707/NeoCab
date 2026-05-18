@@ -14,7 +14,9 @@ pub struct KioskInfo {
 }
 
 #[tauri::command]
-pub async fn get_kiosk_config(kiosk_config: tauri::State<'_, KioskConfig>) -> Result<KioskInfo, String> {
+pub async fn get_kiosk_config(
+    kiosk_config: tauri::State<'_, KioskConfig>,
+) -> Result<KioskInfo, String> {
     Ok(KioskInfo {
         kiosk: kiosk_config.kiosk,
         autoboot_system: kiosk_config.autoboot_system.clone(),
@@ -25,4 +27,17 @@ pub async fn get_kiosk_config(kiosk_config: tauri::State<'_, KioskConfig>) -> Re
         disable_appclose: kiosk_config.disable_appclose,
         disable_suspend: kiosk_config.disable_suspend,
     })
+}
+
+#[tauri::command]
+pub async fn get_available_systems() -> Result<Vec<String>, String> {
+    Ok(vec![
+        "mame".to_string(),
+        "nes".to_string(),
+        "snes".to_string(),
+        "genesis".to_string(),
+        "psx".to_string(),
+        "n64".to_string(),
+        "gba".to_string(),
+    ])
 }

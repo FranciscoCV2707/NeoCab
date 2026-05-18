@@ -1,11 +1,11 @@
-use std::sync::Arc;
-use tokio::sync::RwLock;
-use serde::{Deserialize, Serialize};
-use tracing::info;
 use crate::error::Result;
-use std::collections::HashMap;
 use crate::input::joy_mapper::JoyMapper;
 use crate::input::joy_mapper::KeyInjector;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::sync::Arc;
+use tokio::sync::RwLock;
+use tracing::info;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum InputButton {
@@ -157,7 +157,11 @@ impl InputManager {
 
     pub async fn get_connected_devices(&self) -> Result<Vec<InputDevice>> {
         let devices = self.devices.read().await;
-        Ok(devices.values().filter(|d| d.is_connected).cloned().collect())
+        Ok(devices
+            .values()
+            .filter(|d| d.is_connected)
+            .cloned()
+            .collect())
     }
 
     pub async fn add_mapping(&self, mapping: InputMapping) -> Result<()> {
@@ -187,7 +191,7 @@ impl InputManager {
     }
 
     pub async fn set_deadzone(&self, deadzone: f32) -> Result<()> {
-        if deadzone < 0.0 || deadzone > 1.0 {
+        if !(0.0..=1.0).contains(&deadzone) {
             return Err(crate::error::NeoCabError::InvalidInput(
                 "Deadzone must be between 0.0 and 1.0".to_string(),
             ));
@@ -218,7 +222,11 @@ impl InputManager {
             0.0
         } else {
             let scaled = (value.abs() - deadzone) / (1.0 - deadzone);
-            if value >= 0.0 { scaled } else { -scaled }
+            if value >= 0.0 {
+                scaled
+            } else {
+                -scaled
+            }
         }
     }
 
@@ -236,24 +244,47 @@ impl InputManager {
     async fn resolve_profile_path(&self, system: &str, game: &str) -> Option<std::path::PathBuf> {
         let assignments = self.profile_assignments.read().await;
 
-        if let Some(assignment) = assignments.iter().find(|a| a.scope == "game" && a.identifier == format!("{}:{}", system, game)) {
-            let path = std::path::PathBuf::from(format!("config/joy_profiles/{}.yml", assignment.profile_name));
-            if path.exists() { return Some(path); }
+        if let Some(assignment) = assignments
+            .iter()
+            .find(|a| a.scope == "game" && a.identifier == format!("{}:{}", system, game))
+        {
+            let path = std::path::PathBuf::from(format!(
+                "config/joy_profiles/{}.yml",
+                assignment.profile_name
+            ));
+            if path.exists() {
+                return Some(path);
+            }
         }
 
-        if let Some(assignment) = assignments.iter().find(|a| a.scope == "system" && a.identifier == system) {
-            let path = std::path::PathBuf::from(format!("config/joy_profiles/{}.yml", assignment.profile_name));
-            if path.exists() { return Some(path); }
+        if let Some(assignment) = assignments
+            .iter()
+            .find(|a| a.scope == "system" && a.identifier == system)
+        {
+            let path = std::path::PathBuf::from(format!(
+                "config/joy_profiles/{}.yml",
+                assignment.profile_name
+            ));
+            if path.exists() {
+                return Some(path);
+            }
         }
 
-        let game_path = std::path::PathBuf::from(format!("config/joy_profiles/{}-{}.yml", system, game));
-        if game_path.exists() { return Some(game_path); }
+        let game_path =
+            std::path::PathBuf::from(format!("config/joy_profiles/{}-{}.yml", system, game));
+        if game_path.exists() {
+            return Some(game_path);
+        }
 
         let system_path = std::path::PathBuf::from(format!("config/joy_profiles/{}.yml", system));
-        if system_path.exists() { return Some(system_path); }
+        if system_path.exists() {
+            return Some(system_path);
+        }
 
         let global_path = std::path::PathBuf::from("config/joy_profiles/global.yml");
-        if global_path.exists() { return Some(global_path); }
+        if global_path.exists() {
+            return Some(global_path);
+        }
 
         None
     }
@@ -264,7 +295,10 @@ impl InputManager {
             if let Err(e) = mapper.load_profile_from_file(&profile_path) {
                 info!("Failed to load profile for {}/{}: {}", system, game, e);
             } else {
-                info!("Auto-loaded profile for {}/{}: {:?}", system, game, profile_path);
+                info!(
+                    "Auto-loaded profile for {}/{}: {:?}",
+                    system, game, profile_path
+                );
             }
         } else {
             info!("No profile found for {}/{}", system, game);
@@ -274,7 +308,8 @@ impl InputManager {
     async fn auto_load_profile_for_device(&self, device_id: u32) {
         if let Some(device) = self.get_device(device_id).await {
             if let Some(ref guid) = device.guid {
-                let path = std::path::PathBuf::from(format!("config/joy_profiles/device_{}.yml", guid));
+                let path =
+                    std::path::PathBuf::from(format!("config/joy_profiles/device_{}.yml", guid));
                 if path.exists() {
                     let mut mappers = self.device_mappers.write().await;
                     if let Some(mapper) = mappers.get_mut(&device_id) {
@@ -291,9 +326,13 @@ impl InputManager {
 
     pub async fn add_profile_assignment(&self, assignment: ProfileAssignment) -> Result<()> {
         let mut assignments = self.profile_assignments.write().await;
-        assignments.retain(|a| !(a.scope == assignment.scope && a.identifier == assignment.identifier));
+        assignments
+            .retain(|a| !(a.scope == assignment.scope && a.identifier == assignment.identifier));
         assignments.push(assignment.clone());
-        info!("Profile assignment added: {}:{} -> {}", assignment.scope, assignment.identifier, assignment.profile_name);
+        info!(
+            "Profile assignment added: {}:{} -> {}",
+            assignment.scope, assignment.identifier, assignment.profile_name
+        );
         Ok(())
     }
 
@@ -314,23 +353,32 @@ impl InputManager {
         let profile_path = std::path::PathBuf::from(format!("config/joy_profiles/{}.yml", system));
 
         if profile_path.exists() {
-            mapper.load_profile_from_file(&profile_path)
-                .map_err(|e| crate::error::NeoCabError::Config(e))?;
+            mapper
+                .load_profile_from_file(&profile_path)
+                .map_err(crate::error::NeoCabError::Config)?;
             info!("Auto-loaded JoyMapper profile for system: {}", system);
         } else {
-            info!("No specific JoyMapper profile found for system: {}. Using default.", system);
+            info!(
+                "No specific JoyMapper profile found for system: {}. Using default.",
+                system
+            );
         }
         Ok(())
     }
 
     pub async fn load_profile_for_game(&self, system: &str, game: &str) -> Result<()> {
         let mut mapper = self.joy_mapper.write().await;
-        let profile_path = std::path::PathBuf::from(format!("config/joy_profiles/{}-{}.yml", system, game));
+        let profile_path =
+            std::path::PathBuf::from(format!("config/joy_profiles/{}-{}.yml", system, game));
 
         if profile_path.exists() {
-            mapper.load_profile_from_file(&profile_path)
-                .map_err(|e| crate::error::NeoCabError::Config(e))?;
-            info!("Auto-loaded JoyMapper profile for game: {}:{}", system, game);
+            mapper
+                .load_profile_from_file(&profile_path)
+                .map_err(crate::error::NeoCabError::Config)?;
+            info!(
+                "Auto-loaded JoyMapper profile for game: {}:{}",
+                system, game
+            );
         } else {
             self.load_profile_for_system(system).await?;
         }
@@ -361,16 +409,14 @@ impl InputManager {
                         let btn_idx = self.button_to_index(button);
                         actions.extend(mapper.handle_button(btn_idx, false));
                     }
-                    InputEventType::AxisMoved(axis) => {
-                        match axis {
-                            AxisInput::LeftStickX(x) => actions.extend(mapper.handle_axis(0, x)),
-                            AxisInput::LeftStickY(y) => actions.extend(mapper.handle_axis(1, y)),
-                            AxisInput::RightStickX(x) => actions.extend(mapper.handle_axis(2, x)),
-                            AxisInput::RightStickY(y) => actions.extend(mapper.handle_axis(3, y)),
-                            AxisInput::TriggerL(x) => actions.extend(mapper.handle_axis(4, x)),
-                            AxisInput::TriggerR(x) => actions.extend(mapper.handle_axis(5, x)),
-                        }
-                    }
+                    InputEventType::AxisMoved(axis) => match axis {
+                        AxisInput::LeftStickX(x) => actions.extend(mapper.handle_axis(0, x)),
+                        AxisInput::LeftStickY(y) => actions.extend(mapper.handle_axis(1, y)),
+                        AxisInput::RightStickX(x) => actions.extend(mapper.handle_axis(2, x)),
+                        AxisInput::RightStickY(y) => actions.extend(mapper.handle_axis(3, y)),
+                        AxisInput::TriggerL(x) => actions.extend(mapper.handle_axis(4, x)),
+                        AxisInput::TriggerR(x) => actions.extend(mapper.handle_axis(5, x)),
+                    },
                 }
             }
         } else {
@@ -384,16 +430,14 @@ impl InputManager {
                     let btn_idx = self.button_to_index(button);
                     actions.extend(mapper.handle_button(btn_idx, false));
                 }
-                InputEventType::AxisMoved(axis) => {
-                    match axis {
-                        AxisInput::LeftStickX(x) => actions.extend(mapper.handle_axis(0, x)),
-                        AxisInput::LeftStickY(y) => actions.extend(mapper.handle_axis(1, y)),
-                        AxisInput::RightStickX(x) => actions.extend(mapper.handle_axis(2, x)),
-                        AxisInput::RightStickY(y) => actions.extend(mapper.handle_axis(3, y)),
-                        AxisInput::TriggerL(x) => actions.extend(mapper.handle_axis(4, x)),
-                        AxisInput::TriggerR(x) => actions.extend(mapper.handle_axis(5, x)),
-                    }
-                }
+                InputEventType::AxisMoved(axis) => match axis {
+                    AxisInput::LeftStickX(x) => actions.extend(mapper.handle_axis(0, x)),
+                    AxisInput::LeftStickY(y) => actions.extend(mapper.handle_axis(1, y)),
+                    AxisInput::RightStickX(x) => actions.extend(mapper.handle_axis(2, x)),
+                    AxisInput::RightStickY(y) => actions.extend(mapper.handle_axis(3, y)),
+                    AxisInput::TriggerL(x) => actions.extend(mapper.handle_axis(4, x)),
+                    AxisInput::TriggerR(x) => actions.extend(mapper.handle_axis(5, x)),
+                },
             }
         }
 
@@ -402,9 +446,9 @@ impl InputManager {
         match event.input {
             InputEventType::ButtonPressed(button) => {
                 let mappings = self.mappings.read().await;
-                let mapping = mappings.iter().find(|m| {
-                    m.device_id == event.device_id && m.button == button
-                });
+                let mapping = mappings
+                    .iter()
+                    .find(|m| m.device_id == event.device_id && m.button == button);
 
                 if let Some(m) = mapping {
                     info!("Input action triggered: {}", m.mapped_to);
@@ -441,7 +485,10 @@ impl InputManager {
         }
     }
 
-    pub async fn get_device_mapper_state(&self, device_id: u32) -> Option<crate::input::joy_mapper::JoyMapper> {
+    pub async fn get_device_mapper_state(
+        &self,
+        device_id: u32,
+    ) -> Option<crate::input::joy_mapper::JoyMapper> {
         let mappers = self.device_mappers.read().await;
         mappers.get(&device_id).cloned()
     }
@@ -460,11 +507,23 @@ impl InputManager {
 
     fn button_to_index(&self, button: InputButton) -> u8 {
         match button {
-            InputButton::A => 0, InputButton::B => 1, InputButton::X => 2, InputButton::Y => 3,
-            InputButton::L1 => 4, InputButton::R1 => 5, InputButton::Select => 6, InputButton::Start => 7,
-            InputButton::L2 => 8, InputButton::R2 => 9, InputButton::LeftStick => 10,
-            InputButton::RightStick => 11, InputButton::Guide => 12,
-            InputButton::Up => 99, InputButton::Down => 99, InputButton::Left => 99, InputButton::Right => 99,
+            InputButton::A => 0,
+            InputButton::B => 1,
+            InputButton::X => 2,
+            InputButton::Y => 3,
+            InputButton::L1 => 4,
+            InputButton::R1 => 5,
+            InputButton::Select => 6,
+            InputButton::Start => 7,
+            InputButton::L2 => 8,
+            InputButton::R2 => 9,
+            InputButton::LeftStick => 10,
+            InputButton::RightStick => 11,
+            InputButton::Guide => 12,
+            InputButton::Up => 99,
+            InputButton::Down => 99,
+            InputButton::Left => 99,
+            InputButton::Right => 99,
         }
     }
 
@@ -482,8 +541,12 @@ impl InputManager {
                 info!("Injected key: {}", k);
             }
             crate::input::joy_mapper::MappedAction::Keys(keys) => {
-                for k in &keys { self.injector.press_key(k); }
-                for k in keys.iter().rev() { self.injector.release_key(k); }
+                for k in &keys {
+                    self.injector.press_key(k);
+                }
+                for k in keys.iter().rev() {
+                    self.injector.release_key(k);
+                }
                 info!("Injected combo: {:?}", keys);
             }
             crate::input::joy_mapper::MappedAction::Macro(steps) => {
@@ -549,19 +612,29 @@ mod tests {
     fn test_deadzone_calculation() {
         let im = InputManager::new();
         assert_eq!(im.apply_deadzone(0.05, 0.1), 0.0);
-        assert_eq!(im.apply_deadzone(0.5, 0.1).round(), 0.4);
+        assert!((im.apply_deadzone(0.5, 0.1) - 0.444).abs() < 0.001);
     }
 
     #[tokio::test]
     async fn test_multi_device_mappers() {
         let im = InputManager::new();
         let device1 = InputDevice {
-            id: 1, name: "P1".to_string(), device_type: "gamepad".to_string(),
-            vendor_id: None, product_id: None, guid: Some("guid1".to_string()), is_connected: true,
+            id: 1,
+            name: "P1".to_string(),
+            device_type: "gamepad".to_string(),
+            vendor_id: None,
+            product_id: None,
+            guid: Some("guid1".to_string()),
+            is_connected: true,
         };
         let device2 = InputDevice {
-            id: 2, name: "P2".to_string(), device_type: "gamepad".to_string(),
-            vendor_id: None, product_id: None, guid: Some("guid2".to_string()), is_connected: true,
+            id: 2,
+            name: "P2".to_string(),
+            device_type: "gamepad".to_string(),
+            vendor_id: None,
+            product_id: None,
+            guid: Some("guid2".to_string()),
+            is_connected: true,
         };
 
         im.register_device(device1).await.unwrap();

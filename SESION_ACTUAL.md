@@ -1,9 +1,9 @@
-# 🎮 NeoCab - Sesión Actual
+# NeoCab - Sesión Actual
 
-**Fecha:** 2026-05-15  
-**Status:** ✅ v2.0 IMPROVEMENT PHASE COMPLETE  
-**Versión:** v2.0.0  
-**Progreso Total:** 30/30 features (100%)
+**Fecha:** 2026-05-18
+**Status:** ✅ v2.0.1 IMPLEMENTATION PLAN COMPLETE
+**Versión:** v2.0.1
+**Progreso Total:** 35/35 tasks (100%)
 
 ---
 
@@ -11,33 +11,38 @@
 
 ### Estado del Proyecto
 ```
-NEOCAB v2.0.0 - ESTADO ACTUAL
+NEOCAB v2.0.1 - ESTADO ACTUAL
 ├─ Frontend (React + TypeScript)
-│  ├─ ✅ Build: 273KB JS, 63KB CSS
+│  ├─ ✅ Build: 310KB JS, 71KB CSS
 │  ├─ ✅ Zero TypeScript errors
-│  ├─ ✅ Vitest: 24 tests passing
-│  └─ ✅ Zustand stores (4), Layout Engine, Magic Tokens
+│  ├─ ✅ Vitest: 37 tests passing
+│  └─ ✅ New panels: SafeQuitRules, Plugins, KioskSettings
 ├─ Backend (Rust + Tauri)
 │  ├─ ✅ Cargo check: CLEAN
-│  ├─ ✅ DB Migrations + Launch Pipeline + Config Injection
-│  ├─ ✅ Auto-Updater + Kiosk Mode + RetroAchievements
-│  └─ ✅ Video Pipeline + Script Hooks + Plugins + SafeQuit
-├─ Tauri Commands: 130+ (+30 nuevas)
-├─ React Components: 60+ (+10 nuevas)
-├─ Tests: 24 (Vitest)
-└── Arquitectura: Stores, Layout Engine, CI/CD, Logging rotativo
+│  ├─ ✅ New commands: plugins.rs, safe_quit additions
+│  └─ ✅ New state: SafeQuitState, PluginState
+├─ Tauri Commands: 135+
+├─ React Components: 65+
+├─ Tests: 37 (Vitest)
+└─ Arquitectura: Clean + formatted
 ```
 
-### Fases Completadas (v2.0)
+### Fases Completadas (v2.0.1)
 - ✅ FASE 0 — Baja Fruta (5/5): Auto-Updater, Config Injection, Fuzzy Matching, Scraping Batch, Multi-language
 - ✅ FASE 1 — Frontend (4/5): Zustand Stores, Layout Engine, Live Reload, Magic Tokens
 - ✅ FASE 2 — Backend Rust (6/6): Emulator Autodetect, Launch Pipeline, Mount, Kiosk, RetroAchievements, DB Migrations
 - ✅ FASE 3 — Avanzado (9/9): Tags, Rotation, Jukebox, SafeQuit, Script Hooks, Video Pipeline, Plugins, Multi-monitor, Animation
 - ✅ FASE 4 — Infraestructura (6/6): Testing, Logging, CI/CD, Gamepad Hotplug, Startup Validation
+- ✅ IMPLEMENTATION PLAN: UI completions, duplicate cleanup, new panels, tests
 
-### Últimos Cambios (v2.0.0)
-- 30 features implementadas basadas en análisis de 6 frontends (AdvanceMAME, Attract, AttractPlus, Pegasus, RetroFE, SimpleLauncher)
-- Plan detallado en `docs/PLAN_MEJORA_v2.md`
+### Últimos Cambios (v2.0.1)
+- Safe Quit Rules UI + backend state
+- Lua Plugins UI + backend state
+- Kiosk Settings UI (full read/write)
+- Duplicate cleanup (OperatorPanel, ShaderSelector deleted)
+- 3 new test files, 37 tests passing
+- cargo fmt applied
+- Build: 310KB JS, 71KB CSS, clean
 
 ---
 
@@ -45,9 +50,9 @@ NEOCAB v2.0.0 - ESTADO ACTUAL
 
 | Comando | Estado | Resultado |
 |---------|--------|-----------|
-| `npm run build` | ✅ | 273KB JS, 63KB CSS |
+| `npm run build` | ✅ | 310KB JS, 71KB CSS |
 | `cargo check` | ✅ | Warnings only |
-| `npm test` | ✅ | 24 tests passed |
+| `npm test` | ✅ | 37 tests passed |
 | `npx tsc --noEmit` | ✅ | Clean |
 
 ---
@@ -55,13 +60,10 @@ NEOCAB v2.0.0 - ESTADO ACTUAL
 ## Próximos Pasos
 
 1. Commit y push a main
-2. Release v2.0.0
-3. Próximas iteraciones (post-v2.0):
-   - React Router integration
-   - rlua plugin engine (completar sandbox)
-   - Full multi-monitor Tauri windows
-   - Advanced fade/transition animations
+2. Release v2.0.1
+3. Testing en hardware real (opcional)
+4. No hay más tareas pendientes del IMPLEMENTATION_PLAN.md
 
 ---
 
-**Documentación actualizada:** STATUS.md, CHANGELOG.md, ROADMAP.md, docs/PLAN_MEJORA_v2.md, SESION_ACTUAL.md
+**Documentación actualizada:** STATUS.md, CHANGELOG.md, ROADMAP.md, SESION_ACTUAL.md, IMPLEMENTATION_PLAN.md

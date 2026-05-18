@@ -1,11 +1,11 @@
-use tauri::State;
-use serde_json::json;
 use crate::core::GameLibrary;
+use serde_json::json;
 use std::path::PathBuf;
+use tauri::State;
 
 use crate::db::Database;
-use std::sync::Arc;
 use std::path::Path;
+use std::sync::Arc;
 
 #[tauri::command]
 pub async fn list_games(
@@ -34,11 +34,10 @@ pub async fn list_systems(
 }
 
 #[tauri::command]
-pub async fn toggle_favorite(
-    game_id: i64,
-    db: State<'_, Arc<Database>>,
-) -> Result<bool, String> {
-    db.toggle_game_favorite(game_id).await.map_err(|e| e.to_string())
+pub async fn toggle_favorite(game_id: i64, db: State<'_, Arc<Database>>) -> Result<bool, String> {
+    db.toggle_game_favorite(game_id)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -79,29 +78,35 @@ pub async fn import_external_library(
 ) -> Result<usize, String> {
     let importer = crate::core::UniversalImporter::new(db.inner().clone());
     let path = Path::new(&xml_path);
-    
+
     match format.as_str() {
         "emulationstation" => importer.import_es2_xml(path, system_id).await,
         "hyperspin" => importer.import_hyperspin_xml(path, system_id).await,
         "launchbox" => importer.import_launchbox_xml(path, system_id).await,
-        _ => Err(crate::error::NeoCabError::Config("Unsupported format".to_string())),
+        _ => Err(crate::error::NeoCabError::Config(
+            "Unsupported format".to_string(),
+        )),
     }
     .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn import_steam_games(
-    db: State<'_, Arc<Database>>,
-) -> Result<usize, String> {
+pub async fn import_steam_games(db: State<'_, Arc<Database>>) -> Result<usize, String> {
     use crate::core::steam_importer::SteamImporter;
     use crate::models::Game;
 
     // Ensure Steam system exists or create it
-    let system_id = match db.get_system_by_name("steam").await.map_err(|e| e.to_string())? {
+    let system_id = match db
+        .get_system_by_name("steam")
+        .await
+        .map_err(|e| e.to_string())?
+    {
         Some(s) => s.id,
         None => {
             // Need to insert a new system for steam. For simplicity we assume it might exist or we just use a generic PC system.
-            return Err("Steam system not found in DB. Please add a system named 'steam' first.".into());
+            return Err(
+                "Steam system not found in DB. Please add a system named 'steam' first.".into(),
+            );
         }
     };
 
@@ -145,7 +150,7 @@ pub async fn import_steam_games(
             updated_at: None,
         };
 
-        if let Ok(_) = db.insert_game(&game).await {
+        if db.insert_game(&game).await.is_ok() {
             imported += 1;
         }
     }
@@ -205,18 +210,24 @@ pub async fn scan_roms(
     use tauri::Emitter;
 
     let mut total_count = 0;
-    
+
     for dir in dirs_to_scan {
         let app = std::sync::Arc::new(app_handle.clone());
         let app_clone = app.clone();
 
-        match game_library.scan_roms(&dir, move |current, total, filename| {
-            let _ = app_clone.emit("scan_progress", ScanProgress {
-                current,
-                total,
-                filename: filename.to_string(),
-            });
-        }).await {
+        match game_library
+            .scan_roms(&dir, move |current, total, filename| {
+                let _ = app_clone.emit(
+                    "scan_progress",
+                    ScanProgress {
+                        current,
+                        total,
+                        filename: filename.to_string(),
+                    },
+                );
+            })
+            .await
+        {
             Ok(count) => total_count += count,
             Err(e) => tracing::warn!("Failed to scan dir {:?}: {}", dir, e),
         }
@@ -238,9 +249,12 @@ pub async fn scrape_game(
     db: State<'_, Arc<Database>>,
 ) -> Result<String, String> {
     use crate::core::scraper::GameScraper;
-    
-    let game = db.get_game_by_id(game_id).await.map_err(|e| e.to_string())?;
-    
+
+    let game = db
+        .get_game_by_id(game_id)
+        .await
+        .map_err(|e| e.to_string())?;
+
     let game = match game {
         Some(g) => g,
         None => return Err("Game not found".to_string()),
@@ -248,20 +262,18 @@ pub async fn scrape_game(
 
     let media_dir = PathBuf::from("./media");
     let scraper = GameScraper::new(media_dir);
-    
-    let rom_name = game.filename.as_deref()
-        .unwrap_or(&game.title);
-    
-    let info = scraper.scrape_and_download(
-        rom_name,
-        &system_name,
-        game.crc32.as_deref(),
-    ).await.map_err(|e| e.to_string())?;
+
+    let rom_name = game.filename.as_deref().unwrap_or(&game.title);
+
+    let info = scraper
+        .scrape_and_download(rom_name, &system_name, game.crc32.as_deref())
+        .await
+        .map_err(|e| e.to_string())?;
 
     // Update the game in the database with scraped metadata
     let year_i64 = info.year.map(|y| y as i64);
     let players_i64 = info.players.map(|p| p as i64);
-    
+
     db.update_game_metadata(
         game_id,
         &info.title,
@@ -269,7 +281,9 @@ pub async fn scrape_game(
         year_i64,
         players_i64,
         info.rating,
-    ).await.map_err(|e| e.to_string())?;
+    )
+    .await
+    .map_err(|e| e.to_string())?;
 
     let result = json!({
         "success": true,
@@ -314,16 +328,21 @@ pub async fn scrape_all(
 
     SCRAPE_CANCEL.store(false, Ordering::Relaxed);
 
-    let system = db.get_system_by_name(&system_name).await
+    let system = db
+        .get_system_by_name(&system_name)
+        .await
         .map_err(|e| e.to_string())?
         .ok_or_else(|| format!("System '{}' not found", system_name))?;
 
     // Get all games for this system
-    let games = db.get_games_by_system(system.id, None, None, false).await
+    let games = db
+        .get_games_by_system(system.id, None, None, false)
+        .await
         .map_err(|e| e.to_string())?;
 
     // Filter to only unscraped games
-    let to_scrape: Vec<_> = games.into_iter()
+    let to_scrape: Vec<_> = games
+        .into_iter()
         .filter(|g| g.description.is_none() || g.description.as_deref() == Some(""))
         .collect();
 
@@ -337,12 +356,9 @@ pub async fn scrape_all(
 
     // Pass cancel to scraper but also allow global cancel
     let cancel_clone = cancel.clone();
-    let (scraped, errors) = scraper.scrape_all(
-        &to_scrape,
-        &system_name,
-        cancel_clone,
-        Some(app_handle),
-    ).await;
+    let (scraped, errors) = scraper
+        .scrape_all(&to_scrape, &system_name, cancel_clone, Some(app_handle))
+        .await;
 
     let was_cancelled = SCRAPE_CANCEL.load(Ordering::Relaxed);
 
@@ -361,4 +377,3 @@ pub async fn cancel_scraping() -> Result<(), String> {
     SCRAPE_CANCEL.store(true, Ordering::Relaxed);
     Ok(())
 }
-

@@ -1,8 +1,8 @@
 use crate::Result;
-use sdl2::Sdl;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::EventPump;
+use sdl2::Sdl;
 use std::collections::VecDeque;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -47,11 +47,13 @@ impl InputHandler {
 
     /// Initialize with SDL2 context (must be called before polling events)
     pub fn initialize_sdl(&mut self, sdl_context: &Sdl) -> Result<()> {
-        let event_subsystem = sdl_context.event()
-            .map_err(|e| crate::error::NeoCabError::Custom(format!("SDL2 event init failed: {}", e)))?;
+        let event_subsystem = sdl_context.event().map_err(|e| {
+            crate::error::NeoCabError::Custom(format!("SDL2 event init failed: {}", e))
+        })?;
 
-        self.event_pump = Some(event_subsystem.event_pump()
-            .map_err(|e| crate::error::NeoCabError::Custom(format!("Event pump creation failed: {}", e)))?);
+        self.event_pump = Some(event_subsystem.event_pump().map_err(|e| {
+            crate::error::NeoCabError::Custom(format!("Event pump creation failed: {}", e))
+        })?);
 
         tracing::info!("SDL2 Input Handler initialized with JoyMapper (XP Ready)");
         Ok(())
@@ -68,7 +70,9 @@ impl InputHandler {
                     let actions = match event {
                         Event::JoyButtonDown { button, .. } => mapper.handle_button(button, true),
                         Event::JoyButtonUp { button, .. } => mapper.handle_button(button, false),
-                        Event::JoyAxisMotion { axis, value, .. } => mapper.handle_axis(axis, value as f32 / 32768.0),
+                        Event::JoyAxisMotion { axis, value, .. } => {
+                            mapper.handle_axis(axis, value as f32 / 32768.0)
+                        }
                         _ => Vec::new(),
                     };
 
@@ -96,7 +100,10 @@ impl InputHandler {
         match event {
             Event::Quit { .. } => Some(InputEvent::Quit),
 
-            Event::KeyDown { keycode: Some(code), .. } => match code {
+            Event::KeyDown {
+                keycode: Some(code),
+                ..
+            } => match code {
                 // Arrow keys / WASD for navigation
                 Keycode::Up | Keycode::W => Some(InputEvent::MoveUp),
                 Keycode::Down | Keycode::S => Some(InputEvent::MoveDown),

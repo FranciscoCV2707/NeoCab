@@ -1,7 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::process::Command;
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateInfo {
@@ -64,8 +64,7 @@ pub async fn check_for_updates() -> Result<UpdateInfo, String> {
 #[tauri::command]
 pub async fn download_update(url: String, _app_handle: tauri::AppHandle) -> Result<String, String> {
     let temp_dir = std::env::temp_dir().join("neocab-update");
-    std::fs::create_dir_all(&temp_dir)
-        .map_err(|e| format!("Cannot create temp dir: {}", e))?;
+    std::fs::create_dir_all(&temp_dir).map_err(|e| format!("Cannot create temp dir: {}", e))?;
 
     let zip_path = temp_dir.join("neocab-update.zip");
 
@@ -93,7 +92,8 @@ pub async fn download_update(url: String, _app_handle: tauri::AppHandle) -> Resu
         let mut buffer = [0u8; 65536];
 
         loop {
-            let n = reader.read(&mut buffer)
+            let n = reader
+                .read(&mut buffer)
                 .map_err(|e| format!("Read error: {}", e))?;
             if n == 0 {
                 break;
@@ -104,7 +104,9 @@ pub async fn download_update(url: String, _app_handle: tauri::AppHandle) -> Resu
 
         let path_str = zip_path_clone.to_string_lossy().to_string();
         Ok(path_str)
-    }).await.map_err(|e| format!("Task failed: {}", e))?;
+    })
+    .await
+    .map_err(|e| format!("Task failed: {}", e))?;
 
     result
 }
@@ -112,8 +114,7 @@ pub async fn download_update(url: String, _app_handle: tauri::AppHandle) -> Resu
 #[tauri::command]
 pub async fn apply_update(zip_path: String) -> Result<(), String> {
     let updater_path = get_updater_path();
-    let current_exe = std::env::current_exe()
-        .map_err(|e| format!("Cannot get exe path: {}", e))?;
+    let current_exe = std::env::current_exe().map_err(|e| format!("Cannot get exe path: {}", e))?;
     let current_pid = std::process::id();
 
     if !updater_path.exists() {

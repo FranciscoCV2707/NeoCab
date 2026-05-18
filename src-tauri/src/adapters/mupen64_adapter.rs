@@ -13,9 +13,7 @@ impl Mupen64Adapter {
 
     pub async fn launch(&mut self, rom_path: &str) -> Result<()> {
         let args = vec!["--fullscreen", rom_path];
-        let child = Command::new("mupen64plus")
-            .args(&args)
-            .spawn()?;
+        let child = Command::new("mupen64plus").args(&args).spawn()?;
 
         self.process = Some(child);
         info!("Mupen64Plus launched for: {}", rom_path);
