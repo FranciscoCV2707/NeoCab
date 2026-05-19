@@ -332,6 +332,7 @@ static SCRAPE_CANCEL: AtomicBool = AtomicBool::new(false);
 #[tauri::command]
 pub async fn scrape_all(
     system_name: String,
+    only_missing: Option<bool>,
     db: State<'_, Arc<Database>>,
     config_manager: State<'_, Arc<crate::core::ConfigManager>>,
     app_handle: tauri::AppHandle,
@@ -351,18 +352,32 @@ pub async fn scrape_all(
         .await
         .map_err(|e| e.to_string())?;
 
-    let to_scrape: Vec<_> = games
-        .into_iter()
-        .filter(|g| g.description.is_none() || g.description.as_deref() == Some(""))
-        .collect();
+    let to_scrape: Vec<_> = if only_missing.unwrap_or(true) {
+        games
+            .into_iter()
+            .filter(|g| g.description.is_none() || g.description.as_deref() == Some(""))
+            .collect()
+    } else {
+        games
+    };
 
     if to_scrape.is_empty() {
         return Ok(serde_json::json!({"scraped": 0, "total": 0, "skipped": true}).to_string());
     }
 
     let cfg = config_manager.get_config().await;
+    let mut scraper_settings = cfg.scraper.clone();
+    if !scraper_settings.use_screenscraper {
+        scraper_settings.ss_dev_id.clear();
+        scraper_settings.ss_dev_password.clear();
+        scraper_settings.ss_user.clear();
+        scraper_settings.ss_password.clear();
+    }
+    if !scraper_settings.use_tgdb {
+        scraper_settings.tgdb_api_key.clear();
+    }
     let media_dir = PathBuf::from("./media");
-    let scraper = GameScraper::with_config(media_dir, &cfg.scraper);
+    let scraper = GameScraper::with_config(media_dir, &scraper_settings);
     let cancel = Arc::new(AtomicBool::new(false));
 
     // Pass cancel to scraper but also allow global cancel

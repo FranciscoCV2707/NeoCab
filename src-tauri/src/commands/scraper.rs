@@ -35,7 +35,18 @@ fn media_dir() -> PathBuf {
 
 async fn build_scraper(config_manager: &ConfigManager) -> GameScraper {
     let cfg = config_manager.get_config().await;
-    GameScraper::with_config(media_dir(), &cfg.scraper)
+    let mut s = cfg.scraper.clone();
+    // Clear credentials for disabled providers so the scraper skips them.
+    if !s.use_screenscraper {
+        s.ss_dev_id.clear();
+        s.ss_dev_password.clear();
+        s.ss_user.clear();
+        s.ss_password.clear();
+    }
+    if !s.use_tgdb {
+        s.tgdb_api_key.clear();
+    }
+    GameScraper::with_config(media_dir(), &s)
 }
 
 /// Devuelve la configuración actual de credenciales del scraper.
@@ -46,13 +57,16 @@ pub async fn get_scraper_config(
 ) -> Result<serde_json::Value, String> {
     let cfg = config_manager.get_config().await;
     Ok(json!({
-        "ss_dev_id":       cfg.scraper.ss_dev_id,
-        "ss_dev_password": if cfg.scraper.ss_dev_password.is_empty() { "" } else { "••••••••" },
-        "ss_user":         cfg.scraper.ss_user,
-        "ss_password":     if cfg.scraper.ss_password.is_empty() { "" } else { "••••••••" },
-        "tgdb_api_key":    cfg.scraper.tgdb_api_key,
-        "ss_configured":   !cfg.scraper.ss_dev_id.is_empty(),
-        "tgdb_configured": !cfg.scraper.tgdb_api_key.is_empty(),
+        "ss_dev_id":          cfg.scraper.ss_dev_id,
+        "ss_dev_password":    if cfg.scraper.ss_dev_password.is_empty() { "" } else { "••••••••" },
+        "ss_user":            cfg.scraper.ss_user,
+        "ss_password":        if cfg.scraper.ss_password.is_empty() { "" } else { "••••••••" },
+        "tgdb_api_key":       if cfg.scraper.tgdb_api_key.is_empty() { "" } else { "••••••••" },
+        "ss_configured":      !cfg.scraper.ss_dev_id.is_empty(),
+        "tgdb_configured":    !cfg.scraper.tgdb_api_key.is_empty(),
+        "use_screenscraper":  cfg.scraper.use_screenscraper,
+        "use_arcadedb":       cfg.scraper.use_arcadedb,
+        "use_tgdb":           cfg.scraper.use_tgdb,
     }))
 }
 
@@ -66,15 +80,21 @@ pub async fn save_scraper_config(
     ss_user: String,
     ss_password: String,
     tgdb_api_key: String,
+    use_screenscraper: bool,
+    use_arcadedb: bool,
+    use_tgdb: bool,
     config_manager: State<'_, Arc<ConfigManager>>,
 ) -> Result<(), String> {
     let placeholder = "••••••••";
     let mut cfg = config_manager.get_config().await;
-    cfg.scraper.ss_dev_id    = ss_dev_id;
-    cfg.scraper.ss_user      = ss_user;
-    cfg.scraper.tgdb_api_key = tgdb_api_key;
+    cfg.scraper.ss_dev_id         = ss_dev_id;
+    cfg.scraper.ss_user           = ss_user;
+    cfg.scraper.use_screenscraper = use_screenscraper;
+    cfg.scraper.use_arcadedb      = use_arcadedb;
+    cfg.scraper.use_tgdb          = use_tgdb;
     if ss_dev_password != placeholder { cfg.scraper.ss_dev_password = ss_dev_password; }
     if ss_password     != placeholder { cfg.scraper.ss_password     = ss_password; }
+    if tgdb_api_key    != placeholder { cfg.scraper.tgdb_api_key    = tgdb_api_key; }
 
     config_manager
         .set_scraper_config(cfg.scraper)

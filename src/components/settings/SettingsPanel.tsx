@@ -3,7 +3,7 @@ import { SystemManager } from './SystemManager';
 import { ThemeEditor } from '../studio/ThemeEditor';
 import { InputWizard } from '../operator/InputWizard';
 import KeymapConfigPanel from '../operator/KeymapConfig';
-import { ScraperCredentialsPanel } from './ScraperCredentialsPanel';
+import { ScraperPanel } from './ScraperPanel';
 import '../operator/OperatorPanel.css';
 
 type SettingsTab = 'systems' | 'theme' | 'controls' | 'keymap' | 'scraper';
@@ -66,7 +66,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                 {activeTab === 'scraper' && (
                     <div className="tab-pane">
                         <h3>Credenciales del Scraper</h3>
-                        <ScraperCredentialsPanel />
+                        <ScraperPanel />
                     </div>
                 )}
             </div>

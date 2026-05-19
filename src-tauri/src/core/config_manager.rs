@@ -129,7 +129,9 @@ pub struct EmulatorsSettings {
 //
 // Si algún campo está vacío, ese scraper se omite y se pasa al siguiente.
 // ArcadeDB siempre funciona sin credenciales (solo juegos MAME/arcade).
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+fn bool_true() -> bool { true }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ScraperSettings {
     #[serde(default)]
     pub ss_dev_id: String,
@@ -141,6 +143,27 @@ pub struct ScraperSettings {
     pub ss_password: String,
     #[serde(default)]
     pub tgdb_api_key: String,
+    #[serde(default = "bool_true")]
+    pub use_screenscraper: bool,
+    #[serde(default = "bool_true")]
+    pub use_arcadedb: bool,
+    #[serde(default = "bool_true")]
+    pub use_tgdb: bool,
+}
+
+impl Default for ScraperSettings {
+    fn default() -> Self {
+        Self {
+            ss_dev_id: String::new(),
+            ss_dev_password: String::new(),
+            ss_user: String::new(),
+            ss_password: String::new(),
+            tgdb_api_key: String::new(),
+            use_screenscraper: true,
+            use_arcadedb: true,
+            use_tgdb: true,
+        }
+    }
 }
 
 impl Default for AppConfig {
