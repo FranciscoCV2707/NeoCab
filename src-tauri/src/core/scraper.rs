@@ -20,11 +20,24 @@ pub struct ScrapedGameInfo {
     pub players: Option<i32>,
     pub rating: Option<f64>,
     pub region: Option<String>,
+    // Media URLs
     pub box_art_url: Option<String>,
     pub screenshot_url: Option<String>,
     pub wheel_url: Option<String>,
     pub marquee_url: Option<String>,
     pub video_url: Option<String>,
+    /// Decorative bezel/frame image for the emulator window.
+    pub bezel_url: Option<String>,
+    /// Fan art / background image for the game detail view.
+    pub fanart_url: Option<String>,
+    /// Rendered 3-D box artwork.
+    pub box3d_url: Option<String>,
+    /// Cartridge/disc image.
+    pub cartridge_url: Option<String>,
+    /// PDF or image link to the game manual.
+    pub manual_url: Option<String>,
+    /// Which scraper provided this data.
+    pub source: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -218,6 +231,27 @@ fn get_tgdb_platform_id(system_name: &str) -> Option<u32> {
     map.get(system_name.to_lowercase().as_str()).copied()
 }
 
+// ─── Helpers ───
+
+fn is_arcade_system(system_name: &str) -> bool {
+    matches!(
+        system_name.to_lowercase().as_str(),
+        "mame"
+            | "arcade"
+            | "fba"
+            | "fbneo"
+            | "cps1"
+            | "cps2"
+            | "cps3"
+            | "neogeo"
+            | "neogeocd"
+            | "naomi"
+            | "atomiswave"
+            | "model2"
+            | "model3"
+    )
+}
+
 // ─── Main Scraper ───
 
 pub struct GameScraper {
@@ -310,6 +344,17 @@ impl GameScraper {
             }
         }
 
+        // Try ArcadeDB for arcade systems (free, no auth needed)
+        if is_arcade_system(system_name) {
+            match self.scrape_arcadedb(rom_name).await {
+                Ok(info) if !info.title.is_empty() => {
+                    info!("ArcadeDB matched: {}", info.title);
+                    return Ok(info);
+                }
+                _ => info!("ArcadeDB: no match for {}, trying TheGamesDB...", rom_name),
+            }
+        }
+
         // Try TheGamesDB as secondary
         if !self.tgdb_api_key.is_empty() {
             match self.scrape_thegamesdb(rom_name, system_name).await {
@@ -379,17 +424,23 @@ impl GameScraper {
                             .as_ref()
                             .and_then(|d| d.get(0..4))
                             .and_then(|y| y.parse().ok()),
-                        developer: None, // Need separate API call for developers in TGDB v1
+                        developer: None,
                         publisher: None,
                         genre: None,
                         players: game.players.map(|p| p as i32),
                         rating: game.rating.as_ref().and_then(|r| r.parse().ok()),
                         region: None,
-                        box_art_url: None, // Need separate images call for TGDB
+                        box_art_url: None,
                         screenshot_url: None,
                         wheel_url: None,
                         marquee_url: None,
                         video_url: None,
+                        bezel_url: None,
+                        fanart_url: None,
+                        box3d_url: None,
+                        cartridge_url: None,
+                        manual_url: None,
+                        source: Some("TheGamesDB".to_string()),
                     });
                 }
             }
@@ -550,6 +601,12 @@ impl GameScraper {
             wheel_url,
             marquee_url,
             video_url,
+            bezel_url: None,
+            fanart_url: None,
+            box3d_url: None,
+            cartridge_url: None,
+            manual_url: None,
+            source: Some("ScreenScraper".to_string()),
         }
     }
 
@@ -607,6 +664,215 @@ impl GameScraper {
         (box_art, screenshot, wheel, marquee, video)
     }
 
+    /// Scrape a single game from ArcadeDB (free, MAME-focused, no credentials).
+    pub async fn scrape_arcadedb(&self, rom_name: &str) -> Result<ScrapedGameInfo> {
+        let rom_id = rom_name
+            .trim_end_matches(".zip")
+            .trim_end_matches(".7z")
+            .to_lowercase();
+
+        let url = format!(
+            "https://www.arcadeitalia.net/api/game.php?game_name={}&lang=en",
+            rom_id
+        );
+
+        info!("ArcadeDB scraping: {}", rom_name);
+
+        let response = self.client.get(&url).send().await?;
+
+        if !response.status().is_success() {
+            return Err(crate::error::NeoCabError::Network(format!(
+                "ArcadeDB status {}",
+                response.status()
+            )));
+        }
+
+        #[derive(serde::Deserialize)]
+        struct ADBResponse {
+            result: Option<Vec<ADBGame>>,
+        }
+        #[derive(serde::Deserialize)]
+        struct ADBGame {
+            title: Option<String>,
+            history: Option<String>,
+            year: Option<String>,
+            manufacturer: Option<String>,
+            genre: Option<String>,
+            players: Option<u32>,
+            #[serde(rename = "url_image_ingame")]
+            screenshot_url: Option<String>,
+            #[serde(rename = "url_image_title")]
+            title_screen_url: Option<String>,
+            #[serde(rename = "url_image_marquee")]
+            marquee_url: Option<String>,
+            #[serde(rename = "url_image_cabinet")]
+            cabinet_url: Option<String>,
+            #[serde(rename = "url_video_shortplay")]
+            video_url: Option<String>,
+        }
+
+        let body = response.text().await?;
+        let adb: ADBResponse = serde_json::from_str(&body)
+            .map_err(|e| crate::error::NeoCabError::Serialization(e))?;
+
+        let game = adb
+            .result
+            .and_then(|r| r.into_iter().next())
+            .ok_or_else(|| crate::error::NeoCabError::Other(format!("ArcadeDB: no result for '{}'", rom_name)))?;
+
+        let screenshot = game.screenshot_url.or(game.title_screen_url);
+        Ok(ScrapedGameInfo {
+            title: game.title.unwrap_or_else(|| rom_name.to_string()),
+            description: game.history,
+            year: game.year.as_deref().and_then(|y| y.parse().ok()),
+            developer: game.manufacturer.clone(),
+            publisher: game.manufacturer,
+            genre: game.genre,
+            players: game.players.map(|p| p as i32),
+            rating: None,
+            region: None,
+            box_art_url: game.cabinet_url,
+            screenshot_url: screenshot,
+            wheel_url: None,
+            marquee_url: game.marquee_url,
+            video_url: game.video_url,
+            bezel_url: None,
+            fanart_url: None,
+            box3d_url: None,
+            cartridge_url: None,
+            manual_url: None,
+            source: Some("ArcadeDB".to_string()),
+        })
+    }
+
+    /// Scrape with exponential backoff retry on 429 / 5xx errors.
+    pub async fn scrape_with_retry(
+        &self,
+        rom_name: &str,
+        system_name: &str,
+        crc32: Option<&str>,
+        max_retries: u32,
+    ) -> Result<ScrapedGameInfo> {
+        let mut delay = Duration::from_millis(500);
+        for attempt in 0..=max_retries {
+            match self.scrape(rom_name, system_name, crc32).await {
+                Ok(info) => return Ok(info),
+                Err(e) if attempt < max_retries => {
+                    warn!(
+                        "Scrape attempt {}/{} failed for {}: {}. Retrying in {:?}...",
+                        attempt + 1, max_retries + 1, rom_name, e, delay
+                    );
+                    sleep(delay).await;
+                    delay = std::cmp::min(delay * 2, Duration::from_secs(30));
+                }
+                Err(e) => return Err(e),
+            }
+        }
+        unreachable!()
+    }
+
+    /// Batch scrape with configurable concurrency via tokio Semaphore.
+    /// Use `max_concurrent = 1` to scrape sequentially (default behavior).
+    pub async fn scrape_all_concurrent(
+        scraper: std::sync::Arc<Self>,
+        games: Vec<crate::models::Game>,
+        system_name: String,
+        max_concurrent: usize,
+        cancel: std::sync::Arc<std::sync::atomic::AtomicBool>,
+        app_handle: Option<tauri::AppHandle>,
+    ) -> (usize, usize) {
+        use std::sync::atomic::Ordering;
+        use std::sync::Arc;
+        use tokio::sync::Semaphore;
+        use tokio::task::JoinSet;
+
+        let sem = Arc::new(Semaphore::new(max_concurrent.max(1)));
+        let scraped = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let errors = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let total = games.len();
+        let mut set = JoinSet::new();
+
+        for (i, game) in games.into_iter().enumerate() {
+            if cancel.load(Ordering::Relaxed) {
+                break;
+            }
+
+            let permit = match sem.clone().acquire_owned().await {
+                Ok(p) => p,
+                Err(_) => break,
+            };
+
+            let s = scraper.clone();
+            let sys = system_name.clone();
+            let scraped_ref = scraped.clone();
+            let errors_ref = errors.clone();
+            let cancel_ref = cancel.clone();
+            let handle_opt = app_handle.clone();
+
+            set.spawn(async move {
+                let _permit = permit;
+
+                if cancel_ref.load(Ordering::Relaxed) {
+                    return;
+                }
+
+                let rom_name = game.filename.as_deref().unwrap_or(&game.title).to_string();
+
+                if let Some(h) = &handle_opt {
+                    let _ = h.emit(
+                        "scrape_progress",
+                        serde_json::json!({
+                            "current": i + 1,
+                            "total": total,
+                            "game_name": &game.title,
+                            "status": "scraping",
+                        }),
+                    );
+                }
+
+                match s.scrape_with_retry(&rom_name, &sys, game.crc32.as_deref(), 2).await {
+                    Ok(_) => {
+                        scraped_ref.fetch_add(1, Ordering::Relaxed);
+                        if let Some(h) = &handle_opt {
+                            let _ = h.emit(
+                                "scrape_progress",
+                                serde_json::json!({
+                                    "current": i + 1,
+                                    "total": total,
+                                    "game_name": &game.title,
+                                    "status": "done",
+                                }),
+                            );
+                        }
+                    }
+                    Err(e) => {
+                        errors_ref.fetch_add(1, Ordering::Relaxed);
+                        warn!("Failed to scrape {}: {}", game.title, e);
+                        if let Some(h) = &handle_opt {
+                            let _ = h.emit(
+                                "scrape_progress",
+                                serde_json::json!({
+                                    "current": i + 1,
+                                    "total": total,
+                                    "game_name": &game.title,
+                                    "status": "error",
+                                    "error": e.to_string(),
+                                }),
+                            );
+                        }
+                    }
+                }
+            });
+        }
+
+        while let Some(_) = set.join_next().await {}
+
+        let s = scraped.load(Ordering::Relaxed);
+        let e = errors.load(Ordering::Relaxed);
+        info!("Concurrent scrape complete: {} scraped, {} errors", s, e);
+        (s, e)
+    }
+
     /// Fallback scraper using cleaned ROM name matching
     async fn scrape_fallback(&self, rom_name: &str, _system_name: &str) -> Result<ScrapedGameInfo> {
         let clean_name = rom_name
@@ -645,6 +911,12 @@ impl GameScraper {
             wheel_url: None,
             marquee_url: None,
             video_url: None,
+            bezel_url: None,
+            fanart_url: None,
+            box3d_url: None,
+            cartridge_url: None,
+            manual_url: None,
+            source: Some("Fallback".to_string()),
         })
     }
 
@@ -732,6 +1004,42 @@ impl GameScraper {
             let ext = url.rsplit('.').next().unwrap_or("mp4");
             let dest = game_media_dir
                 .join("Videos")
+                .join(format!("{}.{}", clean_name, ext));
+            self.download_media(url, &dest).await.ok();
+        }
+
+        // Download bezel
+        if let Some(url) = &info.bezel_url {
+            let ext = url.rsplit('.').next().unwrap_or("png");
+            let dest = game_media_dir
+                .join("Bezels")
+                .join(format!("{}.{}", clean_name, ext));
+            self.download_media(url, &dest).await.ok();
+        }
+
+        // Download fanart
+        if let Some(url) = &info.fanart_url {
+            let ext = url.rsplit('.').next().unwrap_or("jpg");
+            let dest = game_media_dir
+                .join("Fanart")
+                .join(format!("{}.{}", clean_name, ext));
+            self.download_media(url, &dest).await.ok();
+        }
+
+        // Download 3D box
+        if let Some(url) = &info.box3d_url {
+            let ext = url.rsplit('.').next().unwrap_or("png");
+            let dest = game_media_dir
+                .join("3DBoxes")
+                .join(format!("{}.{}", clean_name, ext));
+            self.download_media(url, &dest).await.ok();
+        }
+
+        // Download cartridge
+        if let Some(url) = &info.cartridge_url {
+            let ext = url.rsplit('.').next().unwrap_or("png");
+            let dest = game_media_dir
+                .join("Cartridges")
                 .join(format!("{}.{}", clean_name, ext));
             self.download_media(url, &dest).await.ok();
         }

@@ -300,6 +300,12 @@ impl Scraper for ScreenScraperScraper {
             wheel_url,
             marquee_url,
             video_url,
+            bezel_url: None,
+            fanart_url: None,
+            box3d_url: None,
+            cartridge_url: None,
+            manual_url: None,
+            source: Some("ScreenScraper".to_string()),
         })
     }
 }

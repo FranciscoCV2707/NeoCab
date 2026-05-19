@@ -8,6 +8,10 @@ const MIGRATIONS: &[(&str, &str)] = &[
         "002_tags_jukebox_safequit",
         include_str!("002_tags_jukebox_safequit.sql"),
     ),
+    (
+        "003_extended_media",
+        include_str!("003_extended_media.sql"),
+    ),
 ];
 
 pub async fn run_migrations(pool: &SqlitePool) -> Result<(), sqlx::Error> {

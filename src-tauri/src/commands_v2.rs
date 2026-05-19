@@ -266,14 +266,3 @@ pub async fn game_launch_v2(
     CommandResponse::ok(launch_result).to_json_string()
 }
 
-pub fn register_v2_commands() -> impl Fn(tauri::Builder) -> tauri::Builder {
-    |app| {
-        app.invoke_handler(tauri::generate_handler![
-            session_insert_coin_v2,
-            session_get_status_v2,
-            session_start_v2,
-            input_get_devices_v2,
-            game_launch_v2,
-        ])
-    }
-}

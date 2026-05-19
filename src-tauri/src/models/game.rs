@@ -31,6 +31,18 @@ pub struct Game {
     pub image_path: Option<String>,
     pub marquee_path: Option<String>,
     pub video_path: Option<String>,
+    // Extended media (migration 003)
+    pub screenshot_path: Option<String>,
+    pub wheel_path: Option<String>,
+    pub bezel_path: Option<String>,
+    pub fanart_path: Option<String>,
+    pub box3d_path: Option<String>,
+    pub cartridge_path: Option<String>,
+    pub manual_path: Option<String>,
+    /// Which scraper last provided metadata (e.g. "ScreenScraper", "ArcadeDB").
+    pub media_source: Option<String>,
+    /// ISO-8601 timestamp of last successful scrape.
+    pub scraped_at: Option<String>,
     pub external_id: Option<String>,
     pub region: Option<String>,
     pub language: Option<String>,

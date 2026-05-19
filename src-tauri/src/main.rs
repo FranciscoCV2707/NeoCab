@@ -10,8 +10,9 @@ fn main() {
 
     #[cfg(all(feature = "legacy-ui", not(feature = "modern-ui")))]
     {
-        eprintln!("Legacy SDL2 mode not yet implemented");
-        std::process::exit(1);
+        let args: Vec<String> = std::env::args().collect();
+        let kiosk_config = neocab_lib::parse_cli_args(&args);
+        neocab_lib::run_with_config(kiosk_config)
     }
 
     #[cfg(not(any(feature = "modern-ui", feature = "legacy-ui")))]

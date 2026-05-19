@@ -8,6 +8,46 @@
 
 ---
 
+## 🔧 Session 2026-05-18 — Mejoras basadas en análisis de 74 repositorios
+
+### Bloque A — Deuda técnica corregida
+- **A1**: Eliminado `src/components/AuditPanel.tsx` (duplicado obsoleto; canónico en `operator/`)
+- **A2**: Version sincronizada a `2.0.1` en `package.json`, `tauri.conf.json` y `lib.rs`
+- **A3**: TypeScript estricto: `noUnusedLocals/Parameters: true`, tests incluidos en typecheck con `vitest/globals`
+- **A4**: Coverage thresholds subidos a `80/70/80/80` en `vitest.config.ts`
+- **A5**: `main.rs` — legacy SDL2 block ahora llama a `run_with_config()` (ya implementado en `lib.rs`)
+- **A6**: `commands_v2.rs` registrado como módulo en `lib.rs`; v2 commands añadidos al invoke_handler; `register_v2_commands()` eliminado (API incorrecta)
+- **A7**: 8 archivos de sesión movidos a `docs/sessions/`; duplicados de tags en invoke_handler eliminados
+
+### Bloque B — Scraping mejorado
+- **B1**: Nuevo scraper `scrapers/arcadedb.rs` (ArcadeDB, gratis, MAME-focused, sin auth); registrado en `mod.rs`
+- **B1**: ArcadeDB integrado en `core/scraper.rs` como fuente primaria para sistemas arcade
+- **B2**: `scrape_with_retry()` — retry con backoff exponencial (hasta 30s) para 429/5xx
+- **B2**: `scrape_all_concurrent()` — scraping paralelo con `tokio::Semaphore` + `JoinSet`
+- **B3**: `media_source` y `scraped_at` añadidos a `ScrapedGameInfo`, modelo `Game` y migración DB
+
+### Bloque C — Identificación de ROMs
+- **C1+C2**: Nuevo módulo `rom_identifier.rs`:
+  - `identify_rom()` — calcula CRC32 + SHA-256, strips iNES/SNES copier headers
+  - `parse_rom_name()` — parser No-Intro: regions, revision, version, flags (Beta/Proto/Demo/Pirate)
+  - 5 tests unitarios incluidos
+
+### Bloque D — UX y tipos de media
+- **D1**: `useSystemStore.ts` — vistas configurables (`UserView`) con filtros por campo/operador; persisten en localStorage; aparecen como sistemas virtuales (IDs 8000-8999)
+- **D2**: Nuevo `useCollectionStore.ts` — colecciones manuales y automáticas (reglas); show-in-menu como sistemas virtuales (IDs 7000-7999)
+- **D3**: `useThemeStore.ts` — `getPlatformAccent()` + `applyPlatformAccent()` para 30+ plataformas (SNES, PS1, MAME, etc.) con CSS variables `--platform-primary/secondary/text`
+- **D4**: 7 nuevos tipos de media: `screenshot`, `wheel`, `bezel`, `fanart`, `box3d`, `cartridge`, `manual` — en DB (migración 003), modelo `Game`, `ScrapedGameInfo`, y descarga en `scrape_and_download()`
+
+### Bloque E — Parsers de librerías externas
+- Nuevo módulo `library_parsers.rs` con trait `LibraryParser`:
+  - `FolderParser` — escanea directorios por extensión (recursivo)
+  - `SteamParser` — lee `steamapps/*.acf` + `libraryfolders.vdf`; detecta Steam en Windows/Linux
+  - `GogParser` — lee registro Windows `HKLM\SOFTWARE\WOW6432Node\GOG.com\Games`
+  - `EpicParser` — parsea `LauncherInstalled.dat` (JSON)
+  - `MameParser` — ejecuta `mame -listxml` y parsea XML
+
+---
+
 ## 🎯 Improvement Phase Status: Based on Analysis of 6 Frontends + 11 Controller Tools
 
 This improvement phase was designed after exhaustive analysis of:

@@ -58,6 +58,12 @@ impl Scraper for FallbackScraper {
             wheel_url: None,
             marquee_url: None,
             video_url: None,
+            bezel_url: None,
+            fanart_url: None,
+            box3d_url: None,
+            cartridge_url: None,
+            manual_url: None,
+            source: Some("Fallback".to_string()),
         })
     }
 }

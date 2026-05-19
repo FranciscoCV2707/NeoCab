@@ -1,6 +1,9 @@
 pub mod adapters;
 pub mod commands;
+pub mod commands_v2;
 pub mod core;
+pub mod library_parsers;
+pub mod rom_identifier;
 pub mod db;
 pub mod error;
 pub mod input;
@@ -85,7 +88,7 @@ pub fn run_with_config(kiosk_config: core::kiosk_config::KioskConfig) {
     let system_info = utils::get_system_info();
 
     tracing::info!("================================================");
-    tracing::info!("NeoCab v1.0 Starting");
+    tracing::info!("NeoCab v2.0.1 Starting");
     tracing::info!("Runtime Mode: {}", runtime_mode);
     tracing::info!("Platform: {} ({})", system_info.os, system_info.arch);
     tracing::info!("Family: {}", system_info.family);
@@ -424,11 +427,6 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
             // Display
             commands::get_display_config,
             commands::set_display_rotation,
-            commands::create_tag,
-            commands::delete_tag,
-            commands::add_game_tag,
-            commands::remove_game_tag,
-            commands::get_game_tags,
             // RetroAchievements
             commands::ra_login,
             commands::ra_get_game_achievements,
@@ -445,6 +443,12 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
             commands::check_for_updates,
             commands::download_update,
             commands::apply_update,
+            // v2 commands (typed CommandResponse<T> wrapper)
+            commands_v2::session_insert_coin_v2,
+            commands_v2::session_get_status_v2,
+            commands_v2::session_start_v2,
+            commands_v2::input_get_devices_v2,
+            commands_v2::game_launch_v2,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
