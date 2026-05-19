@@ -1,8 +1,8 @@
-# NeoCab v1.3.0 - Estado del Proyecto
+# NeoCab v2.0.1 - Estado del Proyecto
 
 **Última actualización:** 2026-05-18  
-**Versión:** 1.3.0 ESTABLE  
-**Progreso Global:** FASES 1-6 COMPLETADAS
+**Versión:** 2.0.1  
+**Progreso Global:** FASES 1-6 COMPLETADAS + MEJORAS ECOSISTEMA
 
 ---
 
@@ -114,7 +114,16 @@ C:\Users\[Usuario]\AppData\Local\Programs\NeoCab\
 
 ---
 
-## ✅ ESTADO ACTUAL: ESTABLE
+## ✅ ESTADO ACTUAL: ESTABLE v2.0.1
+
+### Sesión 2026-05-18 — Nuevos módulos
+- ✅ `scrapers/arcadedb.rs` — scraper MAME gratuito sin auth
+- ✅ `rom_identifier.rs` — CRC32/SHA256, headers strip, parser No-Intro names
+- ✅ `library_parsers.rs` — Steam, GOG, Epic, MAME, Folder parsers
+- ✅ `useCollectionStore.ts` — colecciones manuales y automáticas
+- ✅ `useSystemStore.ts` — vistas/filtros como sistemas virtuales
+- ✅ `useThemeStore.ts` — platform accents para 30+ plataformas
+- ✅ DB migración 003 — 7 tipos de media + media_source + scraped_at
 
 ### Backend (Rust)
 - ✅ Base de datos SQLite inicializada
@@ -223,12 +232,13 @@ C:\Users\[Usuario]\AppData\Local\Programs\NeoCab\
 
 ## 🎓 DOCUMENTACIÓN RELACIONADA
 
-- **Arquitectura**: `docs/02_PLAN_MAESTRO_PARTE_2.md`
 - **UI Guide**: `docs/15_UI_HYPERSPIN_WHEEL.md`
 - **JoyMapper**: `docs/16_JOYMAPPER_NATIVO.md`
 - **NeoCab Studio**: `docs/18_NEOCAB_STUDIO.md`
 - **Setup**: `docs/17_SETUP_WIZARD.md`
-- **Roadmap Completo**: `docs/05_CRONOGRAMA_DIA_POR_DIA.md`
+- **Emuladores**: `docs/06_EMULADORES_EXHAUSTIVO.md`
+- **Hardware**: `docs/10_HARDWARE_FISICO.md`
+- **Roadmap**: `ROADMAP.md`
 
 ---
 
