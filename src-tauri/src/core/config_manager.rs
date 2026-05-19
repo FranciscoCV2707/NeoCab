@@ -114,6 +114,8 @@ pub struct InputSettings {
 pub struct EmulatorsSettings {
     pub default: String,
     pub auto_select: bool,
+    #[serde(default)]
+    pub paths: HashMap<String, String>,
 }
 
 // Credenciales para los scrapers externos. Se leen desde config.yml al iniciar.
@@ -228,6 +230,7 @@ impl Default for AppConfig {
             emulators: EmulatorsSettings {
                 default: "retroarch".to_string(),
                 auto_select: true,
+                paths: HashMap::new(),
             },
             scraper: ScraperSettings::default(),
             systems,
@@ -337,6 +340,18 @@ impl ConfigManager {
         {
             let mut config = self.config.write().await;
             config.scraper = settings;
+        }
+        self.save_to_file().await
+    }
+
+    pub async fn set_emulator_path(&self, id: String, path: String) -> Result<()> {
+        {
+            let mut config = self.config.write().await;
+            if path.is_empty() {
+                config.emulators.paths.remove(&id);
+            } else {
+                config.emulators.paths.insert(id, path);
+            }
         }
         self.save_to_file().await
     }

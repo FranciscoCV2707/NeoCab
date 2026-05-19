@@ -4,9 +4,10 @@ import { ThemeEditor } from '../studio/ThemeEditor';
 import { InputWizard } from '../operator/InputWizard';
 import KeymapConfigPanel from '../operator/KeymapConfig';
 import { ScraperPanel } from './ScraperPanel';
+import { EmulatorSetupPanel } from './EmulatorSetupPanel';
 import '../operator/OperatorPanel.css';
 
-type SettingsTab = 'systems' | 'theme' | 'controls' | 'keymap' | 'scraper';
+type SettingsTab = 'systems' | 'theme' | 'controls' | 'keymap' | 'scraper' | 'emulators';
 
 interface SettingsPanelProps {
     onBack: () => void;
@@ -48,6 +49,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                 >
                     Scraper
                 </button>
+                <button
+                    className={`tab-button ${activeTab === 'emulators' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('emulators')}
+                >
+                    Emuladores
+                </button>
                 <button className="tab-button manual-button" onClick={onBack}>
                     Volver
                 </button>
@@ -67,6 +74,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                     <div className="tab-pane">
                         <h3>Credenciales del Scraper</h3>
                         <ScraperPanel />
+                    </div>
+                )}
+                {activeTab === 'emulators' && (
+                    <div className="tab-pane">
+                        <h3>Configuracion de Emuladores</h3>
+                        <EmulatorSetupPanel />
                     </div>
                 )}
             </div>

@@ -1,8 +1,122 @@
-use crate::core::{EmulatorManager, TimerManager};
+use crate::core::{ConfigManager, EmulatorManager, TimerManager};
 use crate::db::Database;
 use serde_json::json;
 use std::sync::Arc;
 use tauri::{Emitter, State};
+
+// Static catalog — display info that doesn't change at runtime
+fn emulator_catalog() -> Vec<serde_json::Value> {
+    let entries: &[(&str, &str, &str, &[&str])] = &[
+        ("mame",        "MAME",        "mame.exe",               &["Arcade", "MAME"]),
+        ("retroarch",   "RetroArch",   "retroarch.exe",          &["NES", "SNES", "Genesis", "GB", "GBC", "GBA", "PS1", "N64"]),
+        ("teknoparrot", "TeknoParrot", "ParrotLoader64.exe",      &["Arcade PC", "Namco", "Sega", "Taito"]),
+        ("pcsx2",       "PCSX2",       "pcsx2-qt.exe",           &["PlayStation 2"]),
+        ("dolphin",     "Dolphin",     "Dolphin.exe",            &["GameCube", "Wii"]),
+        ("duckstation", "DuckStation", "duckstation-qt.exe",     &["PlayStation 1"]),
+        ("ppsspp",      "PPSSPP",      "PPSSPPWindows64.exe",    &["PSP"]),
+        ("xenia",       "Xenia",       "xenia.exe",              &["Xbox 360"]),
+        ("rpcs3",       "RPCS3",       "rpcs3.exe",              &["PlayStation 3"]),
+        ("cemu",        "Cemu",        "Cemu.exe",               &["Wii U"]),
+        ("yuzu",        "Yuzu",        "yuzu.exe",               &["Nintendo Switch"]),
+        ("ryujinx",     "Ryujinx",     "Ryujinx.exe",            &["Nintendo Switch"]),
+        ("mgba",        "mGBA",        "mgba.exe",               &["GBA", "GB", "GBC"]),
+        ("flycast",     "Flycast",     "flycast.exe",            &["Dreamcast", "Naomi", "Atomiswave"]),
+    ];
+    entries
+        .iter()
+        .map(|(id, name, default_exe, systems)| {
+            json!({
+                "id": id,
+                "name": name,
+                "default_exe": default_exe,
+                "systems": systems,
+            })
+        })
+        .collect()
+}
+
+#[tauri::command]
+pub async fn get_emulator_info_list(
+    config_manager: State<'_, Arc<ConfigManager>>,
+) -> Result<serde_json::Value, String> {
+    let config = config_manager.get_config().await;
+    let paths = &config.emulators.paths;
+
+    let emulators: Vec<serde_json::Value> = emulator_catalog()
+        .into_iter()
+        .map(|mut entry| {
+            let id = entry["id"].as_str().unwrap_or("").to_string();
+            let configured_path = paths.get(&id).cloned().unwrap_or_default();
+            let exists = !configured_path.is_empty()
+                && std::path::Path::new(&configured_path).exists();
+            entry["configured_path"] = json!(configured_path);
+            entry["path_exists"] = json!(exists);
+            entry
+        })
+        .collect();
+
+    Ok(json!({ "emulators": emulators }))
+}
+
+#[tauri::command]
+pub async fn set_emulator_path(
+    id: String,
+    path: String,
+    config_manager: State<'_, Arc<ConfigManager>>,
+) -> Result<(), String> {
+    config_manager
+        .set_emulator_path(id, path)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn detect_emulator_path(id: String) -> Result<String, String> {
+    let catalog = emulator_catalog();
+    let default_exe = catalog
+        .iter()
+        .find(|e| e["id"] == id)
+        .and_then(|e| e["default_exe"].as_str())
+        .unwrap_or("")
+        .to_string();
+
+    if default_exe.is_empty() {
+        return Ok(String::new());
+    }
+
+    // Common install directories to search
+    let search_dirs = [
+        format!("C:\\Program Files\\{}", id),
+        format!("C:\\Program Files (x86)\\{}", id),
+        format!("C:\\emulators\\{}", id),
+        "C:\\emulators".to_string(),
+        ".".to_string(),
+    ];
+
+    for dir in &search_dirs {
+        let candidate = std::path::Path::new(dir).join(&default_exe);
+        if candidate.exists() {
+            return Ok(candidate.to_string_lossy().to_string());
+        }
+    }
+
+    // Also check PATH
+    if let Ok(output) = std::process::Command::new("where").arg(&default_exe).output() {
+        if output.status.success() {
+            let found = String::from_utf8_lossy(&output.stdout)
+                .lines()
+                .next()
+                .unwrap_or("")
+                .trim()
+                .to_string();
+            if !found.is_empty() {
+                return Ok(found);
+            }
+        }
+    }
+
+    Ok(String::new())
+}
 
 #[tauri::command]
 pub async fn list_emulators(

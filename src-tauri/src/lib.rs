@@ -264,6 +264,9 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
             commands::stop_game,
             commands::get_recommended_emulator,
             commands::check_timer_timeout,
+            commands::get_emulator_info_list,
+            commands::set_emulator_path,
+            commands::detect_emulator_path,
             // Coin system
             commands::add_coins,
             commands::add_coins_via_key,
@@ -573,15 +576,19 @@ async fn initialize_app() -> Result<(
 
     let game_library = core::GameLibrary::new(db.clone());
 
+    let config_manager = core::ConfigManager::new(data_dir.join("config.yml"), db.clone()).await?;
+    let config_manager_arc = Arc::new(config_manager);
+
     let mut emulator_manager = core::EmulatorManager::new(db.clone());
-    emulator_manager.initialize_default_emulators().await?;
+    {
+        let cfg = config_manager_arc.get_config().await;
+        emulator_manager.initialize_default_emulators_with_paths(&cfg.emulators.paths).await?;
+    }
 
     let coin_manager = core::CoinManager::new(db.clone());
     let coin_manager_arc = Arc::new(coin_manager);
     let timer_manager = core::TimerManager::new();
     let timer_manager_arc = Arc::new(timer_manager);
-    let config_manager = core::ConfigManager::new(data_dir.join("config.yml"), db.clone()).await?;
-    let config_manager_arc = Arc::new(config_manager);
     let session_manager = core::SessionManager::new(
         coin_manager_arc.clone(),
         timer_manager_arc.clone(),

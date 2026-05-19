@@ -1,5 +1,5 @@
 use crate::adapters::launch::{self, LaunchContext, LaunchResult, LaunchStrategy};
-use crate::adapters::{EmulatorAdapter, MameAdapter};
+use crate::adapters::{EmulatorAdapter, GenericAdapter, MameAdapter};
 use crate::db::Database;
 use crate::error::{NeoCabError, Result};
 use crate::models::Game;
@@ -188,7 +188,19 @@ impl EmulatorManager {
     }
 
     pub async fn initialize_default_emulators(&mut self) -> Result<()> {
+        self.initialize_default_emulators_with_paths(&HashMap::new()).await
+    }
+
+    pub async fn initialize_default_emulators_with_paths(
+        &mut self,
+        paths: &HashMap<String, String>,
+    ) -> Result<()> {
         info!("Initializing default emulators");
+
+        // Helper: use configured path if present, otherwise fall back to default exe name
+        let exe = |id: &str, default: &str| -> String {
+            paths.get(id).filter(|p| !p.is_empty()).cloned().unwrap_or_else(|| default.to_string())
+        };
 
         // MAME (arcade)
         let mame = Arc::new(MameAdapter::new("mame".to_string(), "0.262".to_string()));
@@ -237,21 +249,63 @@ impl EmulatorManager {
         ));
         self.register_adapter("retroarch-n64".to_string(), retroarch_n64);
 
-        info!("Default emulators initialized (MAME + RetroArch cores)");
+        // Standalone emulators via GenericAdapter
+        let specs: &[(&str, &str, &[&str], &[&str])] = &[
+            ("teknoparrot", "ParrotLoader64.exe", &["--profile"], &[]),
+            ("pcsx2",       "pcsx2-qt.exe",        &["--fullscreen", "--nogui"], &[]),
+            ("dolphin",     "Dolphin.exe",          &["--exec"], &["--batch", "--confirm=false"]),
+            ("duckstation", "duckstation-qt.exe",   &["-fullscreen", "-batch"], &[]),
+            ("ppsspp",      "PPSSPPWindows64.exe",  &[], &[]),
+            ("xenia",       "xenia.exe",            &[], &[]),
+            ("rpcs3",       "rpcs3.exe",            &["--no-gui"], &[]),
+            ("cemu",        "Cemu.exe",             &["-g"], &[]),
+            ("yuzu",        "yuzu.exe",             &[], &[]),
+            ("ryujinx",     "Ryujinx.exe",          &[], &[]),
+            ("mgba",        "mgba.exe",             &[], &[]),
+            ("flycast",     "flycast.exe",          &[], &[]),
+        ];
+
+        for (id, default_exe, before, after) in specs {
+            let adapter = Arc::new(GenericAdapter::new(
+                *id,
+                exe(id, default_exe),
+                "latest",
+                before.iter().map(|s| s.to_string()).collect(),
+                after.iter().map(|s| s.to_string()).collect(),
+            ));
+            self.register_adapter(id.to_string(), adapter);
+        }
+
+        info!("Default emulators initialized ({} adapters)", self.adapters.len());
         Ok(())
     }
 
     pub fn get_recommended_emulator(&self, system_name: &str) -> Option<String> {
-        // Map systems to recommended emulator
-        match system_name {
-            "nes" => Some("retroarch-nes".to_string()),
-            "snes" => Some("retroarch-snes".to_string()),
-            "genesis" => Some("retroarch-genesis".to_string()),
-            "gb" => Some("retroarch-gb".to_string()),
-            "psx" => Some("retroarch-psx".to_string()),
-            "n64" => Some("retroarch-n64".to_string()),
-            "mame" => Some("mame".to_string()),
-            _ => self.adapters.keys().next().cloned(),
+        let recommendation = match system_name {
+            "nes" | "famicom"               => "retroarch-nes",
+            "snes" | "superfamicom"         => "retroarch-snes",
+            "genesis" | "megadrive"         => "retroarch-genesis",
+            "gb" | "gbc" | "gameboy"        => "retroarch-gb",
+            "psx" | "ps1" | "playstation"   => "duckstation",
+            "ps2"                           => "pcsx2",
+            "ps3"                           => "rpcs3",
+            "psp"                           => "ppsspp",
+            "n64"                           => "retroarch-n64",
+            "gamecube" | "wii"              => "dolphin",
+            "wiiu"                          => "cemu",
+            "switch"                        => "yuzu",
+            "xbox360"                       => "xenia",
+            "arcade_pc" | "teknoparrot"     => "teknoparrot",
+            "dreamcast" | "naomi"           => "flycast",
+            "gba"                           => "mgba",
+            "mame" | "arcade"               => "mame",
+            _ => return self.adapters.keys().next().cloned(),
+        };
+        // Only return if the adapter is actually registered
+        if self.adapters.contains_key(recommendation) {
+            Some(recommendation.to_string())
+        } else {
+            self.adapters.keys().next().cloned()
         }
     }
 }
