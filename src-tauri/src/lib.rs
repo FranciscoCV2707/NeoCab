@@ -448,7 +448,6 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
             commands_v2::session_get_status_v2,
             commands_v2::session_start_v2,
             commands_v2::input_get_devices_v2,
-            commands_v2::game_launch_v2,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

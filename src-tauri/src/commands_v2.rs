@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use tauri::{State, Emitter, AppHandle};
 use std::sync::Arc;
+use std::collections::HashMap;
 
 pub mod types {
     use serde::{Deserialize, Serialize};
@@ -41,16 +42,6 @@ pub mod types {
         pub credits: i64,
         pub coins_inserted: i64,
         pub message: String,
-    }
-
-    #[derive(Debug, Clone, Serialize, Deserialize)]
-    pub struct GameLaunchContext {
-        pub game_id: i64,
-        pub game_title: String,
-        pub system_name: String,
-        pub emulator_id: Option<String>,
-        pub rom_path: String,
-        pub media_path: Option<String>,
     }
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -109,13 +100,13 @@ pub mod types {
 use types::*;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct CommandResponse<T> {
+pub struct CommandResponse<T: Serialize> {
     pub success: bool,
     pub data: Option<T>,
     pub error: Option<String>,
 }
 
-impl<T> CommandResponse<T> {
+impl<T: Serialize> CommandResponse<T> {
     pub fn ok(data: T) -> Self {
         Self { success: true, data: Some(data), error: None }
     }
@@ -136,11 +127,16 @@ pub async fn session_insert_coin_v2(
 ) -> Result<String, String> {
     use crate::commands::types::ToCommandResult;
 
-    let result = session_manager.insert_coin().await.to_result()?;
+    let result = session_manager.insert_coin().await.to_result().map_err(|e| e.message)?;
+
+    let credits = match result {
+        crate::core::SessionState::CreditAdded { credits } => credits,
+        _ => 0,
+    };
 
     let coin_result = CoinInsertResult {
         success: true,
-        credits: result.credits(),
+        credits,
         coins_inserted: 1,
         message: "Coin inserted".to_string(),
     };
@@ -156,7 +152,7 @@ pub async fn session_get_status_v2(
 ) -> Result<String, String> {
     use crate::commands::types::ToCommandResult;
 
-    let state = session_manager.check_session().await.to_result()?;
+    let state = session_manager.check_session().await.to_result().map_err(|e| e.message)?;
 
     let status = SessionStatus {
         session_id: None,
@@ -164,8 +160,8 @@ pub async fn session_get_status_v2(
         state: match state {
             crate::core::SessionState::Idle => SessionState::Idle,
             crate::core::SessionState::CreditAdded { .. } => SessionState::WaitingForGame,
-            crate::core::SessionState::Playing { .. } => SessionState::Playing,
-            crate::core::SessionState::Paused => SessionState::Paused,
+            crate::core::SessionState::Active { .. } => SessionState::Playing,
+            crate::core::SessionState::Paused { .. } => SessionState::Paused,
             crate::core::SessionState::Warning { .. } => SessionState::Playing,
             crate::core::SessionState::SessionExpired => SessionState::SessionExpired,
             _ => SessionState::Idle,
@@ -188,14 +184,14 @@ pub async fn session_start_v2(
 ) -> Result<String, String> {
     use crate::commands::types::ToCommandResult;
 
-    let result = session_manager.start_session(&system_name).await.to_result()?;
+    session_manager.start_session(&system_name).await.to_result().map_err(|e| e.message)?;
 
     let status = SessionStatus {
         session_id: Some(uuid::Uuid::new_v4().to_string()),
         system_name: Some(system_name),
         state: SessionState::Playing,
         mode: SessionMode::FreePlay,
-        credits: result.credits(),
+        credits: 0.0,
         remaining_seconds: 0,
         elapsed_seconds: 0,
         is_paused: false,
@@ -212,7 +208,7 @@ pub async fn input_get_devices_v2(
 ) -> Result<String, String> {
     use crate::commands::types::ToCommandResult;
 
-    let devices = input_manager.get_connected_devices().await.to_result()?;
+    let devices = input_manager.get_connected_devices().await.to_result().map_err(|e| e.message)?;
 
     let device_states: Vec<InputDeviceState> = devices
         .into_iter()
@@ -229,40 +225,3 @@ pub async fn input_get_devices_v2(
 
     CommandResponse::ok(device_states).to_json_string()
 }
-
-#[tauri::command]
-pub async fn game_launch_v2(
-    game_id: i64,
-    db: State<'_, Arc<crate::db::Database>>,
-    launcher: State<'_, Arc<crate::core::Launcher>>,
-    app: AppHandle,
-) -> Result<String, String> {
-    use crate::commands::types::ToCommandResult;
-
-    let game = db.get_game_by_id(game_id).await.to_result()?
-        .ok_or_else(|| "Game not found".to_string())?;
-
-    let ctx = GameLaunchContext {
-        game_id: game.id,
-        game_title: game.title.clone(),
-        system_name: game.system_name.clone(),
-        emulator_id: None,
-        rom_path: game.rom_path.clone(),
-        media_path: game.media_path.clone(),
-    };
-
-    let result = launcher.launch_game(&ctx).await.to_result()?;
-
-    let launch_result = LaunchResult {
-        success: result.is_ok(),
-        process_id: result.ok().flatten(),
-        error_message: result.err(),
-    };
-
-    if launch_result.success {
-        let _ = app.emit("game_launched", &ctx);
-    }
-
-    CommandResponse::ok(launch_result).to_json_string()
-}
-
