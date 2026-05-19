@@ -45,6 +45,7 @@ interface ThemeMedia {
   marquee_enabled: boolean;
   wheel_enabled: boolean;
   box_art_enabled: boolean;
+  background_image: string;
 }
 
 interface ThemeSounds {
@@ -113,6 +114,7 @@ const defaultMedia: ThemeMedia = {
   marquee_enabled: true,
   wheel_enabled: true,
   box_art_enabled: true,
+  background_image: '',
 };
 
 const defaultSounds: ThemeSounds = {
@@ -446,63 +448,90 @@ export const ThemeEditor: React.FC = () => {
 
   const renderLayout = () => (
     <div className="editor-section">
-      <h3>Layout Settings</h3>
-      <p className="section-desc">Configure view styles and animations</p>
+      <h3>Diseño y Navegación</h3>
+      <p className="section-desc">Elige cómo se muestran los sistemas y los juegos</p>
+
+      <label style={{ display: 'block', marginBottom: 6, fontWeight: 600 }}>Vista de Sistemas</label>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
+        {[
+          { value: 'carousel', label: 'Carrusel 3D', desc: 'Rueda giratoria', diagram: '◀ ① ② ③ ▶' },
+          { value: 'grid',    label: 'Cuadrícula',  desc: 'Mosaico de iconos', diagram: '▣ ▣\n▣ ▣' },
+          { value: 'list',    label: 'Lista',        desc: 'Vertical simple',  diagram: '━━━━\n━━━━\n━━━━' },
+        ].map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => updateLayout('system_view', opt.value)}
+            style={{
+              flex: '1 1 120px',
+              padding: '10px 8px',
+              border: `2px solid ${theme.layout.system_view === opt.value ? theme.colors.primary : '#444'}`,
+              borderRadius: 8,
+              background: theme.layout.system_view === opt.value ? `${theme.colors.primary}22` : '#1a1a2e',
+              color: theme.layout.system_view === opt.value ? theme.colors.primary : '#ccc',
+              cursor: 'pointer',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: 18, marginBottom: 4, whiteSpace: 'pre', lineHeight: 1.3 }}>{opt.diagram}</div>
+            <div style={{ fontWeight: 600, fontSize: 12 }}>{opt.label}</div>
+            <div style={{ fontSize: 11, opacity: 0.6 }}>{opt.desc}</div>
+          </button>
+        ))}
+      </div>
+
+      <label style={{ display: 'block', marginBottom: 6, fontWeight: 600 }}>Vista de Juegos</label>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
+        {[
+          { value: 'split',   label: 'Dividida',   desc: 'Lista + preview', diagram: '▌  ▌▐  ▐' },
+          { value: 'full',    label: 'Completa',   desc: 'Imagen grande',   diagram: '▓▓▓▓▓\n▓▓▓▓▓' },
+          { value: 'compact', label: 'Compacta',   desc: 'Solo lista densa', diagram: '━━━━\n━━━━\n━━━━\n━━━━' },
+        ].map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => updateLayout('game_view', opt.value)}
+            style={{
+              flex: '1 1 120px',
+              padding: '10px 8px',
+              border: `2px solid ${theme.layout.game_view === opt.value ? theme.colors.accent : '#444'}`,
+              borderRadius: 8,
+              background: theme.layout.game_view === opt.value ? `${theme.colors.accent}22` : '#1a1a2e',
+              color: theme.layout.game_view === opt.value ? theme.colors.accent : '#ccc',
+              cursor: 'pointer',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: 16, marginBottom: 4, whiteSpace: 'pre', lineHeight: 1.3 }}>{opt.diagram}</div>
+            <div style={{ fontWeight: 600, fontSize: 12 }}>{opt.label}</div>
+            <div style={{ fontSize: 11, opacity: 0.6 }}>{opt.desc}</div>
+          </button>
+        ))}
+      </div>
+
       <div className="setting-list">
         <div className="setting-item">
-          <label>System View Style</label>
-          <select value={theme.layout.system_view} onChange={(e) => updateLayout('system_view', e.target.value)}>
-            <option value="carousel">Carousel 3D</option>
-            <option value="grid">Grid</option>
-            <option value="list">List</option>
-          </select>
-        </div>
-        <div className="setting-item">
-          <label>Game View Style</label>
-          <select value={theme.layout.game_view} onChange={(e) => updateLayout('game_view', e.target.value)}>
-            <option value="split">Split Panel</option>
-            <option value="full">Full Preview</option>
-            <option value="compact">Compact</option>
-          </select>
-        </div>
-        <div className="setting-item">
-          <label>Wheel Style</label>
+          <label>Estilo del Wheel</label>
           <select value={theme.layout.wheel_style} onChange={(e) => updateLayout('wheel_style', e.target.value)}>
             <option value="3d">3D Wheel</option>
-            <option value="flat">Flat</option>
-            <option value="hidden">Hidden</option>
+            <option value="flat">Plano</option>
+            <option value="hidden">Oculto</option>
           </select>
         </div>
         <div className="setting-item">
-          <label>Transition Type</label>
+          <label>Tipo de Transición</label>
           <select value={theme.layout.transition} onChange={(e) => updateLayout('transition', e.target.value)}>
-            <option value="slide">Slide</option>
-            <option value="fade">Fade</option>
-            <option value="scale">Scale</option>
-            <option value="flip">Flip</option>
+            <option value="slide">Deslizar</option>
+            <option value="fade">Fundido</option>
+            <option value="scale">Escalar</option>
+            <option value="flip">Voltear</option>
           </select>
         </div>
         <div className="setting-item">
-          <label>Easing Function</label>
-          <select value={theme.layout.easing} onChange={(e) => updateLayout('easing', e.target.value)}>
-            <option value="linear">Linear</option>
-            <option value="easeOutCubic">Ease Out Cubic</option>
-            <option value="easeOutQuad">Ease Out Quad</option>
-            <option value="easeOutBounce">Ease Out Bounce</option>
-            <option value="easeOutBack">Ease Out Back</option>
-          </select>
-        </div>
-        <div className="setting-item">
-          <label>Animation Speed (ms)</label>
+          <label>Velocidad ({theme.layout.animation_speed}ms)</label>
           <input
-            type="range"
-            min="100"
-            max="1000"
-            step="50"
+            type="range" min="100" max="1000" step="50"
             value={theme.layout.animation_speed}
             onChange={(e) => updateLayout('animation_speed', Number(e.target.value))}
           />
-          <span>{theme.layout.animation_speed}ms</span>
         </div>
       </div>
     </div>
@@ -510,9 +539,37 @@ export const ThemeEditor: React.FC = () => {
 
   const renderMedia = () => (
     <div className="editor-section">
-      <h3>Media Settings</h3>
-      <p className="section-desc">Configure video, images, and artwork display</p>
+      <h3>Imágenes y Multimedia</h3>
+      <p className="section-desc">Configura vídeo, imágenes y artwork de los juegos</p>
       <div className="setting-list">
+        <div className="setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 6 }}>
+          <label style={{ fontWeight: 600 }}>Imagen de fondo personalizada</label>
+          <p style={{ fontSize: 12, opacity: 0.6, margin: 0 }}>
+            Ruta a una imagen (.jpg, .png, .webp) que se usará como fondo de pantalla.
+          </p>
+          <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+            <input
+              type="text"
+              value={theme.media.background_image}
+              onChange={(e) => updateMedia('background_image', e.target.value)}
+              placeholder="C:\Users\...\fondo.jpg  o  ./media/bg.jpg"
+              style={{ flex: 1, padding: '5px 8px', background: '#1a1a2e', border: '1px solid #444', borderRadius: 4, color: '#eee', fontSize: 12 }}
+            />
+            {theme.media.background_image && (
+              <button
+                onClick={() => updateMedia('background_image', '')}
+                style={{ padding: '4px 8px', background: '#522', border: '1px solid #f66', borderRadius: 4, color: '#eee', cursor: 'pointer', fontSize: 12 }}
+              >
+                Quitar
+              </button>
+            )}
+          </div>
+          {theme.media.background_image && (
+            <p style={{ fontSize: 11, color: '#4af', margin: 0 }}>
+              La imagen se aplicará como fondo al guardar el tema.
+            </p>
+          )}
+        </div>
         <div className="setting-item toggle">
           <label>Video Preview</label>
           <input
@@ -715,77 +772,146 @@ export const ThemeEditor: React.FC = () => {
 
   return (
     <div className="theme-editor">
+      {/* ── Header ── */}
       <div className="editor-header">
-        <h2>Theme Editor</h2>
+        <h2>Editor de Temas</h2>
         <div className="editor-actions">
-          <select onChange={(e) => e.target.value && applyPreset(e.target.value)} defaultValue="">
-            <option value="" disabled>Load preset...</option>
+          <select onChange={(e) => e.target.value && applyPreset(e.target.value)} defaultValue="" title="Cargar preset predefinido">
+            <option value="" disabled>Preset...</option>
             {Object.entries(themePresets).map(([key, preset]) => (
               <option key={key} value={key}>{preset.name}</option>
             ))}
           </select>
-          <select onChange={(e) => e.target.value && loadTheme(e.target.value)} defaultValue="">
-            <option value="" disabled>Load saved theme...</option>
+          <select onChange={(e) => e.target.value && loadTheme(e.target.value)} defaultValue="" title="Cargar tema guardado">
+            <option value="" disabled>Cargar guardado...</option>
             {themes.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
-          <button className="btn-export" onClick={exportTheme}>Export</button>
-          <button className="btn-save" onClick={saveTheme} disabled={saving}>
-            {saving ? 'Saving...' : 'Save Theme'}
+          <button className="btn-export" onClick={exportTheme} title="Exportar tema como archivo">Exportar</button>
+          <button className="btn-save" onClick={saveTheme} disabled={saving} title="Guardar tema en disco">
+            {saving ? 'Guardando...' : 'Guardar tema'}
           </button>
         </div>
       </div>
 
       {message && <div className="editor-message">{message}</div>}
 
-      <div className="editor-body">
-        <div className="editor-tabs">
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              className={`tab-button ${activeTab === tab.key ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      {/* ── Body: editor left + live preview right ── */}
+      <div className="editor-body" style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
 
-        <div className="editor-content">
-          {renderTabContent()}
-        </div>
-      </div>
-
-      <div className="editor-footer">
-        <div className="theme-info">
-          <label>Name:</label>
-          <input
-            type="text"
-            value={theme.name}
-            onChange={(e) => setTheme(prev => ({ ...prev, name: e.target.value }))}
-          />
-          <label>Author:</label>
-          <input
-            type="text"
-            value={theme.author}
-            onChange={(e) => setTheme(prev => ({ ...prev, author: e.target.value }))}
-          />
-          <label>Version:</label>
-          <input
-            type="text"
-            value={theme.version}
-            onChange={(e) => setTheme(prev => ({ ...prev, version: e.target.value }))}
-            style={{ width: '80px' }}
-          />
-        </div>
-        {themes.length > 0 && (
-          <div className="apply-theme">
-            <label>Apply theme:</label>
-            <select onChange={(e) => e.target.value && applyTheme(e.target.value)} defaultValue="">
-              <option value="" disabled>Select...</option>
-              {themes.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
+        {/* Left: tabs + content */}
+        <div style={{ flex: '1 1 0', minWidth: 0 }}>
+          <div className="editor-tabs">
+            {tabs.filter(tab => tab.key !== 'preview').map(tab => (
+              <button
+                key={tab.key}
+                className={`tab-button ${activeTab === tab.key ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
-        )}
+          <div className="editor-content">
+            {activeTab !== 'preview' && renderTabContent()}
+          </div>
+        </div>
+
+        {/* Right: always-on live preview */}
+        <div style={{ flex: '0 0 300px', position: 'sticky', top: 0 }}>
+          <p style={{ fontSize: 11, opacity: 0.5, marginBottom: 6, textAlign: 'center' }}>Vista previa en tiempo real</p>
+          <div
+            style={{
+              backgroundColor: theme.colors.background,
+              backgroundImage: theme.media.background_image ? `url(${theme.media.background_image})` : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              color: theme.colors.text,
+              fontFamily: theme.fonts.ui,
+              borderRadius: 8,
+              overflow: 'hidden',
+              border: `2px solid ${theme.colors.border}`,
+              fontSize: 11,
+            }}
+          >
+            {/* Preview header */}
+            <div style={{ padding: '8px 12px', borderBottom: `2px solid ${theme.colors.border}`, display: 'flex', justifyContent: 'space-between', background: `${theme.colors.surface}cc` }}>
+              <span style={{ color: theme.colors.primary, fontFamily: theme.fonts.title, fontWeight: 700, fontSize: 14, textShadow: theme.effects.glow_intensity > 0 ? `0 0 8px ${theme.colors.primary}` : 'none' }}>
+                NeoCab
+              </span>
+              <span style={{ color: theme.colors.accent }}>Modo Preview</span>
+            </div>
+
+            {/* Preview body */}
+            <div style={{ display: 'flex', height: 180 }}>
+              {/* Sidebar */}
+              <div style={{ width: 90, background: `${theme.colors.surface}dd`, borderRight: `1px solid ${theme.colors.border}`, padding: 6 }}>
+                {['MAME', 'SNES', 'NES', 'PS1'].map((sys, i) => (
+                  <div key={sys} style={{
+                    padding: '4px 6px', marginBottom: 2, borderRadius: 3, fontSize: 10,
+                    background: i === 0 ? theme.colors.primary : 'transparent',
+                    color: i === 0 ? theme.colors.background : theme.colors.text,
+                    borderLeft: i !== 0 ? `2px solid ${theme.colors.border}` : 'none',
+                  }}>
+                    {sys}
+                  </div>
+                ))}
+              </div>
+
+              {/* Main area */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, background: `${theme.colors.secondary}aa`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ opacity: 0.4 }}>Preview</span>
+                </div>
+                <div style={{ background: `${theme.colors.surface}cc` }}>
+                  {['Street Fighter II', 'Pac-Man', 'Donkey Kong'].map((game, i) => (
+                    <div key={game} style={{
+                      padding: '3px 8px', fontSize: 10,
+                      background: i === 0 ? `${theme.colors.accent}33` : 'transparent',
+                      color: i === 0 ? theme.colors.accent : theme.colors.text,
+                      borderLeft: i === 0 ? `2px solid ${theme.colors.accent}` : 'none',
+                    }}>
+                      {game}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Preview footer */}
+            <div style={{ padding: '4px 12px', borderTop: `1px solid ${theme.colors.border}`, display: 'flex', justifyContent: 'space-between', background: `${theme.colors.surface}cc`, opacity: 0.8 }}>
+              <span>Créditos: 5</span>
+              <span>3:00</span>
+              <span style={{ color: theme.colors.success }}>OK</span>
+            </div>
+          </div>
+
+          {/* Quick color swatches */}
+          <div style={{ display: 'flex', gap: 4, marginTop: 8, flexWrap: 'wrap' }}>
+            {Object.entries(theme.colors).slice(0, 6).map(([key, val]) => (
+              <div key={key} title={key} style={{ width: 20, height: 20, borderRadius: 4, background: val, border: '1px solid #333', cursor: 'pointer' }} />
+            ))}
+          </div>
+
+          {/* Footer actions here too */}
+          <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <input
+                type="text"
+                value={theme.name}
+                onChange={(e) => setTheme(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Nombre del tema"
+                style={{ flex: 1, padding: '4px 6px', background: '#1a1a2e', border: '1px solid #444', borderRadius: 4, color: '#eee', fontSize: 11 }}
+              />
+            </div>
+            {themes.length > 0 && (
+              <select onChange={(e) => e.target.value && applyTheme(e.target.value)} defaultValue=""
+                style={{ width: '100%', padding: '4px 6px', background: '#1a1a2e', border: '1px solid #4af', borderRadius: 4, color: '#eee', fontSize: 11 }}>
+                <option value="" disabled>Aplicar tema guardado...</option>
+                {themes.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

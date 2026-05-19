@@ -37,6 +37,7 @@ interface System {
 
 type SortField = "title" | "year" | "genre" | "play_count" | "rating";
 type SortOrder = "asc" | "desc";
+type ViewMode = "list" | "grid" | "compact";
 
 interface GameListProps {
   system: System;
@@ -63,6 +64,8 @@ export default function GameList({
   const [filterYear, setFilterYear] = useState<string>("");
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const listRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -73,6 +76,16 @@ export default function GameList({
   // Apply filters and sorting
   const processedGames = useCallback(() => {
     let result = [...games];
+
+    // Text search
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(g =>
+        g.title.toLowerCase().includes(q) ||
+        g.genre?.toLowerCase().includes(q) ||
+        g.developer?.toLowerCase().includes(q)
+      );
+    }
 
     // Filters
     if (filterFavorites) {
@@ -109,7 +122,7 @@ export default function GameList({
     });
 
     return result;
-  }, [games, filterFavorites, filterGenre, filterYear, sortField, sortOrder]);
+  }, [games, filterFavorites, filterGenre, filterYear, sortField, sortOrder, searchQuery]);
 
   const displayGames = processedGames();
 
@@ -153,18 +166,42 @@ export default function GameList({
 
   return (
     <div className="game-list-container">
-      {/* Header with filters */}
-      <div className="header">
+      {/* Header */}
+      <div className="header" style={{ flexWrap: 'wrap', gap: 8 }}>
         <button className="back-button" onClick={onBack}>← {t('BACK')}</button>
-        <h2>{system.display_name}</h2>
-        <div className="header-actions">
-          <button 
+        <h2 style={{ margin: 0 }}>{system.display_name}</h2>
+
+        {/* Search — grows to fill available space */}
+        <input
+          type="search"
+          className="game-search-input"
+          placeholder={`Buscar en ${system.display_name}…`}
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+        />
+
+        <div className="header-actions" style={{ gap: 6 }}>
+          {/* View mode buttons */}
+          <div className="view-mode-toggle" title="Modo de vista">
+            {(['list', 'grid', 'compact'] as ViewMode[]).map(mode => (
+              <button
+                key={mode}
+                className={`view-mode-btn ${viewMode === mode ? 'active' : ''}`}
+                onClick={() => setViewMode(mode)}
+                title={{ list: 'Lista', grid: 'Cuadrícula', compact: 'Compacto' }[mode]}
+              >
+                {{ list: '≡', grid: '⊞', compact: '▤' }[mode]}
+              </button>
+            ))}
+          </div>
+
+          <button
             className={`filter-toggle ${showFilters ? 'active' : ''}`}
             onClick={() => setShowFilters(!showFilters)}
           >
-            🔽 {t('FILTERS')}
+            {t('FILTERS')}
           </button>
-          <span className="game-count">{displayGames.length} / {games.length} {t('GAMES')}</span>
+          <span className="game-count">{displayGames.length}/{games.length}</span>
         </div>
       </div>
 
@@ -237,32 +274,53 @@ export default function GameList({
       )}
 
       <div className="game-layout">
-        {/* Game List (left side) */}
-        <div className="games-list" ref={listRef}>
+        {/* Game List */}
+        <div className={`games-list games-list--${viewMode}`} ref={listRef}>
           {displayGames.length === 0 ? (
             <div className="empty-state">
               <p>{t('NO_GAMES_FOUND')}</p>
               <p className="hint">
-                {games.length > 0 ? "Try adjusting your filters" : t('SCAN_HINT')}
+                {searchQuery ? `Sin resultados para "${searchQuery}"` : games.length > 0 ? "Ajusta los filtros" : t('SCAN_HINT')}
               </p>
+            </div>
+          ) : viewMode === 'grid' ? (
+            <div className="games-grid">
+              {displayGames.map((game, i) => (
+                <button
+                  key={game.id}
+                  className={`game-card ${i === focusedIndex ? 'focused' : ''}`}
+                  onClick={() => onPlayGame(game)}
+                  disabled={loading}
+                >
+                  {game.image_path ? (
+                    <img src={resolveAssetPath(game.image_path)} alt={game.title} className="game-card-img" />
+                  ) : (
+                    <div className="game-card-placeholder">
+                      {game.is_favorite === 1 && <span className="fav-star">★</span>}
+                    </div>
+                  )}
+                  <div className="game-card-title">{game.title}</div>
+                  {game.year && <div className="game-card-year">{game.year}</div>}
+                </button>
+              ))}
             </div>
           ) : (
             <>
               {/* Virtual scroll spacer top */}
-              {startIndex > 0 && <div style={{ height: startIndex * 55 }} />}
-              
+              {startIndex > 0 && <div style={{ height: startIndex * (viewMode === 'compact' ? 36 : 55) }} />}
+
               {visibleGames.map((game, i) => {
                 const realIndex = startIndex + i;
                 return (
                   <button
                     key={game.id}
-                    className={`game-item ${realIndex === focusedIndex ? 'focused' : ''}`}
+                    className={`game-item game-item--${viewMode} ${realIndex === focusedIndex ? 'focused' : ''}`}
                     onClick={() => onPlayGame(game)}
                     disabled={loading}
                   >
                     <div className="game-info">
                       <div className="game-title">
-                        {game.wheel_path ? (
+                        {game.wheel_path && viewMode !== 'compact' ? (
                           <img src={resolveAssetPath(game.wheel_path)} alt={game.title} className="game-wheel-icon" />
                         ) : (
                           <>
@@ -271,12 +329,14 @@ export default function GameList({
                           </>
                         )}
                       </div>
-                      <div className="game-meta-row">
-                        {game.year && <span className="meta-tag">{game.year}</span>}
-                        {game.genre && <span className="meta-tag">{game.genre}</span>}
-                        {game.players && <span className="meta-tag">{game.players}P</span>}
-                        {(game.play_count ?? 0) > 0 && <span className="meta-tag played">▶ {game.play_count}</span>}
-                      </div>
+                      {viewMode !== 'compact' && (
+                        <div className="game-meta-row">
+                          {game.year && <span className="meta-tag">{game.year}</span>}
+                          {game.genre && <span className="meta-tag">{game.genre}</span>}
+                          {game.players && <span className="meta-tag">{game.players}P</span>}
+                          {(game.play_count ?? 0) > 0 && <span className="meta-tag played">▶ {game.play_count}</span>}
+                        </div>
+                      )}
                     </div>
                     <div className="game-action">▶</div>
                   </button>
@@ -284,7 +344,7 @@ export default function GameList({
               })}
 
               {/* Virtual scroll spacer bottom */}
-              {endIndex < displayGames.length && <div style={{ height: (displayGames.length - endIndex) * 55 }} />}
+              {endIndex < displayGames.length && <div style={{ height: (displayGames.length - endIndex) * (viewMode === 'compact' ? 36 : 55) }} />}
             </>
           )}
         </div>

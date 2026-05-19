@@ -9,7 +9,7 @@ import { PluginsPanel } from './PluginsPanel';
 import { KioskSettingsPanel } from './KioskSettingsPanel';
 import './OperatorPanel.css';
 
-type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'sessions' | 'safequit' | 'plugins' | 'kiosk';
+type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'sessions' | 'safequit' | 'plugins' | 'kiosk' | 'help';
 
 interface OperatorPanelProps {
     onBack: () => void;
@@ -70,10 +70,10 @@ export const OperatorPanel: React.FC<OperatorPanelProps> = ({ onBack }) => {
                     📺 Kiosk
                 </button>
                 <button
-                    className="tab-button manual-button"
-                    onClick={() => window.open('https://github.com/PakoCaballero/NeoCab/wiki', '_blank')}
+                    className={`tab-button manual-button ${activeTab === 'help' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('help')}
                 >
-                    Manual
+                    ? Ayuda
                 </button>
                 <button className="tab-button manual-button" onClick={onBack}>
                     Volver
@@ -89,6 +89,7 @@ export const OperatorPanel: React.FC<OperatorPanelProps> = ({ onBack }) => {
                 {activeTab === 'safequit' && <SafeQuitRulesPanel />}
                 {activeTab === 'plugins' && <PluginsPanel />}
                 {activeTab === 'kiosk' && <KioskSettingsPanel />}
+                {activeTab === 'help' && <HelpPanel />}
             </div>
         </div>
     );
@@ -190,9 +191,69 @@ const StatisticsTab: React.FC = () => {
             </div>
 
             <button onClick={loadStats} className="refresh-button">
-                🔄 Actualizar
+                Actualizar
             </button>
         </div>
     );
 };
+
+const HelpPanel: React.FC = () => (
+    <div className="tab-pane" style={{ maxWidth: 700, lineHeight: 1.7 }}>
+        <h3>Ayuda del Panel de Operador</h3>
+
+        <section style={{ marginBottom: 24 }}>
+            <h4>Secciones de este panel</h4>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                <tbody>
+                    {[
+                        ['Estadísticas', 'Recaudación, monedas insertadas, tiempo de juego y salud del sistema.'],
+                        ['Sesiones', 'Configura el modo de juego (monedas/tiempo) por sistema.'],
+                        ['Red', 'Estado de la red y opciones de conectividad.'],
+                        ['Registros', 'Logs de eventos del sistema para depuración.'],
+                        ['Auditoría', 'Historial de operaciones y cambios de configuración.'],
+                        ['Safe Quit', 'Reglas de cierre seguro de emuladores (tiempo máximo, alertas).'],
+                        ['Plugins', 'Extensiones activas en el sistema.'],
+                        ['Kiosk', 'Modo kiosco: pantalla completa, PIN, restricciones de acceso.'],
+                    ].map(([tab, desc]) => (
+                        <tr key={tab} style={{ borderBottom: '1px solid #333' }}>
+                            <td style={{ padding: '6px 12px 6px 0', fontWeight: 600, whiteSpace: 'nowrap', color: '#4af' }}>{tab}</td>
+                            <td style={{ padding: '6px 0', opacity: 0.8 }}>{desc}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </section>
+
+        <section style={{ marginBottom: 24 }}>
+            <h4>Cómo configurar el scraper</h4>
+            <ol style={{ paddingLeft: 20, fontSize: 13, opacity: 0.85 }}>
+                <li>Ve a <strong>Configuración → Scraper</strong> desde el menú principal.</li>
+                <li>Activa los proveedores que quieras usar (ScreenScraper, ArcadeDB, TheGamesDB).</li>
+                <li>Introduce las credenciales correspondientes (ver registros gratuitos en cada sitio).</li>
+                <li>Guarda la configuración y luego selecciona el sistema a scrapear.</li>
+                <li>Pulsa <strong>Iniciar scraping</strong> — el progreso se mostrará en tiempo real.</li>
+            </ol>
+        </section>
+
+        <section style={{ marginBottom: 24 }}>
+            <h4>Cómo importar ROMs</h4>
+            <ol style={{ paddingLeft: 20, fontSize: 13, opacity: 0.85 }}>
+                <li>Coloca tus ROMs en subcarpetas por sistema dentro del directorio de ROMs configurado.</li>
+                <li>Desde el menú principal usa <strong>Escanear ROMs</strong>.</li>
+                <li>NeoCab detectará automáticamente el sistema por extensión de archivo.</li>
+                <li>También puedes importar desde EmulationStation, HyperSpin o LaunchBox via <em>Importar biblioteca</em>.</li>
+            </ol>
+        </section>
+
+        <section>
+            <h4>Problemas frecuentes</h4>
+            <ul style={{ paddingLeft: 20, fontSize: 13, opacity: 0.85 }}>
+                <li><strong>El scraper no encuentra juegos</strong> — Verifica que las credenciales de ScreenScraper sean correctas. ArcadeDB solo cubre juegos MAME.</li>
+                <li><strong>Los juegos no aparecen</strong> — Revisa que la carpeta de ROMs esté bien configurada y ejecuta Escanear ROMs.</li>
+                <li><strong>El emulador no arranca</strong> — Comprueba que el ejecutable del emulador esté configurado en Ajustes → Sistemas.</li>
+                <li><strong>Sin imagen/video</strong> — Ejecuta el scraper para descargar artwork. Las imágenes se guardan en <code>./media/</code>.</li>
+            </ul>
+        </section>
+    </div>
+);
 
