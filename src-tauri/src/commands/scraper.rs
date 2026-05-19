@@ -38,6 +38,50 @@ async fn build_scraper(config_manager: &ConfigManager) -> GameScraper {
     GameScraper::with_config(media_dir(), &cfg.scraper)
 }
 
+/// Devuelve la configuración actual de credenciales del scraper.
+/// Las contraseñas se enmascaran — no se envían al frontend.
+#[tauri::command]
+pub async fn get_scraper_config(
+    config_manager: State<'_, Arc<ConfigManager>>,
+) -> Result<serde_json::Value, String> {
+    let cfg = config_manager.get_config().await;
+    Ok(json!({
+        "ss_dev_id":       cfg.scraper.ss_dev_id,
+        "ss_dev_password": if cfg.scraper.ss_dev_password.is_empty() { "" } else { "••••••••" },
+        "ss_user":         cfg.scraper.ss_user,
+        "ss_password":     if cfg.scraper.ss_password.is_empty() { "" } else { "••••••••" },
+        "tgdb_api_key":    cfg.scraper.tgdb_api_key,
+        "ss_configured":   !cfg.scraper.ss_dev_id.is_empty(),
+        "tgdb_configured": !cfg.scraper.tgdb_api_key.is_empty(),
+    }))
+}
+
+/// Guarda las credenciales del scraper en config.yml.
+/// Los campos vacíos desactivan ese scraper. Los campos con "••••••••"
+/// (placeholder del frontend) no sobreescriben el valor actual.
+#[tauri::command]
+pub async fn save_scraper_config(
+    ss_dev_id: String,
+    ss_dev_password: String,
+    ss_user: String,
+    ss_password: String,
+    tgdb_api_key: String,
+    config_manager: State<'_, Arc<ConfigManager>>,
+) -> Result<(), String> {
+    let placeholder = "••••••••";
+    let mut cfg = config_manager.get_config().await;
+    cfg.scraper.ss_dev_id    = ss_dev_id;
+    cfg.scraper.ss_user      = ss_user;
+    cfg.scraper.tgdb_api_key = tgdb_api_key;
+    if ss_dev_password != placeholder { cfg.scraper.ss_dev_password = ss_dev_password; }
+    if ss_password     != placeholder { cfg.scraper.ss_password     = ss_password; }
+
+    config_manager
+        .set_scraper_config(cfg.scraper)
+        .await
+        .map_err(|e| e.to_string())
+}
+
 /// Busca metadatos por nombre de ROM. Devuelve el mejor resultado disponible.
 /// El frontend recibe { results: ScraperSearchResult[] }.
 /// gameId en el resultado es el nombre del ROM — úsalo para llamar scraper_get_metadata.

@@ -310,6 +310,14 @@ impl ConfigManager {
         Ok(())
     }
 
+    pub async fn set_scraper_config(&self, settings: ScraperSettings) -> Result<()> {
+        {
+            let mut config = self.config.write().await;
+            config.scraper = settings;
+        }
+        self.save_to_file().await
+    }
+
     pub async fn save_to_file(&self) -> Result<()> {
         let config = self.config.read().await;
         let yaml = serde_yaml::to_string(&*config).map_err(|e| {

@@ -3,9 +3,10 @@ import { SystemManager } from './SystemManager';
 import { ThemeEditor } from '../studio/ThemeEditor';
 import { InputWizard } from '../operator/InputWizard';
 import KeymapConfigPanel from '../operator/KeymapConfig';
+import { ScraperCredentialsPanel } from './ScraperCredentialsPanel';
 import '../operator/OperatorPanel.css';
 
-type SettingsTab = 'systems' | 'theme' | 'controls' | 'keymap';
+type SettingsTab = 'systems' | 'theme' | 'controls' | 'keymap' | 'scraper';
 
 interface SettingsPanelProps {
     onBack: () => void;
@@ -41,6 +42,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                 >
                     Teclado
                 </button>
+                <button
+                    className={`tab-button ${activeTab === 'scraper' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('scraper')}
+                >
+                    Scraper
+                </button>
                 <button className="tab-button manual-button" onClick={onBack}>
                     Volver
                 </button>
@@ -56,6 +63,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                 {activeTab === 'theme' && <ThemeEditor />}
                 {activeTab === 'controls' && <InputWizard />}
                 {activeTab === 'keymap' && <KeymapConfigPanel />}
+                {activeTab === 'scraper' && (
+                    <div className="tab-pane">
+                        <h3>Credenciales del Scraper</h3>
+                        <ScraperCredentialsPanel />
+                    </div>
+                )}
             </div>
         </div>
     );

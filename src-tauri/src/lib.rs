@@ -254,6 +254,8 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
             commands::scraper::scraper_search,
             commands::scraper::scraper_get_metadata,
             commands::scraper::scraper_batch_scrape,
+            commands::scraper::get_scraper_config,
+            commands::scraper::save_scraper_config,
             commands::cancel_scraping,
             commands::update_play_stats,
             // Emulator
