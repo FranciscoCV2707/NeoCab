@@ -42,7 +42,7 @@ describe("useScraperStore", () => {
   });
 
   it("clears search results", () => {
-    useScraperStore.setState({ searchResults: [{ gameId: "1", title: "Test" }] });
+    useScraperStore.setState({ searchResults: [{ gameId: "1", title: "Test", provider: "screenscraper", score: 0 }] });
     useScraperStore.getState().clearSearch();
     expect(useScraperStore.getState().searchResults).toEqual([]);
   });

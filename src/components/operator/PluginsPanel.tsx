@@ -13,7 +13,7 @@ interface Plugin {
 }
 
 export const PluginsPanel: React.FC = () => {
-    const { t } = useTranslation();
+    useTranslation();
     const [plugins, setPlugins] = useState<Plugin[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedPlugin, setSelectedPlugin] = useState<Plugin | null>(null);

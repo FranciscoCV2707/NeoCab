@@ -25,7 +25,7 @@ const EMULATORS = ['mame', 'retroarch', 'pcsx2', 'dolphin', 'duckstation', 'xeni
 const ACTIONS = ['ShowAttract', 'ReturnToMenu', 'Shutdown', 'RestartGame'];
 
 export const SafeQuitRulesPanel: React.FC = () => {
-    const { t } = useTranslation();
+    useTranslation();
     const [rules, setRules] = useState<SafeQuitRule[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);

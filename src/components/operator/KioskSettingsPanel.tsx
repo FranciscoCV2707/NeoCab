@@ -17,7 +17,7 @@ interface KioskInfo {
 const SYSTEMS = ['mame', 'nes', 'snes', 'genesis', 'psx', 'n64', 'gba', 'gb', 'saturn', 'dreamcast'];
 
 export const KioskSettingsPanel: React.FC = () => {
-    const { t } = useTranslation();
+    useTranslation();
     const [config, setConfig] = useState<KioskInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);

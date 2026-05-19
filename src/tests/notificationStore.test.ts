@@ -15,6 +15,7 @@ describe("useNotificationStore", () => {
       type: "success",
       title: "Test",
       message: "Test message",
+      duration: 3000,
     });
 
     const toast = useNotificationStore.getState().toasts[0];
@@ -29,6 +30,7 @@ describe("useNotificationStore", () => {
       type: "info",
       title: "To remove",
       message: "Will be removed",
+      duration: 3000,
     });
 
     expect(useNotificationStore.getState().toasts.length).toBe(1);
@@ -37,8 +39,8 @@ describe("useNotificationStore", () => {
   });
 
   it("clears all toasts", () => {
-    useNotificationStore.getState().addToast({ type: "success", title: "A", message: "a" });
-    useNotificationStore.getState().addToast({ type: "error", title: "B", message: "b" });
+    useNotificationStore.getState().addToast({ type: "success", title: "A", message: "a", duration: 3000 });
+    useNotificationStore.getState().addToast({ type: "error", title: "B", message: "b", duration: 3000 });
 
     expect(useNotificationStore.getState().toasts.length).toBe(2);
     useNotificationStore.getState().clearAll();

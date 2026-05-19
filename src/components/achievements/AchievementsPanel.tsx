@@ -4,17 +4,6 @@ import { useTranslation } from '../../i18n';
 import { toast } from '../../stores/useNotificationStore';
 import './AchievementsPanel.css';
 
-interface _Achievement {
-  id: number;
-  title: string;
-  description: string;
-  badge_name: string;
-  points: number;
-  unlocked: boolean;
-  unlocked_at: string | null;
-  category: string;
-}
-
 interface UserSummary {
   username: string;
   points: number;
