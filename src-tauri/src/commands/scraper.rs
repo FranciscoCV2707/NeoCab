@@ -1,22 +1,31 @@
-use crate::core::scraper::GameScraper;
+use crate::core::{config_manager::ConfigManager, scraper::GameScraper};
 use crate::db::Database;
 use serde_json::json;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::State;
 
-/// Search for game metadata by name. Returns up to 1 result per available scraper source.
+fn media_dir() -> PathBuf {
+    PathBuf::from("./media")
+}
+
+async fn build_scraper(config_manager: &ConfigManager) -> GameScraper {
+    let cfg = config_manager.get_config().await;
+    GameScraper::with_config(media_dir(), &cfg.scraper)
+}
+
+/// Search for game metadata by ROM name. Returns the best match found across all configured scrapers.
 #[tauri::command]
 pub async fn scraper_search(
     query: String,
     system: Option<String>,
+    config_manager: State<'_, Arc<ConfigManager>>,
 ) -> Result<String, String> {
-    let system_name = system.as_deref().unwrap_or("arcade");
-    let media_dir = PathBuf::from("./media");
-    let scraper = GameScraper::new(media_dir);
+    let system_name = system.as_deref().unwrap_or("arcade").to_string();
+    let scraper = build_scraper(&config_manager).await;
 
     let info = scraper
-        .scrape(&query, system_name, None)
+        .scrape(&query, &system_name, None)
         .await
         .unwrap_or_else(|_| crate::core::scraper::ScrapedGameInfo {
             title: query.clone(),
@@ -41,11 +50,10 @@ pub async fn scraper_search(
             source: Some("Fallback".to_string()),
         });
 
-    let provider = info.source.as_deref().unwrap_or("local").to_lowercase();
-    let provider = match provider.as_str() {
+    let provider = match info.source.as_deref().unwrap_or("").to_lowercase().as_str() {
         s if s.contains("screenscraper") => "screenscraper",
-        s if s.contains("arcadedb") || s.contains("arcade") => "local",
-        s if s.contains("thegamesdb") || s.contains("tgdb") => "thegamesdb",
+        s if s.contains("arcadedb") => "local",
+        s if s.contains("thegamesdb") => "thegamesdb",
         _ => "local",
     };
 
@@ -65,17 +73,17 @@ pub async fn scraper_search(
     Ok(result.to_string())
 }
 
-/// Get full metadata for a game by ROM name (gameId from search result).
+/// Get full metadata for a game by ROM name (gameId from search result), without downloading media.
 #[tauri::command]
 pub async fn scraper_get_metadata(
     game_id: String,
     provider: Option<String>,
     system: Option<String>,
+    config_manager: State<'_, Arc<ConfigManager>>,
 ) -> Result<String, String> {
     let _ = provider;
     let system_name = system.as_deref().unwrap_or("arcade");
-    let media_dir = PathBuf::from("./media");
-    let scraper = GameScraper::new(media_dir);
+    let scraper = build_scraper(&config_manager).await;
 
     let info = scraper
         .scrape(&game_id, system_name, None)
@@ -111,11 +119,10 @@ pub async fn scraper_get_metadata(
 pub async fn scraper_batch_scrape(
     game_ids: Vec<i64>,
     db: State<'_, Arc<Database>>,
+    config_manager: State<'_, Arc<ConfigManager>>,
 ) -> Result<String, String> {
-    let media_dir = PathBuf::from("./media");
-    let scraper = GameScraper::new(media_dir);
+    let scraper = build_scraper(&config_manager).await;
 
-    // Build system id → name map once
     let systems = db.get_systems().await.map_err(|e| e.to_string())?;
     let system_map: std::collections::HashMap<i64, String> = systems
         .into_iter()

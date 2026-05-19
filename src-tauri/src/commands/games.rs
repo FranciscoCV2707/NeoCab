@@ -256,6 +256,7 @@ pub async fn scrape_game(
     game_id: i64,
     system_name: String,
     db: State<'_, Arc<Database>>,
+    config_manager: State<'_, Arc<crate::core::ConfigManager>>,
 ) -> Result<String, String> {
     use crate::core::scraper::GameScraper;
 
@@ -269,8 +270,9 @@ pub async fn scrape_game(
         None => return Err("Game not found".to_string()),
     };
 
+    let cfg = config_manager.get_config().await;
     let media_dir = PathBuf::from("./media");
-    let scraper = GameScraper::new(media_dir);
+    let scraper = GameScraper::with_config(media_dir, &cfg.scraper);
 
     let rom_name = game.filename.as_deref().unwrap_or(&game.title);
 
@@ -331,6 +333,7 @@ static SCRAPE_CANCEL: AtomicBool = AtomicBool::new(false);
 pub async fn scrape_all(
     system_name: String,
     db: State<'_, Arc<Database>>,
+    config_manager: State<'_, Arc<crate::core::ConfigManager>>,
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
     use crate::core::scraper::GameScraper;
@@ -343,13 +346,11 @@ pub async fn scrape_all(
         .map_err(|e| e.to_string())?
         .ok_or_else(|| format!("System '{}' not found", system_name))?;
 
-    // Get all games for this system
     let games = db
         .get_games_by_system(system.id, None, None, false)
         .await
         .map_err(|e| e.to_string())?;
 
-    // Filter to only unscraped games
     let to_scrape: Vec<_> = games
         .into_iter()
         .filter(|g| g.description.is_none() || g.description.as_deref() == Some(""))
@@ -359,8 +360,9 @@ pub async fn scrape_all(
         return Ok(serde_json::json!({"scraped": 0, "total": 0, "skipped": true}).to_string());
     }
 
+    let cfg = config_manager.get_config().await;
     let media_dir = PathBuf::from("./media");
-    let scraper = GameScraper::new(media_dir);
+    let scraper = GameScraper::with_config(media_dir, &cfg.scraper);
     let cancel = Arc::new(AtomicBool::new(false));
 
     // Pass cancel to scraper but also allow global cancel

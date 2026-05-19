@@ -286,6 +286,22 @@ impl GameScraper {
         }
     }
 
+    /// Build a GameScraper pre-loaded with credentials from AppConfig.
+    pub fn with_config(
+        media_dir: PathBuf,
+        cfg: &crate::core::config_manager::ScraperSettings,
+    ) -> Self {
+        let mut s = Self::new(media_dir);
+        s.set_credentials(
+            &cfg.ss_dev_id,
+            &cfg.ss_dev_password,
+            &cfg.ss_user,
+            &cfg.ss_password,
+            &cfg.tgdb_api_key,
+        );
+        s
+    }
+
     /// Configure API credentials
     pub fn set_credentials(
         &mut self,

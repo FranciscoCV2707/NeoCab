@@ -71,6 +71,8 @@ pub struct AppConfig {
     pub input: InputSettings,
     pub emulators: EmulatorsSettings,
     #[serde(default)]
+    pub scraper: ScraperSettings,
+    #[serde(default)]
     pub systems: HashMap<String, SystemGameConfig>,
 }
 
@@ -112,6 +114,20 @@ pub struct InputSettings {
 pub struct EmulatorsSettings {
     pub default: String,
     pub auto_select: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct ScraperSettings {
+    #[serde(default)]
+    pub ss_dev_id: String,
+    #[serde(default)]
+    pub ss_dev_password: String,
+    #[serde(default)]
+    pub ss_user: String,
+    #[serde(default)]
+    pub ss_password: String,
+    #[serde(default)]
+    pub tgdb_api_key: String,
 }
 
 impl Default for AppConfig {
@@ -177,6 +193,7 @@ impl Default for AppConfig {
                 default: "retroarch".to_string(),
                 auto_select: true,
             },
+            scraper: ScraperSettings::default(),
             systems,
         }
     }
