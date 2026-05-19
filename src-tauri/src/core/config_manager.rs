@@ -116,6 +116,19 @@ pub struct EmulatorsSettings {
     pub auto_select: bool,
 }
 
+// Credenciales para los scrapers externos. Se leen desde config.yml al iniciar.
+//
+// Ejemplo de config.yml:
+//
+//   scraper:
+//     ss_dev_id: "MiApp"                  # ID de desarrollador en screenscraper.fr
+//     ss_dev_password: "dev_pass_aqui"    # Contraseña de desarrollador
+//     ss_user: "mi_usuario"               # Tu cuenta personal screenscraper.fr
+//     ss_password: "mi_pass"              # Tu contraseña personal
+//     tgdb_api_key: "abc123..."           # API key de thegamesdb.net (gratuita)
+//
+// Si algún campo está vacío, ese scraper se omite y se pasa al siguiente.
+// ArcadeDB siempre funciona sin credenciales (solo juegos MAME/arcade).
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ScraperSettings {
     #[serde(default)]

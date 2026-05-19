@@ -253,18 +253,38 @@ fn is_arcade_system(system_name: &str) -> bool {
 }
 
 // ─── Main Scraper ───
+//
+// Pipeline de scraping (orden de prioridad):
+//
+//   1. ScreenScraper  — mejor calidad, cubre todos los sistemas.
+//                       Requiere cuenta en screenscraper.fr + credenciales dev.
+//                       Se salta si ss_dev_id está vacío.
+//
+//   2. ArcadeDB       — gratuito, sin registro, solo juegos MAME/arcade.
+//                       API: https://www.arcadeitalia.net/api/game.php
+//                       Siempre disponible para sistemas arcade.
+//
+//   3. TheGamesDB     — buena cobertura de consolas retro.
+//                       Requiere API key gratuita en thegamesdb.net.
+//                       Se salta si tgdb_api_key está vacío.
+//
+//   4. Fallback       — limpia el nombre del archivo (sin datos reales).
+//                       Siempre disponible como último recurso.
+//
+// Para activar ScreenScraper y TheGamesDB, configura las credenciales
+// en config.yml bajo la sección [scraper]. Ver ScraperSettings.
 
 pub struct GameScraper {
     client: Client,
     media_dir: PathBuf,
-    // ScreenScraper credentials
+    // ScreenScraper — regístrate en screenscraper.fr, solicita dev access
     ss_dev_id: String,
     ss_dev_password: String,
-    ss_user: String,
-    ss_password: String,
-    // TheGamesDB
+    ss_user: String,      // tu usuario personal de screenscraper.fr
+    ss_password: String,  // tu contraseña personal
+    // TheGamesDB — API key gratuita en thegamesdb.net/forum/viewtopic.php?t=1966
     tgdb_api_key: String,
-    // Rate limiting
+    // Rate limiter interno — ScreenScraper limita a ~1 req/seg por cuenta gratuita
     last_request: std::sync::Mutex<std::time::Instant>,
 }
 

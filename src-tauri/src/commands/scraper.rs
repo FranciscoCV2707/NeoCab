@@ -1,3 +1,27 @@
+// Comandos Tauri para scraping de metadatos de juegos.
+//
+// Flujo típico desde el frontend:
+//
+//   1. scraper_search(query, system)
+//      → Busca por nombre de ROM. Devuelve ScraperSearchResult[].
+//        Usa el pipeline completo: SS → ArcadeDB → TGDB → Fallback.
+//
+//   2. scraper_get_metadata(game_id, provider, system)
+//      → Obtiene metadata completa para un resultado de búsqueda.
+//        game_id = nombre del ROM (viene del campo gameId en scraper_search).
+//        NO descarga archivos de media.
+//
+//   3. scraper_batch_scrape(game_ids, db, config_manager)
+//      → Scrape + descarga media para una lista de IDs de juegos en la BD.
+//        Actualiza title/description/year/players en la BD.
+//        Descarga imágenes a ./media/<sistema>/<tipo>/<nombre>.
+//
+// Para scraping rápido de un juego individual (desde el Operator Panel):
+//   → Usa scrape_game(game_id, system_name) en commands/games.rs
+//
+// Para scrape masivo de todo un sistema:
+//   → Usa scrape_all(system_name) en commands/games.rs
+
 use crate::core::{config_manager::ConfigManager, scraper::GameScraper};
 use crate::db::Database;
 use serde_json::json;
@@ -14,7 +38,9 @@ async fn build_scraper(config_manager: &ConfigManager) -> GameScraper {
     GameScraper::with_config(media_dir(), &cfg.scraper)
 }
 
-/// Search for game metadata by ROM name. Returns the best match found across all configured scrapers.
+/// Busca metadatos por nombre de ROM. Devuelve el mejor resultado disponible.
+/// El frontend recibe { results: ScraperSearchResult[] }.
+/// gameId en el resultado es el nombre del ROM — úsalo para llamar scraper_get_metadata.
 #[tauri::command]
 pub async fn scraper_search(
     query: String,
@@ -73,7 +99,10 @@ pub async fn scraper_search(
     Ok(result.to_string())
 }
 
-/// Get full metadata for a game by ROM name (gameId from search result), without downloading media.
+/// Obtiene metadata completa para un ROM sin descargar archivos.
+/// game_id = nombre del ROM (el gameId que devolvió scraper_search).
+/// provider se ignora por ahora — siempre usa el pipeline completo.
+/// system = nombre del sistema (ej: "mame", "snes") para mejorar la búsqueda.
 #[tauri::command]
 pub async fn scraper_get_metadata(
     game_id: String,
@@ -114,7 +143,10 @@ pub async fn scraper_get_metadata(
     Ok(result.to_string())
 }
 
-/// Batch scrape games by DB ID. Downloads media and updates the database.
+/// Scrape + descarga media para una lista de juegos por ID de la BD.
+/// El frontend llama esto con 1 ID a la vez desde useScraperStore.batchScrape().
+/// Actualiza title/description/year/players en la BD al terminar cada juego.
+/// Los archivos de imagen se guardan en ./media/<sistema>/<tipo>/<nombre>.
 #[tauri::command]
 pub async fn scraper_batch_scrape(
     game_ids: Vec<i64>,
