@@ -27,6 +27,7 @@ pub mod tags;
 pub mod theme;
 pub mod timer;
 pub mod types;
+pub mod scraper;
 pub mod updater;
 
 pub use types::*;
