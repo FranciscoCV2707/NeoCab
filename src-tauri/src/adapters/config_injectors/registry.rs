@@ -1,9 +1,14 @@
+use super::ares_injector::AresInjector;
+use super::cemu_injector::CemuInjector;
 use super::dolphin_injector::DolphinInjector;
 use super::duckstation_injector::DuckStationInjector;
+use super::flycast_injector::FlycastInjector;
 use super::injector_trait::EmulatorConfigInjector;
 use super::mame_injector::MameInjector;
 use super::pcsx2_injector::Pcsx2Injector;
+use super::redream_injector::RedreamInjector;
 use super::retroarch_injector::RetroArchInjector;
+use super::rpcs3_injector::Rpcs3Injector;
 use super::xenia_injector::XeniaInjector;
 
 /// Registry of all config injectors, ordered by priority
@@ -15,6 +20,11 @@ pub fn get_all_injectors() -> Vec<Box<dyn EmulatorConfigInjector>> {
         Box::new(Pcsx2Injector),
         Box::new(DuckStationInjector),
         Box::new(XeniaInjector),
+        Box::new(CemuInjector),
+        Box::new(FlycastInjector),
+        Box::new(Rpcs3Injector),
+        Box::new(AresInjector),
+        Box::new(RedreamInjector),
     ]
 }
 

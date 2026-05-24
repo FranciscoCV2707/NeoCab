@@ -1,17 +1,27 @@
+pub mod ares_injector;
+pub mod cemu_injector;
 pub mod dolphin_injector;
 pub mod duckstation_injector;
+pub mod flycast_injector;
 pub mod injector_trait;
 pub mod mame_injector;
 pub mod pcsx2_injector;
+pub mod redream_injector;
 pub mod registry;
 pub mod retroarch_injector;
+pub mod rpcs3_injector;
 pub mod xenia_injector;
 
+pub use ares_injector::AresInjector;
+pub use cemu_injector::CemuInjector;
 pub use dolphin_injector::DolphinInjector;
 pub use duckstation_injector::DuckStationInjector;
+pub use flycast_injector::FlycastInjector;
 pub use injector_trait::{EmulatorConfigInjector, EmulatorSettings};
 pub use mame_injector::MameInjector;
 pub use pcsx2_injector::Pcsx2Injector;
+pub use redream_injector::RedreamInjector;
 pub use registry::{find_injector, get_all_injectors, list_injectors};
 pub use retroarch_injector::RetroArchInjector;
+pub use rpcs3_injector::Rpcs3Injector;
 pub use xenia_injector::XeniaInjector;

@@ -1,6 +1,7 @@
 pub mod emulator_detector;
 pub mod fuzzy_match;
 pub mod init;
+pub mod mame_metadata_parser;
 pub mod platform;
 pub mod platform_detect;
 

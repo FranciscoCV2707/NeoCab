@@ -126,6 +126,92 @@ impl GameLibrary {
             .and_then(|n| n.to_str())
             .unwrap_or("unknown");
 
+        let is_zip = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .map(|e| e.to_lowercase() == "zip")
+            .unwrap_or(false);
+
+        if is_zip {
+            let path_buf = path.to_path_buf();
+            let zip_result = tokio::task::spawn_blocking(move || {
+                let file = std::fs::File::open(&path_buf)?;
+                let mut archive = zip::ZipArchive::new(file)?;
+                let mut zip_entries = Vec::new();
+                for i in 0..archive.len() {
+                    let file = archive.by_index(i)?;
+                    if file.is_file() {
+                        let name = file.name().to_string();
+                        let crc32 = format!("{:08x}", file.crc32());
+                        let size = file.size() as i64;
+                        zip_entries.push((name, crc32, size));
+                    }
+                }
+                Ok::<_, anyhow::Error>(zip_entries)
+            }).await.map_err(|e| crate::error::NeoCabError::Other(e.to_string()))?;
+
+            if let Ok(entries) = zip_result {
+                let mut indexed_any = false;
+                for (name, crc32, size) in entries {
+                    if self.db.get_game_by_crc32(&crc32).await?.is_none() {
+                        let system_id = self.detect_system(path).await?;
+                        let game = Game {
+                            id: 0,
+                            title: name.clone(),
+                            sort_title: Some(name.to_lowercase()),
+                            system_id,
+                            emulator_id: None,
+                            rom_path: path.to_string_lossy().to_string(),
+                            filename: Some(name.clone()),
+                            file_size: Some(size),
+                            crc32: Some(crc32),
+                            sha1: None,
+                            md5: None,
+                            description: None,
+                            year: None,
+                            developer: None,
+                            publisher: None,
+                            genre: None,
+                            players: None,
+                            rating: 0.0,
+                            rating_count: 0,
+                            play_count: 0,
+                            total_play_time: 0,
+                            last_played: None,
+                            is_favorite: 0,
+                            is_hidden: 0,
+                            has_save_state: 0,
+                            image_path: None,
+                            marquee_path: None,
+                            video_path: None,
+                            screenshot_path: None,
+                            wheel_path: None,
+                            bezel_path: None,
+                            fanart_path: None,
+                            box3d_path: None,
+                            cartridge_path: None,
+                            manual_path: None,
+                            media_source: None,
+                            scraped_at: None,
+                            external_id: None,
+                            region: Some("World".to_string()),
+                            language: Some("en".to_string()),
+                            created_at: None,
+                            updated_at: None,
+                            buttons: None,
+                            control_type: None,
+                            joystick_direction: None,
+                            category: None,
+                            orientation: None,
+                        };
+                        self.db.insert_game(&game).await?;
+                        indexed_any = true;
+                    }
+                }
+                return Ok(indexed_any);
+            }
+        }
+
         // Use streaming CRC32 to avoid OOM for large files
         use tokio::io::AsyncReadExt;
         let mut file = tokio::fs::File::open(path).await?;
@@ -192,6 +278,11 @@ impl GameLibrary {
             language: Some("en".to_string()),
             created_at: None,
             updated_at: None,
+            buttons: None,
+            control_type: None,
+            joystick_direction: None,
+            category: None,
+            orientation: None,
         };
 
         self.db.insert_game(&game).await?;

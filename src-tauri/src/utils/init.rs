@@ -176,10 +176,10 @@ pub fn run_startup_validations() {
         }
     }
 
-    // Check disk space (disabled on Windows due to winapi complexity)
-    #[cfg(not(windows))]
+    // Setup Linux device permissions for ARM/Console cabinets
+    #[cfg(target_os = "linux")]
     {
-        let _ = base; // suppress unused warning
+        let _ = setup_linux_permissions();
     }
 
     if is_portable_mode() {
@@ -187,6 +187,50 @@ pub fn run_startup_validations() {
     }
 
     tracing::info!("Startup validations complete");
+}
+
+#[cfg(target_os = "linux")]
+pub fn setup_linux_permissions() -> Result<()> {
+    let rules_content = r#"# NeoCab Hardware Rules
+# Allows access to serial and input devices without root
+
+# Serial / Arduino connections
+KERNEL=="ttyUSB[0-9]*", MODE="0666"
+KERNEL=="ttyACM[0-9]*", MODE="0666"
+
+# Arcade controllers and joysticks
+KERNEL=="js[0-9]*", MODE="0666"
+KERNEL=="event[0-9]*", MODE="0666"
+KERNEL=="uinput", MODE="0666"
+"#;
+
+    let base = base_dir();
+    let rules_path = base.join("data").join("99-neocab.rules");
+
+    // Write rules template
+    std::fs::write(&rules_path, rules_content)?;
+    tracing::info!("Created local udev rules template at: {}", rules_path.display());
+
+    let system_rules_path = std::path::Path::new("/etc/udev/rules.d/99-neocab.rules");
+    if !system_rules_path.exists() {
+        if let Err(_) = std::fs::write(system_rules_path, rules_content) {
+            tracing::warn!(
+                "PERMISSIONS WARNING: To use arcade joysticks and Arduino serial interfaces without root, please run:\n\
+                sudo cp {} /etc/udev/rules.d/ && sudo udevadm control --reload-rules && sudo udevadm trigger",
+                rules_path.display()
+            );
+        } else {
+            tracing::info!("Successfully installed system udev rules at /etc/udev/rules.d/99-neocab.rules");
+            let _ = std::process::Command::new("udevadm")
+                .args(["control", "--reload-rules"])
+                .status();
+            let _ = std::process::Command::new("udevadm")
+                .args(["trigger"])
+                .status();
+        }
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]

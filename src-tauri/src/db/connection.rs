@@ -17,19 +17,48 @@ impl Database {
             tokio::fs::create_dir_all(parent).await?;
         }
 
+        let mut journal_mode = sqlx::sqlite::SqliteJournalMode::Wal;
+        let mut synchronous = sqlx::sqlite::SqliteSynchronous::Normal;
+
+        // Platform-specific SQLite adjustments
+        #[cfg(all(target_os = "linux", any(target_arch = "arm", target_arch = "aarch64")))]
+        {
+            // ARM/SD Card optimized: minimize writes to extend SD card life
+            journal_mode = sqlx::sqlite::SqliteJournalMode::Memory;
+            synchronous = sqlx::sqlite::SqliteSynchronous::Off;
+        }
+
+        #[cfg(target_os = "windows")]
+        {
+            // Detect Windows XP to optimize slow HDD/FAT32 performance
+            if matches!(crate::utils::detect_mode(), crate::utils::RuntimeMode::Legacy) {
+                journal_mode = sqlx::sqlite::SqliteJournalMode::Truncate;
+                synchronous = sqlx::sqlite::SqliteSynchronous::Normal;
+            }
+        }
+
         let options = SqliteConnectOptions::from_str(db_path)?
             .create_if_missing(true)
-            .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal)
-            .synchronous(sqlx::sqlite::SqliteSynchronous::Normal)
+            .journal_mode(journal_mode)
+            .synchronous(synchronous)
             .foreign_keys(true);
 
         let pool = SqlitePool::connect_with(options).await?;
-
-        // Enable cache pragma
-        sqlx::query("PRAGMA cache_size = -8000")
-            .execute(&pool)
-            .await?;
-
+        // Setup SQLite performance tuning pragmas
+        if cfg!(target_os = "windows") && matches!(crate::utils::detect_mode(), crate::utils::RuntimeMode::Legacy) {
+            // Windows XP / Legacy optimizations:
+            // - cache_size = -4000: caps cache at 4MB to keep memory consumption extremely low (typical cabinet has 512MB RAM)
+            // - temp_store = MEMORY: stores temporary structures in RAM to prevent disk I/O bottlenecks on slow mechanical IDE drives
+            // - mmap_size = 0: disables memory mapping to avoid virtual memory address space fragmentation/exhaustion in 32-bit environments
+            // - page_size = 4096: aligns page reads with NTFS/FAT32 sector cluster boundaries
+            sqlx::query("PRAGMA cache_size = -4000").execute(&pool).await?;
+            sqlx::query("PRAGMA temp_store = MEMORY").execute(&pool).await?;
+            sqlx::query("PRAGMA mmap_size = 0").execute(&pool).await?;
+            sqlx::query("PRAGMA page_size = 4096").execute(&pool).await?;
+        } else {
+            // Default settings for modern configurations
+            sqlx::query("PRAGMA cache_size = -8000").execute(&pool).await?;
+        }
         // Run versioned migrations
         super::migrations::run_migrations(&pool).await?;
 
@@ -546,6 +575,11 @@ impl Database {
         genre: Option<&str>,
         only_favorites: bool,
     ) -> Result<Vec<crate::models::Game>> {
+        let max_buttons = self.get_config("curation_max_buttons").await.ok().flatten()
+            .and_then(|s| s.parse::<i64>().ok());
+        let joystick_type = self.get_config("curation_joystick_type").await.ok().flatten();
+        let orientation = self.get_config("curation_orientation").await.ok().flatten();
+
         let mut query = "SELECT * FROM games WHERE 1=1".to_string();
 
         if system_id > 0 {
@@ -560,6 +594,20 @@ impl Database {
         }
         if only_favorites {
             query.push_str(" AND is_favorite = 1");
+        }
+
+        if let Some(btns) = max_buttons {
+            query.push_str(&format!(" AND (buttons IS NULL OR buttons <= {})", btns));
+        }
+        if let Some(ref joy) = joystick_type {
+            if joy != "any" && !joy.is_empty() {
+                query.push_str(&format!(" AND (joystick_direction IS NULL OR joystick_direction = '{}')", joy));
+            }
+        }
+        if let Some(ref orient) = orientation {
+            if orient != "any" && !orient.is_empty() {
+                query.push_str(&format!(" AND (orientation IS NULL OR orientation = '{}')", orient));
+            }
         }
 
         query.push_str(" ORDER BY sort_title");
@@ -598,13 +646,63 @@ impl Database {
     }
 
     pub async fn get_save_states(&self, game_id: i64) -> Result<Vec<crate::models::SaveState>> {
-        let states = sqlx::query_as::<_, crate::models::SaveState>(
+        let rows = sqlx::query_as::<_, crate::models::SaveState>(
             "SELECT * FROM save_states WHERE game_id = ? ORDER BY slot ASC",
         )
         .bind(game_id)
         .fetch_all(&self.pool)
         .await?;
-        Ok(states)
+
+        Ok(rows)
+    }
+
+    pub async fn create_save_state(
+        &self,
+        game_id: i64,
+        slot: i64,
+        save_path: &str,
+        thumbnail: Option<&str>,
+        description: Option<&str>,
+    ) -> Result<()> {
+        let exists = sqlx::query_scalar::<_, i64>(
+            "SELECT COUNT(*) FROM save_states WHERE game_id = ? AND slot = ?",
+        )
+        .bind(game_id)
+        .bind(slot)
+        .fetch_one(&self.pool)
+        .await?;
+
+        if exists > 0 {
+            sqlx::query(
+                "UPDATE save_states SET save_path = ?, thumbnail = ?, description = ?, created_at = datetime('now') WHERE game_id = ? AND slot = ?",
+            )
+            .bind(save_path)
+            .bind(thumbnail)
+            .bind(description)
+            .bind(game_id)
+            .bind(slot)
+            .execute(&self.pool)
+            .await?;
+        } else {
+            sqlx::query(
+                "INSERT INTO save_states (game_id, slot, save_path, thumbnail, description) VALUES (?, ?, ?, ?, ?)",
+            )
+            .bind(game_id)
+            .bind(slot)
+            .bind(save_path)
+            .bind(thumbnail)
+            .bind(description)
+            .execute(&self.pool)
+            .await?;
+        }
+
+        // Update games table flag has_save_state
+        sqlx::query("UPDATE games SET has_save_state = 1 WHERE id = ?")
+            .bind(game_id)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(())
     }
 
     pub async fn get_high_scores(&self, game_id: i64) -> Result<Vec<serde_json::Value>> {
@@ -633,8 +731,9 @@ impl Database {
         let result = sqlx::query(
             "INSERT INTO games (title, sort_title, system_id, emulator_id, rom_path,
              filename, file_size, crc32, sha1, md5, description, year, developer,
-             publisher, genre, region, language)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+             publisher, genre, region, language, buttons, control_type, joystick_direction,
+             category, orientation)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         )
         .bind(&game.title)
         .bind(&game.sort_title)
@@ -653,6 +752,11 @@ impl Database {
         .bind(&game.genre)
         .bind(&game.region)
         .bind(&game.language)
+        .bind(game.buttons)
+        .bind(&game.control_type)
+        .bind(&game.joystick_direction)
+        .bind(&game.category)
+        .bind(&game.orientation)
         .execute(&self.pool)
         .await?;
 
@@ -694,6 +798,37 @@ impl Database {
         .bind(year)
         .bind(players)
         .bind(rating)
+        .bind(game_id)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn update_game_curation(
+        &self,
+        game_id: i64,
+        buttons: Option<i64>,
+        control_type: Option<&str>,
+        joystick_direction: Option<&str>,
+        category: Option<&str>,
+        orientation: Option<&str>,
+    ) -> Result<()> {
+        sqlx::query(
+            "UPDATE games SET 
+                buttons = ?, 
+                control_type = ?, 
+                joystick_direction = ?, 
+                category = ?, 
+                orientation = ?, 
+                updated_at = datetime('now') 
+             WHERE id = ?"
+        )
+        .bind(buttons)
+        .bind(control_type)
+        .bind(joystick_direction)
+        .bind(category)
+        .bind(orientation)
         .bind(game_id)
         .execute(&self.pool)
         .await?;

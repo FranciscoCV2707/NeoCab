@@ -92,7 +92,7 @@ fn get_windows_version() -> WindowsVersion {
         .open_subkey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion")
     {
         Ok(key) => {
-            let major: String = key
+            let major_str: String = key
                 .get_value("CurrentMajorVersionNumber")
                 .unwrap_or_else(|_| {
                     // Fallback to CurrentVersion string
@@ -100,18 +100,33 @@ fn get_windows_version() -> WindowsVersion {
                         .unwrap_or_else(|_| "10".to_string())
                 });
 
-            let minor: String = key
-                .get_value("CurrentMinorVersionNumber")
-                .unwrap_or_else(|_| "0".to_string());
+            let mut major_parsed = 10;
+            let mut minor_parsed = 0;
 
-            let build: String = key
+            if major_str.contains('.') {
+                let parts: Vec<&str> = major_str.split('.').collect();
+                if let Some(major_part) = parts.first() {
+                    major_parsed = major_part.parse().unwrap_or(10);
+                }
+                if let Some(minor_part) = parts.get(1) {
+                    minor_parsed = minor_part.parse().unwrap_or(0);
+                }
+            } else {
+                major_parsed = major_str.parse().unwrap_or(10);
+                let minor_str: String = key
+                    .get_value("CurrentMinorVersionNumber")
+                    .unwrap_or_else(|_| "0".to_string());
+                minor_parsed = minor_str.parse().unwrap_or(0);
+            }
+
+            let build_str: String = key
                 .get_value("CurrentBuildNumber")
                 .unwrap_or_else(|_| "0".to_string());
 
             WindowsVersion {
-                major: major.parse().unwrap_or(10),
-                minor: minor.parse().unwrap_or(0),
-                build: build.parse().unwrap_or(0),
+                major: major_parsed,
+                minor: minor_parsed,
+                build: build_str.parse().unwrap_or(0),
             }
         }
         Err(e) => {

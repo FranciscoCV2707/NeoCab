@@ -8,4 +8,5 @@ pub trait EmulatorAdapter: Send + Sync {
     async fn launch(&self, rom_path: &str) -> Result<()>;
     async fn stop(&self) -> Result<()>;
     async fn is_running(&self) -> bool;
+    async fn get_pid(&self) -> Option<u32>;
 }

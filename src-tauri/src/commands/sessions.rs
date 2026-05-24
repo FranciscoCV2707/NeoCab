@@ -1,7 +1,8 @@
 use crate::core::{ArcadeConfig, SessionConfig, SessionManager, SessionMode, TimedConfig};
 use serde_json::json;
 use std::sync::Arc;
-use tauri::{Emitter, State};
+use std::path::PathBuf;
+use tauri::{Emitter, State, Manager};
 
 #[tauri::command]
 pub async fn session_insert_coin(
@@ -30,6 +31,16 @@ pub async fn session_start(
 ) -> Result<String, String> {
     match session_manager.start_session(&system_name).await {
         Ok(state) => {
+            // Trigger Lua plugin hook OnSessionStart
+            if let Some(plugin_state) = app.try_state::<crate::core::plugin_engine::PluginState>() {
+                if let Ok(engine) = plugin_state.0.lock() {
+                    let base_dir = app.path().app_data_dir().unwrap_or_else(|_| PathBuf::from("./data"));
+                    let ctx = crate::core::plugin_engine::PluginContext::new(base_dir)
+                        .with_game("", &system_name);
+                    let _ = engine.execute_hook(crate::core::plugin_engine::PluginHook::OnSessionStart, ctx);
+                }
+            }
+
             let _ = app.emit(
                 "session_started",
                 serde_json::to_value(&state).unwrap_or_default(),
@@ -52,8 +63,27 @@ pub async fn session_check(
                     "timer_warning",
                     json!({ "remaining_seconds": remaining_seconds }),
                 );
+
+                // Trigger Lua plugin hook OnTimerWarning
+                if let Some(plugin_state) = app.try_state::<crate::core::plugin_engine::PluginState>() {
+                    if let Ok(engine) = plugin_state.0.lock() {
+                        let base_dir = app.path().app_data_dir().unwrap_or_else(|_| PathBuf::from("./data"));
+                        let ctx = crate::core::plugin_engine::PluginContext::new(base_dir)
+                            .with_session(*remaining_seconds as i64, 0);
+                        let _ = engine.execute_hook(crate::core::plugin_engine::PluginHook::OnTimerWarning, ctx);
+                    }
+                }
             } else if let crate::core::SessionState::SessionExpired = &state {
                 let _ = app.emit("time_expired", json!({}));
+
+                // Trigger Lua plugin hook OnTimeExpired
+                if let Some(plugin_state) = app.try_state::<crate::core::plugin_engine::PluginState>() {
+                    if let Ok(engine) = plugin_state.0.lock() {
+                        let base_dir = app.path().app_data_dir().unwrap_or_else(|_| PathBuf::from("./data"));
+                        let ctx = crate::core::plugin_engine::PluginContext::new(base_dir);
+                        let _ = engine.execute_hook(crate::core::plugin_engine::PluginHook::OnTimeExpired, ctx);
+                    }
+                }
             }
             Ok(json!({ "success": true, "state": state }).to_string())
         }
@@ -84,9 +114,21 @@ pub async fn session_resume(
 #[tauri::command]
 pub async fn session_end(
     session_manager: State<'_, Arc<SessionManager>>,
+    app: tauri::AppHandle,
 ) -> Result<String, String> {
     match session_manager.end_session().await {
-        Ok(state) => Ok(json!({ "success": true, "state": state }).to_string()),
+        Ok(state) => {
+            // Trigger Lua plugin hook OnSessionEnd
+            if let Some(plugin_state) = app.try_state::<crate::core::plugin_engine::PluginState>() {
+                if let Ok(engine) = plugin_state.0.lock() {
+                    let base_dir = app.path().app_data_dir().unwrap_or_else(|_| PathBuf::from("./data"));
+                    let ctx = crate::core::plugin_engine::PluginContext::new(base_dir);
+                    let _ = engine.execute_hook(crate::core::plugin_engine::PluginHook::OnSessionEnd, ctx);
+                }
+            }
+
+            Ok(json!({ "success": true, "state": state }).to_string())
+        }
         Err(e) => Err(e.to_string()),
     }
 }

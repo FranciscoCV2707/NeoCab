@@ -1,15 +1,35 @@
 use crate::core::CoinManager;
 use serde_json::json;
 use std::sync::Arc;
-use tauri::State;
+use tauri::{State, Manager};
 
 #[tauri::command]
 pub async fn add_coins(
     amount: i64,
+    app_handle: tauri::AppHandle,
     coin_manager: State<'_, Arc<CoinManager>>,
 ) -> Result<String, String> {
     match coin_manager.add_coins(amount).await {
         Ok(state) => {
+            // Trigger Lua plugin hook OnCoinInserted
+            if let Some(plugin_state) = app_handle.try_state::<crate::core::plugin_engine::PluginState>() {
+                if let Ok(engine) = plugin_state.0.lock() {
+                    let base_dir = app_handle.path().app_data_dir().unwrap_or_else(|_| std::path::PathBuf::from("./data"));
+                    let ctx = crate::core::plugin_engine::PluginContext::new(base_dir)
+                        .with_session(0, state.total_balance as i32);
+                    let _ = engine.execute_hook(crate::core::plugin_engine::PluginHook::OnCoinInserted, ctx);
+                }
+            }
+
+            // Trigger HardwareScriptEngine CoinInserted
+            if let Some(hw_script_state) = app_handle.try_state::<Arc<tokio::sync::Mutex<crate::core::HardwareScriptEngine>>>() {
+                let hw_clone = hw_script_state.inner().clone();
+                tokio::spawn(async move {
+                    let lock = hw_clone.lock().await;
+                    let _ = lock.trigger_event(crate::core::HardwareEvent::CoinInserted).await;
+                });
+            }
+
             let result = json!({
                 "success": true,
                 "balance": state.total_balance,
@@ -100,6 +120,7 @@ pub async fn return_coins(
             let result = json!({
                 "success": true,
                 "balance": state.total_balance,
+                "coins_returned": amount,
                 "message": format!("Returned {} coins", amount)
             });
             Ok(result.to_string())
@@ -117,10 +138,10 @@ pub async fn return_coins(
 #[tauri::command]
 pub async fn get_earnings(coin_manager: State<'_, Arc<CoinManager>>) -> Result<String, String> {
     match coin_manager.get_earnings().await {
-        Ok(total) => {
+        Ok(earnings) => {
             let result = json!({
                 "success": true,
-                "total_earnings": total
+                "earnings": earnings
             });
             Ok(result.to_string())
         }
@@ -137,10 +158,30 @@ pub async fn get_earnings(coin_manager: State<'_, Arc<CoinManager>>) -> Result<S
 #[tauri::command]
 pub async fn add_coins_via_key(
     amount: i64,
+    app_handle: tauri::AppHandle,
     coin_manager: State<'_, Arc<CoinManager>>,
 ) -> Result<String, String> {
     match coin_manager.add_coins(amount).await {
         Ok(state) => {
+            // Trigger Lua plugin hook OnCoinInserted
+            if let Some(plugin_state) = app_handle.try_state::<crate::core::plugin_engine::PluginState>() {
+                if let Ok(engine) = plugin_state.0.lock() {
+                    let base_dir = app_handle.path().app_data_dir().unwrap_or_else(|_| std::path::PathBuf::from("./data"));
+                    let ctx = crate::core::plugin_engine::PluginContext::new(base_dir)
+                        .with_session(0, state.total_balance as i32);
+                    let _ = engine.execute_hook(crate::core::plugin_engine::PluginHook::OnCoinInserted, ctx);
+                }
+            }
+
+            // Trigger HardwareScriptEngine CoinInserted
+            if let Some(hw_script_state) = app_handle.try_state::<Arc<tokio::sync::Mutex<crate::core::HardwareScriptEngine>>>() {
+                let hw_clone = hw_script_state.inner().clone();
+                tokio::spawn(async move {
+                    let lock = hw_clone.lock().await;
+                    let _ = lock.trigger_event(crate::core::HardwareEvent::CoinInserted).await;
+                });
+            }
+
             let result = json!({
                 "success": true,
                 "balance": state.total_balance,

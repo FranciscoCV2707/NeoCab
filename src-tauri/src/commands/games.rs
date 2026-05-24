@@ -157,6 +157,11 @@ pub async fn import_steam_games(db: State<'_, Arc<Database>>) -> Result<usize, S
             external_id: None,
             created_at: None,
             updated_at: None,
+            buttons: None,
+            control_type: None,
+            joystick_direction: None,
+            category: None,
+            orientation: None,
         };
 
         if db.insert_game(&game).await.is_ok() {
@@ -173,6 +178,106 @@ pub async fn get_save_states(
     db: State<'_, Arc<Database>>,
 ) -> Result<Vec<crate::models::SaveState>, String> {
     db.get_save_states(game_id).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn save_game_state(
+    game_id: i64,
+    slot: i64,
+    description: String,
+    emulator_name: String,
+    db: State<'_, Arc<Database>>,
+) -> Result<(), String> {
+    use enigo::Keyboard;
+    let mut enigo = enigo::Enigo::new(&enigo::Settings::default()).map_err(|e| e.to_string())?;
+    match emulator_name.to_lowercase().as_str() {
+        "retroarch" => {
+            enigo.key(enigo::Key::F2, enigo::Direction::Click).map_err(|e| e.to_string())?;
+        }
+        "pcsx2" | "duckstation" => {
+            enigo.key(enigo::Key::F1, enigo::Direction::Click).map_err(|e| e.to_string())?;
+        }
+        "dolphin" => {
+            enigo.key(enigo::Key::Shift, enigo::Direction::Press).map_err(|e| e.to_string())?;
+            match slot {
+                1 => enigo.key(enigo::Key::F1, enigo::Direction::Click).map_err(|e| e.to_string())?,
+                2 => enigo.key(enigo::Key::F2, enigo::Direction::Click).map_err(|e| e.to_string())?,
+                3 => enigo.key(enigo::Key::F3, enigo::Direction::Click).map_err(|e| e.to_string())?,
+                4 => enigo.key(enigo::Key::F4, enigo::Direction::Click).map_err(|e| e.to_string())?,
+                _ => enigo.key(enigo::Key::F5, enigo::Direction::Click).map_err(|e| e.to_string())?,
+            };
+            enigo.key(enigo::Key::Shift, enigo::Direction::Release).map_err(|e| e.to_string())?;
+        }
+        "mame" => {
+            enigo.key(enigo::Key::Shift, enigo::Direction::Press).map_err(|e| e.to_string())?;
+            enigo.key(enigo::Key::F7, enigo::Direction::Click).map_err(|e| e.to_string())?;
+            enigo.key(enigo::Key::Shift, enigo::Direction::Release).map_err(|e| e.to_string())?;
+            std::thread::sleep(std::time::Duration::from_millis(100));
+            let slot_char = match slot {
+                1 => '1',
+                2 => '2',
+                3 => '3',
+                4 => '4',
+                _ => '5',
+            };
+            enigo.key(enigo::Key::Unicode(slot_char), enigo::Direction::Click).map_err(|e| e.to_string())?;
+        }
+        _ => {
+            enigo.key(enigo::Key::F2, enigo::Direction::Click).map_err(|e| e.to_string())?;
+        }
+    }
+
+    let save_path = format!("slot_{}", slot);
+    db.create_save_state(game_id, slot, &save_path, None, Some(&description))
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn load_game_state(
+    game_id: i64,
+    slot: i64,
+    emulator_name: String,
+    db: State<'_, Arc<Database>>,
+) -> Result<(), String> {
+    use enigo::Keyboard;
+    let mut enigo = enigo::Enigo::new(&enigo::Settings::default()).map_err(|e| e.to_string())?;
+    match emulator_name.to_lowercase().as_str() {
+        "retroarch" => {
+            enigo.key(enigo::Key::F4, enigo::Direction::Click).map_err(|e| e.to_string())?;
+        }
+        "pcsx2" | "duckstation" => {
+            enigo.key(enigo::Key::F3, enigo::Direction::Click).map_err(|e| e.to_string())?;
+        }
+        "dolphin" => {
+            match slot {
+                1 => enigo.key(enigo::Key::F1, enigo::Direction::Click).map_err(|e| e.to_string())?,
+                2 => enigo.key(enigo::Key::F2, enigo::Direction::Click).map_err(|e| e.to_string())?,
+                3 => enigo.key(enigo::Key::F3, enigo::Direction::Click).map_err(|e| e.to_string())?,
+                4 => enigo.key(enigo::Key::F4, enigo::Direction::Click).map_err(|e| e.to_string())?,
+                _ => enigo.key(enigo::Key::F5, enigo::Direction::Click).map_err(|e| e.to_string())?,
+            };
+        }
+        "mame" => {
+            enigo.key(enigo::Key::F7, enigo::Direction::Click).map_err(|e| e.to_string())?;
+            std::thread::sleep(std::time::Duration::from_millis(100));
+            let slot_char = match slot {
+                1 => '1',
+                2 => '2',
+                3 => '3',
+                4 => '4',
+                _ => '5',
+            };
+            enigo.key(enigo::Key::Unicode(slot_char), enigo::Direction::Click).map_err(|e| e.to_string())?;
+        }
+        _ => {
+            enigo.key(enigo::Key::F4, enigo::Direction::Click).map_err(|e| e.to_string())?;
+        }
+    }
+
+    Ok(())
 }
 
 #[tauri::command]
@@ -402,4 +507,86 @@ pub async fn scrape_all(
 pub async fn cancel_scraping() -> Result<(), String> {
     SCRAPE_CANCEL.store(true, Ordering::Relaxed);
     Ok(())
+}
+
+#[tauri::command]
+pub async fn curate_arcade_metadata(
+    controls_path: String,
+    catver_path: String,
+    db: State<'_, Arc<Database>>,
+) -> Result<String, String> {
+    use crate::utils::mame_metadata_parser::{parse_catver, parse_controls_dat};
+    use std::path::Path;
+
+    let catver_map = if !catver_path.is_empty() {
+        parse_catver(Path::new(&catver_path)).map_err(|e| format!("CatVer parsing failed: {}", e))?
+    } else {
+        std::collections::HashMap::new()
+    };
+
+    let controls_map = if !controls_path.is_empty() {
+        parse_controls_dat(Path::new(&controls_path)).map_err(|e| format!("controls.dat parsing failed: {}", e))?
+    } else {
+        std::collections::HashMap::new()
+    };
+
+    if catver_map.is_empty() && controls_map.is_empty() {
+        return Err("Both CatVer and controls.dat paths were empty or failed to load any data.".to_string());
+    }
+
+    // Get all games in database
+    let games = db
+        .get_games_by_system(0, None, None, false)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let mut updated_count = 0;
+
+    for game in games {
+        // Extract ROM name
+        let filename = game.filename.as_deref().or_else(|| {
+            Path::new(&game.rom_path)
+                .file_name()
+                .and_then(|s| s.to_str())
+        });
+
+        if let Some(fname) = filename {
+            let rom_name = Path::new(fname)
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or(fname)
+                .to_lowercase();
+
+            let catver_entry = catver_map.get(&rom_name);
+            let controls_entry = controls_map.get(&rom_name);
+
+            if catver_entry.is_some() || controls_entry.is_some() {
+                let category = catver_entry.and_then(|e| e.category.clone());
+                let orientation = catver_entry.and_then(|e| e.orientation.clone());
+                
+                let buttons = controls_entry.and_then(|e| e.buttons);
+                let control_type = controls_entry.and_then(|e| e.control_type.clone());
+                let joystick_direction = controls_entry.and_then(|e| e.joystick_direction.clone());
+
+                db.update_game_curation(
+                    game.id,
+                    buttons,
+                    control_type.as_deref(),
+                    joystick_direction.as_deref(),
+                    category.as_deref(),
+                    orientation.as_deref(),
+                )
+                .await
+                .map_err(|e| e.to_string())?;
+
+                updated_count += 1;
+            }
+        }
+    }
+
+    Ok(serde_json::json!({
+        "success": true,
+        "updated_count": updated_count,
+        "message": format!("Successfully curated {} games.", updated_count)
+    }).to_string())
 }

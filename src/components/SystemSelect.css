@@ -249,3 +249,127 @@
   border-radius: 4px;
   background: var(--primary, #ff6b00);
 }
+
+/* ── Grid layout ────────────────────────────────────────── */
+.systems-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  padding: 24px;
+  overflow-y: auto;
+  align-content: start;
+}
+
+.grid-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px 12px;
+  background: var(--surface, #1a1a1a);
+  border: 2px solid var(--card-color, #888);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.grid-card.focused {
+  transform: scale(1.06);
+  box-shadow: 0 0 24px var(--card-color, #ff6b00), 0 8px 32px rgba(0,0,0,0.4);
+  border-color: var(--card-color, #ff6b00);
+  background: color-mix(in srgb, var(--card-color, #ff6b00) 10%, var(--surface, #1a1a1a));
+}
+
+.grid-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.grid-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text, #fff);
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.grid-card.focused .grid-name {
+  color: var(--card-color, #ff6b00);
+}
+
+/* ── List layout ────────────────────────────────────────── */
+.systems-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 8px 0;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+  background: transparent;
+  border: none;
+  border-left: 4px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.list-row.focused {
+  background: color-mix(in srgb, var(--card-color, #ff6b00) 12%, transparent);
+  border-left-color: var(--card-color, #ff6b00);
+  box-shadow: inset 0 0 20px color-mix(in srgb, var(--card-color, #ff6b00) 8%, transparent);
+}
+
+.list-row:hover:not(.focused) {
+  background: color-mix(in srgb, var(--surface, #1a1a1a) 80%, transparent);
+}
+
+.list-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.list-name {
+  flex: 1;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text, #fff);
+  letter-spacing: 0.5px;
+}
+
+.list-row.focused .list-name {
+  color: var(--card-color, #ff6b00);
+  text-shadow: 0 0 12px var(--card-color, #ff6b00);
+}
+
+.list-arrow {
+  font-size: 1rem;
+  color: var(--card-color, #ff6b00);
+  opacity: 0.8;
+}

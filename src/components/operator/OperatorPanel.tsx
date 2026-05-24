@@ -7,9 +7,10 @@ import { SafeQuitRulesPanel } from './SafeQuitRules';
 import { SessionConfig } from './SessionConfig';
 import { PluginsPanel } from './PluginsPanel';
 import { KioskSettingsPanel } from './KioskSettingsPanel';
+import { CurationPanel } from './CurationPanel';
 import './OperatorPanel.css';
 
-type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'sessions' | 'safequit' | 'plugins' | 'kiosk' | 'help';
+type TabType = 'statistics' | 'network' | 'logs' | 'audit' | 'sessions' | 'safequit' | 'plugins' | 'kiosk' | 'curation' | 'help';
 
 interface OperatorPanelProps {
     onBack: () => void;
@@ -70,6 +71,12 @@ export const OperatorPanel: React.FC<OperatorPanelProps> = ({ onBack }) => {
                     📺 Kiosk
                 </button>
                 <button
+                    className={`tab-button ${activeTab === 'curation' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('curation')}
+                >
+                    🧹 Curación
+                </button>
+                <button
                     className={`tab-button manual-button ${activeTab === 'help' ? 'active' : ''}`}
                     onClick={() => setActiveTab('help')}
                 >
@@ -89,6 +96,7 @@ export const OperatorPanel: React.FC<OperatorPanelProps> = ({ onBack }) => {
                 {activeTab === 'safequit' && <SafeQuitRulesPanel />}
                 {activeTab === 'plugins' && <PluginsPanel />}
                 {activeTab === 'kiosk' && <KioskSettingsPanel />}
+                {activeTab === 'curation' && <CurationPanel />}
                 {activeTab === 'help' && <HelpPanel />}
             </div>
         </div>

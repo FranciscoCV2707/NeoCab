@@ -1,7 +1,8 @@
 {
   "name": "Neon Future",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "NeoCab Team",
+  "style": "neon",
   "description": "Vibrant neon colors with gradients and glow effects, cyberpunk inspired",
   "colors": {
     "primary": "#ff00ff",
@@ -20,7 +21,18 @@
     "ui": "Verdana",
     "title": "Impact",
     "subtitle": "Verdana",
-    "mono": "Consolas"
+    "mono": "Consolas",
+    "google_font": "Orbitron"
+  },
+  "background": {
+    "type": "gradient",
+    "color": "#0a0a0a",
+    "gradient": "linear-gradient(135deg, #0a0014 0%, #0a0a0a 50%, #000a14 100%)",
+    "image": null,
+    "video": null,
+    "opacity": 1.0,
+    "blur": 0,
+    "overlay_color": null
   },
   "layout": {
     "system_view": "grid",
@@ -29,6 +41,15 @@
     "transition": "fade",
     "animation_speed": 400,
     "easing": "easeOutQuad"
+  },
+  "wheel": {
+    "item_size": 110,
+    "item_spacing": 20,
+    "animation_duration": 400,
+    "selected_color": "#ff00ff",
+    "unselected_color": "#333333",
+    "selected_scale": 1.2,
+    "glow_selected": true
   },
   "media": {
     "video_enabled": true,
@@ -49,6 +70,15 @@
     "scanlines": false,
     "crt_curve": 0,
     "glow_intensity": 1.0,
-    "shadow_enabled": true
+    "shadow_enabled": true,
+    "vignette": 0.4,
+    "noise": 0.0,
+    "blur_unselected": 0
+  },
+  "overlay": {
+    "coin_position": "top-right",
+    "timer_position": "bottom-right",
+    "stats_opacity": 0.9,
+    "animation_style": "smooth"
   }
 }

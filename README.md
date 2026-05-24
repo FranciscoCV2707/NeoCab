@@ -1,6 +1,6 @@
 # 🕹️ NeoCab: The Ultimate Unified Arcade OS
 
-[![Version](https://img.shields.io/badge/version-1.3.0--stable-brightgreen)](https://github.com/FranciscoCV2707/NeoCab)
+[![Version](https://img.shields.io/badge/version-1.4.0--stable-brightgreen)](https://github.com/FranciscoCV2707/NeoCab)
 [![Platform](https://img.shields.io/badge/platform-Windows%20XP%20|%207%20|%2010%20|%2011%20|%20Linux%20|%20ARM-blue)](https://github.com/FranciscoCV2707/NeoCab)
 [![License](https://img.shields.io/badge/license-MIT-orange)](LICENSE)
 
@@ -10,10 +10,12 @@ Built with **Rust** for maximum performance and **React/Tauri** for a modern, fl
 
 ---
 
-## 📋 Latest Updates (v1.3.0)
+## 📋 Latest Updates (v1.4.0)
+- ✅ **Widget Layout System** (v1.4): Drag-and-drop visual editor, 11 widget types, percentage-based positions, resolution presets
+- ✅ **Theme SDK** (v1.4): theme.css + theme.js hooks (onMount, onNavigate, onSelect…), NeoCabAPI, custom events bus
+- ✅ **Theme Community Tools** (v1.4): "Nueva plantilla", "Importar carpeta", "Abrir carpeta", bundled vs. custom split, Manual SDK modal
 - ✅ **Advanced Input System** (v1.2): JoyMapper v2 with radial deadzones, spline curves, shift layers, 6 controller templates, AntiMicroX import
 - ✅ **Unified Navigation** (v1.3): Keyboard + gamepad navigation with configurable keymap, 15 mappable actions
-- ✅ **Theme System** (v1.1): 5 bundled themes, HyperSpin-style layouts, per-system/game assignment
 - ✅ **Session System** (v1.1): Unified coins + time management with 4 modes (Arcade, Timed, Unlimited, Token)
 
 ---
@@ -23,10 +25,12 @@ NeoCab eliminates the need for external configuration tools by integrating every
 
 ### 🎨 NeoCab Studio (Visual Theme Engine)
 *Replaces: HyperTheme, Photoshop templates, and XML editing.*
-- **WYSIWYG Editor**: Real-time visual editor integrated directly into the Operator Panel.
-- **Drag-and-Drop**: Position wheels, videos, and artwork with your mouse.
-- **Dynamic Styling**: Adjust scale, rotation, opacity, and Z-index on the fly.
-- **Theme Persistence**: Changes are saved instantly to a lightweight JSON schema, compatible across all platforms.
+- **Widget Layout Editor**: Full drag-and-drop canvas. Position the system wheel, logos, clock, credits counter, video preview, and custom images anywhere — in percentage-based coordinates that scale perfectly on any resolution (720p → 4K → vertical cabinet).
+- **11 Widget Types**: background, system-wheel, system-logo (with PNG support), game-list, game-preview, game-info, clock, credits, session-timer, text-label, image.
+- **Theme SDK**: Every theme can ship `theme.css` (custom `@keyframes`, overrides) and `theme.js` (lifecycle hooks: `onMount`, `onNavigate`, `onSelect`, `onBack`…). Access live state via `window.NeoCabAPI`.
+- **Community-First**: "Nueva plantilla" creates a starter folder with CSS + JS template. "Importar carpeta" installs any community theme. "Abrir carpeta" opens the theme in your OS file manager.
+- **Bundled vs. Custom**: Clear separation between 5 included themes and user/community themes.
+- **Theme Persistence**: Saved to `theme.json` with a `screens` widget layout section, compatible across all platforms.
 
 ### 🕹️ Native JoyMapper (Input Engine)
 *Replaces: JoyToKey, x360ce, ViGEmBus, and native emulator mapping.*

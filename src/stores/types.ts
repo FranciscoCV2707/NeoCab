@@ -20,6 +20,11 @@ export interface Game {
   total_play_time?: number;
   last_played?: string;
   rating?: number;
+  buttons?: number;
+  control_type?: string;
+  joystick_direction?: string;
+  category?: string;
+  orientation?: string;
 }
 
 export interface System {

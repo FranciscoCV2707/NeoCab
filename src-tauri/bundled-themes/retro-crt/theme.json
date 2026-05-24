@@ -1,7 +1,8 @@
 {
   "name": "Retro CRT",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "NeoCab Team",
+  "style": "crt",
   "description": "Authentic CRT monitor effect with green phosphor scanlines and curvature",
   "colors": {
     "primary": "#33ff33",
@@ -20,7 +21,18 @@
     "ui": "Courier New",
     "title": "Courier New",
     "subtitle": "Courier New",
-    "mono": "Courier New"
+    "mono": "Courier New",
+    "google_font": "Share Tech Mono"
+  },
+  "background": {
+    "type": "color",
+    "color": "#050a05",
+    "gradient": null,
+    "image": null,
+    "video": null,
+    "opacity": 1.0,
+    "blur": 0,
+    "overlay_color": null
   },
   "layout": {
     "system_view": "carousel",
@@ -29,6 +41,15 @@
     "transition": "slide",
     "animation_speed": 350,
     "easing": "easeOutCubic"
+  },
+  "wheel": {
+    "item_size": 110,
+    "item_spacing": 10,
+    "animation_duration": 350,
+    "selected_color": "#33ff33",
+    "unselected_color": "#1a3a1a",
+    "selected_scale": 1.1,
+    "glow_selected": true
   },
   "media": {
     "video_enabled": true,
@@ -49,6 +70,15 @@
     "scanlines": true,
     "crt_curve": 0.3,
     "glow_intensity": 0.3,
-    "shadow_enabled": false
+    "shadow_enabled": false,
+    "vignette": 0.6,
+    "noise": 0.05,
+    "blur_unselected": 1
+  },
+  "overlay": {
+    "coin_position": "top-left",
+    "timer_position": "bottom-left",
+    "stats_opacity": 0.7,
+    "animation_style": "instant"
   }
 }

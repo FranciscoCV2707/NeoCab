@@ -1,11 +1,43 @@
-# 🚀 NeoCab v1.3 - Release Notes
+# NeoCab v1.4 - Release Notes
 
-**Release Date:** May 14, 2026  
+**Release Date:** May 21, 2026
 **Status:** Stable Release
 
 ## Overview
 
-NeoCab v1.3 is the complete arcade cabinet operating system with advanced input processing and unified navigation. Built on v1.0 foundation with major improvements in themes, session management, input processing, and keyboard/gamepad navigation.
+NeoCab v1.4 is the Widget Layout release. The theme system evolves from a color/font editor into a full **drag-and-drop visual composer** similar to HyperTheme — where users position any UI element freely on a canvas in percentage-based coordinates that adapt to any resolution. Advanced users get a full Theme SDK with CSS + JS lifecycle hooks. Community users get a clean import/export workflow.
+
+## Major Features (v1.4)
+
+### Widget Layout System
+- **LayoutEditor**: Full-screen drag-and-drop canvas with 16:9 and 9:16 (vertical cabinet) aspect ratios
+- **11 Widget Types**: background, system-wheel, system-logo, game-list, game-preview, game-info, clock, credits, session-timer, text-label, image
+- **Percentage-based positioning**: X/Y/W/H in % — layouts look correct on 720p, 1080p, 1440p, and 4K with no adjustments
+- **Resize handles**: Bottom-right drag handle per widget; Delete key removes selected widget
+- **Properties panel**: Per-widget config — wheel style (carousel/grid/list), logo PNG mode, text font/size/color, image fit
+- **Resolution presets**: 1920×1080, 1280×720, 2560×1440, 1080×1920 (vertical)
+- **Screen tabs**: Separate layouts for Systems / Games / Menu screens
+- **ScreenRenderer**: Runtime renderer that reads the `screens` section from `theme.json` and positions widgets absolutely; fully backward-compatible (themes without `screens` use the existing renderer)
+
+### Theme SDK
+- **theme.css**: Custom `@keyframes`, class overrides, CSS variable usage — full creative freedom
+- **theme.js**: ES module with lifecycle hooks: `onMount(api)`, `onNavigate(e)`, `onViewChange(e)`, `onFocus(e)`, `onSelect(e)`, `onBack(e)`, `onUnmount()`
+- **window.NeoCabAPI**: Read-only state accessor — `getCurrentView()`, `getFocusedIndex()`, `getCurrentSystem()`, `getSystemCards()`, `getCssVar()`, `setCssVar()` (--theme-* prefix only)
+- **Custom events bus**: `neocab:navigate`, `neocab:viewchange`, `neocab:focus`, `neocab:select`, `neocab:back` dispatched on `document`
+- **Blob URL loading**: CSP-safe dynamic injection of CSS and JS assets
+
+### Community Theme Tools
+- **Nueva plantilla**: Creates a new theme folder with starter `theme.json`, `theme.css`, `theme.js`, and a default 5-widget `screens.systems` layout
+- **Mis Temas**: Separate dropdown showing only user/community themes (`metadata.json` with `is_custom: true`)
+- **Temas incluidos**: Separate dropdown for the 5 bundled themes — no more confusion between presets and saved themes
+- **Importar carpeta**: Paste any folder path containing `theme.json` — copies files and registers as custom theme
+- **Abrir carpeta**: Opens the theme folder in the OS file manager (Windows Explorer / Finder / xdg-open)
+- **Manual SDK**: Modal with 4 collapsible sections — CSS variables reference, stable DOM classes, event schemas, NeoCabAPI docs — each with a Copy button
+
+### System Logo PNG Support
+- `system-logo` widget can display `assets/systems/{name}.png` from the theme folder
+- Falls back to styled initial letter with system accent color
+- Configurable: `use_png: true/false`, `fallback: "initial" | "text"`
 
 ## Major Features (v1.3)
 
@@ -215,6 +247,17 @@ To upgrade from earlier phases:
 - **Email:** support@neocab.local
 
 ## Changelog
+
+### v1.4.0 (2026-05-21)
+- Widget Layout System: drag-and-drop LayoutEditor, 11 widget types, ScreenRenderer runtime
+- Theme SDK: theme.css + theme.js lifecycle hooks, window.NeoCabAPI, custom events bus
+- Community tools: Nueva plantilla, Importar carpeta, Abrir carpeta, Mis Temas dropdown
+- System logo PNG widget with fallback to styled initial
+- Bundled vs. custom theme separation (metadata.json)
+- Manual SDK modal (CSS vars, DOM classes, events, API reference)
+- MainMenu wired to CSS theme vars (colors, fonts respond to active theme)
+- Preview toggle: Sistema / Menú Principal in ThemeEditor panel
+- `screens` field in theme.json with backward-compatible fallback
 
 ### v1.3.0 (2026-05-14)
 - Unified keyboard + gamepad navigation

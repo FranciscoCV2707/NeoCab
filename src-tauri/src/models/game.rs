@@ -48,4 +48,10 @@ pub struct Game {
     pub language: Option<String>,
     pub created_at: Option<String>,
     pub updated_at: Option<String>,
+    // Curation fields
+    pub buttons: Option<i64>,
+    pub control_type: Option<String>,
+    pub joystick_direction: Option<String>,
+    pub category: Option<String>,
+    pub orientation: Option<String>,
 }

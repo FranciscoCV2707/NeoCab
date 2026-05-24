@@ -92,6 +92,12 @@ pub struct ArcadeSettings {
     pub attract_mode_enabled: bool,
     pub attract_mode_timeout: i32,
     pub kiosk_mode: bool,
+    #[serde(default)]
+    pub max_buttons: Option<i32>,
+    #[serde(default)]
+    pub joystick_type: Option<String>,
+    #[serde(default)]
+    pub orientation_restriction: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -214,6 +220,9 @@ impl Default for AppConfig {
                 attract_mode_enabled: true,
                 attract_mode_timeout: 300,
                 kiosk_mode: false,
+                max_buttons: None,
+                joystick_type: None,
+                orientation_restriction: None,
             },
             display: DisplaySettings {
                 width: 1920,

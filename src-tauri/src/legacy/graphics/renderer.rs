@@ -26,6 +26,12 @@ impl Renderer {
     pub fn new() -> Result<Self> {
         tracing::info!("Initializing SDL2 Renderer");
 
+        // Set SDL2 hints for Windows XP performance optimization
+        sdl2::hint::set("SDL_RENDER_SCALE_QUALITY", "nearest");
+        sdl2::hint::set("SDL_FRAMEBUFFER_ACCELERATION", "1");
+        sdl2::hint::set("SDL_VIDEO_WIN_D3DCOMPILER", "none");
+        sdl2::hint::set("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1");
+
         let sdl_context = sdl2::init()
             .map_err(|e| crate::error::NeoCabError::Legacy(format!("SDL2 init failed: {}", e)))?;
 
@@ -47,9 +53,18 @@ impl Renderer {
                 crate::error::NeoCabError::Legacy(format!("Window creation failed: {}", e))
             })?;
 
-        let mut canvas = window.into_canvas().build().map_err(|e| {
-            crate::error::NeoCabError::Legacy(format!("Canvas creation failed: {}", e))
-        })?;
+        let mut canvas = window
+            .into_canvas()
+            .accelerated()
+            .present_vsync()
+            .build()
+            .or_else(|_| {
+                tracing::warn!("Failed to initialize hardware accelerated SDL2 canvas, falling back to software rendering");
+                window.into_canvas().software().build()
+            })
+            .map_err(|e| {
+                crate::error::NeoCabError::Legacy(format!("Canvas creation failed: {}", e))
+            })?;
 
         canvas.set_draw_color(Color::BLACK);
         canvas.clear();

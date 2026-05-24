@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::{Mutex, RwLock};
+use std::sync::{Mutex, RwLock, Arc};
 use tracing::info;
+use crate::core::arduino_serial::ArduinoInterface;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Plugin {
@@ -150,6 +151,7 @@ pub struct PluginEngine {
     plugins: RwLock<Vec<Plugin>>,
     plugin_dir: PathBuf,
     hook_listeners: RwLock<HashMap<PluginHook, Vec<String>>>,
+    arduino: Option<Arc<tokio::sync::Mutex<ArduinoInterface>>>,
 }
 
 impl PluginEngine {
@@ -158,8 +160,125 @@ impl PluginEngine {
             plugins: RwLock::new(Vec::new()),
             plugin_dir,
             hook_listeners: RwLock::new(HashMap::new()),
+            arduino: None,
         }
     }
+
+    pub fn set_arduino(&mut self, arduino: Arc<tokio::sync::Mutex<ArduinoInterface>>) {
+        self.arduino = Some(arduino);
+    }
+
+    pub fn execute_hook(&self, hook: PluginHook, ctx: PluginContext) -> Result<(), String> {
+        let hook_str = hook.as_str();
+        let listeners = self.list_by_hook(hook.clone());
+        if listeners.is_empty() {
+            return Ok(());
+        }
+
+        let plugins = self.plugins.read().unwrap();
+        for plugin_name in listeners {
+            if let Some(plugin) = plugins.iter().find(|p| p.name == plugin_name && p.enabled) {
+                if plugin.plugin_type == PluginType::Lua {
+                    let path = &plugin.file_path;
+                    if let Ok(content) = std::fs::read_to_string(path) {
+                        let lua = mlua::Lua::new();
+                        
+                        // Inject neocab API
+                        let neocab_table = lua.create_table().map_err(|e| e.to_string())?;
+                        
+                        // neocab.log(level, msg)
+                        let log_fn = lua.create_function(|_, (level, msg): (String, String)| {
+                            match level.as_str() {
+                                "info" => tracing::info!("[Lua Plugin] {}", msg),
+                                "warn" => tracing::warn!("[Lua Plugin] {}", msg),
+                                "error" => tracing::error!("[Lua Plugin] {}", msg),
+                                _ => tracing::debug!("[Lua Plugin] {}", msg),
+                            }
+                            Ok(())
+                        }).map_err(|e| e.to_string())?;
+                        neocab_table.set("log", log_fn).map_err(|e| e.to_string())?;
+
+                        // neocab.trigger_solenoid(output_id)
+                        let arduino_clone = self.arduino.clone();
+                        let trigger_fn = lua.create_function(move |_, output_id: u8| {
+                            if let Some(arduino) = &arduino_clone {
+                                if let Ok(mut lock) = arduino.try_lock() {
+                                    let _ = lock.trigger_solenoid(output_id);
+                                }
+                            }
+                            Ok(())
+                        }).map_err(|e| e.to_string())?;
+                        neocab_table.set("trigger_solenoid", trigger_fn).map_err(|e| e.to_string())?;
+
+                        // neocab.set_led(pin, color_hex, state)
+                        let arduino_clone2 = self.arduino.clone();
+                        let set_led_fn = lua.create_function(move |_, (pin, color_hex, state): (u8, Option<String>, bool)| {
+                            if let Some(arduino) = &arduino_clone2 {
+                                if let Ok(mut lock) = arduino.try_lock() {
+                                    let _ = lock.set_led(pin, color_hex.as_deref(), state);
+                                }
+                            }
+                            Ok(())
+                        }).map_err(|e| e.to_string())?;
+                        neocab_table.set("set_led", set_led_fn).map_err(|e| e.to_string())?;
+
+                        // neocab.send_key(key)
+                        let send_key_fn = lua.create_function(|_, key: String| {
+                            use enigo::Keyboard;
+                            use mlua::ExternalError;
+                            let mut enigo = match enigo::Enigo::new(&enigo::Settings::default()) {
+                                Ok(e) => e,
+                                Err(e) => return Err(format!("Failed to initialize input simulator: {}", e).to_lua_err()),
+                            };
+                            if key.len() == 1 {
+                                if let Some(c) = key.chars().next() {
+                                    let _ = enigo.key(enigo::Key::Unicode(c), enigo::Direction::Click);
+                                }
+                            } else {
+                                match key.to_lowercase().as_str() {
+                                    "enter" => { let _ = enigo.key(enigo::Key::Return, enigo::Direction::Click); }
+                                    "space" => { let _ = enigo.key(enigo::Key::Space, enigo::Direction::Click); }
+                                    "escape" => { let _ = enigo.key(enigo::Key::Escape, enigo::Direction::Click); }
+                                    "tab" => { let _ = enigo.key(enigo::Key::Tab, enigo::Direction::Click); }
+                                    _ => {}
+                                }
+                            }
+                            Ok(())
+                        }).map_err(|e| e.to_string())?;
+                        neocab_table.set("send_key", send_key_fn).map_err(|e| e.to_string())?;
+
+                        lua.globals().set("neocab", neocab_table).map_err(|e| e.to_string())?;
+
+                        // Inject ctx
+                        let ctx_table = lua.create_table().map_err(|e| e.to_string())?;
+                        let _ = ctx_table.set("neocab_version", ctx.neocab_version.clone());
+                        let _ = ctx_table.set("data_dir", ctx.data_dir.to_string_lossy().to_string());
+                        let _ = ctx_table.set("game_title", ctx.game_title.clone());
+                        let _ = ctx_table.set("system_name", ctx.system_name.clone());
+                        let _ = ctx_table.set("session_time_remaining", ctx.session_time_remaining);
+                        let _ = ctx_table.set("coins_inserted", ctx.coins_inserted);
+                        let _ = ctx_table.set("input_device_name", ctx.input_device_name.clone());
+
+                        // Execute script to get module
+                        match lua.load(&content).eval::<mlua::Table>() {
+                            Ok(plugin_module) => {
+                                if let Ok(func) = plugin_module.get::<_, mlua::Function>(hook_str) {
+                                    if let Err(err) = func.call::<_, mlua::Value>(ctx_table) {
+                                        tracing::error!("Error executing hook '{}' in plugin '{}': {}", hook_str, plugin.name, err);
+                                    }
+                                }
+                            }
+                            Err(err) => {
+                                tracing::error!("Error evaluating plugin '{}': {}", plugin.name, err);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
 
     pub fn discover(&mut self) -> Vec<String> {
         let mut discovered = Vec::new();

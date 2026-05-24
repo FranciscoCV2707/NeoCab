@@ -12,6 +12,7 @@ use std::net::SocketAddr;
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tracing::{debug, error, info, warn};
+use tower_http::cors::{Any, CorsLayer};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CabinetInfo {
@@ -85,7 +86,29 @@ impl NetworkManager {
         let db = self.db.clone();
         let id = self.cabinet_id.clone();
         let name = self.cabinet_name.clone();
-        let _discovered = self.discovered_cabinets.clone();
+
+        let cors = CorsLayer::new()
+            .allow_origin(Any)
+            .allow_methods(Any)
+            .allow_headers(Any);
+
+        async fn handle_revenue(AxumState(db): AxumState<Arc<crate::db::Database>>) -> Json<serde_json::Value> {
+            match db.get_earnings_summary().await {
+                Ok(mut summary) => {
+                    if let Some(obj) = summary.as_object_mut() {
+                        let coins = obj.get("total_coins").and_then(|c| c.as_i64()).unwrap_or(0);
+                        obj.insert("total_revenue".to_string(), serde_json::json!(coins as f64));
+                        let games = obj.get("total_games").and_then(|g| g.as_i64()).unwrap_or(0);
+                        obj.insert("total_roms".to_string(), serde_json::json!(games));
+                    }
+                    Json(summary)
+                }
+                Err(e) => {
+                    error!("Failed to get earnings summary: {}", e);
+                    Json(serde_json::json!({"error": e.to_string()}))
+                }
+            }
+        }
 
         let app = Router::new()
             .route("/api/status", get(move || async move {
@@ -96,21 +119,39 @@ impl NetworkManager {
                     "version": "3.0.0"
                 }))
             }))
-            .route("/api/revenue", get(move |AxumState(db): AxumState<Arc<crate::db::Database>>| async move {
-                match db.get_earnings_summary().await {
-                    Ok(summary) => Json(summary),
-                    Err(e) => {
-                        error!("Failed to get earnings summary: {}", e);
-                        Json(serde_json::json!({"error": e.to_string()}))
-                    }
-                }
-            }))
-            .route("/api/revenue/sync", post(move |AxumState(_db): AxumState<Arc<crate::db::Database>>, Json(payload): Json<EarningsSyncPayload>| async move {
+            .route("/api/revenue", get(handle_revenue))
+            .route("/api/revenue/summary", get(handle_revenue))
+            .route("/api/revenue/sync", post(move |AxumState(db): AxumState<Arc<crate::db::Database>>, Json(payload): Json<EarningsSyncPayload>| async move {
                 info!("Received revenue sync from {} ({}): ${}", payload.cabinet_name, payload.cabinet_id, payload.total_earnings);
-                // En una implementación real, aquí almacenarríamos el resumen remoto
-                // Por ahora solo lo logeamos
+                
+                let last_sync = chrono::Utc::now().to_rfc3339();
+                let res = sqlx::query(
+                    "INSERT INTO remote_cabinets (id, name, ip, port, total_revenue, total_sessions, total_roms, is_online, last_sync)
+                     VALUES (?, ?, '0.0.0.0', 8080, ?, ?, ?, 1, ?)
+                     ON CONFLICT(id) DO UPDATE SET
+                        name = excluded.name,
+                        total_revenue = excluded.total_revenue,
+                        total_sessions = excluded.total_sessions,
+                        total_roms = excluded.total_roms,
+                        is_online = 1,
+                        last_sync = excluded.last_sync"
+                )
+                .bind(&payload.cabinet_id)
+                .bind(&payload.cabinet_name)
+                .bind(payload.total_earnings)
+                .bind(payload.total_coins as i64)
+                .bind(payload.total_games_played as i64)
+                .bind(&last_sync)
+                .execute(db.pool())
+                .await;
+
+                if let Err(e) = res {
+                    error!("Failed to persist remote cabinet sync: {}", e);
+                }
+
                 Json(serde_json::json!({"status": "received", "timestamp": payload.timestamp}))
             }))
+            .layer(cors)
             .with_state(db);
 
         tokio::spawn(async move {
@@ -196,6 +237,7 @@ impl NetworkManager {
 
         let discovered = self.discovered_cabinets.clone();
         let master_ip = self.master_ip.clone();
+        let db = self.db.clone();
 
         tokio::spawn(async move {
             while let Ok(event) = receiver.recv_async().await {
@@ -220,7 +262,7 @@ impl NetworkManager {
 
                         let cabinet = CabinetInfo {
                             id: id.clone(),
-                            name,
+                            name: name.clone(),
                             ip: ip.clone(),
                             port: info.get_port(),
                             is_master: role_str == "Master",
@@ -231,6 +273,33 @@ impl NetworkManager {
                             "Cabinet discovered: {} ({}) at {}:{}",
                             cabinet.name, cabinet.id, cabinet.ip, cabinet.port
                         );
+
+                        // Persistir en base de datos remote_cabinets
+                        let db_clone = db.clone();
+                        let id_clone = id.clone();
+                        let name_clone = name.clone();
+                        let ip_clone = ip.clone();
+                        let port_clone = cabinet.port;
+                        let last_sync_time = chrono::Utc::now().to_rfc3339();
+                        tokio::spawn(async move {
+                            let _ = sqlx::query(
+                                "INSERT INTO remote_cabinets (id, name, ip, port, is_online, last_sync)
+                                 VALUES (?, ?, ?, ?, 1, ?)
+                                 ON CONFLICT(id) DO UPDATE SET
+                                    name = excluded.name,
+                                    ip = excluded.ip,
+                                    port = excluded.port,
+                                    is_online = 1,
+                                    last_sync = excluded.last_sync"
+                            )
+                            .bind(&id_clone)
+                            .bind(&name_clone)
+                            .bind(&ip_clone)
+                            .bind(port_clone as i64)
+                            .bind(&last_sync_time)
+                            .execute(db_clone.pool())
+                            .await;
+                        });
 
                         // Si es maestro, guardar su IP para sincronización
                         if cabinet.is_master {

@@ -1,13 +1,45 @@
 import { create } from "zustand";
 import { invoke } from "@tauri-apps/api/core";
+import { injectThemeAssets, unloadThemeAssets } from "../theme/themePlugin";
+import type { ThemeScreens } from "../types/layout";
+
+export interface ThemeBackground {
+  type: "color" | "gradient" | "image" | "video";
+  color: string;
+  gradient: string | null;
+  image: string | null;
+  video: string | null;
+  opacity: number;
+  blur: number;
+  overlay_color: string | null;
+}
+
+export interface ThemeWheel {
+  item_size: number;
+  item_spacing: number;
+  animation_duration: number;
+  selected_color: string;
+  unselected_color: string;
+  selected_scale: number;
+  glow_selected: boolean;
+}
+
+export interface ThemeOverlay {
+  coin_position: string;
+  timer_position: string;
+  stats_opacity: number;
+  animation_style: string;
+}
 
 export interface Theme {
   name: string;
   version: string;
   author: string;
+  style?: string;
   description: string;
   colors: Record<string, string>;
   fonts: Record<string, string>;
+  background?: ThemeBackground;
   layout: {
     system_view: string;
     game_view: string;
@@ -16,12 +48,20 @@ export interface Theme {
     animation_speed: number;
     easing: string;
   };
+  wheel?: ThemeWheel;
   effects: {
     scanlines: boolean;
     crt_curve: number;
     glow_intensity: number;
     shadow_enabled: boolean;
+    vignette?: number;
+    noise?: number;
+    blur_unselected?: number;
   };
+  overlay?: ThemeOverlay;
+  media?: Record<string, unknown>;
+  sounds?: Record<string, string>;
+  screens?: ThemeScreens;
 }
 
 interface ThemeStore {
@@ -30,11 +70,102 @@ interface ThemeStore {
   loading: boolean;
   listThemes: () => Promise<void>;
   applyTheme: (theme: Theme) => void;
+  currentThemeId: string | null;
+  setCurrentThemeId: (id: string) => void;
   reloadTheme: () => Promise<void>;
+}
+
+export function injectThemeCss(theme: Theme) {
+  const root = document.documentElement;
+
+  // Colors
+  Object.entries(theme.colors).forEach(([key, value]) => {
+    root.style.setProperty(`--${key}`, value);
+  });
+
+  // Fonts
+  root.style.setProperty("--font-ui", theme.fonts.ui || "Arial");
+  root.style.setProperty("--font-title", theme.fonts.title || "Impact");
+  root.style.setProperty("--font-subtitle", theme.fonts.subtitle || "Arial");
+  root.style.setProperty("--font-mono", theme.fonts.mono || "Consolas");
+
+  // Google Font import
+  const googleFont = theme.fonts.google_font;
+  if (googleFont) {
+    const linkId = "theme-google-font";
+    let link = document.getElementById(linkId) as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement("link");
+      link.id = linkId;
+      link.rel = "stylesheet";
+      document.head.appendChild(link);
+    }
+    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(googleFont)}&display=swap`;
+    root.style.setProperty("--font-google", googleFont);
+  }
+
+  // Layout
+  root.style.setProperty("--animation-speed", `${theme.layout.animation_speed}ms`);
+  root.style.setProperty("--transition-type", theme.layout.transition);
+  root.style.setProperty("--easing", theme.layout.easing);
+  root.dataset.systemView = theme.layout.system_view;
+  root.dataset.gameView = theme.layout.game_view;
+  root.dataset.wheelStyle = theme.layout.wheel_style;
+
+  // Effects
+  root.style.setProperty("--glow-intensity", String(theme.effects.glow_intensity));
+  root.style.setProperty("--crt-curve", String(theme.effects.crt_curve));
+  root.style.setProperty("--vignette", String(theme.effects.vignette ?? 0));
+  root.style.setProperty("--noise-opacity", String(theme.effects.noise ?? 0));
+  root.style.setProperty("--blur-unselected", `${theme.effects.blur_unselected ?? 0}px`);
+  root.style.setProperty("--shadow-enabled", theme.effects.shadow_enabled ? "1" : "0");
+
+  // Background
+  const bg = theme.background;
+  if (bg) {
+    root.style.setProperty("--bg-type", bg.type);
+    root.style.setProperty("--bg-color", bg.color);
+    root.style.setProperty("--bg-gradient", bg.gradient || "none");
+    root.style.setProperty("--bg-image", bg.image ? `url('${bg.image}')` : "none");
+    root.style.setProperty("--bg-opacity", String(bg.opacity));
+    root.style.setProperty("--bg-blur", `${bg.blur}px`);
+    root.style.setProperty("--bg-overlay", bg.overlay_color || "transparent");
+  }
+
+  // Wheel
+  const wheel = theme.wheel;
+  if (wheel) {
+    root.style.setProperty("--wheel-item-size", `${wheel.item_size}px`);
+    root.style.setProperty("--wheel-spacing", `${wheel.item_spacing}px`);
+    root.style.setProperty("--wheel-selected-color", wheel.selected_color);
+    root.style.setProperty("--wheel-unselected-color", wheel.unselected_color);
+    root.style.setProperty("--wheel-selected-scale", String(wheel.selected_scale));
+    root.style.setProperty("--wheel-anim-duration", `${wheel.animation_duration}ms`);
+  }
+
+  // Scanlines overlay
+  const existing = document.getElementById("scanlines-overlay");
+  if (theme.effects.scanlines) {
+    if (!existing) {
+      const el = document.createElement("div");
+      el.id = "scanlines-overlay";
+      el.style.cssText =
+        "position:fixed;inset:0;pointer-events:none;z-index:9999;" +
+        "background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.18) 2px,rgba(0,0,0,0.18) 4px)";
+      document.body.appendChild(el);
+    }
+  } else {
+    existing?.remove();
+  }
+
+  // Body/root data attributes
+  document.body.dataset.theme = theme.name.toLowerCase().replace(/\s+/g, "-");
+  if (theme.style) root.dataset.themeStyle = theme.style;
 }
 
 export const useThemeStore = create<ThemeStore>((set, get) => ({
   currentTheme: null,
+  currentThemeId: null,
   themes: [],
   loading: false,
 
@@ -50,25 +181,29 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
   applyTheme: (theme: Theme) => {
     set({ currentTheme: theme });
     localStorage.setItem("neocab_theme", JSON.stringify(theme));
+    injectThemeCss(theme);
+    // Load theme.css + theme.js from disk (non-blocking, optional)
+    const slug = theme.name.toLowerCase().replace(/\s+/g, "-");
+    invoke<string>("get_theme_path", { themeName: slug })
+      .then((path) => injectThemeAssets(slug, path))
+      .catch((e) => console.warn("[ThemeSDK] Could not load theme assets:", e));
+  },
+
+  setCurrentThemeId: (id: string) => {
+    set({ currentThemeId: id });
+    localStorage.setItem("neocab_theme_id", id);
   },
 
   reloadTheme: async () => {
-    // Clear cached theme CSS
-    document.querySelectorAll('[data-theme-css]').forEach(el => el.remove());
     document.getElementById("scanlines-overlay")?.remove();
+    await unloadThemeAssets();
 
-    // Remove theme body class
-    const body = document.body;
-    body.className = body.className.split(" ").filter(c => !c.startsWith("theme-")).join(" ");
-
-    // Re-apply current theme from localStorage or fetch from backend
     const cached = localStorage.getItem("neocab_theme");
     if (cached) {
       try {
         const theme = JSON.parse(cached) as Theme;
         get().applyTheme(theme);
       } catch {
-        // Fall back to listing themes
         await get().listThemes();
         if (get().themes.length > 0) {
           get().applyTheme(get().themes[0]);
@@ -76,7 +211,6 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
       }
     }
 
-    // Trigger re-render by toggling a CSS animation class
     document.documentElement.style.setProperty("--theme-reload", Date.now().toString());
   },
 }));

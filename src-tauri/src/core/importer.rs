@@ -146,6 +146,11 @@ impl UniversalImporter {
                 language: None,
                 created_at: Some("".to_string()),
                 updated_at: Some("".to_string()),
+                buttons: None,
+                control_type: None,
+                joystick_direction: None,
+                category: None,
+                orientation: None,
             };
 
             self.db.insert_game(&game).await?;
@@ -208,6 +213,11 @@ impl UniversalImporter {
                 language: None,
                 created_at: Some("".to_string()),
                 updated_at: Some("".to_string()),
+                buttons: None,
+                control_type: None,
+                joystick_direction: None,
+                category: None,
+                orientation: None,
             };
 
             self.db.insert_game(&game).await?;
@@ -273,6 +283,11 @@ impl UniversalImporter {
                 language: None,
                 created_at: Some("".to_string()),
                 updated_at: Some("".to_string()),
+                buttons: None,
+                control_type: None,
+                joystick_direction: None,
+                category: None,
+                orientation: None,
             };
 
             self.db.insert_game(&game).await?;

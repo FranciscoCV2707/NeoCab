@@ -35,9 +35,18 @@ impl Renderer {
                 crate::error::NeoCabError::Custom(format!("Window creation failed: {}", e))
             })?;
 
-        let canvas = window.into_canvas().build().map_err(|e| {
-            crate::error::NeoCabError::Custom(format!("Canvas creation failed: {}", e))
-        })?;
+        let canvas = window
+            .into_canvas()
+            .accelerated()
+            .present_vsync()
+            .build()
+            .or_else(|_| {
+                tracing::warn!("Failed to initialize hardware accelerated SDL2 canvas, falling back to software rendering");
+                window.into_canvas().software().build()
+            })
+            .map_err(|e| {
+                crate::error::NeoCabError::Custom(format!("Canvas creation failed: {}", e))
+            })?;
 
         tracing::info!("SDL2 Renderer initialized successfully");
 

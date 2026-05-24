@@ -1,8 +1,8 @@
-# 📖 NeoCab Master User Manual v1.3 🎮
+# NeoCab Master User Manual v1.4
 
 This manual provides a comprehensive, step-by-step guide to mastering your **NeoCab** installation. From basic navigation to advanced theme creation, input engineering, and keyboard/gamepad configuration, everything is covered here.
 
-**Version:** 1.3.0 | **Last Updated:** 2026-05-14
+**Version:** 1.4.0 | **Last Updated:** 2026-05-21
 
 ---
 
@@ -44,18 +44,58 @@ The Operator Panel is the "Brain" of your machine. Access it by pressing `Ctrl +
 
 ---
 
-## 🎨 NeoCab Studio (Design Mode)
-NeoCab Studio is a built-in WYSIWYG (What You See Is What You Get) theme editor.
-1.  **Access**: Go to Operator Panel -> **Studio**.
-2.  **Element Selection**: Click on any element (Game Wheel, Video Window, Background) to select it.
-3.  **Transformation**:
-    - **Position**: Drag and drop anywhere on the screen.
-    - **Scale**: Use the slider to make elements larger or smaller.
-    - **Opacity**: Create subtle overlays by adjusting transparency.
-4.  **Transitions (Fades)**:
-    - Set the **Duration** of the loading screen.
-    - Change the **Loading Text** (e.g., "Now Loading", "Get Ready!").
-5.  **Save**: Always click **Save Config** to apply changes.
+## NeoCab Studio (Design Mode)
+
+NeoCab Studio is the built-in visual theme engine. Access it via **Operator Panel → Studio**. It has two layers that work together:
+
+### Attribute Editor (ThemeEditor)
+The left panel lets you configure colors, fonts, background type (color/gradient/image/video), effects (scanlines, CRT curve, glow), layout style, wheel behavior, and sounds. A live preview at the bottom shows either the Systems screen or the Main Menu — toggle between them with the **Sistema / Menú Principal** selector.
+
+### Visual Layout Editor (drag-and-drop)
+Click **Editor Visual** in the Studio header to open the full-screen canvas editor.
+
+**How it works:**
+- **Palette (left)** — click a widget type to add it to the canvas at a default size and position.
+- **Canvas (center)** — drag widgets to move them; drag the bottom-right handle to resize. Click outside to deselect. Press `Delete` to remove the selected widget.
+- **Properties (right)** — when a widget is selected: adjust X, Y, W, H in % with ±0.5 buttons; set Z-index (stacking order); toggle visibility; and configure widget-specific options.
+- **Resolution presets** — 1920×1080, 1280×720, 2560×1440, 1080×1920 (vertical cabinet).
+- **Screen tabs** — Sistemas / Juegos / Menú each have their own widget layout.
+- Click **Aplicar al tema** to push the layout back into the theme, then **Guardar y Aplicar** to persist it.
+
+All positions are in % (0–100), so the layout scales automatically to any resolution.
+
+### Available Widget Types
+
+| Widget | What it shows |
+|---|---|
+| `background` | Full-area background using the theme's color/gradient/image |
+| `system-wheel` | The system selector (carousel, grid, or list style) |
+| `system-logo` | PNG logo from `assets/systems/{name}.png`, or styled initial letter |
+| `clock` | Live clock HH:MM |
+| `credits` | Current coin/credit counter |
+| `session-timer` | Active session countdown |
+| `text-label` | Custom text with font, size, and color |
+| `image` | Static image with contain/cover/fill modes |
+| `game-list` | Game list (active in Games screen) |
+| `game-preview` | Video/screenshot preview (active in Games screen) |
+| `game-info` | Title, developer, tags (active in Games screen) |
+
+### Community Themes & SDK
+
+**Create your own theme:**
+1. Click **Nueva plantilla** → enter a name → a starter folder is created in `themes/{slug}/` with `theme.json`, `theme.css`, `theme.js`, and `metadata.json`.
+2. Click **Abrir carpeta** to open it in your OS file manager.
+3. Edit `theme.css` for custom animations and style overrides; edit `theme.js` for lifecycle hooks (`onMount`, `onNavigate`, `onSelect`, `onBack`, etc.).
+4. Return to NeoCab — your theme appears under **Mis Temas**.
+5. Load it, then open **Editor Visual** to position widgets.
+6. Click **Guardar y Aplicar**.
+
+**Import a community theme:** click **Importar carpeta** → paste the path to any folder containing a `theme.json`.
+
+**Manual SDK:** click **Manual SDK** for a reference modal covering all CSS custom properties, stable DOM classes, custom events, and the `window.NeoCabAPI` object.
+
+### Save
+Click **Guardar y Aplicar** at any time to write all changes (colors, fonts, effects, and widget layout) to `theme.json`.
 
 ---
 

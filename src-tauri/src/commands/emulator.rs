@@ -2,7 +2,8 @@ use crate::core::{ConfigManager, EmulatorManager, TimerManager};
 use crate::db::Database;
 use serde_json::json;
 use std::sync::Arc;
-use tauri::{Emitter, State};
+use std::path::PathBuf;
+use tauri::{Emitter, State, Manager};
 
 // Static catalog — display info that doesn't change at runtime
 fn emulator_catalog() -> Vec<serde_json::Value> {
@@ -172,12 +173,44 @@ pub async fn launch_game(
     // 4. Load JoyMapper profile automatically
     let _ = input_manager.load_profile_for_system(&emu).await;
 
+    // Trigger Lua plugin hook OnGameLaunch
+    if let Some(plugin_state) = app_handle.try_state::<crate::core::plugin_engine::PluginState>() {
+        if let Ok(engine) = plugin_state.0.lock() {
+            let base_dir = app_handle.path().app_data_dir().unwrap_or_else(|_| PathBuf::from("./data"));
+            let ctx = crate::core::plugin_engine::PluginContext::new(base_dir)
+                .with_game(&game.title, &emu);
+            let _ = engine.execute_hook(crate::core::plugin_engine::PluginHook::OnGameLaunch, ctx);
+        }
+    }
+
+    // Trigger HardwareScriptEngine GameLaunched
+    if let Some(hw_script_state) = app_handle.try_state::<Arc<tokio::sync::Mutex<crate::core::HardwareScriptEngine>>>() {
+        let hw_clone = hw_script_state.inner().clone();
+        tokio::spawn(async move {
+            let lock = hw_clone.lock().await;
+            let _ = lock.trigger_event(crate::core::HardwareEvent::GameLaunched).await;
+        });
+    }
+
     // 5. Launch the game via EmulatorManager
     match emulator_manager.launch_game(&game, &emu).await {
         Ok(_) => {
+            // Hide main and marquee windows to suspend rendering & free RAM/GPU memory
+            if let Some(main_window) = app_handle.get_webview_window("main") {
+                let _ = main_window.hide();
+            }
+            if let Some(marquee_window) = app_handle.get_webview_window("marquee") {
+                let _ = marquee_window.hide();
+            }
+
             // Start monitoring process
             let app_clone = app_handle.clone();
             if let Some(adapter) = emulator_manager.get_adapter(&emu) {
+                // Raise emulator priority and lower frontend priority
+                if let Some(pid) = adapter.get_pid().await {
+                    crate::utils::raise_process_priority(pid);
+                }
+
                 let db_clone = db.inner().clone();
                 tokio::spawn(async move {
                     // Let frontend know we're ready
@@ -194,12 +227,43 @@ pub async fn launch_game(
                         }
                     }
 
+                    // Process finished: restore windows
+                    if let Some(main_window) = app_clone.get_webview_window("main") {
+                        let _ = main_window.show();
+                        let _ = main_window.set_focus();
+                    }
+                    if let Some(marquee_window) = app_clone.get_webview_window("marquee") {
+                        let _ = marquee_window.show();
+                    }
+
+                    // Restore own process priority
+                    crate::utils::restore_own_priority();
+
                     // Process finished
                     let elapsed = start_time.elapsed().as_secs() as i64;
                     if elapsed > 10 {
                         // Only count if played for more than 10 seconds
                         let _ = db_clone.update_play_stats(game_id, elapsed).await;
                     }
+
+                    // Trigger Lua plugin hook OnGameEnd
+                    if let Some(plugin_state) = app_clone.try_state::<crate::core::plugin_engine::PluginState>() {
+                        if let Ok(engine) = plugin_state.0.lock() {
+                            let base_dir = app_clone.path().app_data_dir().unwrap_or_else(|_| PathBuf::from("./data"));
+                            let ctx = crate::core::plugin_engine::PluginContext::new(base_dir);
+                            let _ = engine.execute_hook(crate::core::plugin_engine::PluginHook::OnGameEnd, ctx);
+                        }
+                    }
+
+                    // Trigger HardwareScriptEngine GameStopped
+                    if let Some(hw_script_state) = app_clone.try_state::<Arc<tokio::sync::Mutex<crate::core::HardwareScriptEngine>>>() {
+                        let hw_clone = hw_script_state.inner().clone();
+                        tokio::spawn(async move {
+                            let lock = hw_clone.lock().await;
+                            let _ = lock.trigger_event(crate::core::HardwareEvent::GameStopped).await;
+                        });
+                    }
+
                     let _ = app_clone.emit("game_launch_finished", ());
                 });
             }

@@ -68,6 +68,8 @@ dirs = "5.0"
 reqwest = { version = "0.11", features = ["json", "blocking"] }
 urlencoding = "2.1"
 quick-xml = { version = "0.31", features = ["serialize"] }
+mlua = { version = "0.9", features = ["lua54", "vendored"] }
+
 
 # Networking (Phase 7)
 mdns-sd = "0.13"

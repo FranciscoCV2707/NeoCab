@@ -1,8 +1,8 @@
 # 📋 TAREAS DE PROYECTO - NEOCAB
 
-**Actualizado:** 2026-05-14  
-**Versión:** v1.3.0  
-**Estado:** Fases 1-6 COMPLETADAS
+**Actualizado:** 2026-05-21  
+**Versión:** v1.4.0  
+**Estado:** Fases 1-7 COMPLETADAS
 
 ---
 
@@ -525,40 +525,47 @@
 
 ---
 
-## 🎨 SEMANA 13 - THEMES + POLISH
+## SEMANA 13 - THEMES + STUDIO (v1.1 → v1.4) ✅ COMPLETADO
 
-### T13.1: Theme System
-- [ ] Crear sistema de temas
-- [ ] Tema clásico (HyperSpin style)
-- [ ] Tema moderno (flat design)
-- **Estimado:** 2h
+### T13.1: Theme System ✅
+- [x] 5 temas bundled (arcade-classic, neon-future, crt-retro, minimal-dark, cyberpunk)
+- [x] Per-system/game theme assignment con hierarchy resolution
+- [x] ThemeEditor con 7 tabs (colores, fuentes, fondo, layout, efectos, media, sonidos)
+- **Estado:** ✅ COMPLETADO (v1.1)
 
-### T13.2: Tercero Tema
-- [ ] Tema retro (CRT effect)
-- [ ] Switcher de temas
-- [ ] Persistencia
-- **Estimado:** 1.5h
+### T13.2: Widget Layout System ✅
+- [x] `src/types/layout.ts` — tipos Widget, ScreenLayout, ThemeScreens, WidgetType
+- [x] `src/components/ScreenRenderer.tsx` — renderer runtime (posicionamiento % absoluto)
+- [x] `src/components/studio/LayoutEditor.tsx` — canvas drag-and-drop, palette, properties
+- [x] 11 tipos de widget: background, system-wheel, system-logo, game-list, game-preview, game-info, clock, credits, session-timer, text-label, image
+- [x] Resoluciones: 1920×1080, 1280×720, 2560×1440, 1080×1920 (vertical)
+- [x] Backward-compatible: temas sin `screens` usan renderer clásico sin cambios
+- **Estado:** ✅ COMPLETADO (v1.4)
 
-### T13.3: Polish UI
-- [ ] Animaciones suaves
-- [ ] Transiciones
-- [ ] Sound effects
-- **Estimado:** 2h
+### T13.3: Theme SDK ✅
+- [x] `theme.css` — blob URL injection, acceso a todas las CSS vars
+- [x] `theme.js` — ES module con hooks: onMount, onNavigate, onViewChange, onFocus, onSelect, onBack, onUnmount
+- [x] `window.NeoCabAPI` — getCurrentView, getFocusedIndex, getCurrentSystem, getCssVar, setCssVar
+- [x] Custom events bus: neocab:navigate, neocab:viewchange, neocab:focus, neocab:select, neocab:back
+- **Estado:** ✅ COMPLETADO (v1.4)
 
-### T13.4: Performance Optimization
-- [ ] Profile de performance
-- [ ] Optimizar renders
-- [ ] Lazy loading
-- **Estimado:** 1.5h
+### T13.4: Community Theme Tools ✅
+- [x] "Nueva plantilla" — crea carpeta con theme.json + CSS/JS starter + 5 widgets default
+- [x] "Mis Temas" / "Temas incluidos" — dropdowns separados por metadata.json
+- [x] "Importar carpeta" — copia cualquier carpeta con theme.json
+- [x] "Abrir carpeta" — abre en explorador del OS
+- [x] Manual SDK modal — 4 secciones con botones Copy
+- **Estado:** ✅ COMPLETADO (v1.4)
 
-### T13.5: Tests
-- [ ] Visual regression tests
-- [ ] Performance benchmarks
-- [ ] Theme switching tests
-- **Estimado:** 1.5h
+### T13.5: Polish UI ✅
+- [x] MainMenu wired to CSS theme vars
+- [x] Preview toggle Sistema/Menú en ThemeEditor
+- [x] TransitionView component (5 tipos de transición)
+- [x] SystemSelect carousel 3D con glassmorphism
+- **Estado:** ✅ COMPLETADO (v1.1 + v1.4)
 
-**Semana 13 Total:** 8.5 horas  
-**Hito:** 3 temas funcionando ✅
+**Semana 13 Total:** ~80 horas (v1.1 + v1.4 combinadas)  
+**Hito:** NeoCab Studio completo — editor visual drag-and-drop + Theme SDK + herramientas comunidad ✅
 
 ---
 

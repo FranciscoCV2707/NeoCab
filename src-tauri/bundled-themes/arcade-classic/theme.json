@@ -1,7 +1,8 @@
 {
   "name": "Arcade Classic",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "NeoCab Team",
+  "style": "arcade",
   "description": "Authentic 80s arcade cabinet aesthetic with neon glow and warm orange accents",
   "colors": {
     "primary": "#ff6b00",
@@ -20,7 +21,18 @@
     "ui": "Arial",
     "title": "Impact",
     "subtitle": "Arial",
-    "mono": "Consolas"
+    "mono": "Consolas",
+    "google_font": "Press Start 2P"
+  },
+  "background": {
+    "type": "gradient",
+    "color": "#0a0a0a",
+    "gradient": "radial-gradient(ellipse at 50% 30%, #1a0800 0%, #0a0a0a 70%)",
+    "image": null,
+    "video": null,
+    "opacity": 1.0,
+    "blur": 0,
+    "overlay_color": null
   },
   "layout": {
     "system_view": "carousel",
@@ -29,6 +41,15 @@
     "transition": "slide",
     "animation_speed": 300,
     "easing": "easeOutCubic"
+  },
+  "wheel": {
+    "item_size": 120,
+    "item_spacing": 15,
+    "animation_duration": 300,
+    "selected_color": "#ff6b00",
+    "unselected_color": "#444444",
+    "selected_scale": 1.15,
+    "glow_selected": true
   },
   "media": {
     "video_enabled": true,
@@ -49,6 +70,15 @@
     "scanlines": false,
     "crt_curve": 0,
     "glow_intensity": 0.7,
-    "shadow_enabled": true
+    "shadow_enabled": true,
+    "vignette": 0.3,
+    "noise": 0.0,
+    "blur_unselected": 0
+  },
+  "overlay": {
+    "coin_position": "top-right",
+    "timer_position": "bottom-right",
+    "stats_opacity": 0.8,
+    "animation_style": "smooth"
   }
 }

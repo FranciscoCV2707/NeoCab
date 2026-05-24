@@ -111,4 +111,9 @@ impl EmulatorAdapter for GenericAdapter {
         }
         Ok(())
     }
+
+    async fn get_pid(&self) -> Option<u32> {
+        let process = self.process.lock().await;
+        process.as_ref().map(|child| child.id())
+    }
 }

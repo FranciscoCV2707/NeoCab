@@ -1,7 +1,8 @@
 {
   "name": "Cyberpunk",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "NeoCab Team",
+  "style": "cyberpunk",
   "description": "Dark theme with neon accents and glitch effects, inspired by cyberpunk aesthetics",
   "colors": {
     "primary": "#ff006e",
@@ -20,7 +21,18 @@
     "ui": "Verdana",
     "title": "Impact",
     "subtitle": "Verdana",
-    "mono": "Consolas"
+    "mono": "Consolas",
+    "google_font": "Rajdhani"
+  },
+  "background": {
+    "type": "gradient",
+    "color": "#0a0a0a",
+    "gradient": "linear-gradient(135deg, #0a0014 0%, #0a0a0a 50%, #14000a 100%)",
+    "image": null,
+    "video": null,
+    "opacity": 1.0,
+    "blur": 0,
+    "overlay_color": null
   },
   "layout": {
     "system_view": "grid",
@@ -29,6 +41,15 @@
     "transition": "glitch",
     "animation_speed": 250,
     "easing": "easeOutBack"
+  },
+  "wheel": {
+    "item_size": 110,
+    "item_spacing": 20,
+    "animation_duration": 250,
+    "selected_color": "#ff006e",
+    "unselected_color": "#2a0a2a",
+    "selected_scale": 1.2,
+    "glow_selected": true
   },
   "media": {
     "video_enabled": true,
@@ -49,6 +70,15 @@
     "scanlines": true,
     "crt_curve": 0.1,
     "glow_intensity": 0.8,
-    "shadow_enabled": true
+    "shadow_enabled": true,
+    "vignette": 0.5,
+    "noise": 0.02,
+    "blur_unselected": 0
+  },
+  "overlay": {
+    "coin_position": "top-right",
+    "timer_position": "bottom-right",
+    "stats_opacity": 0.9,
+    "animation_style": "smooth"
   }
 }

@@ -1,4 +1,4 @@
-use crate::error::Result;
+use crate::error::{NeoCabError, Result};
 
 /// Arduino Serial Interface for arcade hardware control
 /// Communicates with Arduino for coin counting and solenoid triggering
@@ -200,6 +200,84 @@ impl ArduinoInterface {
         tracing::debug!("Mock port listing (Arduino feature disabled)");
         Ok(vec!["COM3".to_string(), "COM4".to_string()])
     }
+
+    /// Set LED state and color
+    #[cfg(feature = "hardware-arduino")]
+    pub fn set_led(&mut self, pin: u8, color_hex: Option<&str>, state: bool) -> Result<()> {
+        use std::io::Write;
+        if !self.is_connected {
+            return Err(NeoCabError::System("Arduino not connected".to_string()));
+        }
+        if let Some(port) = &mut self.port {
+            let state_byte = if state { b'1' } else { b'0' };
+            let color = color_hex.unwrap_or("FFFFFF");
+            let cmd = format!("L{:02x}{}{}\n", pin, state_byte as char, color);
+            port.write_all(cmd.as_bytes()).map_err(|e| {
+                NeoCabError::System(format!("Failed to write LED command: {}", e))
+            })?;
+            tracing::info!("Arduino SetLED command sent: {}", cmd.trim());
+            Ok(())
+        } else {
+            Err(NeoCabError::System("Serial port not initialized".to_string()))
+        }
+    }
+
+    #[cfg(not(feature = "hardware-arduino"))]
+    pub fn set_led(&mut self, pin: u8, color_hex: Option<&str>, state: bool) -> Result<()> {
+        tracing::debug!("Mock SetLED (Arduino disabled): pin={}, color={:?}, state={}", pin, color_hex, state);
+        Ok(())
+    }
+
+    /// Blink LED
+    #[cfg(feature = "hardware-arduino")]
+    pub fn blink_led(&mut self, pin: u8, times: u32, interval_ms: u32) -> Result<()> {
+        use std::io::Write;
+        if !self.is_connected {
+            return Err(NeoCabError::System("Arduino not connected".to_string()));
+        }
+        if let Some(port) = &mut self.port {
+            let cmd = format!("B{:02x}{:04x}{:04x}\n", pin, times, interval_ms);
+            port.write_all(cmd.as_bytes()).map_err(|e| {
+                NeoCabError::System(format!("Failed to write BlinkLED command: {}", e))
+            })?;
+            tracing::info!("Arduino BlinkLED command sent: {}", cmd.trim());
+            Ok(())
+        } else {
+            Err(NeoCabError::System("Serial port not initialized".to_string()))
+        }
+    }
+
+    #[cfg(not(feature = "hardware-arduino"))]
+    pub fn blink_led(&mut self, pin: u8, times: u32, _interval_ms: u32) -> Result<()> {
+        tracing::debug!("Mock BlinkLED (Arduino disabled): pin={}, times={}", pin, times);
+        Ok(())
+    }
+
+    /// Play sound on Arduino buzzer
+    #[cfg(feature = "hardware-arduino")]
+    pub fn play_sound(&mut self, sound_id: u8) -> Result<()> {
+        use std::io::Write;
+        if !self.is_connected {
+            return Err(NeoCabError::System("Arduino not connected".to_string()));
+        }
+        if let Some(port) = &mut self.port {
+            let cmd = format!("P{:02x}\n", sound_id);
+            port.write_all(cmd.as_bytes()).map_err(|e| {
+                NeoCabError::System(format!("Failed to write PlaySound command: {}", e))
+            })?;
+            tracing::info!("Arduino PlaySound command sent: {}", cmd.trim());
+            Ok(())
+        } else {
+            Err(NeoCabError::System("Serial port not initialized".to_string()))
+        }
+    }
+
+    #[cfg(not(feature = "hardware-arduino"))]
+    pub fn play_sound(&mut self, sound_id: u8) -> Result<()> {
+        tracing::debug!("Mock PlaySound (Arduino disabled): sound_id={}", sound_id);
+        Ok(())
+    }
+
 
     pub fn is_connected(&self) -> bool {
         self.is_connected

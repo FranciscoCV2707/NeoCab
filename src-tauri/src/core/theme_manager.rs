@@ -16,9 +16,13 @@ pub struct Theme {
     pub version: String,
     pub author: String,
     pub description: String,
+    #[serde(default)]
+    pub style: Option<String>,
     pub colors: ThemeColors,
     pub fonts: ThemeFonts,
     pub layout: ThemeLayout,
+    #[serde(default)]
+    pub background: Option<ThemeBackground>,
     pub media: MediaSettings,
     pub sounds: ThemeSounds,
     pub effects: ThemeEffects,
@@ -51,7 +55,33 @@ pub struct ThemeFonts {
     pub title: String,
     pub subtitle: String,
     pub mono: String,
+    #[serde(default)]
+    pub google_font: Option<String>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ThemeBackground {
+    #[serde(rename = "type", default = "default_bg_type")]
+    pub bg_type: String,
+    #[serde(default = "default_bg_color")]
+    pub color: String,
+    #[serde(default)]
+    pub gradient: Option<String>,
+    #[serde(default)]
+    pub image: Option<String>,
+    #[serde(default)]
+    pub video: Option<String>,
+    #[serde(default = "default_one_f32")]
+    pub opacity: f32,
+    #[serde(default)]
+    pub blur: f32,
+    #[serde(default)]
+    pub overlay_color: Option<String>,
+}
+
+fn default_bg_type() -> String { "color".to_string() }
+fn default_bg_color() -> String { "#0a0a0a".to_string() }
+fn default_one_f32() -> f32 { 1.0 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ThemeLayout {
@@ -78,6 +108,12 @@ pub struct ThemeEffects {
     pub crt_curve: f32,
     pub glow_intensity: f32,
     pub shadow_enabled: bool,
+    #[serde(default)]
+    pub vignette: f32,
+    #[serde(default)]
+    pub noise: f32,
+    #[serde(default)]
+    pub blur_unselected: f32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -87,7 +123,14 @@ pub struct WheelSettings {
     pub animation_duration: u32,
     pub selected_color: String,
     pub unselected_color: String,
+    #[serde(default = "default_selected_scale")]
+    pub selected_scale: f32,
+    #[serde(default = "default_true")]
+    pub glow_selected: bool,
 }
+
+fn default_selected_scale() -> f32 { 1.15 }
+fn default_true() -> bool { true }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OverlaySettings {
@@ -116,11 +159,14 @@ pub struct MediaSettings {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ThemeInfo {
+    pub id: String,
     pub name: String,
     pub author: String,
     pub version: String,
     pub description: String,
     pub preview_path: Option<String>,
+    #[serde(default)]
+    pub is_custom: bool,
 }
 
 impl Default for Theme {
@@ -130,6 +176,17 @@ impl Default for Theme {
             version: "1.0.0".to_string(),
             author: "NeoCab Team".to_string(),
             description: "Authentic 80s arcade cabinet aesthetic".to_string(),
+            style: Some("arcade".to_string()),
+            background: Some(ThemeBackground {
+                bg_type: "color".to_string(),
+                color: "#0a0a0a".to_string(),
+                gradient: None,
+                image: None,
+                video: None,
+                opacity: 1.0,
+                blur: 0.0,
+                overlay_color: None,
+            }),
             colors: ThemeColors {
                 primary: "#ff6b00".to_string(),
                 secondary: "#1a1a1a".to_string(),
@@ -148,6 +205,7 @@ impl Default for Theme {
                 title: "Impact".to_string(),
                 subtitle: "Arial".to_string(),
                 mono: "Consolas".to_string(),
+                google_font: None,
             },
             layout: ThemeLayout {
                 system_view: "carousel".to_string(),
@@ -177,6 +235,9 @@ impl Default for Theme {
                 crt_curve: 0.0,
                 glow_intensity: 0.7,
                 shadow_enabled: true,
+                vignette: 0.0,
+                noise: 0.0,
+                blur_unselected: 0.0,
             },
             wheel: Some(WheelSettings {
                 item_size: 120,
@@ -184,6 +245,8 @@ impl Default for Theme {
                 animation_duration: 300,
                 selected_color: "#ff6b00".to_string(),
                 unselected_color: "#666666".to_string(),
+                selected_scale: 1.15,
+                glow_selected: true,
             }),
             overlay: Some(OverlaySettings {
                 coin_position: "top-right".to_string(),
@@ -216,6 +279,10 @@ impl ThemeManager {
         }
     }
 
+    pub fn get_themes_dir(&self) -> &PathBuf {
+        &self.themes_dir
+    }
+
     /// Install bundled themes from src-tauri/bundled-themes/ if they don't exist
     pub fn install_bundled_themes(&self) -> Result<()> {
         if !self.themes_dir.exists() {
@@ -224,36 +291,46 @@ impl ThemeManager {
             })?;
         }
 
-        let bundled_themes = [
+        let bundled_themes: &[(&str, &str, &str, Option<&str>, Option<&str>)] = &[
             (
                 "arcade-classic",
                 include_str!("../../bundled-themes/arcade-classic/theme.json"),
                 include_str!("../../bundled-themes/arcade-classic/layout.json"),
+                Some(include_str!("../../bundled-themes/arcade-classic/theme.css")),
+                Some(include_str!("../../bundled-themes/arcade-classic/theme.js")),
             ),
             (
                 "neon-future",
                 include_str!("../../bundled-themes/neon-future/theme.json"),
                 include_str!("../../bundled-themes/neon-future/layout.json"),
+                None,
+                None,
             ),
             (
                 "minimal-clean",
                 include_str!("../../bundled-themes/minimal-clean/theme.json"),
                 include_str!("../../bundled-themes/minimal-clean/layout.json"),
+                None,
+                None,
             ),
             (
                 "retro-crt",
                 include_str!("../../bundled-themes/retro-crt/theme.json"),
                 include_str!("../../bundled-themes/retro-crt/layout.json"),
+                None,
+                None,
             ),
             (
                 "cyberpunk",
                 include_str!("../../bundled-themes/cyberpunk/theme.json"),
                 include_str!("../../bundled-themes/cyberpunk/layout.json"),
+                None,
+                None,
             ),
         ];
 
         let mut installed = 0;
-        for (name, theme_json, layout_json) in bundled_themes {
+        for (name, theme_json, layout_json, theme_css, theme_js) in bundled_themes {
             let theme_dir = self.themes_dir.join(name);
             if !theme_dir.exists() {
                 fs::create_dir_all(&theme_dir).map_err(|e| {
@@ -267,6 +344,18 @@ impl ThemeManager {
                 fs::write(theme_dir.join("layout.json"), layout_json).map_err(|e| {
                     crate::error::NeoCabError::System(format!("Failed to write layout: {}", e))
                 })?;
+
+                if let Some(css) = theme_css {
+                    fs::write(theme_dir.join("theme.css"), css).map_err(|e| {
+                        crate::error::NeoCabError::System(format!("Failed to write theme.css: {}", e))
+                    })?;
+                }
+
+                if let Some(js) = theme_js {
+                    fs::write(theme_dir.join("theme.js"), js).map_err(|e| {
+                        crate::error::NeoCabError::System(format!("Failed to write theme.js: {}", e))
+                    })?;
+                }
 
                 installed += 1;
                 info!("Installed bundled theme: {}", name);
@@ -341,14 +430,31 @@ impl ThemeManager {
                     match fs::read_to_string(&theme_json) {
                         Ok(json_str) => match serde_json::from_str::<Theme>(&json_str) {
                             Ok(theme) => {
+                                let folder_id = path
+                                    .file_name()
+                                    .and_then(|n| n.to_str())
+                                    .unwrap_or("")
+                                    .to_string();
                                 let preview_path =
                                     path.join("preview.png").to_str().map(String::from);
+                                let metadata_path = path.join("metadata.json");
+                                let is_custom = if metadata_path.exists() {
+                                    fs::read_to_string(&metadata_path)
+                                        .ok()
+                                        .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
+                                        .and_then(|v| v.get("is_custom").and_then(|b| b.as_bool()))
+                                        .unwrap_or(false)
+                                } else {
+                                    false
+                                };
                                 themes.push(ThemeInfo {
+                                    id: folder_id,
                                     name: theme.name,
                                     author: theme.author,
                                     version: theme.version,
                                     description: theme.description,
                                     preview_path,
+                                    is_custom,
                                 });
                             }
                             Err(e) => {
@@ -405,7 +511,7 @@ impl ThemeManager {
         Ok(theme.name)
     }
 
-    /// Export theme as .neotheme ZIP file
+    /// Export theme as .neotheme ZIP file (includes all assets + auto-generated README)
     pub async fn export_theme(&self, name: &str) -> Result<String> {
         let theme_dir = self.themes_dir.join(name);
 
@@ -417,47 +523,35 @@ impl ThemeManager {
         }
 
         let export_path = self.themes_dir.join(format!("{}.neotheme", name));
-
-        // Create ZIP file with theme contents
         let file = fs::File::create(&export_path).map_err(|e| {
             crate::error::NeoCabError::System(format!("Failed to create ZIP: {}", e))
         })?;
 
         let mut zip = zip::ZipWriter::new(file);
 
-        // Add theme.json
-        let theme_json_path = theme_dir.join("theme.json");
-        if theme_json_path.exists() {
-            let content = fs::read_to_string(&theme_json_path).map_err(|e| {
-                crate::error::NeoCabError::System(format!("Failed to read theme.json: {}", e))
-            })?;
+        // Load theme to generate README
+        let theme_opt = if theme_dir.join("theme.json").exists() {
+            fs::read_to_string(theme_dir.join("theme.json"))
+                .ok()
+                .and_then(|s| serde_json::from_str::<Theme>(&s).ok())
+        } else {
+            None
+        };
 
-            zip.start_file("theme.json", Default::default())
-                .map_err(|e| {
-                    crate::error::NeoCabError::System(format!("Failed to add to ZIP: {}", e))
+        // Add all files recursively from the theme directory
+        self.zip_dir_recursive(&theme_dir, &theme_dir, &mut zip)?;
+
+        // Auto-generate README.md if none exists
+        if !theme_dir.join("README.md").exists() {
+            if let Some(ref theme) = theme_opt {
+                let readme = self.generate_readme(theme);
+                zip.start_file("README.md", Default::default()).map_err(|e| {
+                    crate::error::NeoCabError::System(format!("Failed to add README: {}", e))
                 })?;
-            zip.write_all(content.as_bytes()).map_err(|e| {
-                crate::error::NeoCabError::System(format!("Failed to write ZIP: {}", e))
-            })?;
-        }
-
-        // Add preview.png if exists
-        let preview_path = theme_dir.join("preview.png");
-        if preview_path.exists() {
-            let preview_data = fs::read(&preview_path).map_err(|e| {
-                crate::error::NeoCabError::System(format!("Failed to read preview: {}", e))
-            })?;
-
-            zip.start_file("preview.png", Default::default())
-                .map_err(|e| {
-                    crate::error::NeoCabError::System(format!(
-                        "Failed to add preview to ZIP: {}",
-                        e
-                    ))
+                zip.write_all(readme.as_bytes()).map_err(|e| {
+                    crate::error::NeoCabError::System(format!("Failed to write README: {}", e))
                 })?;
-            zip.write_all(&preview_data).map_err(|e| {
-                crate::error::NeoCabError::System(format!("Failed to write preview ZIP: {}", e))
-            })?;
+            }
         }
 
         zip.finish().map_err(|e| {
@@ -467,6 +561,82 @@ impl ThemeManager {
         let export_str = export_path.to_str().unwrap_or("").to_string();
         info!("Exported theme to: {}", export_str);
         Ok(export_str)
+    }
+
+    fn zip_dir_recursive(
+        &self,
+        base: &std::path::Path,
+        dir: &std::path::Path,
+        zip: &mut zip::ZipWriter<fs::File>,
+    ) -> Result<()> {
+        let entries = fs::read_dir(dir).map_err(|e| {
+            crate::error::NeoCabError::System(format!("Failed to read dir: {}", e))
+        })?;
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let rel = path.strip_prefix(base).unwrap_or(&path);
+            let rel_str = rel.to_string_lossy().replace('\\', "/");
+            if path.is_dir() {
+                zip.add_directory(&rel_str, Default::default()).ok();
+                self.zip_dir_recursive(base, &path, zip)?;
+            } else {
+                let data = fs::read(&path).map_err(|e| {
+                    crate::error::NeoCabError::System(format!("Failed to read {}: {}", rel_str, e))
+                })?;
+                zip.start_file(&rel_str, Default::default()).map_err(|e| {
+                    crate::error::NeoCabError::System(format!("Failed to add {}: {}", rel_str, e))
+                })?;
+                zip.write_all(&data).map_err(|e| {
+                    crate::error::NeoCabError::System(format!("Failed to write {}: {}", rel_str, e))
+                })?;
+            }
+        }
+        Ok(())
+    }
+
+    fn generate_readme(&self, theme: &Theme) -> String {
+        let primary = &theme.colors.primary;
+        let bg = &theme.colors.background;
+        let glow = theme.effects.glow_intensity;
+        let scanlines = theme.effects.scanlines;
+        let style = theme.style.as_deref().unwrap_or("custom");
+
+        format!(
+            "# {} v{}\n**Autor:** {}  **Estilo:** {}\n\n{}\n\n\
+## Cómo recrear este tema con IA\n\
+Pega lo siguiente en Claude o ChatGPT:\n\n\
+> \"Crea un tema para NeoCab de estilo {}, color principal {}, fondo {}, \
+intensidad de glow {:.0}%, scanlines: {}. Responde solo con el theme.json válido.\"\n\n\
+## Parámetros principales\n\
+| Campo | Valor | Efecto visual |\n\
+|---|---|---|\n\
+| primary | {} | Color de selección y glow |\n\
+| background | {} | Fondo del menú |\n\
+| glow_intensity | {:.2} | Brillo en elementos activos |\n\
+| scanlines | {} | Efecto de líneas CRT |\n\
+| crt_curve | {:.2} | Curvatura de pantalla CRT |\n\
+| system_view | {} | Disposición de plataformas |\n\
+| transition | {} | Animación de navegación |\n\n\
+## Importar\n\
+Arrastra este archivo .neotheme al Editor de Temas de NeoCab, o usa el botón \"Importar .neotheme\".\n",
+            theme.name,
+            theme.version,
+            theme.author,
+            style,
+            theme.description,
+            style,
+            primary,
+            bg,
+            glow * 100.0,
+            if scanlines { "sí" } else { "no" },
+            primary,
+            bg,
+            glow,
+            scanlines,
+            theme.effects.crt_curve,
+            theme.layout.system_view,
+            theme.layout.transition,
+        )
     }
 
     /// Import theme from .neotheme ZIP file

@@ -8,6 +8,15 @@ import { useTheme } from "./hooks/useTheme";
 import { useTranslation, Locale } from "./i18n";
 import { useSystemStore } from "./stores/useSystemStore";
 import { initThemeHotkey } from "./stores/useThemeStore";
+import { dispatchNeoCabEvent } from "./theme/themeEvents";
+import { exposeNeoCabAPI } from "./theme/neoCabApi";
+import {
+  notifyThemeNavigate,
+  notifyThemeViewChange,
+  notifyThemeFocus,
+  notifyThemeSelect,
+  notifyThemeBack,
+} from "./theme/themePlugin";
 import { useGameStore } from "./stores/useGameStore";
 import { useUIStore, initUIListeners } from "./stores/useUIStore";
 import { Game, SaveState, System } from "./stores/types";
@@ -58,7 +67,7 @@ export default function App() {
   const showSaveStateForGame = useUIStore((s) => s.showSaveStateForGame);
   const hideSaveStateModal = useUIStore((s) => s.hideSaveStateModal);
 
-  useEffect(() => { initUIListeners(); initThemeHotkey(); }, []);
+  useEffect(() => { initUIListeners(); initThemeHotkey(); exposeNeoCabAPI(); }, []);
   useEffect(() => { document.documentElement.setAttribute("lang", locale); }, [locale]);
 
   useEffect(() => {
@@ -208,19 +217,87 @@ export default function App() {
     if (["up", "down", "left", "right"].includes(action)) playSound("navigate");
     switch (currentView) {
       case "menu":
-        if (action === "confirm") { playSound("select"); setView("systems"); }
+        if (action === "confirm") {
+          playSound("select");
+          setView("systems");
+          const vc1 = { from: "menu", to: "systems" };
+          dispatchNeoCabEvent("neocab:viewchange", vc1);
+          notifyThemeViewChange(vc1);
+        }
         break;
-      case "systems":
-        if (action === "up" || action === "left") setFocusedIndex(Math.max(0, focusedIndex - 1));
-        if (action === "down" || action === "right") setFocusedIndex(Math.min(systems.length - 1, focusedIndex + 1));
-        if (action === "confirm" && systems[focusedIndex]) handleSelectSystem(systems[focusedIndex]);
-        if (action === "back") handleBack();
+      case "systems": {
+        if (action === "up" || action === "left") {
+          const next = Math.max(0, focusedIndex - 1);
+          setFocusedIndex(next);
+          const nd = { direction: action, fromIndex: focusedIndex, toIndex: next, view: "systems" };
+          dispatchNeoCabEvent("neocab:navigate", nd);
+          notifyThemeNavigate(nd);
+          document.documentElement.dataset.focusedIndex = String(next);
+          dispatchNeoCabEvent("neocab:focus", { item: systems[next], index: next, view: "systems" });
+          notifyThemeFocus({ item: systems[next], index: next, view: "systems" });
+        }
+        if (action === "down" || action === "right") {
+          const next = Math.min(systems.length - 1, focusedIndex + 1);
+          setFocusedIndex(next);
+          const nd = { direction: action, fromIndex: focusedIndex, toIndex: next, view: "systems" };
+          dispatchNeoCabEvent("neocab:navigate", nd);
+          notifyThemeNavigate(nd);
+          document.documentElement.dataset.focusedIndex = String(next);
+          dispatchNeoCabEvent("neocab:focus", { item: systems[next], index: next, view: "systems" });
+          notifyThemeFocus({ item: systems[next], index: next, view: "systems" });
+        }
+        if (action === "confirm" && systems[focusedIndex]) {
+          const sel = { item: systems[focusedIndex], view: "systems" };
+          dispatchNeoCabEvent("neocab:select", sel);
+          notifyThemeSelect(sel);
+          handleSelectSystem(systems[focusedIndex]);
+          const vc2 = { from: "systems", to: "games" };
+          dispatchNeoCabEvent("neocab:viewchange", vc2);
+          notifyThemeViewChange(vc2);
+        }
+        if (action === "back") {
+          const bk = { fromView: "systems" };
+          dispatchNeoCabEvent("neocab:back", bk);
+          notifyThemeBack(bk);
+          handleBack();
+          const vc3 = { from: "systems", to: "menu" };
+          dispatchNeoCabEvent("neocab:viewchange", vc3);
+          notifyThemeViewChange(vc3);
+        }
         break;
-      case "games":
-        if (action === "up") setFocusedIndex(Math.max(0, focusedIndex - 1));
-        if (action === "down") setFocusedIndex(Math.min(games.length - 1, focusedIndex + 1));
-        if (action === "confirm" && games[focusedIndex]) handlePlayGame(games[focusedIndex]);
-        if (action === "back") handleBack();
+      }
+      case "games": {
+        if (action === "up" || action === "left") {
+          const next = Math.max(0, focusedIndex - 1);
+          setFocusedIndex(next);
+          const nd = { direction: action, fromIndex: focusedIndex, toIndex: next, view: "games" };
+          dispatchNeoCabEvent("neocab:navigate", nd);
+          notifyThemeNavigate(nd);
+          document.documentElement.dataset.focusedIndex = String(next);
+        }
+        if (action === "down" || action === "right") {
+          const next = Math.min(games.length - 1, focusedIndex + 1);
+          setFocusedIndex(next);
+          const nd = { direction: action, fromIndex: focusedIndex, toIndex: next, view: "games" };
+          dispatchNeoCabEvent("neocab:navigate", nd);
+          notifyThemeNavigate(nd);
+          document.documentElement.dataset.focusedIndex = String(next);
+        }
+        if (action === "confirm" && games[focusedIndex]) {
+          const sel = { item: games[focusedIndex], view: "games" };
+          dispatchNeoCabEvent("neocab:select", sel);
+          notifyThemeSelect(sel);
+          handlePlayGame(games[focusedIndex]);
+        }
+        if (action === "back") {
+          const bk = { fromView: "games" };
+          dispatchNeoCabEvent("neocab:back", bk);
+          notifyThemeBack(bk);
+          handleBack();
+          const vc4 = { from: "games", to: "systems" };
+          dispatchNeoCabEvent("neocab:viewchange", vc4);
+          notifyThemeViewChange(vc4);
+        }
         if (action === "coin") {
           invoke<string>("session_insert_coin")
             .then((result) => {
@@ -238,6 +315,7 @@ export default function App() {
             });
         }
         break;
+      }
       case "operator":
         if (action === "back") setView("menu");
         break;
@@ -267,6 +345,8 @@ export default function App() {
       {pauseVisible && (
         <PauseMenu
           gameName={fadeInfo.game}
+          gameId={games[focusedIndex]?.id || 0}
+          emulatorName={selectedSystem?.name || "mame"}
           onClose={() => setPauseVisible(false)}
           onExitGame={() => { setPauseVisible(false); invoke("stop_game", { emulator: selectedSystem?.name || "mame" }); }}
         />

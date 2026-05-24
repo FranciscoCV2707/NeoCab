@@ -1,7 +1,10 @@
-# ⚡ GUÍA RÁPIDA - NEOCAB
+# GUIA RAPIDA - NEOCAB
 
-**Actualizado:** 2026-05-10  
-**Para:** Comenzar proyecto en 30 minutos
+**Actualizado:** 2026-05-21  
+**Versión:** v1.4.0 (estable)  
+**Para:** Comenzar a desarrollar / contribuir al proyecto
+
+> **El proyecto está completo.** Esta guía es para nuevos colaboradores que quieren compilar y ejecutar NeoCab localmente.
 
 ---
 

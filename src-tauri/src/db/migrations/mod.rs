@@ -12,6 +12,18 @@ const MIGRATIONS: &[(&str, &str)] = &[
         "003_extended_media",
         include_str!("003_extended_media.sql"),
     ),
+    (
+        "004_curation_metadata",
+        include_str!("004_curation_metadata.sql"),
+    ),
+    (
+        "005_network_cabinets",
+        include_str!("005_network_cabinets.sql"),
+    ),
+    (
+        "006_dat_metadata",
+        include_str!("006_dat_metadata.sql"),
+    ),
 ];
 
 pub async fn run_migrations(pool: &SqlitePool) -> Result<(), sqlx::Error> {

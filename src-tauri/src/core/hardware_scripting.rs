@@ -114,7 +114,7 @@ impl HardwareScriptEngine {
             }
         };
 
-        let _lock = arduino.lock().await;
+        let mut lock = arduino.lock().await;
 
         match action {
             HardwareAction::TriggerSolenoid {
@@ -122,27 +122,27 @@ impl HardwareScriptEngine {
                 duration_ms: _,
             } => {
                 info!("Executing TriggerSolenoid on ID {}", output_id);
-                // Custom trigger implementation
-                #[cfg(feature = "hardware-arduino")]
                 let _ = lock.trigger_solenoid(*output_id);
             }
             HardwareAction::SetLED {
                 pin,
-                color_hex: _,
+                color_hex,
                 state,
             } => {
                 info!("Executing SetLED on pin {} to state {}", pin, state);
-                // Send specific LED command to Arduino
+                let _ = lock.set_led(*pin, color_hex.as_deref(), *state);
             }
             HardwareAction::BlinkLED {
                 pin,
                 times,
-                interval_ms: _,
+                interval_ms,
             } => {
                 info!("Executing BlinkLED on pin {} {} times", pin, times);
+                let _ = lock.blink_led(*pin, *times, *interval_ms);
             }
             HardwareAction::PlaySound { sound_id } => {
                 info!("Executing Hardware PlaySound {}", sound_id);
+                let _ = lock.play_sound(*sound_id);
             }
         }
 

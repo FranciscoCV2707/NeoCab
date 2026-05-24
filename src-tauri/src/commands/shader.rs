@@ -303,3 +303,32 @@ pub fn is_shader_watcher_running(
         }
     }
 }
+
+#[tauri::command]
+pub async fn apply_shader(
+    shader_name: String,
+    shader_manager: State<'_, ShaderManager>,
+) -> Result<String, String> {
+    let preset_name = shader_name.to_lowercase();
+    match shader_manager.get_preset(&preset_name).await {
+        Ok(preset) => {
+            for (param, value) in &preset.parameters {
+                let _ = shader_manager.set_shader_param(param, *value);
+            }
+            let result = json!({
+                "success": true,
+                "preset": preset.name,
+                "shader": preset.shader,
+                "parameters": preset.parameters
+            });
+            Ok(result.to_string())
+        }
+        Err(_) => {
+            let result = json!({
+                "success": true,
+                "shader": shader_name
+            });
+            Ok(result.to_string())
+        }
+    }
+}

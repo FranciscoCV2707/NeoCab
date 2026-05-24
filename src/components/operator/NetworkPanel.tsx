@@ -1,26 +1,23 @@
 import React, { useState, useEffect } from 'react';
-// TODO: Re-implement network hook
-// import { useNetwork, NetworkRole } from '../../hooks/useNetwork';
 import { invoke } from '@tauri-apps/api/core';
 import './NetworkPanel.css';
 
+interface CabinetInfo {
+    id: string;
+    name: string;
+    ip: string;
+    port: number;
+    is_master: boolean;
+}
+
 export const NetworkPanel: React.FC = () => {
-    const [role, setRole] = useState<string>('master');
+    const [role, setRole] = useState<string>('Standalone');
     const [masterIp, setMasterIp] = useState<string | null>(null);
     const [syncing, setSyncing] = useState(false);
     const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
-
-    interface CabinetInfo {
-        id: string;
-        name: string;
-        ip: string;
-        port: number;
-        is_master: boolean;
-    }
-
-    const _discoveredCabinets: CabinetInfo[] = [];
-    const _loading = false;
-    const _error: string | null = null;
+    const [discoveredCabinets, setDiscoveredCabinets] = useState<CabinetInfo[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const changeRole = async (newRole: string) => {
         setRole(newRole);
@@ -32,17 +29,38 @@ export const NetworkPanel: React.FC = () => {
     };
 
     useEffect(() => {
-        loadMasterIp();
-    }, []);
+        const init = async () => {
+            setLoading(true);
+            try {
+                const currentRole = await invoke<string>('get_network_role');
+                setRole(currentRole);
 
-    const loadMasterIp = async () => {
-        try {
-            const ip = await invoke<string | null>('get_master_ip');
-            setMasterIp(ip);
-        } catch (err) {
-            console.error('Failed to get master IP:', err);
-        }
-    };
+                const ip = await invoke<string | null>('get_master_ip');
+                setMasterIp(ip);
+
+                const cabinets = await invoke<CabinetInfo[]>('list_discovered_cabinets');
+                setDiscoveredCabinets(cabinets);
+            } catch (err) {
+                console.error('Failed to initialize network panel:', err);
+                setError('Error al inicializar la red');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        init();
+
+        const interval = setInterval(async () => {
+            try {
+                const cabinets = await invoke<CabinetInfo[]>('list_discovered_cabinets');
+                setDiscoveredCabinets(cabinets);
+            } catch (err) {
+                console.error('Failed to refresh cabinets:', err);
+            }
+        }, 8000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     const handleSyncNow = async () => {
         setSyncing(true);
@@ -60,13 +78,17 @@ export const NetworkPanel: React.FC = () => {
         changeRole(e.target.value);
     };
 
+    if (loading) {
+        return <div className="network-panel"><p>Cargando configuración de red...</p></div>;
+    }
+
     return (
         <div className="network-panel">
             <header className="panel-header">
                 <h2>Red de Gabinetes</h2>
                 <div className="role-selector">
                     <label>Modo de Red:</label>
-                    <select value={role} onChange={handleRoleChange} disabled={_loading}>
+                    <select value={role} onChange={handleRoleChange}>
                         <option value="Standalone">Independiente (Standalone)</option>
                         <option value="Master">Maestro (Master)</option>
                         <option value="Client">Cliente (Client)</option>
@@ -74,11 +96,11 @@ export const NetworkPanel: React.FC = () => {
                 </div>
             </header>
 
-            {_error && <div className="error-message">{_error}</div>}
+            {error && <div className="error-message">{error}</div>}
 
             <div className="cabinet-list-container">
-                <h3>Gabinetes Detectados ({_discoveredCabinets.length})</h3>
-                {_discoveredCabinets.length === 0 ? (
+                <h3>Gabinetes Detectados ({discoveredCabinets.length})</h3>
+                {discoveredCabinets.length === 0 ? (
                     <div className="empty-state">
                         <p>Buscando otros gabinetes en la red local...</p>
                         <div className="loader"></div>
@@ -95,7 +117,7 @@ export const NetworkPanel: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {_discoveredCabinets.map((cabinet: CabinetInfo) => (
+                            {discoveredCabinets.map((cabinet: CabinetInfo) => (
                                 <tr key={cabinet.id} className={cabinet.is_master ? 'master-row' : ''}>
                                     <td>{cabinet.name} {cabinet.is_master && <span className="badge">MASTER</span>}</td>
                                     <td>{cabinet.ip}</td>

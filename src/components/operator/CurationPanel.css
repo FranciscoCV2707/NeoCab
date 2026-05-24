@@ -1,0 +1,231 @@
+.curation-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+}
+
+.curation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.curation-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.curation-card h4 {
+    margin: 0;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 600;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+.curation-card .hint {
+    font-size: 0.85rem;
+    color: #888;
+    margin: 0;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
+    font-size: 0.9rem;
+    color: #ccc;
+    font-weight: 500;
+}
+
+.input-group select,
+.input-group input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.input-group select:focus,
+.input-group input:focus {
+    border-color: #00d4ff;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.2);
+    outline: none;
+}
+
+.save-btn,
+.run-btn {
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.save-btn {
+    background: #00d4ff;
+    color: #000;
+    margin-top: 10px;
+}
+
+.save-btn:hover {
+    background: #33e0ff;
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+}
+
+.run-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    width: 100%;
+}
+
+.run-btn:hover:not(:disabled) {
+    background: #00ffcc;
+    color: #000;
+    border-color: #00ffcc;
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+}
+
+.run-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.curation-log {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 10px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.curation-log h5 {
+    margin: 0 0 8px 0;
+    color: #00ffcc;
+    font-size: 0.85rem;
+}
+
+.curation-log pre {
+    margin: 0;
+    font-family: 'Consolas', monospace;
+    font-size: 0.8rem;
+    color: #00ffcc;
+    white-space: pre-wrap;
+}
+
+/* Verification results styling */
+.verification-results {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.verification-results h5 {
+    margin: 0;
+    color: #00ffcc;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+}
+
+.results-summary {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 12px;
+    border-radius: 6px;
+}
+
+.result-metric {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #ccc;
+    font-weight: 500;
+}
+
+.result-metric.text-success {
+    color: #00ffcc;
+}
+
+.result-metric.text-warning {
+    color: #ffd700;
+}
+
+.result-metric.text-danger {
+    color: #ff4a4a;
+}
+
+.metric-val {
+    font-weight: 700;
+}
+
+.result-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 12px;
+}
+
+.result-section h6 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.results-list {
+    margin: 0;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.results-list li code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #ffd700;
+    font-family: 'Consolas', monospace;
+}
+
+.list-more {
+    list-style: none;
+    font-style: italic;
+    color: #777;
+    margin-top: 5px;
+}
+

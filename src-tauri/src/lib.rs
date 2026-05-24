@@ -134,7 +134,16 @@ fn run_legacy_app() {
         match legacy::LegacyApp::new().await {
             Ok(mut app) => {
                 tracing::info!("Legacy application created successfully");
-                match app.run().await {
+                
+                // Enable high-precision Windows scheduler timers for stable frame-rate limiting
+                crate::utils::enable_high_precision_timer();
+
+                let run_result = app.run().await;
+
+                // Restore default scheduler resolution on shutdown
+                crate::utils::disable_high_precision_timer();
+
+                match run_result {
                     Ok(_) => {
                         tracing::info!("Legacy application exited normally");
                         Ok(())
@@ -151,7 +160,6 @@ fn run_legacy_app() {
             }
         }
     });
-
     match result {
         Ok(_) => {
             tracing::info!("NeoCab legacy mode shutdown complete");
@@ -194,6 +202,8 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
                     shader_manager,
                     config_manager_arc,
                     network_manager,
+                    arduino_arc,
+                    hardware_script_engine_arc,
                 )) => {
                     app.manage(db);
                     app.manage(game_library);
@@ -211,7 +221,16 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
                     app.manage(config_manager_arc);
                     app.manage(network_manager);
                     app.manage(commands::SafeQuitState::default());
-                    app.manage(core::plugin_engine::PluginState::default());
+
+                    let plugin_state = core::plugin_engine::PluginState::default();
+                    {
+                        if let Ok(mut engine) = plugin_state.0.lock() {
+                            engine.set_arduino(arduino_arc.clone());
+                        }
+                    }
+                    app.manage(plugin_state);
+                    app.manage(arduino_arc);
+                    app.manage(hardware_script_engine_arc);
 
                     // Show marquee window on start if it exists
                     if let Some(marquee) = app.get_webview_window("marquee") {
@@ -242,9 +261,15 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
             commands::list_games,
             commands::toggle_favorite,
             commands::update_game_metadata,
+            commands::curate_arcade_metadata,
             commands::import_external_library,
             commands::import_steam_games,
+            commands::import_dat_file,
+            commands::verify_library_against_dat,
+            commands::get_imported_dats,
             commands::get_save_states,
+            commands::save_game_state,
+            commands::load_game_state,
             commands::get_high_scores,
             commands::scan_roms,
             commands::detect_emulators,
@@ -330,6 +355,10 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
             commands::export_theme,
             commands::import_theme,
             commands::apply_theme,
+            commands::get_theme_path,
+            commands::open_theme_folder,
+            commands::create_theme_from_template,
+            commands::import_theme_folder,
             commands::list_themes,
             commands::set_game_theme,
             commands::get_game_theme,
@@ -401,6 +430,7 @@ fn run_modern_app(kiosk_config: core::kiosk_config::KioskConfig) {
             commands::start_shader_watcher,
             commands::stop_shader_watcher,
             commands::is_shader_watcher_running,
+            commands::apply_shader,
             // Network
             commands::get_network_info,
             commands::list_discovered_cabinets,
@@ -556,6 +586,8 @@ async fn initialize_app() -> Result<(
     core::ShaderManager,
     std::sync::Arc<core::ConfigManager>,
     core::NetworkManager,
+    std::sync::Arc<tokio::sync::Mutex<core::ArduinoInterface>>,
+    std::sync::Arc<tokio::sync::Mutex<core::HardwareScriptEngine>>,
 )> {
     let base = get_base_dir();
     let data_dir = base.join("data");
@@ -626,8 +658,15 @@ async fn initialize_app() -> Result<(
     let shader_manager =
         core::ShaderManager::with_custom_path(shader_path.clone(), shader_path.clone());
 
-    // Phase 7: Network Manager
-    let cabinet_id = uuid::Uuid::new_v4().to_string(); // In a real app, this should be persistent
+    // Phase 7: Network Manager - persistent cabinet_id
+    let cabinet_id = match db.get_config("cabinet_id").await {
+        Ok(Some(id)) => id,
+        _ => {
+            let id = uuid::Uuid::new_v4().to_string();
+            let _ = db.set_config("cabinet_id", &id).await;
+            id
+        }
+    };
     let network_manager =
         core::NetworkManager::new(cabinet_id, "NeoCab-Gabinete".to_string(), 8080, db.clone())?;
 
@@ -635,6 +674,31 @@ async fn initialize_app() -> Result<(
     let _ = network_manager.start_server();
     let _ = network_manager.start_advertising();
     let _ = network_manager.start_discovery();
+
+    // Initialize Arduino connection
+    let arduino_enabled = db.get_config("arduino_enabled").await.ok().flatten().map(|s| s == "true").unwrap_or(false);
+    let arduino_port = db.get_config("arduino_port").await.ok().flatten().unwrap_or_else(|| {
+        if cfg!(target_os = "windows") {
+            "COM3".to_string()
+        } else {
+            "/dev/ttyUSB0".to_string()
+        }
+    });
+    let arduino_baud = db.get_config("arduino_baud").await.ok().flatten().and_then(|s| s.parse::<u32>().ok()).unwrap_or(9600);
+
+    let mut arduino = core::ArduinoInterface::new(arduino_port, arduino_baud);
+    if arduino_enabled {
+        let _ = arduino.connect();
+    }
+    let arduino_arc = std::sync::Arc::new(tokio::sync::Mutex::new(arduino));
+
+    let mut hardware_script_engine = core::HardwareScriptEngine::new();
+    hardware_script_engine.set_arduino(arduino_arc.clone());
+    let hw_script_path = data_dir.join("hardware_script.json");
+    if hw_script_path.exists() {
+        let _ = hardware_script_engine.load_script(&hw_script_path);
+    }
+    let hardware_script_engine_arc = std::sync::Arc::new(tokio::sync::Mutex::new(hardware_script_engine));
 
     Ok((
         db,
@@ -651,5 +715,7 @@ async fn initialize_app() -> Result<(
         shader_manager,
         config_manager_arc,
         network_manager,
+        arduino_arc,
+        hardware_script_engine_arc,
     ))
 }

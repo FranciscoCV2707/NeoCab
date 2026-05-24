@@ -67,6 +67,7 @@
   letter-spacing: 8px;
   margin: 0;
   line-height: 1;
+  font-family: var(--font-title, Impact);
 }
 
 .logo-neo {
@@ -161,6 +162,7 @@
   border-radius: 12px;
   background: var(--surface, #1a1a1a);
   color: var(--text, #ffffff);
+  font-family: var(--font-ui, Arial);
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
@@ -183,7 +185,7 @@
 
 .menu-button:hover:not(.disabled) {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 8px 32px rgba(255, 107, 0, 0.3);
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--primary, #ff6b00) 30%, transparent);
   border-color: var(--highlight, #ff8c00);
 }
 
@@ -205,7 +207,7 @@
 }
 
 .menu-button.primary:hover:not(.disabled) {
-  box-shadow: 0 12px 40px rgba(255, 107, 0, 0.5);
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--primary, #ff6b00) 50%, transparent);
 }
 
 .button-icon {

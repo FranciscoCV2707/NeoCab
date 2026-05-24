@@ -3,6 +3,7 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 import { emit } from "@tauri-apps/api/event";
 import { t } from "../i18n";
 import LeaderboardPanel from './LeaderboardPanel';
+import ShelfView from "./game-list/ShelfView";
 
 interface Game {
   id: number;
@@ -26,6 +27,11 @@ interface Game {
   total_play_time?: number;
   last_played?: string;
   rating?: number;
+  buttons?: number;
+  control_type?: string;
+  joystick_direction?: string;
+  category?: string;
+  orientation?: string;
 }
 
 interface System {
@@ -37,7 +43,7 @@ interface System {
 
 type SortField = "title" | "year" | "genre" | "play_count" | "rating";
 type SortOrder = "asc" | "desc";
-type ViewMode = "list" | "grid" | "compact";
+type ViewMode = "list" | "grid" | "compact" | "shelf";
 
 interface GameListProps {
   system: System;
@@ -183,14 +189,14 @@ export default function GameList({
         <div className="header-actions" style={{ gap: 6 }}>
           {/* View mode buttons */}
           <div className="view-mode-toggle" title="Modo de vista">
-            {(['list', 'grid', 'compact'] as ViewMode[]).map(mode => (
+            {(['list', 'grid', 'compact', 'shelf'] as ViewMode[]).map(mode => (
               <button
                 key={mode}
                 className={`view-mode-btn ${viewMode === mode ? 'active' : ''}`}
                 onClick={() => setViewMode(mode)}
-                title={{ list: 'Lista', grid: 'Cuadrícula', compact: 'Compacto' }[mode]}
+                title={{ list: 'Lista', grid: 'Cuadrícula', compact: 'Compacto', shelf: 'Repisa 3D' }[mode]}
               >
-                {{ list: '≡', grid: '⊞', compact: '▤' }[mode]}
+                {{ list: '≡', grid: '⊞', compact: '▤', shelf: '3D' }[mode]}
               </button>
             ))}
           </div>
@@ -274,139 +280,151 @@ export default function GameList({
       )}
 
       <div className="game-layout">
-        {/* Game List */}
-        <div className={`games-list games-list--${viewMode}`} ref={listRef}>
-          {displayGames.length === 0 ? (
-            <div className="empty-state">
-              <p>{t('NO_GAMES_FOUND')}</p>
-              <p className="hint">
-                {searchQuery ? `Sin resultados para "${searchQuery}"` : games.length > 0 ? "Ajusta los filtros" : t('SCAN_HINT')}
-              </p>
-            </div>
-          ) : viewMode === 'grid' ? (
-            <div className="games-grid">
-              {displayGames.map((game, i) => (
-                <button
-                  key={game.id}
-                  className={`game-card ${i === focusedIndex ? 'focused' : ''}`}
-                  onClick={() => onPlayGame(game)}
-                  disabled={loading}
-                >
-                  {game.image_path ? (
-                    <img src={resolveAssetPath(game.image_path)} alt={game.title} className="game-card-img" />
-                  ) : (
-                    <div className="game-card-placeholder">
-                      {game.is_favorite === 1 && <span className="fav-star">★</span>}
-                    </div>
-                  )}
-                  <div className="game-card-title">{game.title}</div>
-                  {game.year && <div className="game-card-year">{game.year}</div>}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <>
-              {/* Virtual scroll spacer top */}
-              {startIndex > 0 && <div style={{ height: startIndex * (viewMode === 'compact' ? 36 : 55) }} />}
-
-              {visibleGames.map((game, i) => {
-                const realIndex = startIndex + i;
-                return (
-                  <button
-                    key={game.id}
-                    className={`game-item game-item--${viewMode} ${realIndex === focusedIndex ? 'focused' : ''}`}
-                    onClick={() => onPlayGame(game)}
-                    disabled={loading}
-                  >
-                    <div className="game-info">
-                      <div className="game-title">
-                        {game.wheel_path && viewMode !== 'compact' ? (
-                          <img src={resolveAssetPath(game.wheel_path)} alt={game.title} className="game-wheel-icon" />
-                        ) : (
-                          <>
-                            {game.is_favorite === 1 && <span className="fav-star">★</span>}
-                            {game.title}
-                          </>
-                        )}
-                      </div>
-                      {viewMode !== 'compact' && (
-                        <div className="game-meta-row">
-                          {game.year && <span className="meta-tag">{game.year}</span>}
-                          {game.genre && <span className="meta-tag">{game.genre}</span>}
-                          {game.players && <span className="meta-tag">{game.players}P</span>}
-                          {(game.play_count ?? 0) > 0 && <span className="meta-tag played">▶ {game.play_count}</span>}
+        {viewMode === "shelf" ? (
+          <ShelfView
+            games={displayGames}
+            onPlayGame={onPlayGame}
+            loading={loading}
+            focusedIndex={focusedIndex}
+            systemName={system.display_name}
+          />
+        ) : (
+          <>
+            {/* Game List */}
+            <div className={`games-list games-list--${viewMode}`} ref={listRef}>
+              {displayGames.length === 0 ? (
+                <div className="empty-state">
+                  <p>{t('NO_GAMES_FOUND')}</p>
+                  <p className="hint">
+                    {searchQuery ? `Sin resultados para "${searchQuery}"` : games.length > 0 ? "Ajusta los filtros" : t('SCAN_HINT')}
+                  </p>
+                </div>
+              ) : viewMode === 'grid' ? (
+                <div className="games-grid">
+                  {displayGames.map((game, i) => (
+                    <button
+                      key={game.id}
+                      className={`game-card ${i === focusedIndex ? 'focused' : ''}`}
+                      onClick={() => onPlayGame(game)}
+                      disabled={loading}
+                    >
+                      {game.image_path ? (
+                        <img src={resolveAssetPath(game.image_path)} alt={game.title} className="game-card-img" />
+                      ) : (
+                        <div className="game-card-placeholder">
+                          {game.is_favorite === 1 && <span className="fav-star">★</span>}
                         </div>
                       )}
-                    </div>
-                    <div className="game-action">▶</div>
-                  </button>
-                );
-              })}
+                      <div className="game-card-title">{game.title}</div>
+                      {game.year && <div className="game-card-year">{game.year}</div>}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {/* Virtual scroll spacer top */}
+                  {startIndex > 0 && <div style={{ height: startIndex * (viewMode === 'compact' ? 36 : 55) }} />}
 
-              {/* Virtual scroll spacer bottom */}
-              {endIndex < displayGames.length && <div style={{ height: (displayGames.length - endIndex) * (viewMode === 'compact' ? 36 : 55) }} />}
-            </>
-          )}
-        </div>
+                  {visibleGames.map((game, i) => {
+                    const realIndex = startIndex + i;
+                    return (
+                      <button
+                        key={game.id}
+                        className={`game-item game-item--${viewMode} ${realIndex === focusedIndex ? 'focused' : ''}`}
+                        onClick={() => onPlayGame(game)}
+                        disabled={loading}
+                      >
+                        <div className="game-info">
+                          <div className="game-title">
+                            {game.wheel_path && viewMode !== 'compact' ? (
+                              <img src={resolveAssetPath(game.wheel_path)} alt={game.title} className="game-wheel-icon" />
+                            ) : (
+                              <>
+                                {game.is_favorite === 1 && <span className="fav-star">★</span>}
+                                {game.title}
+                              </>
+                            )}
+                          </div>
+                          {viewMode !== 'compact' && (
+                            <div className="game-meta-row">
+                              {game.year && <span className="meta-tag">{game.year}</span>}
+                              {game.genre && <span className="meta-tag">{game.genre}</span>}
+                              {game.players && <span className="meta-tag">{game.players}P</span>}
+                              {(game.play_count ?? 0) > 0 && <span className="meta-tag played">▶ {game.play_count}</span>}
+                            </div>
+                          )}
+                        </div>
+                        <div className="game-action">▶</div>
+                      </button>
+                    );
+                  })}
 
-        {/* Game Preview Panel (right side) */}
-        {currentGame && (
-          <div className="game-preview-panel">
-            {/* Video Preview */}
-            {currentGame.video_path ? (
-              <div className="preview-video-container">
-                <video
-                  ref={videoRef}
-                  key={currentGame.video_path}
-                  src={resolveAssetPath(currentGame.video_path)}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="preview-video"
-                  onError={() => {
-                    // Fallback to image if video fails
-                    if (videoRef.current) videoRef.current.style.display = 'none';
-                  }}
-                />
-              </div>
-            ) : currentGame.image_path ? (
-              <div className="preview-image-container">
-                <img
-                  src={resolveAssetPath(currentGame.image_path)}
-                  alt={currentGame.title}
-                  className="preview-image"
-                />
-              </div>
-            ) : (
-              <div className="preview-placeholder">
-                <span className="preview-placeholder-icon">🎮</span>
-                <span>{currentGame.title}</span>
+                  {/* Virtual scroll spacer bottom */}
+                  {endIndex < displayGames.length && <div style={{ height: (displayGames.length - endIndex) * (viewMode === 'compact' ? 36 : 55) }} />}
+                </>
+              )}
+            </div>
+
+            {/* Game Preview Panel (right side) */}
+            {currentGame && (
+              <div className="game-preview-panel">
+                {/* Video Preview */}
+                {currentGame.video_path ? (
+                  <div className="preview-video-container">
+                    <video
+                      ref={videoRef}
+                      key={currentGame.video_path}
+                      src={resolveAssetPath(currentGame.video_path)}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="preview-video"
+                      onError={() => {
+                        // Fallback to image if video fails
+                        if (videoRef.current) videoRef.current.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                ) : currentGame.image_path ? (
+                  <div className="preview-image-container">
+                    <img
+                      src={resolveAssetPath(currentGame.image_path)}
+                      alt={currentGame.title}
+                      className="preview-image"
+                    />
+                  </div>
+                ) : (
+                  <div className="preview-placeholder">
+                    <span className="preview-placeholder-icon">🎮</span>
+                    <span>{currentGame.title}</span>
+                  </div>
+                )}
+
+                {/* Game Info */}
+                <div className="preview-info">
+                  <h3 className="preview-title">{currentGame.title}</h3>
+                  {currentGame.developer && (
+                    <p className="preview-developer">{currentGame.developer}</p>
+                  )}
+                  <div className="preview-tags">
+                    {currentGame.year && <span className="info-tag">{currentGame.year}</span>}
+                    {currentGame.genre && <span className="info-tag">{currentGame.genre}</span>}
+                    {currentGame.players && <span className="info-tag">{currentGame.players} {t('PLAYERS')}</span>}
+                    {currentGame.rating && currentGame.rating > 0 && (
+                      <span className="info-tag rating">★ {currentGame.rating.toFixed(1)}</span>
+                    )}
+                  </div>
+                  {currentGame.description && (
+                    <p className="preview-description">{currentGame.description.substring(0, 300)}
+                      {currentGame.description.length > 300 ? "..." : ""}
+                    </p>
+                  )}
+                  <LeaderboardPanel gameId={currentGame.id} />
+                </div>
               </div>
             )}
-
-            {/* Game Info */}
-            <div className="preview-info">
-              <h3 className="preview-title">{currentGame.title}</h3>
-              {currentGame.developer && (
-                <p className="preview-developer">{currentGame.developer}</p>
-              )}
-              <div className="preview-tags">
-                {currentGame.year && <span className="info-tag">{currentGame.year}</span>}
-                {currentGame.genre && <span className="info-tag">{currentGame.genre}</span>}
-                {currentGame.players && <span className="info-tag">{currentGame.players} {t('PLAYERS')}</span>}
-                {currentGame.rating && currentGame.rating > 0 && (
-                  <span className="info-tag rating">★ {currentGame.rating.toFixed(1)}</span>
-                )}
-              </div>
-              {currentGame.description && (
-                <p className="preview-description">{currentGame.description.substring(0, 300)}
-                  {currentGame.description.length > 300 ? "..." : ""}
-                </p>
-              )}
-              <LeaderboardPanel gameId={currentGame.id} />
-            </div>
-          </div>
+          </>
         )}
       </div>
     </div>

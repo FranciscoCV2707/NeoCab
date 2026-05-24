@@ -117,6 +117,11 @@ impl EmulatorAdapter for MameAdapter {
             Err(NeoCabError::System("No MAME process running".to_string()))
         }
     }
+
+    async fn get_pid(&self) -> Option<u32> {
+        let process = self.process.lock().await;
+        process.as_ref().map(|child| child.id())
+    }
 }
 
 #[cfg(test)]
