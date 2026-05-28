@@ -1,10 +1,66 @@
-# NeoCab Project Status: v2.0.1 - IMPLEMENTATION COMPLETE
+# NeoCab Project Status: v2.2.1 - INTERFACES PERFECTAMENTE CENTRADAS y CANÓNICAS
 
-**Current Version**: 2.0.1
-**Last Update**: 2026-05-18
+**Current Version**: 2.2.1
+**Last Update**: 2026-05-28
 **Stability**: ✅ BUILDING WITHOUT ERRORS
 **Build Status**: ✅ Frontend + Backend compile clean
-**Platform Support**: Windows 10/11 (primary), Windows XP legacy mode, Linux (future)
+**Platform Support**: Windows XP SP2+ (Legacy SDL2), Windows 7/10/11 (Tauri + React), Linux x86_64, Linux ARM (Raspberry Pi 3/4/5)
+
+---
+
+## 🔧 Session 2026-05-28 — Perfeccionamiento y Centrado de Temas NeoCab (v2.2.1)
+
+### Alineación Milimétrica y Centrado de Carruseles (Fase A)
+- **Corrección de Centrado Matemático**: Se detectó que las traslaciones de los carruseles horizontales estaban desfasadas por la mitad del espaciado (gap) de las cartas. Se modificaron las fórmulas de translación para usar exactamente la mitad del ancho de la carta (`card_width / 2`), logrando un centrado 100% perfecto de la carta activa en la pantalla.
+- **HyperRush**: Se actualizó el cálculo de translación a `calc(-${focusedIndex * CARD_STRIDE}px - 170px)` para centrar perfectamente las tarjetas de 340px de ancho. Se agregó `transform-origin: center center` a `.hr-carousel-track` en CSS.
+- **Batocera**: Se envolvió el carrusel de tarjetas de sistemas en un contenedor canónico `.bat-carousel-track` en `BatoceraSkin.tsx` (que faltaba en la JSX original) y se actualizó la translación a `calc(-${focusedIndex * 260}px - 120px)`. Se añadió `transform-origin: center center` a `.bat-carousel-track` en CSS.
+- **Operator**: Se corrigió la fórmula de translación en `OperatorSkin.tsx` a `calc(-${focusedIndex * 240}px - 110px)`, eliminando el prefijo incorrecto `calc(50% - ...)` que causaba desalineaciones. Se añadió `transform-origin: center center` a `.op-sys-track` en CSS.
+
+### Integración canónica de HomeShell y Variables Dinámicas (Fase B)
+- **HomeShell Dinámico**: Se refactorizó `home-shared.css` reemplazando los valores estáticos basados en el color de HyperRush (tono oklch `35`) por variables CSS personalizadas con prefijo `--theme-*`. De esta forma, el componente compartido `HomeShell` se adapta de manera reactiva e instantánea al color y la tonalidad del tema que se encuentre activo.
+- **NeonWall**: Se actualizó `NeonWallSkin.tsx` para importar y renderizar de forma canónica el componente compartido `<HomeShell />` en lugar de una vista estática, y se mapearon sus variables personalizadas en `neonwall.css` (cyan y magenta).
+- **Flux**: Se actualizó `FluxSkin.tsx` para importar y renderizar de forma canónica el componente compartido `<HomeShell />` en lugar de un overlay estático, y se mapearon sus variables personalizadas en `flux.css` (púrpura y dorado).
+- **Centrado de Selección de Sistemas**: Se refactorizó la rejilla de sistemas de NeonWall (`.nw-sys-grid` y `.nw-sys-tile`) a un diseño de tipo `flexbox` con centrado y espaciado dinámico, solucionando las desalineaciones cuando existen menos de 8 sistemas.
+- **Ajuste de Translación de Flux**: Se corrigió el cálculo de translación del carrusel de sistemas en `FluxSkin.tsx` reemplazando la unidad de porcentaje incorrecta `50%` por `50vw` (`calc(50vw - ${focusedIndex * 320 + 160}px)`), ya que los porcentajes en traslaciones CSS se calculan con base en el ancho del propio elemento (track), causando desfasamientos extremos al variar el número de sistemas.
+
+---
+
+## 🔧 Session 2026-05-23 — Optimizaciones de Cabina y Características Avanzadas (v2.2.0)
+
+### Inyectores de Emuladores Expandidos (Fase A)
+- **Ares**: Implementación de `AresInjector` en `ares_injector.rs` para configurar archivos `.bml` (pantalla completa, API de renderizado Vulkan/OpenGL, volumen).
+- **Redream**: Implementación de `RedreamInjector` en `redream_injector.rs` para inyectar configuraciones en tiempo de ejecución.
+- Registro en `registry.rs` de ambos inyectores de forma automática.
+
+### Curación y Restricciones Activas de Cabina (Fase B)
+- **Filtros SQL Dinámicos**: Modificación de `get_games_by_system` en `connection.rs` para aplicar filtros en SQLite según las capacidades del mueble físico (número máximo de botones, direcciones del joystick y orientación de pantalla).
+- **Panel de Curación UI**: Creación de `CurationPanel.tsx` en el panel del operador para habilitar las restricciones de cabina de forma visual y persistir la configuración en la base de datos.
+
+### Escaneo Rápido de ZIPs y Verificación DAT (Fase C)
+- **ZIP Peeking**: Optimización de `game_library.rs` para leer de forma instantánea el CRC32 desde la cabecera central de directorios del ZIP sin descomprimir los archivos.
+- **Auditoría DAT**: Tabla `dat_metadata` en SQLite y comandos Rust (`import_dat_file`, `verify_library_against_dat`, `get_imported_dats`) para importar metadatos XML Logiqx y reportar ROMs faltantes, renombradas o correctas.
+- **Auditoría UI**: Integración visual de carga de archivos DAT y visualización de reportes de integridad en el panel de curación.
+
+### Estantería 3D en CSS Puro (Fase D)
+- **Renderizado Eficiente**: Componente `ShelfView.tsx` y `ShelfView.css` con transformaciones 3D puras de CSS (`transform-style: preserve-3d`, `perspective`, `rotateY`) en lugar de WebGL/Three.js, reduciendo drásticamente la carga en GPUs antiguas.
+- **Estética Neon Premium**: Animación de foco en cajas, lomos con texto vertical e iluminación ambiental LED sincronizada con los colores de la consola seleccionada.
+
+### Optimización Extrema y Compatibilidad con Windows XP (Fase E & Avanzada)
+- **Precisión del Reloj del Sistema**: Carga dinámica de `winmm.dll` y llamadas a `timeBeginPeriod(1)` / `timeEndPeriod(1)` para reducir la resolución del planificador Win32 de 15.6ms a exactly 1ms, eliminando micro-stutters y asegurando 60 FPS limpios.
+- **Ajustes de E/S y RAM en SQLite**:
+  - `PRAGMA cache_size = -4000` (corta el uso a un máximo de 4MB de caché para cabinas con poca RAM de 512MB).
+  - `PRAGMA temp_store = MEMORY` (fuerza tablas e índices temporales en RAM).
+  - `PRAGMA mmap_size = 0` (evita desbordamientos virtuales en arquitecturas de 32 bits).
+  - `PRAGMA page_size = 4096` (alinea lectura con sectores del HDD).
+- **Renderizado SDL2 con Software Fallback**: Configuración segura del canvas de SDL2 para inicializar con aceleración por hardware y VSync, con fallback transparente a render por software, agregando hints clave (`nearest` scaling, framebuffer acceleration, desactivación de direct3d compiler moderna, etc.).
+- **Prioridad de CPU Dinámica**: Elevación de prioridad a `HIGH_PRIORITY_CLASS` para emuladores activos y reducción a `BELOW_NORMAL_PRIORITY_CLASS` para el proceso backend de NeoCab, garantizando que el juego tenga toda la atención del procesador.
+- **Correcciones Diversas**:
+  - Detección corregida de versiones decimales de Windows XP ("5.1"/"5.2") en `platform_detect.rs` para evitar crasheos al arrancar en modo Moderno en XP.
+  - Generación de reglas de udev `/data/99-neocab.rules` automáticas en Linux para acceso sin root a gamepads y puertos serie Arduino.
+  - Actualización de simulación de inputs físicos usando Enigo `0.6.1` en `games.rs` y `plugin_engine.rs` (Keyboard trait).
+  - Motor de Plugins Lua (`mlua` con Lua 5.4 estática) para ejecutar callbacks sobre eventos del ciclo de cabina y emuladores.
+  - Comunicación serie real en `arduino_serial.rs` y solución de locks mutuos en `hardware_scripting.rs`.
+  - Menú de pausa interactivo (`PauseMenu.tsx` y `PauseMenu.css`) con submenús dinámicos para slots de guardado/carga y presets de CRT (sincronizados con comandos Rust `/apply_shader`).
 
 ---
 

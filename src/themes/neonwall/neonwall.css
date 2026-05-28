@@ -10,6 +10,13 @@
   --nw-accent2: oklch(72% 0.20 var(--nw-h2));
   --nw-gold: oklch(82% 0.18 75);
   --nw-deep: #04030a;
+
+  --theme-h: var(--nw-h);
+  --theme-h2: var(--nw-h2);
+  --theme-bone: var(--nw-bone);
+  --theme-accent: var(--nw-accent);
+  --theme-accent-hot: var(--nw-accent2);
+  --theme-deep: var(--nw-deep);
 }
 
 /* ── BG ──────────────────────────────────────────────────────────────────── */
@@ -253,8 +260,8 @@
 .nw-sys-title { font-family: 'Russo One', sans-serif; font-size: 48px; color: var(--nw-bone); text-shadow: 0 0 22px var(--nw-accent); }
 .nw-sys-count { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .3em; color: rgba(255,255,255,.4); text-transform: uppercase; }
 .nw-sys-back { all: unset; cursor: pointer; margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .3em; color: rgba(255,255,255,.35); text-transform: uppercase; }
-.nw-sys-grid { flex: 1; display: grid; grid-template-columns: repeat(8, 1fr); grid-auto-rows: 1fr; gap: 10px; overflow: hidden; }
-.nw-sys-tile { all: unset; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px 6px; background: oklch(10% .06 var(--c-h, var(--nw-h)) / .6); border: 1px solid oklch(40% .16 var(--c-h, var(--nw-h)) / .3); transition: all .15s; border-radius: 4px; }
+.nw-sys-grid { flex: 1; display: flex; justify-content: center; align-items: center; align-content: center; gap: 20px; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
+.nw-sys-tile { all: unset; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 160px; height: 130px; box-sizing: border-box; background: oklch(10% .06 var(--c-h, var(--nw-h)) / .6); border: 1px solid oklch(40% .16 var(--c-h, var(--nw-h)) / .3); transition: all .15s; border-radius: 4px; }
 .nw-sys-tile.active { border-color: oklch(60% .26 var(--c-h, var(--nw-h))); background: oklch(18% .12 var(--c-h, var(--nw-h)) / .8); box-shadow: 0 0 24px oklch(45% .22 var(--c-h, var(--nw-h)) / .5); }
 .nw-sys-tile-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: oklch(18% .10 var(--c-h, var(--nw-h)) / .7); border: 1px solid oklch(40% .16 var(--c-h, var(--nw-h)) / .4); font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: oklch(68% .26 var(--c-h, var(--nw-h))); }
 .nw-sys-tile-name { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .12em; color: rgba(255,255,255,.5); text-align: center; line-height: 1.3; }

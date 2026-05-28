@@ -154,7 +154,7 @@ export function BatoceraSkin({
               <div className="bat-carousel">
                 <div
                   className="bat-carousel-track"
-                  style={{ transform: `translate(calc(-${focusedIndex * 260}px - 130px), -50%)` }}
+                  style={{ transform: `translate(calc(-${focusedIndex * 260}px - 120px), -50%)` }}
                 >
                   {VISIBLE_CARDS.map(d => {
                     const i = ((focusedIndex + d) % systems.length + systems.length) % systems.length;

@@ -145,7 +145,7 @@ export function HyperRushSkin({
     </>;
   }
 
-  const translateX = `calc(-${focusedIndex * CARD_STRIDE}px - ${CARD_STRIDE / 2}px)`;
+  const translateX = `calc(-${focusedIndex * CARD_STRIDE}px - 170px)`;
 
   return (
     <div className="theme-hyperrush">

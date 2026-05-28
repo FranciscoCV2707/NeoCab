@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { getSystemHue } from '../../components/arcade/MediaShape';
 import type { SkinProps } from '../hyperrush/HyperRushSkin';
+import { HomeShell } from '../shared/HomeShell';
+import '../shared/home-shared.css';
 import './flux.css';
 
 function resolveAsset(path?: string) {
@@ -30,13 +32,6 @@ function useDebug() {
   return show;
 }
 
-const MENU_ITEMS = [
-  { id: 'play',     label: 'JUGAR',    tag: 'selecciona sistema', icon: '▶' },
-  { id: 'scan',     label: 'ESCANEAR', tag: 'buscar ROMs',        icon: '⟳' },
-  { id: 'settings', label: 'AJUSTES',  tag: 'cabinet & tema',     icon: '⚙' },
-  { id: 'operator', label: 'OPERADOR', tag: 'panel de control',   icon: '⚐' },
-];
-
 export function FluxSkin({
   currentView, systems, games, focusedIndex, selectedSystem,
   loading,
@@ -45,6 +40,12 @@ export function FluxSkin({
   const videoRef = useRef<HTMLVideoElement>(null);
   const time = useClock();
   const showDebug = useDebug();
+
+  const totals = {
+    titles: systems.reduce((n, s) => n + (s.game_count ?? 0), 0),
+    systems: systems.length,
+    favorites: games.filter(g => g.is_favorite === 1).length,
+  };
 
   useEffect(() => {
     const root = document.querySelector('.theme-flux') as HTMLElement | null;
@@ -80,21 +81,19 @@ export function FluxSkin({
 
       {/* ── HOME overlay ── */}
       {currentView === 'menu' && (
-        <div className="fx-overlay-view">
-          <div className="fx-home-logo">NEOCAB</div>
-          <div className="fx-home-menu">
-            {MENU_ITEMS.map((item, i) => {
-              const action = [onShowSystems, onScanROMs, onShowSettings, onShowOperator][i];
-              return (
-                <button key={item.id} className={`fx-home-btn${i === focusedIndex ? ' active' : ''}`} onClick={action} tabIndex={-1}>
-                  <span className="ic">{item.icon}</span>
-                  <span className="nm">{item.label}</span>
-                  <span className="tg">{item.tag}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <HomeShell
+          className="nc-home"
+          activeIndex={focusedIndex}
+          onSelect={(id) => {
+            if (id === 'play') onShowSystems();
+            else if (id === 'scan') onScanROMs();
+            else if (id === 'settings') onShowSettings();
+            else if (id === 'operator') onShowOperator();
+          }}
+          totals={totals}
+          themeName="Attract Flux"
+          themeTag="Diagonal panels · Configurable"
+        />
       )}
 
       {/* ── SYSTEMS overlay ── */}
@@ -111,7 +110,7 @@ export function FluxSkin({
             </div>
           </div>
           <div className="fx-sys-carousel">
-            <div className="fx-sys-track" style={{ transform: `translate(calc(50% - ${focusedIndex * 320 + 160}px), -50%)` }}>
+            <div className="fx-sys-track" style={{ transform: `translateX(calc(50vw - ${focusedIndex * 320 + 160}px))` }}>
               {systems.map((sys, i) => {
                 const d = i - focusedIndex;
                 const abs = Math.abs(d);

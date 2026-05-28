@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { getSystemHue } from '../../components/arcade/MediaShape';
 import type { SkinProps } from '../hyperrush/HyperRushSkin';
+import { HomeShell } from '../shared/HomeShell';
+import '../shared/home-shared.css';
 import './neonwall.css';
 
 function resolveAsset(path?: string) {
@@ -18,12 +20,7 @@ function useClock() {
   return `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;
 }
 
-const MENU_ITEMS = [
-  { id: 'play',     label: 'JUGAR',    tag: 'selecciona sistema', icon: '▶' },
-  { id: 'scan',     label: 'ESCANEAR', tag: 'buscar ROMs',        icon: '⟳' },
-  { id: 'settings', label: 'AJUSTES',  tag: 'cabinet & tema',     icon: '⚙' },
-  { id: 'operator', label: 'OPERADOR', tag: 'panel de control',   icon: '⚐' },
-];
+
 
 export function NeonWallSkin({
   currentView, systems, games, focusedIndex, selectedSystem,
@@ -53,6 +50,12 @@ export function NeonWallSkin({
   // tile rows: slices of games around the focused index
   const topRow    = games.slice(Math.max(0, focusedIndex - 2), focusedIndex + 3);
   const bottomRow = games.slice(Math.max(0, focusedIndex - 1), focusedIndex + 4);
+
+  const totals = {
+    titles: systems.reduce((n, s) => n + (s.game_count ?? 0), 0),
+    systems: systems.length,
+    favorites: games.filter(g => g.is_favorite === 1).length,
+  };
 
   const collectionLabel =
     currentView === 'menu'    ? 'MAIN MENU' :
@@ -89,52 +92,46 @@ export function NeonWallSkin({
 
         {/* MAIN */}
         <div className="nw-main">
-          <div className="nw-wall">
+          {currentView === 'menu' ? (
+            <HomeShell
+              className="nc-home"
+              activeIndex={focusedIndex}
+              onSelect={(id) => {
+                if (id === 'play') onShowSystems();
+                else if (id === 'scan') onScanROMs();
+                else if (id === 'settings') onShowSettings();
+                else if (id === 'operator') onShowOperator();
+              }}
+              totals={totals}
+              themeName="NeonWall"
+              themeTag="Neon Tiles · Cyberpunk · Grid"
+            />
+          ) : (
+            <div className="nw-wall">
 
-            {/* ── MENU ── */}
-            {currentView === 'menu' && (
-              <div className="nw-home-view">
-                <div className="nw-home-logo">NEO<br/>CAB</div>
-                <div className="nw-home-menu">
-                  {MENU_ITEMS.map((item, i) => {
-                    const action = [onShowSystems, onScanROMs, onShowSettings, onShowOperator][i];
-                    return (
-                      <button key={item.id} className={`nw-home-item${i === focusedIndex ? ' active' : ''}`} onClick={action} tabIndex={-1}>
-                        <span className="ic">{item.icon}</span>
-                        <span className="lbl">
-                          <span className="name">{item.label}</span>
-                          <span className="tag">{item.tag}</span>
-                        </span>
-                      </button>
-                    );
-                  })}
+              {/* ── SYSTEMS ── */}
+              {currentView === 'systems' && (
+                <div className="nw-sys-view">
+                  <div className="nw-sys-header">
+                    <div className="nw-sys-title">{focSys?.display_name.toUpperCase() ?? '–'}</div>
+                    <div className="nw-sys-count">{systems.length} LIBRARIES</div>
+                    <button className="nw-sys-back" onClick={onBack} tabIndex={-1}>← VOLVER</button>
+                  </div>
+                  <div className="nw-sys-grid">
+                    {systems.map((s, i) => {
+                      const [h] = getSystemHue(s.name);
+                      return (
+                        <button key={s.id} className={`nw-sys-tile${i === focusedIndex ? ' active' : ''}`}
+                          style={{ '--c-h': h } as React.CSSProperties}
+                          onClick={() => onSelectSystem(s)} tabIndex={-1}>
+                          <div className="nw-sys-tile-icon">{s.name.slice(0,3).toUpperCase()}</div>
+                          <div className="nw-sys-tile-name">{s.display_name}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {/* ── SYSTEMS ── */}
-            {currentView === 'systems' && (
-              <div className="nw-sys-view">
-                <div className="nw-sys-header">
-                  <div className="nw-sys-title">{focSys?.display_name.toUpperCase() ?? '–'}</div>
-                  <div className="nw-sys-count">{systems.length} LIBRARIES</div>
-                  <button className="nw-sys-back" onClick={onBack} tabIndex={-1}>← VOLVER</button>
-                </div>
-                <div className="nw-sys-grid">
-                  {systems.map((s, i) => {
-                    const [h] = getSystemHue(s.name);
-                    return (
-                      <button key={s.id} className={`nw-sys-tile${i === focusedIndex ? ' active' : ''}`}
-                        style={{ '--c-h': h } as React.CSSProperties}
-                        onClick={() => onSelectSystem(s)} tabIndex={-1}>
-                        <div className="nw-sys-tile-icon">{s.name.slice(0,3).toUpperCase()}</div>
-                        <div className="nw-sys-tile-name">{s.display_name}</div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+              )}
 
             {/* ── GAMES: tile rows + featured ── */}
             {currentView === 'games' && selectedSystem && (
@@ -228,6 +225,7 @@ export function NeonWallSkin({
               </>
             )}
           </div>
+        )}
 
           <div className="nw-floor" />
         </div>

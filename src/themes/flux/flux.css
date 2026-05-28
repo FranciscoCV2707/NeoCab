@@ -9,6 +9,13 @@
   --fx-accent: oklch(72% 0.22 var(--fx-h));
   --fx-accent2: oklch(75% 0.20 var(--fx-h2));
   --fx-deep: #08060f;
+
+  --theme-h: var(--fx-h);
+  --theme-h2: var(--fx-h2);
+  --theme-bone: var(--fx-bone);
+  --theme-accent: var(--fx-accent);
+  --theme-accent-hot: var(--fx-accent2);
+  --theme-deep: var(--fx-deep);
 }
 
 /* ── BG ──────────────────────────────────────────────────────────────────── */
