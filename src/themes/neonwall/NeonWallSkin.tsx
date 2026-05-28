@@ -70,6 +70,23 @@ export function NeonWallSkin({
         <div className="nw-bg-tex" />
       </div>
 
+      {currentView === 'menu' && (
+        <HomeShell
+          className="nc-home"
+          activeIndex={focusedIndex}
+          onSelect={(id) => {
+            if (id === 'play') onShowSystems();
+            else if (id === 'scan') onScanROMs();
+            else if (id === 'settings') onShowSettings();
+            else if (id === 'operator') onShowOperator();
+          }}
+          totals={totals}
+          themeName="NeonWall"
+          themeTag="Neon Tiles · Cyberpunk · Grid"
+        />
+      )}
+
+      {(currentView === 'systems' || currentView === 'games') && (
       <div className="nw-shell">
 
         {/* TOP */}
@@ -92,21 +109,6 @@ export function NeonWallSkin({
 
         {/* MAIN */}
         <div className="nw-main">
-          {currentView === 'menu' ? (
-            <HomeShell
-              className="nc-home"
-              activeIndex={focusedIndex}
-              onSelect={(id) => {
-                if (id === 'play') onShowSystems();
-                else if (id === 'scan') onScanROMs();
-                else if (id === 'settings') onShowSettings();
-                else if (id === 'operator') onShowOperator();
-              }}
-              totals={totals}
-              themeName="NeonWall"
-              themeTag="Neon Tiles · Cyberpunk · Grid"
-            />
-          ) : (
             <div className="nw-wall">
 
               {/* ── SYSTEMS ── */}
@@ -225,7 +227,6 @@ export function NeonWallSkin({
               </>
             )}
           </div>
-        )}
 
           <div className="nw-floor" />
         </div>
@@ -290,6 +291,7 @@ export function NeonWallSkin({
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

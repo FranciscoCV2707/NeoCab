@@ -6,6 +6,7 @@
 .nc-home {
   position: absolute;
   inset: 0;
+  z-index: 5;
   display: grid;
   grid-template-columns: 1.1fr .9fr;
   gap: 48px;

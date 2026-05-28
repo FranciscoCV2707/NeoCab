@@ -32,6 +32,7 @@ export interface System {
   name: string;
   display_name: string;
   extensions: string;
+  game_count?: number;
 }
 
 export interface SaveState {

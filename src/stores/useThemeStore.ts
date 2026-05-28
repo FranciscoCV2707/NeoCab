@@ -3,6 +3,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { injectThemeAssets, unloadThemeAssets } from "../theme/themePlugin";
 import type { ThemeScreens } from "../types/layout";
 
+export type SkinId = 'hyperwheel' | 'hyperrush' | 'neonwall' | 'batocera' | 'flux' | 'operator' | 'classic';
+
 export interface ThemeBackground {
   type: "color" | "gradient" | "image" | "video";
   color: string;
@@ -36,6 +38,8 @@ export interface Theme {
   version: string;
   author: string;
   style?: string;
+  skin?: SkinId;
+  hw?: { base_hue: number; base_hue2: number };
   description: string;
   colors: Record<string, string>;
   fonts: Record<string, string>;
