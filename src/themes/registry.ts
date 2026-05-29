@@ -28,11 +28,11 @@ export const THEME_REGISTRY: ThemeEntry[] = [
     name: 'HyperWheel',
     skin: 'hyperwheel',
     version: '1.0.0',
-    tagline: 'Retro-futurista · CRT · OKLCH dynamics',
-    description: 'Rueda vertical clásica con efectos CRT y paleta oklch dinámica.',
+    tagline: 'Eléctrico fijo · cyan/azul · CRT',
+    description: 'Variante de HyperRush con identidad eléctrica fija (cyan/azul) en todos los sistemas, en vez de recolorear por sistema.',
     inspiration: 'Future Pinball · LaunchBox BigBox',
-    accent: '#ffb000',
-    hw: { base_hue: 35, base_hue2: 195 },
+    accent: '#22d8ff',
+    hw: { base_hue: 200, base_hue2: 280 },
     effects: { scanlines: false, crt_curve: 0.2, glow_intensity: 0.6, vignette: 0.3, noise: 0.04, blur_unselected: 0, shadow_enabled: true },
     status: 'available',
   },
@@ -106,3 +106,27 @@ export const THEME_REGISTRY: ThemeEntry[] = [
 export function getThemeEntry(id: string): ThemeEntry | undefined {
   return THEME_REGISTRY.find(t => t.id === id);
 }
+
+// Native canonical tokens per skin — these match the default values baked into
+// each skin's .css (:root). The ThemeSwitcher feeds these into the active Theme
+// so a preset reproduces its native look, and the ThemeEditor overrides them
+// live to recolor any skin. Values may be hex or oklch (valid CSS color strings).
+export interface SkinTokens {
+  accent: string;
+  accentHot: string;
+  text: string;
+  bg: string;
+  h: number;
+  h2: number;
+}
+
+export const SKIN_TOKENS: Record<SkinId, SkinTokens> = {
+  hyperwheel: { accent: '#22d8ff', accentHot: '#7df0ff', text: '#eaffff', bg: '#020a12', h: 200, h2: 280 },
+  hyperrush:  { accent: '#ffb000', accentHot: '#ffd166', text: '#fff3d4', bg: '#04030a', h: 35, h2: 320 },
+  neonwall:   { accent: 'oklch(72% 0.22 270)', accentHot: 'oklch(72% 0.20 340)', text: '#fff5e4', bg: '#04030a', h: 270, h2: 340 },
+  flux:       { accent: 'oklch(72% 0.22 290)', accentHot: 'oklch(75% 0.20 50)',  text: '#f6f3eb', bg: '#08060f', h: 290, h2: 50 },
+  batocera:   { accent: 'oklch(72% 0.18 220)', accentHot: 'oklch(68% 0.16 280)', text: '#f6f3eb', bg: '#0a0814', h: 220, h2: 280 },
+  operator:   { accent: '#66ff8a', accentHot: '#c9ffd2', text: '#66ff8a', bg: '#020806', h: 135, h2: 195 },
+  classic:    { accent: '#ff6b00', accentHot: '#ff8c00', text: '#ffffff', bg: '#0d0d0d', h: 35, h2: 200 },
+  composed:   { accent: '#ffb000', accentHot: '#ffd166', text: '#fff3d4', bg: '#04030a', h: 35, h2: 320 },
+};

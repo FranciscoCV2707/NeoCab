@@ -1,9 +1,16 @@
 import { create } from "zustand";
 import { invoke } from "@tauri-apps/api/core";
-import { injectThemeAssets, unloadThemeAssets } from "../theme/themePlugin";
+import { injectThemeAssets, unloadThemeAssets } from "../themes/engine/themePlugin";
 import type { ThemeScreens } from "../types/layout";
 
-export type SkinId = 'hyperwheel' | 'hyperrush' | 'neonwall' | 'batocera' | 'flux' | 'operator' | 'classic';
+export type SkinId = 'hyperwheel' | 'hyperrush' | 'neonwall' | 'batocera' | 'flux' | 'operator' | 'classic' | 'composed';
+
+// A composed theme renders a different skin per screen (Home / Systems / Games).
+export interface ComposeMap {
+  home: SkinId;
+  systems: SkinId;
+  games: SkinId;
+}
 
 export interface ThemeBackground {
   type: "color" | "gradient" | "image" | "video";
@@ -39,6 +46,8 @@ export interface Theme {
   author: string;
   style?: string;
   skin?: SkinId;
+  /** For skin === 'composed': which skin renders each screen. */
+  compose?: ComposeMap;
   hw?: { base_hue: number; base_hue2: number };
   description: string;
   colors: Record<string, string>;
@@ -86,6 +95,29 @@ export function injectThemeCss(theme: Theme) {
   Object.entries(theme.colors).forEach(([key, value]) => {
     root.style.setProperty(`--${key}`, value);
   });
+
+  // Canonical theme tokens — every skin reads these (with its own fallback),
+  // so editing colors/hue in the ThemeEditor recolors all 5 skins live.
+  const c = theme.colors;
+  const setIf = (name: string, value: string | undefined) => {
+    if (value) root.style.setProperty(name, value);
+    else root.style.removeProperty(name);
+  };
+  setIf("--theme-accent", c.accent);
+  setIf("--theme-accent-hot", c.highlight ?? c.accent);
+  setIf("--theme-text", c.text);
+  setIf("--theme-bone", c.text);
+  setIf("--theme-bg", c.background);
+  setIf("--theme-deep", c.background);
+  setIf("--theme-surface", c.surface);
+  setIf("--theme-border", c.border);
+  if (theme.hw) {
+    root.style.setProperty("--theme-h", String(theme.hw.base_hue));
+    root.style.setProperty("--theme-h2", String(theme.hw.base_hue2));
+  } else {
+    root.style.removeProperty("--theme-h");
+    root.style.removeProperty("--theme-h2");
+  }
 
   // Fonts
   root.style.setProperty("--font-ui", theme.fonts.ui || "Arial");

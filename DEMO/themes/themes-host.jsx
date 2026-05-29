@@ -112,20 +112,71 @@ window.ThemePreviewSVG = ThemePreviewSVG;
 // ═══════════════════════════════════════════════════════════════════════════
 // APP — host
 // ═══════════════════════════════════════════════════════════════════════════
+// ─── boot badge / flash overlay shown during a theme switch ────────────────
+function ThemeTransition({ phase, incoming }) {
+  if (phase === 'idle' || !incoming) return null;
+  const accent = incoming.accent || '#ffb000';
+  return (
+    <div className={'nc-xfade is-' + phase} style={{ '--xacc': accent }}>
+      <div className="nc-xfade-grid"></div>
+      <div className="nc-xfade-flash"></div>
+      <div className="nc-xfade-sweep"></div>
+      <div className="nc-xfade-line"></div>
+      <div className="nc-xfade-badge">
+        <div className="nc-xfade-k">SWITCHING <b>FRONTEND</b></div>
+        <div className="nc-xfade-name">{incoming.name}</div>
+        <div className="nc-xfade-tag">{incoming.tagline}</div>
+        <div className="nc-xfade-bar"><span></span></div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const themes = window.THEME_REGISTRY;
-  const [activeId, setActiveId] = useStateApp('hyperrush');
+  const [activeId, setActiveId] = useStateApp('neonwall');
+  const [phase, setPhase]       = useStateApp('idle');    // 'idle' | 'out' | 'in'
+  const [incoming, setIncoming] = useStateApp(null);
+  const busyRef = React.useRef(false);
+
+  // keep the shell's "active theme" pointer in sync (used to focus the grid)
+  useEffectApp(() => { window.__neoCabActiveTheme = activeId; }, [activeId]);
+
+  const requestTheme = useCallbackApp((id) => {
+    if (busyRef.current || id === activeId) return;
+    const t = (window.THEME_REGISTRY || []).find(x => x.id === id);
+    if (!t) { setActiveId(id); return; }
+    busyRef.current = true;
+    setIncoming(t);
+    setPhase('out');                                  // power-off collapse
+    setTimeout(() => {
+      setActiveId(id);                                // swap behind the seam
+      setPhase('in');                                 // power-on expand
+      setTimeout(() => {
+        setPhase('idle');
+        setIncoming(null);
+        busyRef.current = false;
+      }, 820);
+    }, 500);
+  }, [activeId]);
 
   function ThemeMount() {
-    if (activeId === 'batocera' && window.BatoceraTheme) return <window.BatoceraTheme onChangeTheme={setActiveId} />;
-    if (activeId === 'operator' && window.OperatorTheme) return <window.OperatorTheme onChangeTheme={setActiveId} />;
-    if (activeId === 'hyperrush' && window.HyperRushTheme) return <window.HyperRushTheme onChangeTheme={setActiveId} />;
-    if (activeId === 'attractflux' && window.FluxTheme) return <window.FluxTheme onChangeTheme={setActiveId} />;
-    if (activeId === 'neonwall' && window.NeonWallTheme) return <window.NeonWallTheme onChangeTheme={setActiveId} />;
+    if (activeId === 'batocera' && window.BatoceraTheme) return <window.BatoceraTheme onChangeTheme={requestTheme} />;
+    if (activeId === 'operator' && window.OperatorTheme) return <window.OperatorTheme onChangeTheme={requestTheme} />;
+    if (activeId === 'hyperrush' && window.HyperRushTheme) return <window.HyperRushTheme onChangeTheme={requestTheme} />;
+    if (activeId === 'attractflux' && window.FluxTheme) return <window.FluxTheme onChangeTheme={requestTheme} />;
+    if (activeId === 'neonwall' && window.NeonWallTheme) return <window.NeonWallTheme onChangeTheme={requestTheme} />;
     return <div style={{color:'#fff',padding:60,fontFamily:'monospace'}}>Theme "{activeId}" not loaded.</div>;
   }
 
-  return <ThemeMount/>;
+  const wrapCls = 'nc-stage-wrap' + (phase === 'out' ? ' is-out' : phase === 'in' ? ' is-in' : '');
+
+  return (
+    <React.Fragment>
+      <div className={wrapCls}><ThemeMount/></div>
+      <ThemeTransition phase={phase} incoming={incoming}/>
+    </React.Fragment>
+  );
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

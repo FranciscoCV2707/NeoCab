@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { getSystemHue } from '../../components/arcade/MediaShape';
 import type { SkinProps } from '../hyperrush/HyperRushSkin';
-import { HomeShell } from '../shared/HomeShell';
-import '../shared/home-shared.css';
+import { ARCADE_MENU } from '../shared/menu';
 import './flux.css';
 
 function resolveAsset(path?: string) {
@@ -79,49 +78,79 @@ export function FluxSkin({
     <div className="theme-flux">
       <div className="fx-bg"><div className="fx-bg-tex" /></div>
 
-      {/* ── HOME overlay ── */}
       {currentView === 'menu' && (
-        <HomeShell
-          className="nc-home"
-          activeIndex={focusedIndex}
-          onSelect={(id) => {
-            if (id === 'play') onShowSystems();
-            else if (id === 'scan') onScanROMs();
-            else if (id === 'settings') onShowSettings();
-            else if (id === 'operator') onShowOperator();
-          }}
-          totals={totals}
-          themeName="Attract Flux"
-          themeTag="Diagonal panels · Configurable"
-        />
+        <div className="fx-home">
+          <div className="fx-home-logo">
+            <div className="eye"><span className="sq" /><span>ATTRACT FLUX · BUILD 0.7</span></div>
+            <div className="big">NEO<span className="accent">CAB</span></div>
+            <div className="tagline">Floating diagonal frontend. Tilt into your library — pick a system, or jump straight to a collection.</div>
+          </div>
+
+          <div className="fx-home-stats">
+            <div className="cell"><span className="k">Titles</span><span className="v">{totals.titles.toLocaleString()}</span></div>
+            <div className="cell"><span className="k">Systems</span><span className="v">{totals.systems}</span></div>
+            <div className="cell"><span className="k">Favs</span><span className="v hi">{totals.favorites}</span></div>
+            <div className="cell"><span className="k">Session</span><span className="v">TODAY</span></div>
+          </div>
+
+          <div className="fx-home-menu">
+            <div className="fx-home-menu-head"><span className="ln" /><span>MAIN MENU</span></div>
+            {(() => {
+              const menuActions: Record<string, () => void> = {
+                play: onShowSystems,
+                scan: onScanROMs,
+                settings: onShowSettings,
+                operator: onShowOperator,
+              };
+              return ARCADE_MENU.map((item, i) => (
+                <div key={item.id}
+                     className={`fx-home-item${i === focusedIndex ? ' active' : ''}`}
+                     style={{ marginRight: (ARCADE_MENU.length - 1 - i) * 30, opacity: i === focusedIndex ? 1 : .82 }}
+                     onClick={() => menuActions[item.id]?.()}>
+                  <span className="num">{String(i+1).padStart(2,'0')}</span>
+                  <span className="ic">{item.icon}</span>
+                  <span className="body">
+                    <span className="label">{item.label}</span>
+                    <span className="tag">{item.sub}</span>
+                  </span>
+                  <span className="arrow">▶</span>
+                </div>
+              ));
+            })()}
+          </div>
+        </div>
       )}
 
       {/* ── SYSTEMS overlay ── */}
       {currentView === 'systems' && (
         <div className="fx-sys-screen">
-          <div className="fx-overlay-view">
-            <div className="fx-sys-head">
-              <div>
-                <div className="fx-logo-eyebrow"><span className="sq" /><span>SELECT SYSTEM</span></div>
-                <div className="fx-sys-title" style={{fontSize: 84}}>{focSys?.display_name?.toUpperCase() ?? '—'}</div>
-                <div className="fx-sys-sub">{focSys?.name ?? ''}</div>
-              </div>
-              <button className="fx-sys-back" onClick={onBack} tabIndex={-1}>← VOLVER</button>
+          <div className="fx-sys-head" style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div className="fx-logo-eyebrow"><span className="sq" /><span>SELECT SYSTEM</span></div>
+              <div className="fx-logo-big" style={{ fontSize: 84 }}>{focSys?.display_name?.toUpperCase() ?? '—'}</div>
+              <div className="fx-logo-sub">{focSys?.name ?? ''}</div>
             </div>
+            <button onClick={onBack} tabIndex={-1}
+              style={{ alignSelf: 'center', padding: '8px 18px', background: 'oklch(15% 0.08 var(--fx-h) / .6)', border: '1px solid var(--fx-accent)', color: '#fff', fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '.28em', textTransform: 'uppercase', cursor: 'pointer' }}>
+              ← VOLVER
+            </button>
           </div>
           <div className="fx-sys-carousel">
-            <div className="fx-sys-track" style={{ transform: `translateX(calc(50vw - ${focusedIndex * 320 + 160}px))` }}>
+            {/* Track is already centered via CSS (left:50%; top:50%). Match DEMO exactly:
+                translate(-idx*STRIDE - halfCard, -50%). STRIDE = card(260)+gap(60)=320. */}
+            <div className="fx-sys-track" style={{ transform: `translate(calc(-${focusedIndex * 320}px - 130px), -50%)` }}>
               {systems.map((sys, i) => {
                 const d = i - focusedIndex;
                 const abs = Math.abs(d);
+                const scale = abs === 0 ? 1.06 : abs === 1 ? .82 : abs === 2 ? .64 : .5;
                 return (
                   <button key={sys.id}
                     className={`fx-sys-card${d === 0 ? ' active' : ''}`}
                     style={{
                       '--c-h': getSystemHue(sys.name)[0],
-                      transform: `rotate(${d * -3}deg) scale(${abs === 0 ? 1 : abs === 1 ? .85 : .68})`,
-                      opacity: abs === 0 ? 1 : abs === 1 ? .75 : .35,
-                      filter: `blur(${abs === 0 ? 0 : abs * .6}px)`,
+                      transform: `rotateY(${d * -18}deg) rotate(${d * -2}deg) scale(${scale})`,
+                      opacity: abs === 0 ? 1 : abs === 1 ? .8 : abs === 2 ? .45 : .2,
+                      filter: `blur(${abs === 0 ? 0 : abs === 1 ? .4 : abs === 2 ? 1.3 : 2.4}px)`,
                       zIndex: 100 - abs,
                     } as React.CSSProperties}
                     onClick={() => onSelectSystem(sys)} tabIndex={-1}>

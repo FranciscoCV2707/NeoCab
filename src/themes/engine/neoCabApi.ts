@@ -1,13 +1,11 @@
-import { useUIStore } from '../stores/useUIStore';
-import { useSystemStore } from '../stores/useSystemStore';
-import type { NeoCabAPI } from '../types/theme-plugin';
+import { useUIStore } from '../../stores/useUIStore';
+import { useSystemStore } from '../../stores/useSystemStore';
+import type { NeoCabAPI } from '../../types/theme-plugin';
 
 const THEME_VAR_PREFIX = '--theme-';
 const NEOCAB_VERSION = '2.0.0';
 
 function getFocusedIndex(): number {
-  // focusedIndex lives in useGameStore — access via DOM data attr as fallback
-  // Reads from document attribute set by the wheel to avoid circular store deps
   const attr = document.documentElement.dataset.focusedIndex;
   return attr !== undefined ? parseInt(attr, 10) : 0;
 }

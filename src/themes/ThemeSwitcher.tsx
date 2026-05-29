@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { THEME_REGISTRY, type ThemeEntry } from './registry';
+import { THEME_REGISTRY, SKIN_TOKENS, type ThemeEntry } from './registry';
 import { useThemeStore, type Theme, injectThemeCss } from '../stores/useThemeStore';
+import { ThemeTransition } from './ThemeTransition';
 import './ThemeSwitcher.css';
 
 interface ThemeSwitcherProps {
@@ -9,19 +10,21 @@ interface ThemeSwitcherProps {
 
 // Build a valid Theme from a registry entry, merging with a base if available
 function buildTheme(entry: ThemeEntry, base: Theme | null): Theme {
+  const tok = SKIN_TOKENS[entry.skin];
   const defaults: Theme = {
     name: entry.name,
     version: entry.version,
     author: 'NeoCab',
     description: entry.description,
     skin: entry.skin,
-    hw: entry.hw,
+    hw: { base_hue: tok.h, base_hue2: tok.h2 },
     colors: {
-      primary: entry.accent,
+      primary: tok.accent,
       secondary: '#1a1a2e',
-      accent: entry.accent,
-      text: '#ffffff',
-      bg: '#04030a',
+      accent: tok.accent,
+      highlight: tok.accentHot,
+      text: tok.text,
+      background: tok.bg,
     },
     fonts: {
       ui: 'Bebas Neue',
@@ -54,7 +57,8 @@ function buildTheme(entry: ThemeEntry, base: Theme | null): Theme {
     ...base,
     name: entry.name,
     skin: entry.skin,
-    hw: entry.hw,
+    hw: { base_hue: tok.h, base_hue2: tok.h2 },
+    colors: { ...base.colors, ...defaults.colors },
     effects: { ...base.effects, ...entry.effects },
     background: base.background ?? DEFAULT_BG,
   };
@@ -180,6 +184,9 @@ export function ThemeSwitcher({ onClose }: ThemeSwitcherProps) {
   const [focusIdx, setFocusIdx]     = useState(initIdx);
   const [selectedId, setSelectedId] = useState<string | null>(activeId);
   const [saved, setSaved]           = useState(false);
+  const [transPhase, setTransPhase] = useState<'idle' | 'out' | 'in'>('idle');
+  const [transEntry, setTransEntry] = useState<ThemeEntry | null>(null);
+  const transRef = useRef(false);
 
   // Preview: apply theme visually without persisting to localStorage yet
   const previewEntry = (entry: ThemeEntry) => {
@@ -191,12 +198,25 @@ export function ThemeSwitcher({ onClose }: ThemeSwitcherProps) {
 
   const saveAndClose = () => {
     const entry = THEME_REGISTRY[focusIdx];
-    if (!entry || entry.status === 'planned') return;
-    const theme = buildTheme(entry, originalTheme.current);
-    applyTheme(theme); // saves to localStorage
-    localStorage.setItem('neocab_theme_id', entry.id);
-    setSaved(true);
-    setTimeout(onClose, 200);
+    if (!entry || entry.status === 'planned' || transRef.current) return;
+
+    transRef.current = true;
+    setTransEntry(entry);
+    setTransPhase('out');
+
+    setTimeout(() => {
+      const theme = buildTheme(entry, originalTheme.current);
+      applyTheme(theme);
+      localStorage.setItem('neocab_theme_id', entry.id);
+      setSaved(true);
+      setTransPhase('in');
+      setTimeout(() => {
+        setTransPhase('idle');
+        setTransEntry(null);
+        transRef.current = false;
+        onClose();
+      }, 820);
+    }, 500);
   };
 
   const cancelAndClose = () => {
@@ -309,6 +329,8 @@ export function ThemeSwitcher({ onClose }: ThemeSwitcherProps) {
           </button>
         </div>
       </div>
+
+      <ThemeTransition phase={transPhase} incoming={transEntry} />
     </div>
   );
 }

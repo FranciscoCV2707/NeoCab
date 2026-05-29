@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import type { SkinProps } from '../hyperrush/HyperRushSkin';
+import { MediaShape, getSystemShape, getSystemHue } from '../../components/arcade/MediaShape';
+import { ARCADE_MENU } from '../shared/menu';
 import './operator.css';
 
 function resolveAsset(path?: string) {
@@ -28,13 +30,6 @@ const VIEWS = [
   { id: 'list',    label: 'List',          key: '1' },
   { id: 'preview', label: 'List + Preview',key: '2' },
   { id: 'grid',    label: 'Grid',          key: '3' },
-];
-
-const MENU_ITEMS = [
-  { label: 'SELECT SYSTEM',  desc: 'Browse game libraries' },
-  { label: 'SCAN ROMS',      desc: 'Index new game files'  },
-  { label: 'SETTINGS',       desc: 'System configuration'  },
-  { label: 'OPERATOR PANEL', desc: 'Manage & statistics'   },
 ];
 
 export function OperatorSkin({
@@ -73,7 +68,7 @@ export function OperatorSkin({
   })();
 
   const listItems = (() => {
-    if (currentView === 'menu')    return MENU_ITEMS.map((m,i) => ({ id: String(i), title: m.label, sub: '', plays: '', genre: '', sys: '' }));
+    if (currentView === 'menu')    return ARCADE_MENU.map((m) => ({ id: m.id, title: m.label, sub: m.sub, plays: '', genre: '', sys: '' }));
     if (currentView === 'systems') return systems.map(s => ({ id: s.id, title: s.display_name, sub: s.name, plays: '', genre: '', sys: '' }));
     return filteredGames.map(g => ({ id: String(g.id), title: g.title, sub: g.developer ?? '', plays: String(g.play_count ?? 0), genre: g.genre ?? '', sys: selectedSystem?.name.toUpperCase() ?? '' }));
   })();
@@ -108,18 +103,23 @@ export function OperatorSkin({
             <div className="op-home-pane">
               <div className="op-pane-head">MAIN MENU<span className="right">SELECT &amp; PRESS [ENTER]</span></div>
               <div className="op-home-menu">
-                {MENU_ITEMS.map((item, i) => {
-                  const action = [onShowSystems, onScanROMs, onShowSettings, onShowOperator][i];
-                  return (
-                    <div key={i} className={`op-menu-row${i === focusedIndex ? ' active' : ''}`}
-                      onClick={action}>
+                {(() => {
+                  const menuActions: Record<string, () => void> = {
+                    play: onShowSystems,
+                    scan: onScanROMs,
+                    settings: onShowSettings,
+                    operator: onShowOperator,
+                  };
+                  return ARCADE_MENU.map((item, i) => (
+                    <div key={item.id} className={`op-menu-row${i === focusedIndex ? ' active' : ''}`}
+                      onClick={() => menuActions[item.id]?.()}>
                       <span className="key">[{i+1}]</span>
-                      <span className="ic">▶</span>
+                      <span className="ic">{item.icon}</span>
                       <span className="lbl">{item.label}</span>
-                      <span className="tag">{item.desc}</span>
+                      <span className="tag">{item.sub}</span>
                     </div>
-                  );
-                })}
+                  ));
+                })()}
               </div>
             </div>
             <div className="op-home-side">
@@ -171,16 +171,20 @@ export function OperatorSkin({
                 const abs = Math.abs(d);
                 const scale = d === 0 ? 1.2 : abs === 1 ? .82 : abs === 2 ? .62 : .42;
                 const opacity = abs === 0 ? 1 : abs === 1 ? .65 : abs === 2 ? .25 : .08;
+                const blur = abs === 0 ? 0 : abs === 1 ? .35 : abs === 2 ? 1.2 : 2.2;
+                const [h] = getSystemHue(s.name);
                 return (
                   <div key={s.id}
                     className={`op-sys-card${d === 0 ? ' active' : ''}`}
-                    style={{ transform: `scale(${scale})`, opacity, zIndex: 100 - abs }}
+                    style={{ transform: `scale(${scale}) rotateY(${d * -15}deg)`, opacity, filter: `blur(${blur}px)`, zIndex: 100 - abs, '--c-h': h } as React.CSSProperties}
                     onClick={() => onSelectSystem(s)}>
                     <div className="op-sys-card-head">
                       <span className="short">{s.name.slice(0, 4).toUpperCase()}</span>
                       <span className="id">{i + 1}.sys</span>
                     </div>
-                    <div className="op-sys-card-art" />
+                    <div className="op-sys-card-art">
+                      <MediaShape shape={getSystemShape(s.name)} hue={h} short={s.name.slice(0,4).toUpperCase()} />
+                    </div>
                     <div className="op-sys-card-name">{s.display_name}</div>
                     <div className="op-sys-card-tag">{s.name}</div>
                     <div className="op-sys-card-count">{games.length} ROMS</div>

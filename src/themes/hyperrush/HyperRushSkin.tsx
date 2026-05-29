@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { getSystemHue } from '../../components/arcade/MediaShape';
+import { MediaShape, getSystemShape, getSystemHue } from '../../components/arcade/MediaShape';
 import { Game, System } from '../../stores/types';
 import type { View } from '../../stores/types';
+import { ARCADE_MENU } from '../shared/menu';
 import './hyperrush.css';
 
 export interface SkinProps {
@@ -29,25 +30,19 @@ function resolveAsset(path?: string) {
 
 const CARD_STRIDE = 380;
 
-const MENU_ITEMS = [
-  { id: 'play',     label: 'JUGAR',    tag: 'selecciona sistema', icon: '▶' },
-  { id: 'scan',     label: 'ESCANEAR', tag: 'buscar ROMs',        icon: '⟳' },
-  { id: 'settings', label: 'AJUSTES',  tag: 'cabinet & tema',     icon: '⚙' },
-  { id: 'operator', label: 'OPERADOR', tag: 'panel de operador',  icon: '⚐' },
-];
-
 type Screen = 'menu' | 'systems' | 'games';
 
-function HRMarquee({ headline, meta }: { headline: React.ReactNode; meta: React.ReactNode }) {
-  const [t] = useState(() => new Date());
-  const time = `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
+function HRMarquee({ headline, meta, tag = 'HYPERRUSH · v2.2' }: { headline: React.ReactNode; meta: React.ReactNode; tag?: string }) {
+  const [t, setT] = useState(() => new Date());
+  useEffect(() => { const id = setInterval(() => setT(new Date()), 1000); return () => clearInterval(id); }, []);
+  const time = `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}:${String(t.getSeconds()).padStart(2, '0')}`;
   return (
     <div className="hr-marquee">
       <div className="hr-brand">
         <div className="hr-brand-mark">N</div>
         <div>
           <div className="hr-brand-name">NEOCAB</div>
-          <div className="hr-brand-tag">HYPERRUSH · v2.2</div>
+          <div className="hr-brand-tag">{tag}</div>
         </div>
       </div>
       <div className="hr-marquee-title">
@@ -67,7 +62,14 @@ export function HyperRushSkin({
   currentView, systems, games, focusedIndex, selectedSystem,
   loading, scanProgress,
   onSelectSystem, onPlayGame, onShowSystems, onShowOperator, onShowSettings, onScanROMs,
-}: SkinProps) {
+  variant = 'rush',
+}: SkinProps & { variant?: 'rush' | 'wheel' }) {
+  const menuActions: Record<string, () => void> = {
+    play: onShowSystems,
+    scan: onScanROMs,
+    settings: onShowSettings,
+    operator: onShowOperator,
+  };
   const videoRef  = useRef<HTMLVideoElement>(null);
   const listRef  = useRef<HTMLDivElement>(null);
   const prevView = useRef<Screen>(currentView as Screen);
@@ -83,12 +85,19 @@ export function HyperRushSkin({
   useEffect(() => {
     const root = document.querySelector('.theme-hyperrush') as HTMLElement | null;
     if (!root) return;
+    if (variant === 'wheel') {
+      // HyperWheel keeps a fixed electric-blue identity across all systems
+      // (HyperRush, by contrast, recolors per selected system).
+      root.style.setProperty('--hr-h', '200');
+      root.style.setProperty('--hr-h2', '280');
+      return;
+    }
     let h = 35, h2 = 320;
     if (view === 'systems' && systems[focusedIndex]) [h, h2] = getSystemHue(systems[focusedIndex].name);
     else if (view === 'games' && selectedSystem) [h, h2] = getSystemHue(selectedSystem.name);
     root.style.setProperty('--hr-h',  String(h));
     root.style.setProperty('--hr-h2', String(h2));
-  }, [view, focusedIndex, systems, selectedSystem]);
+  }, [view, focusedIndex, systems, selectedSystem, variant]);
 
   useEffect(() => {
     if (videoRef.current) { videoRef.current.load(); videoRef.current.play().catch(() => {}); }
@@ -145,10 +154,10 @@ export function HyperRushSkin({
     </>;
   }
 
-  const translateX = `calc(-${focusedIndex * CARD_STRIDE}px - 170px)`;
+  const translateX = `calc(-${focusedIndex * CARD_STRIDE}px - ${CARD_STRIDE / 2}px)`;
 
   return (
-    <div className="theme-hyperrush">
+    <div className={`theme-hyperrush${variant === 'wheel' ? ' hr-variant-wheel' : ''}`}>
       <div className="hr-bg">
         <div className="hr-bg-rays" />
         <div className="hr-bg-grid" />
@@ -157,9 +166,8 @@ export function HyperRushSkin({
       <div className="hr-vignette" />
       <div className="hr-noise" />
 
-      <HRMarquee headline={marqueeHeadline} meta={marqueeMeta} />
-
       <div className="hr-shell">
+        <HRMarquee headline={marqueeHeadline} meta={marqueeMeta} tag={variant === 'wheel' ? 'HYPERWHEEL · v2.2' : 'HYPERRUSH · v2.2'} />
         <div className="hr-main">
 
           {/* ── HOME ── */}
@@ -199,21 +207,18 @@ export function HyperRushSkin({
                   <span className="line" />
                 </div>
                 <div className="hr-home-menu">
-                  {MENU_ITEMS.map((item, i) => {
-                    const action = [onShowSystems, onScanROMs, onShowSettings, onShowOperator][i];
-                    return (
+                  {ARCADE_MENU.map((item, i) => (
                       <button key={item.id} className={`hr-menu-item${i === focusedIndex ? ' active' : ''}`}
-                        onClick={action} tabIndex={-1}>
+                        onClick={() => menuActions[item.id]?.()} tabIndex={-1}>
                         <span className="mi-num">{String(i + 1).padStart(2, '0')}</span>
                         <span className="mi-icon">{item.icon}</span>
                         <span className="mi-body">
                           <span className="mi-label">{item.label}</span>
-                          <span className="mi-tag">{item.tag}</span>
+                          <span className="mi-tag">{item.sub}</span>
                         </span>
                         {i === focusedIndex && <span className="mi-arrow">▶</span>}
                       </button>
-                    );
-                  })}
+                  ))}
                 </div>
                 <div className="hr-home-credits">INSERT COIN · CREDITS <b>99</b> · FREE PLAY MODE</div>
               </div>
@@ -254,7 +259,7 @@ export function HyperRushSkin({
                     return (
                       <div
                         key={s.id}
-                        className={`hr-sys-card-new${d === 0 ? ' active' : ''}`}
+                        className={`hr-sys-card${d === 0 ? ' active' : ''}`}
                         style={{
                           transform: `scale(${scale}) rotateY(${rotY}deg)`,
                           opacity, filter: `blur(${blur}px)`, zIndex: 100 - abs,
@@ -265,10 +270,7 @@ export function HyperRushSkin({
                         <div className="hr-sys-card-grid" />
                         <div className="hr-sys-card-kind">■ PLATFORM</div>
                         <div className="hr-sys-card-media">
-                          <svg viewBox="0 0 80 80" width="80" height="80">
-                            <rect x="10" y="10" width="60" height="60" rx="8" fill={`oklch(40% .16 ${h})`} stroke={`oklch(70% .22 ${h})`} strokeWidth="1.5" />
-                            <text x="40" y="42" textAnchor="middle" fill={`oklch(80% .22 ${h})`} fontFamily="Bebas Neue" fontSize="18">{s.name.slice(0, 4).toUpperCase()}</text>
-                          </svg>
+                          <MediaShape shape={getSystemShape(s.name)} hue={h} short={s.name.slice(0,4).toUpperCase()} />
                         </div>
                         <div className="hr-sys-card-body">
                           <div className="hr-sys-card-name">{s.display_name}</div>
@@ -346,7 +348,7 @@ export function HyperRushSkin({
                     </div>
                     <div className="hr-logo-big" key={focused.id}>{focused.title}</div>
                     {focused.developer && <div className="hr-logo-sub">{focused.developer.toUpperCase()}</div>}
-                    <div className="hr-logo-meta">
+                    <div className="hr-meta">
                       <div className="hr-meta-cell"><div className="k">AÑO</div><div className="v">{focused.year ?? '—'}</div></div>
                       <div className="hr-meta-cell"><div className="k">MAKER</div><div className="v">{focused.developer ?? '—'}</div></div>
                       <div className="hr-meta-cell"><div className="k">GÉNERO</div><div className="v">{focused.genre ?? '—'}</div></div>
@@ -370,7 +372,7 @@ export function HyperRushSkin({
                       const ri  = si;
                       const d   = ri - focusedIndex;
                       const abs = Math.abs(d);
-                      const cls = `hr-wheel-item${d === 0 ? ' active' : abs === 1 ? ' n1' : abs === 2 ? ' n2' : ' far'}`;
+                      const cls = `hr-wheel-item${d === 0 ? ' active' : abs === 1 ? ' n1' : abs === 2 ? ' n2' : ' f'}`;
                       const [h] = selectedSystem ? getSystemHue(selectedSystem.name) : [35];
                       return (
                         <div key={game.id} className={cls} style={{ '--c-h': h } as React.CSSProperties}>
@@ -412,8 +414,10 @@ export function HyperRushSkin({
             </>
           ) : (
             <>
-              <div className="hr-ctl"><span className="btn g">A</span><span className="lbl"><b>Confirmar</b><span>seleccionar</span></span></div>
+              <div className="hr-ctl"><span className="btn g">A</span><span className="lbl"><b>Seleccionar</b><span>entrar al menú</span></span></div>
               <div className="hr-ctl"><span className="btn r">B</span><span className="lbl"><b>Salir</b><span>apagar</span></span></div>
+              <div className="hr-ctl"><span className="btn y">Y</span><span className="lbl"><b>Acerca</b><span>info cabina</span></span></div>
+              <div className="hr-ctl"><span className="btn b">X</span><span className="lbl"><b>Temas</b><span>cambiar tema</span></span></div>
               {loading && <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 10, letterSpacing: '.28em', color: 'rgba(255,243,212,.4)', textTransform: 'uppercase', marginLeft: 16 }}>{scanProgress}</span>}
               <div className="spacer" />
             </>

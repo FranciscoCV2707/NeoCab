@@ -1,10 +1,113 @@
-# NeoCab Project Status: v2.2.1 - INTERFACES PERFECTAMENTE CENTRADAS y CANÓNICAS
+# NeoCab Project Status: v2.2.2 - PERSONALIZACIÓN CANÓNICA + MENÚ REAL + RE-PORT FIEL A DEMO
 
-**Current Version**: 2.2.1
-**Last Update**: 2026-05-28
-**Stability**: ✅ BUILDING WITHOUT ERRORS
-**Build Status**: ✅ Frontend + Backend compile clean
+**Current Version**: 2.2.2
+**Last Update**: 2026-05-29
+**Stability**: ✅ BUILDING WITHOUT ERRORS (tsc --noEmit limpio · vite build OK)
+**Build Status**: ✅ Frontend compila limpio
 **Platform Support**: Windows XP SP2+ (Legacy SDL2), Windows 7/10/11 (Tauri + React), Linux x86_64, Linux ARM (Raspberry Pi 3/4/5)
+
+---
+
+## 🔧 Session 2026-05-29 — Personalización canónica, menú real y re-port fiel a DEMO (v2.2.2)
+
+> Objetivo: el sistema ya NO usa el tema `classic` como base — se basa en los 5 temas de la carpeta
+> DEMO. Toda la apariencia/personalización se adapta a ellos, respetando lo que ya teníamos
+> (editor de colores, preview, drag&drop) y arreglando los temas para que se comporten como la DEMO.
+
+### Personalización canónica de temas (Fase 1 — variables `--theme-*`)
+- **`injectThemeCss` (`src/stores/useThemeStore.ts`)**: ahora emite un set canónico
+  (`--theme-accent/-accent-hot/-text/-bone/-bg/-deep/-surface/-border/-h/-h2`) derivado de
+  `theme.colors` + `theme.hw`. Editar colores/matiz recolorea CUALQUIER skin en vivo.
+- **CSS de los 5 skins**: sus tokens base ahora leen del canónico con fallback nativo
+  (`--hr-amber: var(--theme-accent,#ffb000)`, `--op-fg: var(--theme-accent,#66ff8a)`, etc.).
+  NeonWall/Flux/Batocera invierten la dependencia (`--nw-accent: var(--theme-accent, oklch(...))`)
+  para evitar recursión. El look por defecto NO cambia.
+- **`SKIN_TOKENS` (`src/themes/registry.ts`)** + `ThemeSwitcher.buildTheme`: cada preset inyecta
+  sus tokens nativos reales, de modo que cambiar de tema reproduce su aspecto exacto y el editor
+  lo modifica encima.
+
+### ThemeEditor reintegrado en Settings (Fase 2)
+- `SettingsPanel.tsx` vuelve a montar `<ThemeEditor>` en la pestaña Apariencia (con preview
+  embebido + botón al editor drag&drop) y conserva el botón "Cambiar tema (T)".
+- `ThemeEditor.tsx`: se hidrata desde el tema activo (no pisa el fondo del skin), añade sliders de
+  **matiz** (`hw.base_hue/base_hue2`) para los skins oklch, y al guardar persiste vía store
+  (sobrevive a recargar y rutea al skin correcto). El layout drag&drop marca `skin:'classic'`
+  para renderizarse vía `ScreenRenderer`.
+
+### Menú REAL del sistema en los 5 temas (corrección importante)
+- Se había copiado el menú de la DEMO (favs/recent/shuffle). Restaurado al menú original:
+  **Jugar · Escanear · Configuración · Operador**.
+- `src/themes/shared/menu.ts` (`ARCADE_MENU`) reescrito a esas 4 opciones reales.
+- `src/App.tsx`: la navegación por teclado estaba hardcodeada a 5 ítems de la DEMO (índice 0–4,
+  3=random). Corregida a 0=Jugar, 1=Escanear, 2=Configuración, 3=Operador (máx índice 3).
+- Los 5 skins: mapeo `play/scan/settings/operator` + `onScanROMs` añadido donde faltaba.
+
+### Re-port fiel a DEMO — Flux (Fase 3, 1er tema)
+- Causa raíz detectada: los skins son ports recortados de los `.jsx` de DEMO (Flux 327 vs 645
+  líneas), por eso se desfasaban y faltaban animaciones de desplazamiento.
+- **Corrección del carrusel de sistemas de Flux** (revierte el enfoque `50vw` de la sesión
+  anterior, que duplicaba el offset): ahora `translate(calc(-idx*320px - 130px), -50%)` idéntico
+  a la DEMO (el track ya está centrado por CSS con `left/top:50%`), con `rotateY(d*-18)` 3D y
+  escalas/opacidades/blur calcados. Header de la pantalla de sistemas migrado a las clases reales
+  (`fx-logo-big`/`fx-logo-sub`) en vez de clases inexistentes.
+
+### Re-port fiel a DEMO — HyperRush, NeonWall, Batocera, Operator (Fase 3, completada)
+Verificados los 4 temas restantes contra sus `.jsx` de DEMO, comparando pieza por pieza.
+Regla aplicada: copiar comportamiento/animaciones de la DEMO, pero corrigiendo bugs de la DEMO
+y respetando que el menú salga SIEMPRE de `ARCADE_MENU` (Jugar/Escanear/Configuración/Operador).
+
+- **HyperRush**: ya alineado por commits previos. Reloj del marquee ahora hace tick `HH:MM:SS`
+  (estaba congelado); controles del Home alineados a 4 botones como la DEMO. Carrusel mantenido en
+  `-170px` (=card/2, centra perfecto; la DEMO usa `-190px` y descentra 20px).
+- **NeonWall**: profundidad del coverflow alineada a la fórmula exacta de la DEMO (opacidad
+  `max(.12,.82-(d-1)*.15)`, blur progresivo en `d≥4`, z-index `100-|d|`). Reloj `HH:MM` ya coincidía.
+  Carrusel mantenido en `-160px` (=card/2). Collection chips de género omitidos (no cableados).
+- **Batocera**: BUG corregido — el carrusel renderizaba solo 5 cartas (ventana+módulo) pero la
+  traslación asumía todas; la carta activa solo se centraba con `focusedIndex≈1.5`. Ahora renderiza
+  TODOS los sistemas con el falloff 3D de la DEMO (scale 1.2/.78/.58/.42, opacity 1/.8/.35/.12,
+  blur 0/.4/1.6/3). Offset `-120px` (=card/2). Eliminada constante `VISIBLE_CARDS`.
+- **Operator**: cartas de sistemas ahora con `rotateY(d*-15)` + blur de profundidad
+  (0/.35/1.2/2.2) como la DEMO; antes solo escalaban. Carrusel `-110px` ya correcto. Filtros/views
+  reducidos a los reales (resto omitido por no estar cableado).
+
+Criterio de centrado: el offset correcto es `card_width/2`. Varias DEMO usan `stride/2`, que
+descentra media-gap; se conserva el valor correcto (no se reintroduce el bug visual de la DEMO).
+
+### Rediseño del subsistema de apariencia — roadmap acordado (2026-05-29)
+Decisiones del usuario: el sistema deja de basarse en `classic`; **HyperRush** será el tema por
+defecto; el editor drag&drop será **por componente/widget** (combinar piezas entre temas).
+
+- **Fase 1 — Arreglar los 5 temas (en curso):**
+  - Offsets de carruseles alineados EXACTO a la DEMO (HyperRush 190, NeonWall 174, Batocera 130,
+    Operator 110). Regla: copiar la DEMO, no "corregirla".
+  - HyperRush: el `<HRMarquee>` se movió DENTRO de `.hr-shell` (antes era hermano y el shell
+    `position:absolute;inset:0` tapaba el header → el CRT se montaba sobre él). 
+  - CRT/video de HyperRush reposicionado (`.hr-crt-wrap`: `justify-content:flex-start;
+    padding-left:32px; padding-top:48px`) — valores iniciales, ajustables.
+  - **HyperWheel diferenciado de HyperRush:** mismo skin con prop `variant`. HyperRush recolorea
+    por sistema; HyperWheel mantiene identidad eléctrica fija (cyan/azul, hue 200/280) + marca
+    propia. Registro/SKIN_TOKENS de hyperwheel actualizados.
+  - Pendiente: verificación visual del resto de desfases/animaciones (requiere `npm tauri dev`).
+- **Fase 2 — Integrar Config/Operador en el tema (iniciada):**
+  - `OperatorPanel.css` ahora usa variables canónicas `--theme-*` (acento/fondo/texto) con fallback,
+    así Settings y Operador adoptan la paleta del tema activo. Pendiente: renderizarlos realmente
+    dentro del shell de cada skin (no solo recolorear).
+- **Fase 3 — Eliminar `classic` + HyperRush por defecto + preview real del skin** (el preview del
+  ThemeEditor aún dibuja el menú classic viejo con "Explorar"; hay que reemplazarlo por el skin real).
+- **Fase 3 (avances):** preview real del skin en el editor (`SkinPreview.tsx`, render escalado con
+  datos mock, scope local de `--theme-*`, no interactivo); editor recortado a Colores/Efectos/Componer;
+  skin por defecto = `hyperrush` (no `classic`); persistencia del tema elegido al boot (cache local).
+  Operador/Settings recolorean con `--theme-*`.
+- **Fase 4 — Compositor de temas (nivel pantalla, FUNCIONAL):**
+  - `SkinId 'composed'` + `ComposeMap {home,systems,games}` en `useThemeStore`.
+  - `themes/ComposedSkin.tsx`: monta el skin elegido por pantalla (reusa los 5 skins).
+  - `App.tsx` rutea `composed` con el mapa del tema activo.
+  - Editor → pestaña **Componer**: elige tema por pantalla, preview en vivo de la mezcla, guarda como
+    tema `composed`.
+  - Pendiente: nivel widget (extraer bloques marquee/rueda/CRT/stats a piezas reutilizables) y
+    arrastre literal — se construye encima de este framework.
+
+Nota: no puedo ver la ventana Tauri; los ajustes visuales requieren verificación del usuario.
 
 ---
 

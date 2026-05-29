@@ -2,6 +2,40 @@
 
 All notable changes to this project are documented here.
 
+## [2.2.2] - 2026-05-29 - Personalización canónica + menú real + re-port DEMO
+
+> El sistema deja de depender del tema `classic`: la apariencia se basa en los 5 temas DEMO,
+> con personalización canónica y los temas re-portados fielmente desde DEMO.
+
+### Added
+- Variables canónicas `--theme-*` en `injectThemeCss`: editar colores/matiz recolorea los 5 skins.
+- `SKIN_TOKENS` (registry) con los tokens nativos de cada skin, inyectados por el ThemeSwitcher.
+- ThemeEditor reintegrado en Settings (preview embebido + drag&drop), con sliders de matiz e
+  hidratación desde el tema activo; al guardar persiste vía store.
+
+### Changed
+- Menú de TODOS los temas restaurado al real del sistema: **Jugar · Escanear · Configuración · Operador**
+  (`ARCADE_MENU`, navegación de `App.tsx` y mapeo de los 5 skins).
+- CSS de los 5 skins: tokens base leen del set canónico con fallback nativo (sin cambiar el look).
+
+### Fixed
+- Carrusel de sistemas de **Flux** desfasado: revertido el enfoque `50vw` (doble offset); ahora
+  `translate(calc(-idx*320px - 130px), -50%)` con `rotateY` 3D, idéntico a la DEMO. Header de la
+  pantalla de sistemas migrado a clases reales del CSS.
+- **Batocera**: carrusel de sistemas descentrado — renderizaba solo 5 cartas (ventana+módulo) pero
+  la traslación asumía todas, así que la carta activa solo se centraba con `focusedIndex≈1.5`. Ahora
+  renderiza todos los sistemas con falloff 3D fiel a la DEMO (scale/opacity/blur).
+- **HyperRush**: reloj del marquee estaba congelado al montar; ahora hace tick `HH:MM:SS`.
+
+### Changed (re-port fiel a DEMO — 4 temas restantes)
+- **HyperRush**: controles del Home alineados a 4 botones como la DEMO.
+- **NeonWall**: profundidad del coverflow alineada a la fórmula exacta de la DEMO (opacidad, blur
+  progresivo y z-index por distancia).
+- **Operator**: cartas de la pantalla de sistemas con `rotateY` + blur de profundidad como la DEMO
+  (antes solo escalaban).
+- Criterio de centrado de carruseles unificado a `card_width/2` (se evita el `stride/2` de algunas
+  DEMO, que descentra media-gap). El menú de los 5 temas sigue saliendo de `ARCADE_MENU`.
+
 ## [1.3.0] - 2026-05-16 - v2.0 COMPLETE
 
 > All 26 features from the improvement plan completed. NeoCab now matches or exceeds the capabilities of AdvanceMAME, AttractPlus, Pegasus Frontend, RetroFE, and SimpleLauncher.

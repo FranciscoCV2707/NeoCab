@@ -142,6 +142,54 @@ const PACK_FILTERS = [
   { id: 'platform', label: 'Platformer' },
 ];
 
+// ─── Library generator ─────────────────────────────────────────────────────
+// A real arcade system holds hundreds of ROMs. PACK_GAMES only has a handful of
+// hero titles, so buildSystemLibrary() returns those real entries first and then
+// deterministically synthesises believable filler titles up to `cap`, so a
+// "game wall" UI can show a dense, scrollable, filterable grid per system.
+const LIB_A = ['Neon','Cosmic','Dragon','Turbo','Shadow','Hyper','Mega','Astro','Iron','Crimson','Galaxy','Thunder','Cyber','Phantom','Samurai','Rocket','Laser','Vortex','Blaze','Striker','Solar','Onyx','Aero','Magna','Delta','Omega','Razor','Nova','Pulse','Titan','Jade','Vega','Quasar','Ronin','Falcon'];
+const LIB_B = ['Strike','Raiders','Fist','Warriors','Legend','Circuit','Patrol','Brawl','Force','Quest','Rally','Storm','Arena','Squadron','Hunter','Saga','Drift','Blitz','Champ','Riot','Rangers','Frontier','Combat','Rush','Guardian','Sentinel','Crusade','Vanguard','Empire','Showdown','Gambit','Reckoning','Overdrive'];
+const LIB_S = ['','',' II',' EX',' Turbo',' DX',' R',' Zero',' \u201995',' Plus',' Neo',' \u201998'];
+const LIB_GENRES = ['Versus Fighting','Beat \u2019em Up','Run & Gun','Platformer','Shoot \u2019em Up','Racing','Puzzle','Action'];
+const LIB_MAKERS = ['Capcom','SNK','Konami','Sega','Taito','Namco','Toaplan','Irem','Data East','Technos','Atlus','Jaleco'];
+const LIB_LP = ['Never','Never','Today','Yesterday','3 days ago','Last week','2 weeks ago','1 month ago'];
+
+function libHash(n) { const x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); }
+function libPick(arr, n) { return arr[Math.floor(libHash(n) * arr.length) % arr.length]; }
+
+function buildSystemLibrary(sys, cap = 120) {
+  const real = window.PACK_GAMES.filter(g => g.systemId === sys.id);
+  const total = Math.min(sys.count, cap);
+  const out = real.slice();
+  const base = sys.id.length * 17 + 5;
+  for (let i = out.length; i < total; i++) {
+    const s = base + i * 9;
+    const a = libPick(LIB_A, s), b = libPick(LIB_B, s + 1), suf = libPick(LIB_S, s + 2);
+    const genre = libPick(LIB_GENRES, s + 3), maker = libPick(LIB_MAKERS, s + 4);
+    const year = (typeof sys.year === 'number' ? sys.year : 1985) + Math.floor(libHash(s + 5) * 12);
+    out.push({
+      id: `${sys.id}-g${i}`,
+      title: `${a} ${b}${suf}`,
+      titleParts: [{ accent: a }, `${b}${suf}`],
+      sub: `${maker} \u00b7 ${year}`,
+      system: sys.name, systemId: sys.id,
+      year, manufacturer: maker, genre, players: libHash(s + 9) > .5 ? '1-2P' : '1P',
+      driver: `${sys.id}.cpp`, romset: `${a.toLowerCase()}${i}`,
+      favorite: libHash(s + 6) > 0.86,
+      playCount: Math.floor(libHash(s + 7) * 240),
+      lastPlayed: libPick(LIB_LP, s + 8),
+      hue: Math.floor(libHash(s + 10) * 360), hue2: Math.floor(libHash(s + 11) * 360),
+      hasVideo: libHash(s + 12) > .45, hasScreenshot: libHash(s + 13) > .2,
+      hasMarquee: true, hasBackground: libHash(s + 14) > .5,
+      tagline: 'Drop a coin and find out.',
+      generated: true,
+    });
+  }
+  return out;
+}
+window.buildSystemLibrary = buildSystemLibrary;
+
+
 // Theme registry — used by the host to render the switcher + mount the active theme
 const THEME_REGISTRY = [
   {

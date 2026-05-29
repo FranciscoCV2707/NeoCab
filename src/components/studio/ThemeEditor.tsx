@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { injectThemeCss, Theme } from '../../stores/useThemeStore';
+import { injectThemeCss, Theme, useThemeStore, type SkinId, type ComposeMap } from '../../stores/useThemeStore';
 import { ThemeAIHelper } from './ThemeAIHelper';
 import { ThemeSDKManual } from './ThemeSDKManual';
 import { LayoutEditor } from './LayoutEditor';
+import { SkinPreview } from './SkinPreview';
+import { DEFAULT_COMPOSE } from '../../themes/ComposedSkin';
+import { THEME_REGISTRY } from '../../themes/registry';
 import type { ThemeScreens } from '../../types/layout';
 import './ThemeEditor.css';
 
@@ -108,6 +111,9 @@ interface ThemeData {
   version: string;
   description: string;
   style: string;
+  skin?: SkinId;
+  compose?: ComposeMap;
+  hw?: { base_hue: number; base_hue2: number };
   colors: ThemeColors;
   fonts: ThemeFonts;
   background: ThemeBackground;
@@ -207,7 +213,7 @@ const defaultEffects: ThemeEffects = {
   blur_unselected: 0,
 };
 
-type EditorTab = 'colors' | 'fonts' | 'background' | 'layout' | 'media' | 'sounds' | 'effects';
+type EditorTab = 'colors' | 'fonts' | 'background' | 'layout' | 'media' | 'sounds' | 'effects' | 'compose';
 
 const WHEEL_SYSTEMS = ['MAME', 'SNES', 'NES', 'PS1', 'N64', 'GBA'];
 const WHEEL_GAMES = ['Street Fighter II', 'Pac-Man', 'Donkey Kong', 'Mortal Kombat'];
@@ -238,7 +244,8 @@ export const ThemeEditor: React.FC = () => {
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [previewSystem, setPreviewSystem] = useState(2);
   const [focusedColor, setFocusedColor] = useState<string | null>(null);
-  const [previewMode, setPreviewMode] = useState<'sistema' | 'menu'>('sistema');
+  const [previewMode, setPreviewMode] = useState<'real' | 'sistema' | 'menu'>('real');
+  const [compose, setCompose] = useState<ComposeMap | null>(null);
   const [newTemplateName, setNewTemplateName] = useState('');
   const [showTemplateInput, setShowTemplateInput] = useState(false);
   const [importPath, setImportPath] = useState('');
@@ -247,6 +254,25 @@ export const ThemeEditor: React.FC = () => {
   const colorRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => { loadThemeList(); }, []);
+
+  // Hydrate the editor from the active theme so editing starts from the live
+  // skin's native colors/hue (not generic defaults) and saving never clobbers
+  // the active skin's look unless the user changes it.
+  const storeTheme = useThemeStore(s => s.currentTheme);
+  useEffect(() => {
+    if (!storeTheme) return;
+    setTheme(prev => ({
+      ...prev,
+      name: prev.name === 'Custom Theme' ? `${storeTheme.name} (custom)` : prev.name,
+      skin: (storeTheme.skin as SkinId) ?? prev.skin,
+      hw: storeTheme.hw ?? prev.hw,
+      colors: { ...defaultColors, ...prev.colors, ...storeTheme.colors },
+      fonts: { ...prev.fonts, ...storeTheme.fonts },
+      effects: { ...prev.effects, ...storeTheme.effects },
+    }));
+    // Only on the first mount with a theme available.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const showMsg = (text: string, ok = true) => {
     setMessage({ text, ok });
@@ -307,11 +333,16 @@ export const ThemeEditor: React.FC = () => {
     setSaving(true);
     setMessage(null);
     try {
-      const themeJson = JSON.stringify(theme);
+      // When a composition is set, save as a 'composed' theme so App.tsx renders
+      // the chosen skin per screen.
+      const payload: ThemeData = compose ? { ...theme, skin: 'composed', compose } : theme;
+      const themeJson = JSON.stringify(payload);
       const result = await invoke<string>('save_custom_theme', { theme: themeJson });
       const parsed = JSON.parse(result);
       if (parsed.success) {
-        injectThemeCss(theme as unknown as Theme);
+        // Persist + apply through the store so the custom theme survives reload
+        // and App.tsx routes to the right skin (currentTheme.skin).
+        useThemeStore.getState().applyTheme(payload as unknown as Theme);
         await invoke('apply_theme', { name: parsed.theme_name }).catch(() => {});
         await loadThemeList();
         showMsg(`Tema "${parsed.theme_name}" guardado y aplicado`);
@@ -414,6 +445,12 @@ export const ThemeEditor: React.FC = () => {
   const updateColor = (key: keyof ThemeColors, value: string) =>
     setTheme(prev => ({ ...prev, colors: { ...prev.colors, [key]: value } }));
 
+  const updateHue = (key: 'base_hue' | 'base_hue2', value: number) =>
+    setTheme(prev => ({
+      ...prev,
+      hw: { base_hue: prev.hw?.base_hue ?? 35, base_hue2: prev.hw?.base_hue2 ?? 200, [key]: value },
+    }));
+
   const updateFont = (key: keyof ThemeFonts, value: string) =>
     setTheme(prev => ({ ...prev, fonts: { ...prev.fonts, [key]: value } }));
 
@@ -432,20 +469,33 @@ export const ThemeEditor: React.FC = () => {
   const updateWheel = (key: keyof ThemeWheel, value: string | number | boolean) =>
     setTheme(prev => ({ ...prev, wheel: { ...prev.wheel, [key]: value } }));
 
+  // Only controls relevant to the new skins are exposed. The classic-only tabs
+  // (background/layout/media/sounds) stay in code (still referenced by the
+  // render switch) but are hidden, so the editor stops showing knobs that do
+  // nothing on these themes.
   const tabs: { key: EditorTab; label: string }[] = [
     { key: 'colors', label: 'Colores' },
-    { key: 'fonts', label: 'Fuentes' },
-    { key: 'background', label: 'Fondo' },
-    { key: 'layout', label: 'Layout' },
-    { key: 'media', label: 'Media' },
-    { key: 'sounds', label: 'Sonidos' },
     { key: 'effects', label: 'Efectos' },
+    { key: 'compose', label: 'Componer' },
   ];
 
   const renderColors = () => (
     <div className="editor-section">
       <h3>Paleta de Colores</h3>
       <p className="section-desc">Define los colores del tema — haz clic en un swatch de la preview para saltar a ese color</p>
+      <div style={{ display: 'flex', gap: 24, padding: '12px 14px', marginBottom: 14, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 8 }}>
+        {([['base_hue', 'Matiz principal'], ['base_hue2', 'Matiz secundario']] as const).map(([key, label]) => {
+          const val = theme.hw?.[key] ?? (key === 'base_hue' ? 35 : 200);
+          return (
+            <label key={key} style={{ flex: 1, fontSize: 12 }}>
+              <span style={{ display: 'block', marginBottom: 6, opacity: .7 }}>{label}: {Math.round(val)}°</span>
+              <input type="range" min={0} max={360} step={1} value={val}
+                onChange={(e) => updateHue(key, +e.target.value)}
+                style={{ width: '100%', accentColor: `oklch(72% 0.2 ${val})` }} />
+            </label>
+          );
+        })}
+      </div>
       <div className="color-grid">
         {Object.entries(theme.colors).map(([key, value]) => {
           const active = focusedColor === key;
@@ -782,8 +832,53 @@ export const ThemeEditor: React.FC = () => {
     </div>
   );
 
+  const renderCompose = () => {
+    const c = compose ?? DEFAULT_COMPOSE;
+    const screens: { key: keyof ComposeMap; label: string; hint: string }[] = [
+      { key: 'home', label: 'Inicio / Menú', hint: 'pantalla principal' },
+      { key: 'systems', label: 'Sistemas', hint: 'selección de plataforma' },
+      { key: 'games', label: 'Juegos', hint: 'lista/rueda de títulos' },
+    ];
+    const opts = THEME_REGISTRY.filter(t => t.status === 'available');
+    return (
+      <div className="editor-section">
+        <h3>Componer tema</h3>
+        <p className="section-desc">Elige de qué tema viene cada pantalla. El preview "Tema" (derecha) muestra la mezcla en vivo. Al guardar se crea un tema con skin <b>composed</b>.</p>
+        {screens.map(s => (
+          <div key={s.key} style={{ marginBottom: 18 }}>
+            <label style={{ display: 'block', marginBottom: 2, fontWeight: 600 }}>{s.label}</label>
+            <div style={{ fontSize: 11, opacity: .55, marginBottom: 8 }}>{s.hint}</div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {opts.map(o => {
+                const active = c[s.key] === o.skin;
+                return (
+                  <button key={o.id} onClick={() => setCompose({ ...c, [s.key]: o.skin })}
+                    style={{
+                      padding: '8px 12px', borderRadius: 8, cursor: 'pointer',
+                      border: `2px solid ${active ? o.accent : '#444'}`,
+                      background: active ? `${o.accent}22` : '#1a1a2e',
+                      color: active ? o.accent : '#ccc', fontSize: 12, fontWeight: 600,
+                    }}>
+                    {o.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+        {compose && (
+          <button onClick={() => setCompose(null)}
+            style={{ marginTop: 4, padding: '6px 12px', background: '#333', border: '1px solid #555', borderRadius: 6, color: '#ccc', cursor: 'pointer', fontSize: 12 }}>
+            Quitar composición (usar un solo skin)
+          </button>
+        )}
+      </div>
+    );
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'compose': return renderCompose();
       case 'colors': return renderColors();
       case 'fonts': return renderFonts();
       case 'background': return renderBackground();
@@ -799,6 +894,23 @@ export const ThemeEditor: React.FC = () => {
     intensity > 0 ? `0 0 ${Math.round(intensity * 24)}px ${color}` : 'none';
 
   const prevSys = WHEEL_SYSTEMS[previewSystem];
+
+  // Real-skin preview: which skin to render + the canonical --theme-* vars to scope.
+  const previewSkin: SkinId = (theme.skin && theme.skin !== 'classic'
+    ? theme.skin
+    : (storeTheme?.skin && storeTheme.skin !== 'classic' ? storeTheme.skin : 'hyperrush')) as SkinId;
+  const previewVars: React.CSSProperties = {
+    ['--theme-accent' as string]: theme.colors.accent,
+    ['--theme-accent-hot' as string]: theme.colors.highlight || theme.colors.accent,
+    ['--theme-text' as string]: theme.colors.text,
+    ['--theme-bone' as string]: theme.colors.text,
+    ['--theme-bg' as string]: theme.colors.background,
+    ['--theme-deep' as string]: theme.colors.background,
+    ['--theme-surface' as string]: theme.colors.surface,
+    ['--theme-border' as string]: theme.colors.border,
+    ['--theme-h' as string]: String(theme.hw?.base_hue ?? 35),
+    ['--theme-h2' as string]: String(theme.hw?.base_hue2 ?? 200),
+  } as React.CSSProperties;
 
   return (
     <div className="theme-editor">
@@ -944,7 +1056,7 @@ export const ThemeEditor: React.FC = () => {
           <div style={{ padding: '6px 10px', background: '#0d0d0d', borderBottom: `1px solid ${theme.colors.border}`, fontSize: 10, color: theme.colors.accent, textAlign: 'center', letterSpacing: 2, textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>Vista Previa</span>
             <div style={{ display: 'flex', gap: 0, border: `1px solid ${theme.colors.border}`, borderRadius: 4, overflow: 'hidden' }}>
-              {(['sistema', 'menu'] as const).map(mode => (
+              {(['real', 'sistema', 'menu'] as const).map(mode => (
                 <button key={mode} onClick={() => setPreviewMode(mode)}
                   style={{
                     padding: '2px 8px', fontSize: 9, border: 'none', cursor: 'pointer',
@@ -952,11 +1064,18 @@ export const ThemeEditor: React.FC = () => {
                     color: previewMode === mode ? theme.colors.background : theme.colors.text,
                     textTransform: 'uppercase', letterSpacing: 1, fontWeight: 600,
                   }}>
-                  {mode === 'sistema' ? 'Sistema' : 'Menú'}
+                  {mode === 'real' ? 'Tema' : mode === 'sistema' ? 'Sistema' : 'Menú'}
                 </button>
               ))}
             </div>
           </div>
+
+          {/* Real skin preview — renders the actual active skin live */}
+          {previewMode === 'real' && (
+            <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: 10, background: '#0a0a0a' }}>
+              <SkinPreview skin={previewSkin} vars={previewVars} width={300} compose={compose ?? undefined} />
+            </div>
+          )}
 
           {/* Menu preview */}
           {previewMode === 'menu' && (
@@ -1290,7 +1409,9 @@ export const ThemeEditor: React.FC = () => {
           themeColors={theme.colors}
           themeFonts={theme.fonts}
           onSave={(screens) => {
-            setTheme(prev => ({ ...prev, screens }));
+            // A custom layout is rendered by ScreenRenderer (the 'classic' skin
+            // path in App.tsx), so switch the theme's skin so widgets show up.
+            setTheme(prev => ({ ...prev, screens, skin: 'classic' }));
             setShowLayoutEditor(false);
             showMsg('Layout guardado — pulsa "Guardar y Aplicar" para persistir');
           }}

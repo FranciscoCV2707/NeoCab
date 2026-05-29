@@ -624,13 +624,15 @@ function OpSystems({ shell, systems }) {
             const d = i - shell.sysIndex;
             const abs = Math.abs(d);
             const scale = d === 0 ? 1.2 : abs === 1 ? .82 : abs === 2 ? .62 : .42;
+            const rotY = d * -15;
             const opacity = abs === 0 ? 1 : abs === 1 ? .65 : abs === 2 ? .25 : .08;
+            const blur = abs === 0 ? 0 : abs === 1 ? .35 : abs === 2 ? 1.2 : 2.2;
             return (
               <div
                 key={s.id}
                 className={'op-sys-card' + (d === 0 ? ' active' : '')}
                 onClick={() => shell.setSysIndex(i)}
-                style={{ transform: `scale(${scale})`, opacity, zIndex: 100 - abs }}>
+                style={{ transform: `scale(${scale}) rotateY(${rotY}deg)`, opacity, filter:`blur(${blur}px)`, zIndex: 100 - abs }}>
                 <div className="op-sys-card-head">
                   <span className="short">{s.short}</span>
                   <span className="id">{s.id}.cpp</span>

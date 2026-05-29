@@ -1,6 +1,6 @@
 import { readTextFile } from '@tauri-apps/plugin-fs';
 import { buildNeoCabAPI } from './neoCabApi';
-import type { ThemeLifecycle } from '../types/theme-plugin';
+import type { ThemeLifecycle } from '../../types/theme-plugin';
 
 let _cssLinkEl: HTMLLinkElement | null = null;
 let _cssBlobUrl: string | null = null;
@@ -13,7 +13,6 @@ export async function injectThemeAssets(
 ): Promise<void> {
   await unloadThemeAssets();
 
-  // Inject theme.css via blob URL (CSP-safe)
   try {
     const cssText = await readTextFile(`${themePath}/theme.css`);
     _cssBlobUrl = URL.createObjectURL(new Blob([cssText], { type: 'text/css' }));
@@ -27,7 +26,6 @@ export async function injectThemeAssets(
     // theme.css is optional
   }
 
-  // Import theme.js as ES module via blob URL
   try {
     const jsText = await readTextFile(`${themePath}/theme.js`);
     _jsBlobUrl = URL.createObjectURL(
@@ -57,7 +55,6 @@ export async function unloadThemeAssets(): Promise<void> {
   }
 }
 
-// Proxies called by App.tsx — one line per event type
 export const notifyThemeNavigate  = (d: object) => _jsModule?.onNavigate?.(d as never);
 export const notifyThemeViewChange = (d: object) => _jsModule?.onViewChange?.(d as never);
 export const notifyThemeFocus     = (d: object) => _jsModule?.onFocus?.(d as never);

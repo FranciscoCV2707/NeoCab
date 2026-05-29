@@ -411,6 +411,81 @@ body.show-cursor{cursor:default}
 .nc-kk{display:inline-flex;align-items:center;justify-content:center;padding:3px 9px;border:1px solid rgba(255,255,255,.25);
   border-radius:6px;color:#fff;font-size:10px;letter-spacing:.14em;margin-right:8px;}
 
+/* ═════════════════════════════════════════════════════════════════════════
+   THEME TRANSITION — CRT "channel switch" power-off / power-on
+   ═════════════════════════════════════════════════════════════════════════ */
+.nc-stage-wrap{position:absolute;inset:0;transform-origin:center center;backface-visibility:hidden;}
+.nc-stage-wrap.is-out{animation:ncCrtOff .50s cubic-bezier(.7,.02,.96,.3) forwards;}
+.nc-stage-wrap.is-in {animation:ncCrtOn  .80s cubic-bezier(.14,.86,.4,1) forwards;}
+@keyframes ncCrtOff{
+  0%  {transform:scale(1,1);       filter:brightness(1)   contrast(1);}
+  50% {transform:scale(1.035,.016);filter:brightness(3.4) contrast(1.5);}
+  70% {transform:scale(1.04,.014); filter:brightness(4.5) contrast(1.6);}
+  100%{transform:scale(.0015,.0018);filter:brightness(16) contrast(2);opacity:.5;}
+}
+@keyframes ncCrtOn{
+  0%  {transform:scale(.0015,.0018);filter:brightness(18) contrast(2);opacity:.5;}
+  26% {transform:scale(1.05,.02);   filter:brightness(7)  contrast(1.7);opacity:1;}
+  50% {transform:scale(1.05,.02);   filter:brightness(3.4);}
+  74% {transform:scale(1,.52);      filter:brightness(1.7);}
+  100%{transform:scale(1,1);        filter:brightness(1);}
+}
+
+/* overlay that covers the swap seam + carries flash, sweep & boot badge */
+.nc-xfade{position:absolute;inset:0;z-index:9500;pointer-events:none;overflow:hidden;--xacc:#ffb000;}
+.nc-xfade.is-in{animation:ncXFadeOut .80s ease forwards;}
+@keyframes ncXFadeOut{0%,68%{opacity:1}100%{opacity:0}}
+
+/* white bloom flash, peaking at the collapse seam */
+.nc-xfade-flash{position:absolute;inset:0;opacity:0;
+  background:radial-gradient(130% 70% at 50% 50%, #fff, rgba(255,255,255,0) 72%);}
+.nc-xfade.is-out .nc-xfade-flash{animation:ncXOutFlash .50s ease-in forwards;}
+.nc-xfade.is-in  .nc-xfade-flash{animation:ncXInFlash  .55s ease-out forwards;}
+@keyframes ncXOutFlash{0%{opacity:0}68%{opacity:.06}100%{opacity:.9}}
+@keyframes ncXInFlash {0%{opacity:.9}45%{opacity:.18}100%{opacity:0}}
+
+/* hot horizontal collapse line (the picture squeezing into a single scanline) */
+.nc-xfade-line{position:absolute;left:0;right:0;top:50%;height:3px;opacity:0;
+  transform:translateY(-50%) scaleX(0);
+  background:linear-gradient(90deg,transparent,#fff 10%,#fff 90%,transparent);
+  box-shadow:0 0 22px 5px #fff, 0 0 70px 14px var(--xacc);}
+.nc-xfade.is-out .nc-xfade-line{animation:ncXLine .50s ease-out forwards;}
+.nc-xfade.is-in  .nc-xfade-line{animation:ncXLineOut .34s ease-in forwards;}
+@keyframes ncXLine{0%{opacity:0;transform:translateY(-50%) scaleX(0)}48%{opacity:1;transform:translateY(-50%) scaleX(1)}100%{opacity:1;transform:translateY(-50%) scaleX(1)}}
+@keyframes ncXLineOut{0%{opacity:1;transform:translateY(-50%) scaleY(1)}100%{opacity:0;transform:translateY(-50%) scaleY(8)}}
+
+/* scanline sweep on power-on */
+.nc-xfade-sweep{position:absolute;left:0;right:0;height:34%;top:-34%;opacity:0;mix-blend-mode:screen;
+  background:linear-gradient(180deg,transparent, color-mix(in oklch,var(--xacc) 70%,transparent) 62%,#fff);}
+.nc-xfade.is-in .nc-xfade-sweep{animation:ncXSweep .80s ease-in-out forwards;}
+@keyframes ncXSweep{0%{top:-34%;opacity:.7}90%{opacity:.25}100%{top:104%;opacity:0}}
+
+/* thin animated scanlines over the dark seam */
+.nc-xfade-grid{position:absolute;inset:0;opacity:0;
+  background:repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0 1px, transparent 1px 3px);}
+.nc-xfade.is-out .nc-xfade-grid{animation:ncXGrid .50s ease-in forwards;}
+@keyframes ncXGrid{0%{opacity:0}100%{opacity:.5}}
+
+/* boot badge — incoming theme name + progress bar */
+.nc-xfade-badge{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.9);opacity:0;
+  display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;width:680px;}
+.nc-xfade.is-out .nc-xfade-badge{animation:ncXBadgeIn .50s .14s ease forwards;}
+.nc-xfade.is-in  .nc-xfade-badge{opacity:1;transform:translate(-50%,-50%) scale(1);}
+@keyframes ncXBadgeIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.88)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.nc-xfade-k{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.52em;
+  color:rgba(255,255,255,.7);text-transform:uppercase;}
+.nc-xfade-k b{color:var(--xacc);}
+.nc-xfade-name{font-family:'Russo One',sans-serif;font-size:84px;line-height:.92;letter-spacing:.01em;
+  color:#fff;text-transform:uppercase;text-shadow:0 0 30px var(--xacc),0 0 70px var(--xacc);}
+.nc-xfade-tag{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.28em;
+  color:rgba(255,255,255,.6);text-transform:uppercase;}
+.nc-xfade-bar{width:420px;height:6px;margin-top:6px;border:1px solid rgba(255,255,255,.25);
+  background:rgba(0,0,0,.5);overflow:hidden;}
+.nc-xfade-bar > span{display:block;height:100%;width:0;background:var(--xacc);
+  box-shadow:0 0 14px var(--xacc);transition:width .5s linear;}
+.nc-xfade.is-out .nc-xfade-bar > span{width:58%;}
+.nc-xfade.is-in  .nc-xfade-bar > span{width:100%;transition:width .42s ease-out;}
+
 </style>
 </head>
 <body>

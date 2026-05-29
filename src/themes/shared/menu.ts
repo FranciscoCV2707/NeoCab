@@ -14,22 +14,26 @@ export interface SettingsItem {
   icon: string;
 }
 
+// Real NeoCab system menu (matches the original MainMenu): Jugar, Escanear,
+// Configuración, Operador. Every theme renders THIS, not the DEMO's favs/recent/shuffle.
 export const ARCADE_MENU: MenuItem[] = [
-  { id: 'play',     label: 'Play',      sub: 'select a system',   icon: '▶' },
-  { id: 'favs',     label: 'Favorites',sub: 'pinned titles',     icon: '★' },
-  { id: 'recent',   label: 'Recent',   sub: 'continue session',  icon: '↻' },
-  { id: 'shuffle',  label: 'Shuffle',  sub: 'surprise me',        icon: '?' },
-  { id: 'settings', label: 'Settings', sub: 'themes & options',   icon: '⚙' },
+  { id: 'play',     label: 'Jugar',         sub: 'elegir sistema',               icon: '▶' },
+  { id: 'scan',     label: 'Escanear',      sub: 'buscar e indexar roms',        icon: '⟳' },
+  { id: 'settings', label: 'Configuración', sub: 'temas · controles · opciones', icon: '⚙' },
+  { id: 'operator', label: 'Operador',      sub: 'créditos · timer · stats',     icon: '◉' },
 ];
 
+// ids map 1:1 to the real SettingsPanel tabs (plus 'operator' / 'back'), so a
+// skin can route an entry directly via onShowSettings(id) / onShowOperator().
 export const SETTINGS_MENU: SettingsItem[] = [
-  { id: 'themes',   label: 'Themes',    sub: 'change frontend look',   icon: '◈' },
-  { id: 'video',    label: 'Video',     sub: 'scanlines · glow · crt', icon: '▢' },
-  { id: 'audio',    label: 'Audio',     sub: 'attract sfx · music',    icon: '◐' },
-  { id: 'controls', label: 'Controls',  sub: 'buttons · joystick',     icon: '⌘' },
-  { id: 'cabinet',  label: 'Cabinet',   sub: 'resolution · 16:9 / 4:3',icon: '▣' },
-  { id: 'scraper',  label: 'Scraper',   sub: 'fetch artwork',           icon: '⌕' },
-  { id: 'back',     label: 'Back',      sub: 'return home',             icon: '←' },
+  { id: 'theme',     label: 'Themes',    sub: 'look · colors · layout',  icon: '◈' },
+  { id: 'systems',   label: 'Systems',   sub: 'rom paths · platforms',   icon: '▤' },
+  { id: 'controls',  label: 'Controls',  sub: 'buttons · joystick',      icon: '⌘' },
+  { id: 'keymap',    label: 'Keyboard',  sub: 'navigation keys',         icon: '⌨' },
+  { id: 'scraper',   label: 'Scraper',   sub: 'fetch artwork',           icon: '⌕' },
+  { id: 'emulators', label: 'Emulators', sub: 'cores · standalone',      icon: '▣' },
+  { id: 'operator',  label: 'Operator',  sub: 'coins · timer · stats',   icon: '◉' },
+  { id: 'back',      label: 'Back',      sub: 'return home',             icon: '←' },
 ];
 
 // resolveMenuShortcut maps menu id to filtered games

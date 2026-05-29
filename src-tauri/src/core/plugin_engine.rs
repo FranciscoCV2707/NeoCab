@@ -228,7 +228,7 @@ impl PluginEngine {
                             use mlua::ExternalError;
                             let mut enigo = match enigo::Enigo::new(&enigo::Settings::default()) {
                                 Ok(e) => e,
-                                Err(e) => return Err(format!("Failed to initialize input simulator: {}", e).to_lua_err()),
+                                Err(e) => return Err(format!("Failed to initialize input simulator: {}", e).into_lua_err()),
                             };
                             if key.len() == 1 {
                                 if let Some(c) = key.chars().next() {
@@ -260,7 +260,7 @@ impl PluginEngine {
                         let _ = ctx_table.set("input_device_name", ctx.input_device_name.clone());
 
                         // Execute script to get module
-                        match lua.load(&content).eval::<mlua::Table>() {
+                        let _ = match lua.load(&content).eval::<mlua::Table>() {
                             Ok(plugin_module) => {
                                 if let Ok(func) = plugin_module.get::<_, mlua::Function>(hook_str) {
                                     if let Err(err) = func.call::<_, mlua::Value>(ctx_table) {
@@ -271,7 +271,7 @@ impl PluginEngine {
                             Err(err) => {
                                 tracing::error!("Error evaluating plugin '{}': {}", plugin.name, err);
                             }
-                        }
+                        };
                     }
                 }
             }

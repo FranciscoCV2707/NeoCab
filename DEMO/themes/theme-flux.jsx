@@ -210,9 +210,9 @@ const FLUX_CSS = `
 /* ─── SYSTEMS SCREEN ─── */
 .fx-sys-screen{position:absolute;inset:0;display:flex;flex-direction:column;padding:60px 0 80px;perspective:1400px;}
 .fx-sys-head{padding:0 64px 16px;display:flex;flex-direction:column;gap:6px;}
-.fx-sys-carousel{flex:1;display:flex;align-items:center;justify-content:flex-start;min-height:0;overflow:hidden;}
-.fx-sys-track{position:relative;display:flex;align-items:center;gap:60px;height:380px;
-  transition:transform 460ms cubic-bezier(.18,.85,.22,1.02);will-change:transform;}
+.fx-sys-carousel{flex:1;position:relative;min-height:0;overflow:hidden;perspective:1600px;perspective-origin:50% 50%;}
+.fx-sys-track{position:absolute;left:50%;top:50%;display:flex;align-items:center;gap:60px;transform-style:preserve-3d;
+  transition:transform 500ms cubic-bezier(.16,.84,.3,1.02);will-change:transform;}
 .fx-sys-card{position:relative;flex:none;width:260px;height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;cursor:pointer;
   background:linear-gradient(160deg, oklch(20% 0.10 var(--c-h, var(--fx-h)) / .9), oklch(8% 0.05 var(--c-h, var(--fx-h)) / .95));
   border:1px solid oklch(45% 0.14 var(--c-h, var(--fx-h)) / .55);
@@ -227,7 +227,80 @@ const FLUX_CSS = `
 .fx-sys-card-count{position:relative;margin-top:6px;font-family:'JetBrains Mono', monospace;font-size:11px;letter-spacing:.16em;color:rgba(255,255,255,.55);text-transform:uppercase;}
 .fx-sys-card-count b{font-family:'Bebas Neue', sans-serif;font-size:24px;color:oklch(80% 0.18 var(--c-h, var(--fx-h)));letter-spacing:.04em;}
 
-/* ─── BOTTOM CONTROLS ─── */
+/* ─── HOME (diagonal panel cascade — Flux signature) ─── */
+.fx-home{position:absolute;inset:0;z-index:3;overflow:hidden;}
+.fx-home-logo{
+  position:absolute;top:72px;left:72px;
+}
+.fx-home-logo .eye{
+  display:flex;align-items:center;gap:14px;margin-bottom:12px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.4em;color:rgba(255,255,255,.55);text-transform:uppercase;
+}
+.fx-home-logo .eye .sq{width:8px;height:8px;background:var(--fx-accent2);box-shadow:0 0 8px var(--fx-accent2);}
+.fx-home-logo .big{
+  font-family:'Russo One',sans-serif;font-size:136px;line-height:.82;color:var(--fx-bone);text-transform:uppercase;letter-spacing:-.015em;
+  text-shadow:0 6px 0 oklch(28% 0.18 var(--fx-h)), 0 14px 30px rgba(0,0,0,.65), 0 0 40px oklch(60% 0.22 var(--fx-h) / .55);
+}
+.fx-home-logo .big .accent{color:var(--fx-accent2);text-shadow:0 0 22px var(--fx-accent2), 0 0 60px var(--fx-accent2);}
+.fx-home-logo .tagline{margin-top:18px;max-width:440px;font-family:'Space Grotesk',sans-serif;font-style:italic;font-size:19px;color:rgba(255,255,255,.7);line-height:1.4;}
+
+/* floating tilted stats slab bottom-left */
+.fx-home-stats{
+  position:absolute;left:72px;bottom:108px;width:476px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+  background:linear-gradient(135deg, oklch(15% 0.06 var(--fx-h) / .85), oklch(8% 0.04 var(--fx-h) / .8));
+  border:1px solid var(--fx-accent);transform:rotate(-2deg);
+  clip-path:polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+  box-shadow:0 20px 60px rgba(0,0,0,.5), 0 0 32px oklch(60% 0.22 var(--fx-h) / .3);
+}
+.fx-home-stats .cell{padding:14px 16px;display:flex;flex-direction:column;gap:3px;border-right:1px dashed rgba(255,255,255,.12);}
+.fx-home-stats .cell:last-child{border-right:none;}
+.fx-home-stats .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.26em;color:rgba(255,255,255,.5);text-transform:uppercase;}
+.fx-home-stats .v{font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1;color:#fff;letter-spacing:.03em;}
+.fx-home-stats .v.hi{color:var(--fx-accent2);text-shadow:0 0 10px var(--fx-accent2);}
+
+/* the diagonal cascade of menu panels */
+.fx-home-menu{
+  position:absolute;right:120px;top:50%;
+  transform:translateY(-50%) rotate(-7deg);
+  display:flex;flex-direction:column;gap:16px;
+  perspective:1400px;
+}
+.fx-home-menu-head{
+  align-self:flex-end;display:flex;align-items:center;gap:12px;margin-bottom:4px;margin-right:6px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.4em;color:rgba(255,255,255,.5);text-transform:uppercase;
+}
+.fx-home-menu-head .ln{width:54px;height:1px;background:linear-gradient(to right, transparent, var(--fx-accent2));box-shadow:0 0 8px var(--fx-accent2);}
+.fx-home-item{
+  position:relative;width:480px;padding:20px 28px;display:flex;align-items:center;gap:20px;cursor:pointer;
+  background:linear-gradient(135deg, oklch(16% 0.06 var(--fx-h) / .88), oklch(8% 0.04 var(--fx-h) / .82));
+  border:1px solid oklch(42% 0.14 var(--fx-h) / .5);
+  clip-path:polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px);
+  transition:transform 320ms cubic-bezier(.18,.9,.22,1.05), opacity 320ms ease, box-shadow 320ms ease, border-color 320ms ease, background 320ms ease;
+}
+.fx-home-item .num{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.24em;color:rgba(255,255,255,.5);min-width:26px;}
+.fx-home-item .ic{
+  width:46px;height:46px;flex:none;display:flex;align-items:center;justify-content:center;
+  font-family:'Major Mono Display',monospace;font-size:22px;color:var(--fx-accent2);
+  background:oklch(14% 0.06 var(--fx-h) / .8);border:1px solid oklch(50% 0.16 var(--fx-h) / .5);
+  clip-path:polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  transition:all 320ms ease;
+}
+.fx-home-item .body{flex:1;display:flex;flex-direction:column;gap:3px;}
+.fx-home-item .label{font-family:'Russo One',sans-serif;font-size:26px;color:#fff;letter-spacing:.01em;text-transform:uppercase;line-height:1;}
+.fx-home-item .tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.26em;color:rgba(255,255,255,.5);text-transform:uppercase;}
+.fx-home-item .arrow{font-size:18px;color:var(--fx-accent2);opacity:0;transform:translateX(-8px);transition:all 320ms ease;text-shadow:0 0 10px var(--fx-accent2);}
+.fx-home-item.active{
+  border-color:var(--fx-accent);
+  background:linear-gradient(135deg, oklch(45% 0.20 var(--fx-h) / .9), oklch(20% 0.12 var(--fx-h) / .82));
+  box-shadow:0 22px 50px rgba(0,0,0,.55), 0 0 30px oklch(60% 0.22 var(--fx-h) / .6);
+}
+.fx-home-item.active .num{color:#fff;}
+.fx-home-item.active .ic{color:#fff;border-color:var(--fx-accent2);background:oklch(30% 0.16 var(--fx-h) / .8);box-shadow:0 0 18px oklch(60% 0.22 var(--fx-h) / .6);}
+.fx-home-item.active .label{text-shadow:0 0 18px oklch(70% 0.22 var(--fx-h) / .6);}
+.fx-home-item.active .arrow{opacity:1;transform:translateX(0);}
+
+/* BOTTOM CONTROLS ─── */
 .fx-controls{
   position:absolute;left:0;right:0;bottom:0;
   display:flex;align-items:center;gap:24px;padding:14px 56px;
@@ -341,7 +414,7 @@ function FluxTheme({ onChangeTheme }) {
   // Systems screen — simple horizontal slide carousel themed for Flux
   const SysCarousel = () => {
     const STRIDE = 320;
-    const translateX = `calc(50% - ${shell.sysIndex * STRIDE + STRIDE/2}px)`;
+    const translateX = `calc(-${shell.sysIndex * STRIDE}px - 130px)`;
     return (
       <div className="fx-sys-screen" data-screen-label="Flux · Systems">
         <div className="fx-sys-head">
@@ -350,18 +423,21 @@ function FluxTheme({ onChangeTheme }) {
           <div className="fx-logo-sub">{sys.tag.toUpperCase()}</div>
         </div>
         <div className="fx-sys-carousel">
-          <div className="fx-sys-track" style={{transform:`translateX(${translateX})`}}>
+          <div className="fx-sys-track" style={{transform:`translate(${translateX}, -50%)`}}>
             {allSystems.map((s, i) => {
               const d = i - shell.sysIndex;
               const abs = Math.abs(d);
+              const scale = abs === 0 ? 1.06 : abs === 1 ? .82 : abs === 2 ? .64 : .5;
+              const rotY = d * -18;
+              const tilt = d * -2;
               return (
                 <div key={s.id}
                      className={'fx-sys-card' + (d === 0 ? ' active' : '')}
                      style={{
                        '--c-h': s.hue,
-                       transform:`rotate(${d * -3}deg) scale(${abs === 0 ? 1 : abs === 1 ? .85 : .68})`,
-                       opacity: abs === 0 ? 1 : abs === 1 ? .75 : .35,
-                       filter: `blur(${abs === 0 ? 0 : abs * .6}px)`,
+                       transform:`rotateY(${rotY}deg) rotate(${tilt}deg) scale(${scale})`,
+                       opacity: abs === 0 ? 1 : abs === 1 ? .8 : abs === 2 ? .45 : .2,
+                       filter: `blur(${abs === 0 ? 0 : abs === 1 ? .4 : abs === 2 ? 1.3 : 2.4}px)`,
                        zIndex: 100 - abs,
                      }}
                      onClick={() => shell.setSysIndex(i)}>
@@ -386,10 +462,40 @@ function FluxTheme({ onChangeTheme }) {
       </div>
 
       {shell.screen === 'home' && (
-        <window.HomeShell shell={shell} themeName="Attract Flux" themeTag="Diagonal panels · Configurable"
-                          totals={totals} onAction={(id) => shell.openMenuItem(id, allGames)} />
+        <div className="fx-home" data-screen-label="Flux · Home">
+          <div className="fx-home-logo">
+            <div className="eye"><span className="sq"></span><span>ATTRACT FLUX · BUILD 0.7</span></div>
+            <div className="big">NEO<span className="accent">CAB</span></div>
+            <div className="tagline">Floating diagonal frontend. Tilt into your library — pick a system, or jump straight to a collection.</div>
+          </div>
+
+          <div className="fx-home-stats">
+            <div className="cell"><span className="k">Titles</span><span className="v">{totals.titles.toLocaleString()}</span></div>
+            <div className="cell"><span className="k">Systems</span><span className="v">{totals.systems}</span></div>
+            <div className="cell"><span className="k">Favs</span><span className="v hi">{totals.favorites}</span></div>
+            <div className="cell"><span className="k">Session</span><span className="v">TODAY</span></div>
+          </div>
+
+          <div className="fx-home-menu">
+            <div className="fx-home-menu-head"><span className="ln"></span><span>MAIN MENU</span></div>
+            {window.ARCADE_MENU.map((it, i) => (
+              <div key={it.id}
+                   className={'fx-home-item' + (i === shell.menuIndex ? ' active' : '')}
+                   style={{ marginRight: (window.ARCADE_MENU.length - 1 - i) * 30, opacity: i === shell.menuIndex ? 1 : .82 }}
+                   onClick={() => { shell.setMenuIndex(i); shell.openMenuItem(it.id, allGames); }}>
+                <span className="num">{String(i+1).padStart(2,'0')}</span>
+                <span className="ic">{it.icon}</span>
+                <span className="body">
+                  <span className="label">{it.label}</span>
+                  <span className="tag">{it.sub}</span>
+                </span>
+                <span className="arrow">▶</span>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
-      {shell.screen === 'systems' && <SysCarousel/>}
+      {shell.screen === 'systems' && SysCarousel()}
       {shell.screen === 'settings' && <window.SettingsShell shell={shell} />}
       {shell.screen === 'themes' && <window.ThemeSwitcherPanel shell={shell} activeId="attractflux" />}
       {shell.screen === 'wheel' && (

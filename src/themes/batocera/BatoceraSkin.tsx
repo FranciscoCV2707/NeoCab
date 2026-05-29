@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { getSystemHue } from '../../components/arcade/MediaShape';
+import { MediaShape, getSystemShape, getSystemHue } from '../../components/arcade/MediaShape';
+import { ARCADE_MENU } from '../shared/menu';
 import type { SkinProps } from '../hyperrush/HyperRushSkin';
 import './batocera.css';
 
@@ -17,15 +18,6 @@ function useClock() {
   }, []);
   return `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;
 }
-
-const MENU_ITEMS = [
-  { id: 'play',     label: 'JUGAR',    tag: 'Selecciona sistema', icon: '▶' },
-  { id: 'scan',     label: 'ESCANEAR', tag: 'Buscar ROMs',        icon: '⟳' },
-  { id: 'settings', label: 'AJUSTES',  tag: 'Configuración',      icon: '⚙' },
-  { id: 'operator', label: 'OPERADOR', tag: 'Panel control',      icon: '⚐' },
-];
-
-const VISIBLE_CARDS = [-2, -1, 0, 1, 2] as const;
 
 export function BatoceraSkin({
   currentView, systems, games, focusedIndex, selectedSystem,
@@ -101,7 +93,7 @@ export function BatoceraSkin({
           <div className="bat-home">
             <div className="bat-home-left">
               <div className="bat-home-eyebrow"><span className="dot" /><span>SYSTEM ONLINE · LAUNCHER READY</span></div>
-              <div className="bat-home-logo">NEOCAB</div>
+              <div className="bat-home-title">NEO<span className="accent">CAB</span></div>
               <div className="bat-home-sub">Your arcade cabinet, dressed up clean. Pick a system or jump straight to your pinned titles.</div>
               <div className="bat-home-stats">
                 <div className="bat-home-stat"><div className="k">Titles</div><div className="v">{games.length}</div></div>
@@ -123,14 +115,22 @@ export function BatoceraSkin({
             <div className="bat-home-right">
               <div className="bat-home-menu-head"><span>MAIN MENU</span><div className="line" /></div>
               <div className="bat-home-menu">
-                {MENU_ITEMS.map((item, i) => {
-                  const action = [onShowSystems, onScanROMs, onShowSettings, onShowOperator][i];
+                {ARCADE_MENU.map((item, i) => {
+                  const menuActions: Record<string, () => void> = {
+                    play: onShowSystems,
+                    scan: onScanROMs,
+                    settings: onShowSettings,
+                    operator: onShowOperator,
+                  };
                   return (
-                    <button key={item.id} className={`bat-home-btn${i === focusedIndex ? ' active' : ''}`} onClick={action} tabIndex={-1}>
-                      <span className="ic">{item.icon}</span>
-                      <span className="nm">{item.label}</span>
-                      <span className="tg">{item.tag}</span>
-                      {i === focusedIndex && <span className="arrow">▶</span>}
+                    <button key={item.id} className={`bat-menu-item${i === focusedIndex ? ' active' : ''}`} onClick={() => menuActions[item.id]?.()} tabIndex={-1}>
+                      <span className="mi-num">{String(i+1).padStart(2,'0')}</span>
+                      <span className="mi-icon">{item.icon}</span>
+                      <span className="mi-body">
+                        <span className="mi-label">{item.label}</span>
+                        <span className="mi-tag">{item.sub}</span>
+                      </span>
+                      {i === focusedIndex && <span className="mi-arrow">▶</span>}
                     </button>
                   );
                 })}
@@ -154,32 +154,33 @@ export function BatoceraSkin({
               <div className="bat-carousel">
                 <div
                   className="bat-carousel-track"
-                  style={{ transform: `translate(calc(-${focusedIndex * 260}px - 120px), -50%)` }}
+                  style={{ transform: `translate(calc(-${focusedIndex * 260}px - 130px), -50%)` }}
                 >
-                  {VISIBLE_CARDS.map(d => {
-                    const i = ((focusedIndex + d) % systems.length + systems.length) % systems.length;
-                    const s = systems[i];
-                    const [h] = getSystemHue(s.name);
+                  {systems.map((s, i) => {
+                    const d = i - focusedIndex;
                     const abs = Math.abs(d);
+                    const [h] = getSystemHue(s.name);
+                    const scale = d === 0 ? 1.2 : abs === 1 ? .78 : abs === 2 ? .58 : .42;
+                    const opacity = abs === 0 ? 1 : abs === 1 ? .8 : abs === 2 ? .35 : .12;
+                    const blur = abs === 0 ? 0 : abs === 1 ? .4 : abs === 2 ? 1.6 : 3;
                     return (
                       <button
-                        key={`${i}-${d}`}
+                        key={s.id}
                         className={`bat-sys-card${d === 0 ? ' active' : ''}`}
                         style={{
-                          transform: `scale(${d===0?1:abs===1?.72:.5}) rotateY(${d * -14}deg)`,
-                          opacity: abs===0?1:abs===1?.75:.4,
-                          filter: abs > 0 ? `blur(${abs * .8}px)` : undefined,
-                          zIndex: 10 - abs,
+                          transform: `scale(${scale}) rotateY(${d * -14}deg)`,
+                          opacity, filter: `blur(${blur}px)`, zIndex: 100 - abs,
                           '--card-h': h,
                         } as React.CSSProperties}
                         onClick={() => onSelectSystem(s)} tabIndex={-1}>
                         <div className="sc-glow" />
-                        <div className="sc-body">
-                          <div className="sc-abbr">{s.name.slice(0,4).toUpperCase()}</div>
+                        <div className="sc-shape">
+                          <MediaShape shape={getSystemShape(s.name)} hue={h} short={s.name.slice(0,4).toUpperCase()} />
                         </div>
                         <div className="sc-foot">
                           <div className="sc-name">{s.display_name}</div>
                           <div className="sc-tag">{s.name.toUpperCase()}</div>
+                          <div className="sc-count"><b>{s.game_count ?? 0}</b> titles</div>
                         </div>
                       </button>
                     );

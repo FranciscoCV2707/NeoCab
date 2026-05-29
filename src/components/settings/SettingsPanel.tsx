@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
 import { SystemManager } from './SystemManager';
-import { ThemeEditor } from '../studio/ThemeEditor';
 import { InputWizard } from '../operator/InputWizard';
 import KeymapConfigPanel from '../operator/KeymapConfig';
 import { ScraperPanel } from './ScraperPanel';
 import { EmulatorSetupPanel } from './EmulatorSetupPanel';
+import { ThemeEditor } from '../studio/ThemeEditor';
+import { useThemeStore } from '../../stores/useThemeStore';
+import { THEME_REGISTRY } from '../../themes/registry';
 import '../operator/OperatorPanel.css';
 
-type SettingsTab = 'systems' | 'theme' | 'controls' | 'keymap' | 'scraper' | 'emulators';
+export type SettingsTab = 'systems' | 'theme' | 'controls' | 'keymap' | 'scraper' | 'emulators';
 
 interface SettingsPanelProps {
     onBack: () => void;
+    onOpenThemeSwitcher?: () => void;
+    initialTab?: SettingsTab;
 }
 
-export const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
-    const [activeTab, setActiveTab] = useState<SettingsTab>('systems');
+export const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack, onOpenThemeSwitcher, initialTab }) => {
+    const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab ?? 'systems');
+    const currentTheme = useThemeStore(s => s.currentTheme);
+    const activeId = currentTheme?.name?.toLowerCase().replace(/\s+/g, '') ?? 'hyperrush';
+    const activeEntry = THEME_REGISTRY.find(t => t.id === activeId);
 
     return (
         <div className="operator-panel">
@@ -67,7 +74,29 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                         <SystemManager />
                     </div>
                 )}
-                {activeTab === 'theme' && <ThemeEditor />}
+                {activeTab === 'theme' && (
+                    <div className="tab-pane" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px 16px', background: 'rgba(255,255,255,.05)', borderRadius: 8, border: '1px solid rgba(255,255,255,.1)' }}>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: 600, fontSize: 15 }}>
+                                    Tema activo: <span style={{ color: activeEntry ? activeEntry.accent : '#fff' }}>{activeEntry?.name ?? currentTheme?.name ?? '—'}</span>
+                                </div>
+                                <div style={{ fontSize: 12, opacity: .6, marginTop: 4 }}>{activeEntry?.tagline ?? 'Personaliza colores, fuentes, efectos y layout abajo'}</div>
+                            </div>
+                            <button
+                                onClick={onOpenThemeSwitcher}
+                                style={{
+                                    padding: '10px 22px', background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.25)',
+                                    color: '#fff', fontFamily: 'inherit', fontSize: 13, letterSpacing: '.08em',
+                                    cursor: 'pointer', textTransform: 'uppercase', borderRadius: 4,
+                                }}
+                            >
+                                Cambiar tema (T)
+                            </button>
+                        </div>
+                        <ThemeEditor />
+                    </div>
+                )}
                 {activeTab === 'controls' && <InputWizard />}
                 {activeTab === 'keymap' && <KeymapConfigPanel />}
                 {activeTab === 'scraper' && (

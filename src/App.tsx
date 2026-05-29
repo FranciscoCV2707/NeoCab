@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import { useUnifiedInput } from "./hooks/useUnifiedInputHook";
@@ -7,19 +7,20 @@ import { useAudio } from "./hooks/useAudio";
 import { useTheme } from "./hooks/useTheme";
 import { useTranslation, Locale } from "./i18n";
 import { useSystemStore } from "./stores/useSystemStore";
-import { initThemeHotkey } from "./stores/useThemeStore";
-import { dispatchNeoCabEvent } from "./theme/themeEvents";
-import { exposeNeoCabAPI } from "./theme/neoCabApi";
+import { initThemeHotkey, useThemeStore } from "./stores/useThemeStore";
+import { dispatchNeoCabEvent } from "./themes/engine/themeEvents";
+import { exposeNeoCabAPI } from "./themes/engine/neoCabApi";
 import {
   notifyThemeNavigate,
   notifyThemeViewChange,
   notifyThemeFocus,
   notifyThemeSelect,
   notifyThemeBack,
-} from "./theme/themePlugin";
+} from "./themes/engine/themePlugin";
 import { useGameStore } from "./stores/useGameStore";
 import { useUIStore, initUIListeners } from "./stores/useUIStore";
 import { Game, SaveState, System } from "./stores/types";
+import type { SkinId } from "./stores/useThemeStore";
 import { FadeOverlay } from "./components/launcher/FadeOverlay";
 import { PauseMenu } from "./components/launcher/PauseMenu";
 import { ViewTransition } from "./components/ViewTransition";
@@ -30,11 +31,20 @@ import AttractMode from "./components/AttractMode";
 import SaveStateModal from "./components/SaveStateModal";
 import { OperatorPanel } from "./components/operator/OperatorPanel";
 import { SettingsPanel } from "./components/settings/SettingsPanel";
+import { ThemeSwitcher } from "./themes/ThemeSwitcher";
 import { ToastContainer } from "./components/Toast";
 import { toast } from "./stores/useNotificationStore";
+import { HyperRushSkin } from "./themes/hyperrush/HyperRushSkin";
+import type { SkinProps } from "./themes/hyperrush/HyperRushSkin";
+import { NeonWallSkin } from "./themes/neonwall/NeonWallSkin";
+import { FluxSkin } from "./themes/flux/FluxSkin";
+import { BatoceraSkin } from "./themes/batocera/BatoceraSkin";
+import { OperatorSkin } from "./themes/operator/OperatorSkin";
+import { ComposedSkin, DEFAULT_COMPOSE } from "./themes/ComposedSkin";
 import "./App.css";
 
 export default function App() {
+  const [showThemeSwitcher, setShowThemeSwitcher] = useState(false);
   const { currentTheme } = useTheme();
   const { locale, changeLocale } = useTranslation();
   const { playSound, playBGM, stopBGM } = useAudio();
@@ -53,6 +63,10 @@ export default function App() {
   const loadGames = useGameStore((s) => s.loadGames);
   const setFocusedIndex = useGameStore((s) => s.setFocusedIndex);
 
+  const themeSkin = useThemeStore((s) => s.currentTheme?.skin);
+  const composeMap = useThemeStore((s) => s.currentTheme?.compose);
+  const activeSkin: SkinId = (themeSkin as SkinId) ?? 'hyperrush';
+
   const currentView = useUIStore((s) => s.currentView);
   const fadeVisible = useUIStore((s) => s.fadeVisible);
   const pauseVisible = useUIStore((s) => s.pauseVisible);
@@ -68,6 +82,14 @@ export default function App() {
   const hideSaveStateModal = useUIStore((s) => s.hideSaveStateModal);
 
   useEffect(() => { initUIListeners(); initThemeHotkey(); exposeNeoCabAPI(); }, []);
+
+  // Restore the last applied theme on boot so the chosen skin persists across
+  // restarts (only from the local cache; never pulls a backend default).
+  useEffect(() => {
+    const cached = localStorage.getItem("neocab_theme");
+    if (!cached) return;
+    try { useThemeStore.getState().applyTheme(JSON.parse(cached)); } catch { /* ignore bad cache */ }
+  }, []);
   useEffect(() => { document.documentElement.setAttribute("lang", locale); }, [locale]);
 
   useEffect(() => {
@@ -217,12 +239,29 @@ export default function App() {
     if (["up", "down", "left", "right"].includes(action)) playSound("navigate");
     switch (currentView) {
       case "menu":
+        if (action === "up" || action === "left") {
+          const next = Math.max(0, focusedIndex - 1);
+          setFocusedIndex(next);
+        }
+        if (action === "down" || action === "right") {
+          const next = Math.min(3, focusedIndex + 1);
+          setFocusedIndex(next);
+        }
         if (action === "confirm") {
           playSound("select");
-          setView("systems");
-          const vc1 = { from: "menu", to: "systems" };
-          dispatchNeoCabEvent("neocab:viewchange", vc1);
-          notifyThemeViewChange(vc1);
+          // Real menu: 0=Jugar, 1=Escanear, 2=Configuración, 3=Operador
+          if (focusedIndex === 0) {
+            setView("systems");
+            const vc1 = { from: "menu", to: "systems" };
+            dispatchNeoCabEvent("neocab:viewchange", vc1);
+            notifyThemeViewChange(vc1);
+          } else if (focusedIndex === 1) {
+            handleScanROMs();
+          } else if (focusedIndex === 2) {
+            setView("settings");
+          } else if (focusedIndex === 3) {
+            setView("operator");
+          }
         }
         break;
       case "systems": {
@@ -327,6 +366,18 @@ export default function App() {
 
   useUnifiedInput({ onAction: handleUnifiedAction });
 
+  // T key opens ThemeSwitcher from anywhere (except when it's already open)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.key === 't' || e.key === 'T') && !showThemeSwitcher) {
+        setShowThemeSwitcher(true);
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showThemeSwitcher]);
+
   useEffect(() => {
     if (currentView === "games" && games[focusedIndex]) {
       const g = games[focusedIndex];
@@ -364,7 +415,23 @@ export default function App() {
           />
         )}
       </div>
-      {currentView === "menu" && (
+      {/* ── Operator & Settings: always classic, regardless of skin ── */}
+      {currentView === "operator" && (
+        <ViewTransition transitionType="scale">
+          <OperatorPanel onBack={() => setView("menu")} />
+        </ViewTransition>
+      )}
+      {currentView === "settings" && (
+        <ViewTransition transitionType="scale">
+          <SettingsPanel
+            onBack={() => setView("menu")}
+            onOpenThemeSwitcher={() => setShowThemeSwitcher(true)}
+          />
+        </ViewTransition>
+      )}
+
+      {/* ── Classic skin (menu/systems/games) ── */}
+      {activeSkin === 'classic' && currentView === "menu" && (
         <ViewTransition transitionType="slide" direction="left">
           <MainMenu
             onScanROMs={handleScanROMs}
@@ -378,26 +445,46 @@ export default function App() {
           />
         </ViewTransition>
       )}
-      {currentView === "systems" && (
+      {activeSkin === 'classic' && currentView === "systems" && (
         <ViewTransition transitionType="slide" direction="right">
           <SystemSelect systems={systems} onSelectSystem={handleSelectSystem} onBack={handleBack} loading={loading} focusedIndex={focusedIndex} />
         </ViewTransition>
       )}
-      {currentView === "games" && selectedSystem && (
+      {activeSkin === 'classic' && currentView === "games" && selectedSystem && (
         <ViewTransition transitionType="fade">
           <GameList system={selectedSystem} games={games} onPlayGame={handlePlayGame} onBack={handleBack} loading={loading} focusedIndex={focusedIndex} />
         </ViewTransition>
       )}
-      {currentView === "operator" && (
-        <ViewTransition transitionType="scale">
-          <OperatorPanel onBack={() => setView("menu")} />
-        </ViewTransition>
-      )}
-      {currentView === "settings" && (
-        <ViewTransition transitionType="scale">
-          <SettingsPanel onBack={() => setView("menu")} />
-        </ViewTransition>
-      )}
+
+      {/* ── Theme skins (menu/systems/games only) ── */}
+      {activeSkin !== 'classic' && currentView !== "operator" && currentView !== "settings" && (() => {
+        const skinProps: SkinProps = {
+          currentView,
+          systems,
+          games,
+          focusedIndex,
+          selectedSystem: selectedSystem ?? null,
+          loading,
+          scanProgress,
+          onSelectSystem: handleSelectSystem,
+          onPlayGame: handlePlayGame,
+          onBack: handleBack,
+          onShowSystems: () => setView("systems"),
+          onShowOperator: () => setView("operator"),
+          onShowSettings: () => setView("settings"),
+          onScanROMs: handleScanROMs,
+        };
+        switch (activeSkin) {
+          case 'hyperwheel': return <HyperRushSkin {...skinProps} variant="wheel" />;
+          case 'hyperrush': return <HyperRushSkin {...skinProps} />;
+          case 'neonwall':  return <NeonWallSkin {...skinProps} />;
+          case 'batocera':  return <BatoceraSkin {...skinProps} />;
+          case 'flux':      return <FluxSkin {...skinProps} />;
+          case 'operator':  return <OperatorSkin {...skinProps} />;
+          case 'composed':  return <ComposedSkin {...skinProps} compose={composeMap ?? DEFAULT_COMPOSE} />;
+          default: return null;
+        }
+      })()}
       {showSaveStateModal && pendingGame && (
         <SaveStateModal
           game={pendingGame}
@@ -408,6 +495,9 @@ export default function App() {
         />
       )}
       <ToastContainer />
+      {showThemeSwitcher && (
+        <ThemeSwitcher onClose={() => setShowThemeSwitcher(false)} />
+      )}
     </div>
   );
 }
