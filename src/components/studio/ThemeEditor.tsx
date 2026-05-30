@@ -476,7 +476,6 @@ export const ThemeEditor: React.FC = () => {
   const tabs: { key: EditorTab; label: string }[] = [
     { key: 'colors', label: 'Colores' },
     { key: 'effects', label: 'Efectos' },
-    { key: 'compose', label: 'Componer' },
   ];
 
   const renderColors = () => (
@@ -834,41 +833,66 @@ export const ThemeEditor: React.FC = () => {
 
   const renderCompose = () => {
     const c = compose ?? DEFAULT_COMPOSE;
-    const screens: { key: keyof ComposeMap; label: string; hint: string }[] = [
-      { key: 'home', label: 'Inicio / Menú', hint: 'pantalla principal' },
-      { key: 'systems', label: 'Sistemas', hint: 'selección de plataforma' },
-      { key: 'games', label: 'Juegos', hint: 'lista/rueda de títulos' },
-    ];
     const opts = THEME_REGISTRY.filter(t => t.status === 'available');
+    const zones: { key: keyof ComposeMap; label: string }[] = [
+      { key: 'home', label: 'Inicio / Menú' },
+      { key: 'systems', label: 'Sistemas' },
+      { key: 'games', label: 'Juegos' },
+    ];
+    const nameOf = (skin: SkinId) => opts.find(o => o.skin === skin)?.name ?? skin;
+    const accentOf = (skin: SkinId) => opts.find(o => o.skin === skin)?.accent ?? '#888';
+    const assign = (zone: keyof ComposeMap, skin: SkinId) => setCompose({ ...c, [zone]: skin });
+
     return (
       <div className="editor-section">
-        <h3>Componer tema</h3>
-        <p className="section-desc">Elige de qué tema viene cada pantalla. El preview "Tema" (derecha) muestra la mezcla en vivo. Al guardar se crea un tema con skin <b>composed</b>.</p>
-        {screens.map(s => (
-          <div key={s.key} style={{ marginBottom: 18 }}>
-            <label style={{ display: 'block', marginBottom: 2, fontWeight: 600 }}>{s.label}</label>
-            <div style={{ fontSize: 11, opacity: .55, marginBottom: 8 }}>{s.hint}</div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {opts.map(o => {
-                const active = c[s.key] === o.skin;
-                return (
-                  <button key={o.id} onClick={() => setCompose({ ...c, [s.key]: o.skin })}
-                    style={{
-                      padding: '8px 12px', borderRadius: 8, cursor: 'pointer',
-                      border: `2px solid ${active ? o.accent : '#444'}`,
-                      background: active ? `${o.accent}22` : '#1a1a2e',
-                      color: active ? o.accent : '#ccc', fontSize: 12, fontWeight: 600,
-                    }}>
-                    {o.name}
-                  </button>
-                );
-              })}
+        <h3>Componer tema · arrastra y suelta</h3>
+        <p className="section-desc">Arrastra un tema a cada pantalla (o haz clic para asignarlo a todas). El preview "Tema" muestra la mezcla en vivo; al guardar se crea un tema <b>composed</b>.</p>
+
+        {/* Palette of draggable theme tiles */}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+          {opts.map(o => (
+            <div key={o.id} draggable
+              onDragStart={e => { e.dataTransfer.setData('text/skin', o.skin); e.dataTransfer.effectAllowed = 'copy'; }}
+              onClick={() => setCompose({ home: o.skin, systems: o.skin, games: o.skin })}
+              title={`Arrastra "${o.name}" a una pantalla, o clic para usarlo en todas`}
+              style={{
+                padding: '8px 14px', borderRadius: 8, cursor: 'grab', userSelect: 'none',
+                border: `2px solid ${o.accent}`, background: `${o.accent}18`, color: o.accent,
+                fontWeight: 600, fontSize: 12,
+              }}>
+              ⠿ {o.name}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {/* Drop zones, one per screen */}
+        <div style={{ display: 'flex', gap: 10 }}>
+          {zones.map(z => {
+            const cur = c[z.key];
+            return (
+              <div key={z.key}
+                onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }}
+                onDrop={e => {
+                  e.preventDefault();
+                  const s = e.dataTransfer.getData('text/skin') as SkinId;
+                  if (s) assign(z.key, s);
+                }}
+                style={{
+                  flex: 1, minHeight: 96, borderRadius: 10, padding: 10, textAlign: 'center',
+                  border: `2px dashed ${accentOf(cur)}`, background: `${accentOf(cur)}11`,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6,
+                }}>
+                <div style={{ fontSize: 10, opacity: .6, textTransform: 'uppercase', letterSpacing: 1.5 }}>{z.label}</div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: accentOf(cur) }}>{nameOf(cur)}</div>
+                <div style={{ fontSize: 9, opacity: .45 }}>suelta un tema aquí</div>
+              </div>
+            );
+          })}
+        </div>
+
         {compose && (
           <button onClick={() => setCompose(null)}
-            style={{ marginTop: 4, padding: '6px 12px', background: '#333', border: '1px solid #555', borderRadius: 6, color: '#ccc', cursor: 'pointer', fontSize: 12 }}>
+            style={{ marginTop: 14, padding: '6px 12px', background: '#333', border: '1px solid #555', borderRadius: 6, color: '#ccc', cursor: 'pointer', fontSize: 12 }}>
             Quitar composición (usar un solo skin)
           </button>
         )}
@@ -1405,15 +1429,12 @@ export const ThemeEditor: React.FC = () => {
 
       {showLayoutEditor && (
         <LayoutEditor
-          screens={theme.screens}
-          themeColors={theme.colors}
-          themeFonts={theme.fonts}
-          onSave={(screens) => {
-            // A custom layout is rendered by ScreenRenderer (the 'classic' skin
-            // path in App.tsx), so switch the theme's skin so widgets show up.
-            setTheme(prev => ({ ...prev, screens, skin: 'classic' }));
+          compose={compose ?? DEFAULT_COMPOSE}
+          vars={previewVars}
+          onSave={(c) => {
+            setCompose(c);
             setShowLayoutEditor(false);
-            showMsg('Layout guardado — pulsa "Guardar y Aplicar" para persistir');
+            showMsg('Composición aplicada — pulsa "Guardar y Aplicar" para crear el tema');
           }}
           onClose={() => setShowLayoutEditor(false)}
         />

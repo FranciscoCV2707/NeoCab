@@ -58,6 +58,112 @@ function HRMarquee({ headline, meta, tag = 'HYPERRUSH · v2.2' }: { headline: Re
   );
 }
 
+// ── Reusable HyperRush games-screen blocks (foundation for widget-level
+// composition). Output is identical to the previous inline JSX. ──
+export function HRGamesPreview({ focused, selectedSystem, videoRef }:
+  { focused?: Game; selectedSystem: System | null; videoRef: React.RefObject<HTMLVideoElement> }) {
+  return (
+    <div className="hr-crt-wrap">
+      <div className="hr-crt">
+        <div className="hr-crt-screen">
+          {focused?.video_path ? (
+            <video ref={videoRef} src={resolveAsset(focused.video_path)} autoPlay loop muted playsInline />
+          ) : focused?.image_path ? (
+            <img src={resolveAsset(focused.image_path)} alt={focused.title} />
+          ) : focused ? (
+            <div className="hr-crt-content">
+              <div className="hr-crt-game-name">{focused.title.toUpperCase()}</div>
+              {focused.developer && <div className="hr-crt-sub">{focused.developer.toUpperCase()}</div>}
+              <div className="hr-crt-press">Insert Coin to Continue</div>
+              <div className="hr-crt-copy">© {focused.year ?? '----'} · {selectedSystem?.display_name.toUpperCase()}</div>
+            </div>
+          ) : (
+            <div className="hr-crt-fallback">
+              <div className="glyph">NO SIGNAL</div>
+              <div className="ttl">NO GAME</div>
+              <div className="sub">selecciona un título</div>
+            </div>
+          )}
+          <div className="hr-crt-scan" />
+          <div className="hr-crt-rgb" />
+          <div className="hr-crt-bulge" />
+          <div className="hr-crt-roll" />
+          <div className="hr-crt-corner tl">CH 03</div>
+          <div className="hr-crt-corner tr">● REC</div>
+          <div className="hr-crt-corner bl">RGB · 320×240</div>
+          <div className="hr-crt-corner br">60.00 Hz</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function HRGamesInfo({ focused, selectedSystem }:
+  { focused?: Game; selectedSystem: System | null }) {
+  return (
+    <div className="hr-logo-block">
+      {focused && (
+        <>
+          <div className="hr-logo-pill">
+            <span className="sq" />
+            <span>{selectedSystem?.display_name?.toUpperCase() ?? ''}</span>
+            <span style={{ opacity: .55, marginLeft: 6 }}>·</span>
+            <span style={{ opacity: .75 }}>{focused.year ?? '----'}</span>
+          </div>
+          <div className="hr-logo-big" key={focused.id}>{focused.title}</div>
+          {focused.developer && <div className="hr-logo-sub">{focused.developer.toUpperCase()}</div>}
+          <div className="hr-meta">
+            <div className="hr-meta-cell"><div className="k">AÑO</div><div className="v">{focused.year ?? '—'}</div></div>
+            <div className="hr-meta-cell"><div className="k">MAKER</div><div className="v">{focused.developer ?? '—'}</div></div>
+            <div className="hr-meta-cell"><div className="k">GÉNERO</div><div className="v">{focused.genre ?? '—'}</div></div>
+            <div className="hr-meta-cell"><div className="k">PLAYERS</div><div className="v">{focused.players ?? '—'}</div></div>
+            <div className="hr-meta-cell"><div className="k">SISTEMA</div><div className="v">{selectedSystem?.display_name ?? '—'}</div></div>
+            <div className="hr-meta-cell"><div className="k">PARTIDAS</div><div className="v hi">{String(focused.play_count ?? 0).padStart(4,'0')}</div></div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+export function HRGamesWheel({ games, focusedIndex, loading, selectedSystem, listRef, offset, onPlayGame }:
+  { games: Game[]; focusedIndex: number; loading: boolean; selectedSystem: System | null;
+    listRef: React.RefObject<HTMLDivElement>; offset: number; onPlayGame: (g: Game) => void }) {
+  return (
+    <div className="hr-wheel-col">
+      <div className="hr-wheel-head">
+        <span>NOW BROWSING</span>
+        <span className="v">{games.length ? String(focusedIndex + 1).padStart(2, '0') : '--'}</span>
+        <span style={{ opacity: .4 }}>/</span>
+        <span className="v" style={{ color: 'rgba(255,255,255,.5)' }}>{String(games.length).padStart(2, '0')}</span>
+      </div>
+      <div className="hr-wheel-frame" ref={listRef}>
+        <div className="hr-wheel-track" style={{ transform: `translateY(${offset}px)` }}>
+          {games.map((game, si) => {
+            const ri  = si;
+            const d   = ri - focusedIndex;
+            const abs = Math.abs(d);
+            const cls = `hr-wheel-item${d === 0 ? ' active' : abs === 1 ? ' n1' : abs === 2 ? ' n2' : ' f'}`;
+            const [h] = selectedSystem ? getSystemHue(selectedSystem.name) : [35];
+            return (
+              <div key={game.id} className={cls} style={{ '--c-h': h } as React.CSSProperties}>
+                <button className={`hr-wheel-card${game.is_favorite === 1 ? ' fav' : ''}`}
+                  tabIndex={-1} disabled={loading}
+                  onClick={() => !loading && onPlayGame(game)}>
+                  <span className="num">{String(ri + 1).padStart(2, '0')}</span>
+                  <span className="ttl">{game.title}</span>
+                  <span className="star" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+        <div className="hr-wheel-rail" />
+      </div>
+    </div>
+  );
+}
+
 export function HyperRushSkin({
   currentView, systems, games, focusedIndex, selectedSystem,
   loading, scanProgress,
@@ -305,91 +411,10 @@ export function HyperRushSkin({
           {/* ── GAMES ── */}
           {view === 'games' && (
             <div className="hr-wheel-screen">
-              <div className="hr-crt-wrap">
-                <div className="hr-crt">
-                  <div className="hr-crt-screen">
-                    {focused?.video_path ? (
-                      <video ref={videoRef} src={resolveAsset(focused.video_path)} autoPlay loop muted playsInline />
-                    ) : focused?.image_path ? (
-                      <img src={resolveAsset(focused.image_path)} alt={focused.title} />
-                    ) : focused ? (
-                      <div className="hr-crt-content">
-                        <div className="hr-crt-game-name">{focused.title.toUpperCase()}</div>
-                        {focused.developer && <div className="hr-crt-sub">{focused.developer.toUpperCase()}</div>}
-                        <div className="hr-crt-press">Insert Coin to Continue</div>
-                        <div className="hr-crt-copy">© {focused.year ?? '----'} · {selectedSystem?.display_name.toUpperCase()}</div>
-                      </div>
-                    ) : (
-                      <div className="hr-crt-fallback">
-                        <div className="glyph">NO SIGNAL</div>
-                        <div className="ttl">NO GAME</div>
-                        <div className="sub">selecciona un título</div>
-                      </div>
-                    )}
-                    <div className="hr-crt-scan" />
-                    <div className="hr-crt-rgb" />
-                    <div className="hr-crt-bulge" />
-                    <div className="hr-crt-roll" />
-                    <div className="hr-crt-corner tl">CH 03</div>
-                    <div className="hr-crt-corner tr">● REC</div>
-                    <div className="hr-crt-corner bl">RGB · 320×240</div>
-                    <div className="hr-crt-corner br">60.00 Hz</div>
-                  </div>
-                </div>
-              </div>
-              <div className="hr-logo-block">
-                {focused && (
-                  <>
-                    <div className="hr-logo-pill">
-                      <span className="sq" />
-                      <span>{selectedSystem?.display_name?.toUpperCase() ?? ''}</span>
-                      <span style={{ opacity: .55, marginLeft: 6 }}>·</span>
-                      <span style={{ opacity: .75 }}>{focused.year ?? '----'}</span>
-                    </div>
-                    <div className="hr-logo-big" key={focused.id}>{focused.title}</div>
-                    {focused.developer && <div className="hr-logo-sub">{focused.developer.toUpperCase()}</div>}
-                    <div className="hr-meta">
-                      <div className="hr-meta-cell"><div className="k">AÑO</div><div className="v">{focused.year ?? '—'}</div></div>
-                      <div className="hr-meta-cell"><div className="k">MAKER</div><div className="v">{focused.developer ?? '—'}</div></div>
-                      <div className="hr-meta-cell"><div className="k">GÉNERO</div><div className="v">{focused.genre ?? '—'}</div></div>
-                      <div className="hr-meta-cell"><div className="k">PLAYERS</div><div className="v">{focused.players ?? '—'}</div></div>
-                      <div className="hr-meta-cell"><div className="k">SISTEMA</div><div className="v">{selectedSystem?.display_name ?? '—'}</div></div>
-                      <div className="hr-meta-cell"><div className="k">PARTIDAS</div><div className="v hi">{String(focused.play_count ?? 0).padStart(4,'0')}</div></div>
-                    </div>
-                  </>
-                )}
-              </div>
-              <div className="hr-wheel-col">
-                <div className="hr-wheel-head">
-                  <span>NOW BROWSING</span>
-                  <span className="v">{games.length ? String(focusedIndex + 1).padStart(2, '0') : '--'}</span>
-                  <span style={{ opacity: .4 }}>/</span>
-                  <span className="v" style={{ color: 'rgba(255,255,255,.5)' }}>{String(games.length).padStart(2, '0')}</span>
-                </div>
-                <div className="hr-wheel-frame" ref={listRef}>
-                  <div className="hr-wheel-track" style={{ transform: `translateY(${offset}px)` }}>
-                    {games.map((game, si) => {
-                      const ri  = si;
-                      const d   = ri - focusedIndex;
-                      const abs = Math.abs(d);
-                      const cls = `hr-wheel-item${d === 0 ? ' active' : abs === 1 ? ' n1' : abs === 2 ? ' n2' : ' f'}`;
-                      const [h] = selectedSystem ? getSystemHue(selectedSystem.name) : [35];
-                      return (
-                        <div key={game.id} className={cls} style={{ '--c-h': h } as React.CSSProperties}>
-                          <button className={`hr-wheel-card${game.is_favorite === 1 ? ' fav' : ''}`}
-                            tabIndex={-1} disabled={loading}
-                            onClick={() => !loading && onPlayGame(game)}>
-                            <span className="num">{String(ri + 1).padStart(2, '0')}</span>
-                            <span className="ttl">{game.title}</span>
-                            <span className="star" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="hr-wheel-rail" />
-                </div>
-              </div>
+              <HRGamesPreview focused={focused} selectedSystem={selectedSystem} videoRef={videoRef} />
+              <HRGamesInfo focused={focused} selectedSystem={selectedSystem} />
+              <HRGamesWheel games={games} focusedIndex={focusedIndex} loading={loading}
+                selectedSystem={selectedSystem} listRef={listRef} offset={offset} onPlayGame={onPlayGame} />
             </div>
           )}
         </div>

@@ -38,7 +38,10 @@
       "Skill(graphify)",
       "Bash(dir \"C:\\\\Users\\\\Pako\\\\Desktop\\\\arcade\\\\otros proyectos\\\\NeoCab\\\\src-tauri\\\\target\\\\release\\\\bundle\" /s /b)",
       "Bash(findstr /i \".msi .exe\")",
-      "Bash(Test-Path *)"
+      "Bash(Test-Path *)",
+      "Bash(git grep *)",
+      "mcp__plugin_context-mode_context-mode__ctx_upgrade",
+      "PowerShell(npx tsc --noEmit)"
     ]
   }
 }
