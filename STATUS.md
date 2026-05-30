@@ -99,8 +99,13 @@ defecto; el editor drag&drop será **por componente/widget** (combinar piezas en
     característico de cada tema sobre el marco compartido: scanlines CRT (HyperRush/HyperWheel),
     grid más denso/brillante (NeonWall), wash diagonal de acento (Flux), backdrop plano sin grid
     (Batocera). Todo sigue leyendo `--theme-*`, así recolorea en vivo.
-  - Pendiente: que cada skin monte su fondo real (rueda/coverflow) detrás del panel — requiere
-    extraer el background de cada skin como pieza standalone (se cruza con el nivel widget).
+  - **Fondo real por skin (inicio de Fase 4 — widget level):** nuevo
+    `themes/shared/SkinBackground.tsx` que extrae SOLO las capas de fondo de cada skin como pieza
+    standalone (hr-bg/scan/vignette/noise, nw-bg, fx-bg, bat-bg, op-glow-layer), envueltas en su
+    clase raíz `theme-*` e importando todos los CSS para que resuelvan sin montar el skin completo.
+    `SkinChrome` monta `<SkinBackground skin={...}>` dentro de `.sc-bg`; el gradiente neutro queda
+    solo como fallback (`data-skin="default"`). Operador/Settings ahora se ven sobre el fondo real
+    del tema activo. Primera pieza reutilizable extraída → base del nivel widget.
 - **Fase 3 — Eliminar `classic` + HyperRush por defecto + preview real del skin** (el preview del
   ThemeEditor aún dibuja el menú classic viejo con "Explorar"; hay que reemplazarlo por el skin real).
 - **Fase 3 (avances):** preview real del skin en el editor (`SkinPreview.tsx`, render escalado con

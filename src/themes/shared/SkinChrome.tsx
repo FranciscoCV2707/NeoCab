@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import { SkinBackground } from './SkinBackground';
 import './SkinChrome.css';
 
 interface SkinChromeProps {
@@ -28,7 +29,7 @@ export function SkinChrome({ title, themeName, skin, onBack, children }: SkinChr
 
   return (
     <div className="sc-root" data-skin={skin ?? 'default'}>
-      <div className="sc-bg" />
+      <div className="sc-bg"><SkinBackground skin={skin} /></div>
       <header className="sc-marquee">
         <button className="sc-back" onClick={onBack}>◂ Volver</button>
         <div className="sc-brand">
