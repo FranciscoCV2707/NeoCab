@@ -110,3 +110,38 @@
   border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.08));
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
+
+/* ── Per-skin chrome accents (signature touch, still --theme-* driven) ── */
+
+/* HyperRush / HyperWheel: CRT scanlines over the backdrop */
+.sc-root[data-skin="hyperrush"] .sc-bg::before,
+.sc-root[data-skin="hyperwheel"] .sc-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.22) 3px
+  );
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* NeonWall: tighter, brighter grid for the coverflow vibe */
+.sc-root[data-skin="neonwall"] .sc-bg::after {
+  background-size: 32px 32px;
+  opacity: 0.2;
+}
+
+/* Flux: diagonal accent wash */
+.sc-root[data-skin="flux"] .sc-bg {
+  background:
+    radial-gradient(90% 70% at 80% -10%, var(--theme-accent-hot, var(--theme-accent, #c084fc)) 0%, transparent 45%),
+    linear-gradient(160deg, var(--theme-deep, #0a0a14) 0%, var(--theme-bg, #16213e) 100%);
+}
+
+/* Batocera: softer, flatter backdrop (no grid) */
+.sc-root[data-skin="batocera"] .sc-bg::after { opacity: 0; }
+.sc-root[data-skin="batocera"] .sc-marquee { box-shadow: none; }

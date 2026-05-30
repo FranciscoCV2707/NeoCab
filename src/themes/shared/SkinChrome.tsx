@@ -7,6 +7,8 @@ interface SkinChromeProps {
   title: string;
   /** Active theme display name, shown as the chrome subtitle. */
   themeName: string;
+  /** Active skin id; drives per-skin chrome accents via `data-skin`. */
+  skin?: string;
   onBack: () => void;
   children: ReactNode;
 }
@@ -14,7 +16,7 @@ interface SkinChromeProps {
 // Themed frame for full-screen panels (Operator / Settings) so they belong to
 // the active skin instead of floating on black. All colors read the canonical
 // --theme-* vars, so the chrome recolors live with the theme.
-export function SkinChrome({ title, themeName, onBack, children }: SkinChromeProps) {
+export function SkinChrome({ title, themeName, skin, onBack, children }: SkinChromeProps) {
   const [clock, setClock] = useState(() => new Date());
   useEffect(() => {
     const t = setInterval(() => setClock(new Date()), 1000);
@@ -25,7 +27,7 @@ export function SkinChrome({ title, themeName, onBack, children }: SkinChromePro
   const ss = String(clock.getSeconds()).padStart(2, '0');
 
   return (
-    <div className="sc-root">
+    <div className="sc-root" data-skin={skin ?? 'default'}>
       <div className="sc-bg" />
       <header className="sc-marquee">
         <button className="sc-back" onClick={onBack}>◂ Volver</button>

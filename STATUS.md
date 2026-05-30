@@ -95,8 +95,12 @@ defecto; el editor drag&drop será **por componente/widget** (combinar piezas en
     con NEOCAB/título/reloj/Volver) que lee `--theme-*` y recolorea en vivo. `App.tsx` envuelve
     Operador y Settings en `<SkinChrome>` cuando el skin activo NO es `classic` (classic queda igual).
     Los paneles (`width/height:100%`) se enmarcan dentro en vez de flotar sobre negro.
-  - Pendiente: chrome específico por skin (CRT en HyperRush, coverflow-bg en NeonWall…); por ahora
-    es un marco compartido neutro recoloreado por tema.
+  - **Chrome por skin:** `SkinChrome` recibe `skin` → `data-skin`, y el CSS añade el acento
+    característico de cada tema sobre el marco compartido: scanlines CRT (HyperRush/HyperWheel),
+    grid más denso/brillante (NeonWall), wash diagonal de acento (Flux), backdrop plano sin grid
+    (Batocera). Todo sigue leyendo `--theme-*`, así recolorea en vivo.
+  - Pendiente: que cada skin monte su fondo real (rueda/coverflow) detrás del panel — requiere
+    extraer el background de cada skin como pieza standalone (se cruza con el nivel widget).
 - **Fase 3 — Eliminar `classic` + HyperRush por defecto + preview real del skin** (el preview del
   ThemeEditor aún dibuja el menú classic viejo con "Explorar"; hay que reemplazarlo por el skin real).
 - **Fase 3 (avances):** preview real del skin en el editor (`SkinPreview.tsx`, render escalado con
