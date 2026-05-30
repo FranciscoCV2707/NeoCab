@@ -33,23 +33,23 @@
   mask-image: radial-gradient(100% 70% at 50% 0%, #000 40%, transparent 100%);
 }
 
-/* Marquee header band */
-.sc-marquee {
+/* Marquee bar: holds the real skin marquee + a floating Back control */
+.sc-marqueebar {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 14px 26px;
-  background: linear-gradient(180deg, var(--theme-surface, #1a1a2e) 0%, transparent 100%);
-  border-bottom: 2px solid var(--theme-accent, #ff6b35);
-  box-shadow: 0 0 24px var(--theme-accent, #ff6b35);
 }
+/* The extracted skin marquee fills the bar width */
+.sc-marqueebar > div { width: 100%; }
 
 .sc-back {
+  position: absolute;
+  top: 50%;
+  right: 22px;
+  transform: translateY(-50%);
+  z-index: 2;
   padding: 8px 16px;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.45);
   border: 1px solid var(--theme-border, #444);
   border-radius: 4px;
   color: var(--theme-text, #e0e0e0);
@@ -60,45 +60,8 @@
 }
 .sc-back:hover {
   border-color: var(--theme-accent, #ff6b35);
-  background: color-mix(in srgb, var(--theme-accent, #ff6b35) 14%, transparent);
+  background: color-mix(in srgb, var(--theme-accent, #ff6b35) 22%, rgba(0, 0, 0, 0.45));
 }
-
-.sc-brand {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  line-height: 1;
-}
-.sc-brand-neo { color: var(--theme-text, #fff); font-size: 22px; }
-.sc-brand-cab { color: var(--theme-accent, #ff6b35); font-size: 22px; }
-.sc-brand-sub {
-  margin-left: 8px;
-  font-size: 10px;
-  letter-spacing: 2px;
-  font-weight: 700;
-  opacity: 0.55;
-}
-
-.sc-title {
-  margin-left: auto;
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: var(--theme-accent, #ff6b35);
-  text-shadow: 0 0 12px var(--theme-accent, #ff6b35);
-}
-
-.sc-clock {
-  font-variant-numeric: tabular-nums;
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--theme-text, #e0e0e0);
-}
-.sc-clock-s { opacity: 0.5; font-size: 14px; }
 
 /* Content region: panel sits framed inside the chrome, not full-bleed */
 .sc-content {

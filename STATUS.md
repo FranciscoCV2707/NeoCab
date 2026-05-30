@@ -106,6 +106,11 @@ defecto; el editor drag&drop será **por componente/widget** (combinar piezas en
     `SkinChrome` monta `<SkinBackground skin={...}>` dentro de `.sc-bg`; el gradiente neutro queda
     solo como fallback (`data-skin="default"`). Operador/Settings ahora se ven sobre el fondo real
     del tema activo. Primera pieza reutilizable extraída → base del nivel widget.
+  - **Marquee por skin (2ª pieza):** `themes/shared/SkinMarquee.tsx` reproduce la barra de marca
+    real de cada skin (hr-marquee, nw-top, bat-header, op-topbar; Flux sintetiza una con `--theme-*`)
+    con el título de pantalla inyectado y reloj interno vivo. `SkinChrome` ahora monta el marquee
+    real (`.sc-marqueebar`) con un botón Volver flotante encima, en vez de su banda genérica.
+    Dos piezas standalone (background + marquee) → framework de widgets en marcha.
 - **Fase 3 — Eliminar `classic` + HyperRush por defecto + preview real del skin** (el preview del
   ThemeEditor aún dibuja el menú classic viejo con "Explorar"; hay que reemplazarlo por el skin real).
 - **Fase 3 (avances):** preview real del skin en el editor (`SkinPreview.tsx`, render escalado con

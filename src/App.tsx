@@ -421,7 +421,7 @@ export default function App() {
         <ViewTransition transitionType="scale">
           {activeSkin === 'classic'
             ? <OperatorPanel onBack={() => setView("menu")} />
-            : <SkinChrome title="Operador" themeName={currentTheme?.name ?? 'NeoCab'} skin={activeSkin} onBack={() => setView("menu")}>
+            : <SkinChrome title="Operador" skin={activeSkin} onBack={() => setView("menu")}>
                 <OperatorPanel onBack={() => setView("menu")} />
               </SkinChrome>}
         </ViewTransition>
@@ -430,7 +430,7 @@ export default function App() {
         <ViewTransition transitionType="scale">
           {activeSkin === 'classic'
             ? <SettingsPanel onBack={() => setView("menu")} onOpenThemeSwitcher={() => setShowThemeSwitcher(true)} />
-            : <SkinChrome title="Configuración" themeName={currentTheme?.name ?? 'NeoCab'} skin={activeSkin} onBack={() => setView("menu")}>
+            : <SkinChrome title="Configuración" skin={activeSkin} onBack={() => setView("menu")}>
                 <SettingsPanel onBack={() => setView("menu")} onOpenThemeSwitcher={() => setShowThemeSwitcher(true)} />
               </SkinChrome>}
         </ViewTransition>
