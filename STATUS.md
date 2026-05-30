@@ -111,6 +111,23 @@ defecto; el editor drag&drop será **por componente/widget** (combinar piezas en
     con el título de pantalla inyectado y reloj interno vivo. `SkinChrome` ahora monta el marquee
     real (`.sc-marqueebar`) con un botón Volver flotante encima, en vez de su banda genérica.
     Dos piezas standalone (background + marquee) → framework de widgets en marcha.
+  - **Editor visual estilo HyperTheme (Fase 4 — nivel widget, FUNCIONAL):** el `LayoutEditor` deja
+    de ser solo compositor por pantalla y pasa a editor por widget tipo HyperTheme de HyperSpin:
+    - `useThemeStore`: tipos `WidgetType` (background/marquee/wheel/crt/clock/stats/text),
+      `WidgetInstance` (skin de origen + x/y/w/h/z en %), `WidgetLayout` por pantalla, y campo
+      `Theme.widgets`.
+    - `themes/widgets/pieces.tsx`: registro de las 7 piezas (reusa SkinBackground/SkinMarquee; wheel/
+      crt/clock/stats/text autocontenidos con `--theme-*`).
+    - `themes/widgets/WidgetCanvas.tsx`: renderer que posiciona widgets por % (modo lectura para el
+      app y modo edición con select/drag/resize).
+    - `LayoutEditor.tsx`: pestañas de pantalla, base-skin por pantalla, paleta de widgets, lienzo 16:9
+      con arrastre + redimensión por puntero, panel de propiedades (origen/skin, x/y/w/h, z-order,
+      texto, eliminar). Guarda `{compose, widgets}`.
+    - `ThemeEditor`: hidrata/persiste `widgets`; al guardar crea tema `composed` con el overlay.
+    - `App.tsx`: monta `WidgetCanvas` como overlay (pointer-events:none) sobre la pantalla activa
+      cuando el tema tiene widgets.
+    - Pendiente: más piezas reales (rueda/CRT conectados a datos), snapping/guías, y arrastre desde
+      la paleta directo al lienzo (hoy se añade centrado y luego se arrastra).
 - **Fase 3 — Eliminar `classic` + HyperRush por defecto + preview real del skin** (el preview del
   ThemeEditor aún dibuja el menú classic viejo con "Explorar"; hay que reemplazarlo por el skin real).
 - **Fase 3 (avances):** preview real del skin en el editor (`SkinPreview.tsx`, render escalado con

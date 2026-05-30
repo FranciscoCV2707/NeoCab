@@ -12,6 +12,24 @@ export interface ComposeMap {
   games: SkinId;
 }
 
+// ── Widget-level composition (HyperTheme-style) ───────────────────────────
+// On top of the per-screen base skin, the visual editor can place individual
+// pieces (background, marquee, wheel, crt, clock, stats, text), each sourced
+// from any skin and freely positioned. Coordinates are percentages (0-100).
+export type ScreenKey = 'home' | 'systems' | 'games';
+export type WidgetType = 'background' | 'marquee' | 'wheel' | 'crt' | 'clock' | 'stats' | 'text';
+export interface WidgetInstance {
+  id: string;
+  type: WidgetType;
+  /** Which skin's version of this piece to render. */
+  skin: SkinId;
+  x: number; y: number; w: number; h: number;
+  z: number;
+  /** Free text for the 'text' widget. */
+  text?: string;
+}
+export type WidgetLayout = Partial<Record<ScreenKey, WidgetInstance[]>>;
+
 export interface ThemeBackground {
   type: "color" | "gradient" | "image" | "video";
   color: string;
@@ -48,6 +66,8 @@ export interface Theme {
   skin?: SkinId;
   /** For skin === 'composed': which skin renders each screen. */
   compose?: ComposeMap;
+  /** Optional per-screen widget overlay (HyperTheme-style placement). */
+  widgets?: WidgetLayout;
   hw?: { base_hue: number; base_hue2: number };
   description: string;
   colors: Record<string, string>;

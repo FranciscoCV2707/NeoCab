@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { injectThemeCss, Theme, useThemeStore, type SkinId, type ComposeMap } from '../../stores/useThemeStore';
+import { injectThemeCss, Theme, useThemeStore, type SkinId, type ComposeMap, type WidgetLayout } from '../../stores/useThemeStore';
 import { ThemeAIHelper } from './ThemeAIHelper';
 import { ThemeSDKManual } from './ThemeSDKManual';
 import { LayoutEditor } from './LayoutEditor';
@@ -113,6 +113,7 @@ interface ThemeData {
   style: string;
   skin?: SkinId;
   compose?: ComposeMap;
+  widgets?: WidgetLayout;
   hw?: { base_hue: number; base_hue2: number };
   colors: ThemeColors;
   fonts: ThemeFonts;
@@ -246,6 +247,7 @@ export const ThemeEditor: React.FC = () => {
   const [focusedColor, setFocusedColor] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState<'real' | 'sistema' | 'menu'>('real');
   const [compose, setCompose] = useState<ComposeMap | null>(null);
+  const [widgetLayout, setWidgetLayout] = useState<WidgetLayout | null>(null);
   const [newTemplateName, setNewTemplateName] = useState('');
   const [showTemplateInput, setShowTemplateInput] = useState(false);
   const [importPath, setImportPath] = useState('');
@@ -270,6 +272,8 @@ export const ThemeEditor: React.FC = () => {
       fonts: { ...prev.fonts, ...storeTheme.fonts },
       effects: { ...prev.effects, ...storeTheme.effects },
     }));
+    if (storeTheme.compose) setCompose(storeTheme.compose);
+    if (storeTheme.widgets) setWidgetLayout(storeTheme.widgets);
     // Only on the first mount with a theme available.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -333,9 +337,12 @@ export const ThemeEditor: React.FC = () => {
     setSaving(true);
     setMessage(null);
     try {
-      // When a composition is set, save as a 'composed' theme so App.tsx renders
-      // the chosen skin per screen.
-      const payload: ThemeData = compose ? { ...theme, skin: 'composed', compose } : theme;
+      // When a composition or widget layout is set, save as a 'composed' theme so
+      // App.tsx renders the chosen skin per screen plus the widget overlay.
+      const hasWidgets = !!widgetLayout && Object.values(widgetLayout).some(a => a && a.length > 0);
+      const payload: ThemeData = (compose || hasWidgets)
+        ? { ...theme, skin: 'composed', compose: compose ?? DEFAULT_COMPOSE, widgets: widgetLayout ?? undefined }
+        : theme;
       const themeJson = JSON.stringify(payload);
       const result = await invoke<string>('save_custom_theme', { theme: themeJson });
       const parsed = JSON.parse(result);
@@ -1430,9 +1437,11 @@ export const ThemeEditor: React.FC = () => {
       {showLayoutEditor && (
         <LayoutEditor
           compose={compose ?? DEFAULT_COMPOSE}
+          widgets={widgetLayout ?? undefined}
           vars={previewVars}
-          onSave={(c) => {
+          onSave={(c, w) => {
             setCompose(c);
+            setWidgetLayout(w);
             setShowLayoutEditor(false);
             showMsg('Composición aplicada — pulsa "Guardar y Aplicar" para crear el tema');
           }}

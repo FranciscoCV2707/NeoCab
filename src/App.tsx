@@ -42,6 +42,8 @@ import { BatoceraSkin } from "./themes/batocera/BatoceraSkin";
 import { OperatorSkin } from "./themes/operator/OperatorSkin";
 import { ComposedSkin, DEFAULT_COMPOSE } from "./themes/ComposedSkin";
 import { SkinChrome } from "./themes/shared/SkinChrome";
+import { WidgetCanvas } from "./themes/widgets/WidgetCanvas";
+import type { ScreenKey } from "./stores/useThemeStore";
 import "./App.css";
 
 export default function App() {
@@ -66,6 +68,7 @@ export default function App() {
 
   const themeSkin = useThemeStore((s) => s.currentTheme?.skin);
   const composeMap = useThemeStore((s) => s.currentTheme?.compose);
+  const widgetMap = useThemeStore((s) => s.currentTheme?.widgets);
   const activeSkin: SkinId = (themeSkin as SkinId) ?? 'hyperrush';
 
   const currentView = useUIStore((s) => s.currentView);
@@ -490,6 +493,17 @@ export default function App() {
           case 'composed':  return <ComposedSkin {...skinProps} compose={composeMap ?? DEFAULT_COMPOSE} />;
           default: return null;
         }
+      })()}
+      {/* ── HyperTheme widget overlay (from the visual editor) ── */}
+      {activeSkin !== 'classic' && currentView !== "operator" && currentView !== "settings" && (() => {
+        const screenKey: ScreenKey = currentView === "menu" ? "home" : (currentView as ScreenKey);
+        const list = widgetMap?.[screenKey];
+        if (!list || list.length === 0) return null;
+        return (
+          <div style={{ position: "fixed", inset: 0, zIndex: 40, pointerEvents: "none" }}>
+            <WidgetCanvas widgets={list} screen={screenKey} />
+          </div>
+        );
       })()}
       {showSaveStateModal && pendingGame && (
         <SaveStateModal
