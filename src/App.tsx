@@ -41,6 +41,7 @@ import { FluxSkin } from "./themes/flux/FluxSkin";
 import { BatoceraSkin } from "./themes/batocera/BatoceraSkin";
 import { OperatorSkin } from "./themes/operator/OperatorSkin";
 import { ComposedSkin, DEFAULT_COMPOSE } from "./themes/ComposedSkin";
+import { SkinChrome } from "./themes/shared/SkinChrome";
 import "./App.css";
 
 export default function App() {
@@ -415,18 +416,23 @@ export default function App() {
           />
         )}
       </div>
-      {/* ── Operator & Settings: always classic, regardless of skin ── */}
+      {/* ── Operator & Settings: framed by the active skin's chrome (classic stays bare) ── */}
       {currentView === "operator" && (
         <ViewTransition transitionType="scale">
-          <OperatorPanel onBack={() => setView("menu")} />
+          {activeSkin === 'classic'
+            ? <OperatorPanel onBack={() => setView("menu")} />
+            : <SkinChrome title="Operador" themeName={currentTheme?.name ?? 'NeoCab'} onBack={() => setView("menu")}>
+                <OperatorPanel onBack={() => setView("menu")} />
+              </SkinChrome>}
         </ViewTransition>
       )}
       {currentView === "settings" && (
         <ViewTransition transitionType="scale">
-          <SettingsPanel
-            onBack={() => setView("menu")}
-            onOpenThemeSwitcher={() => setShowThemeSwitcher(true)}
-          />
+          {activeSkin === 'classic'
+            ? <SettingsPanel onBack={() => setView("menu")} onOpenThemeSwitcher={() => setShowThemeSwitcher(true)} />
+            : <SkinChrome title="Configuración" themeName={currentTheme?.name ?? 'NeoCab'} onBack={() => setView("menu")}>
+                <SettingsPanel onBack={() => setView("menu")} onOpenThemeSwitcher={() => setShowThemeSwitcher(true)} />
+              </SkinChrome>}
         </ViewTransition>
       )}
 

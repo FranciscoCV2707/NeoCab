@@ -88,10 +88,15 @@ defecto; el editor drag&drop será **por componente/widget** (combinar piezas en
     por sistema; HyperWheel mantiene identidad eléctrica fija (cyan/azul, hue 200/280) + marca
     propia. Registro/SKIN_TOKENS de hyperwheel actualizados.
   - Pendiente: verificación visual del resto de desfases/animaciones (requiere `npm tauri dev`).
-- **Fase 2 — Integrar Config/Operador en el tema (iniciada):**
-  - `OperatorPanel.css` ahora usa variables canónicas `--theme-*` (acento/fondo/texto) con fallback,
-    así Settings y Operador adoptan la paleta del tema activo. Pendiente: renderizarlos realmente
-    dentro del shell de cada skin (no solo recolorear).
+- **Fase 2 — Integrar Config/Operador en el tema (avanzada):**
+  - `OperatorPanel.css` usa variables canónicas `--theme-*` (acento/fondo/texto) con fallback,
+    así Settings y Operador adoptan la paleta del tema activo.
+  - **`themes/shared/SkinChrome.tsx` (+ CSS):** marco temático (fondo gradiente+grid, banda marquee
+    con NEOCAB/título/reloj/Volver) que lee `--theme-*` y recolorea en vivo. `App.tsx` envuelve
+    Operador y Settings en `<SkinChrome>` cuando el skin activo NO es `classic` (classic queda igual).
+    Los paneles (`width/height:100%`) se enmarcan dentro en vez de flotar sobre negro.
+  - Pendiente: chrome específico por skin (CRT en HyperRush, coverflow-bg en NeonWall…); por ahora
+    es un marco compartido neutro recoloreado por tema.
 - **Fase 3 — Eliminar `classic` + HyperRush por defecto + preview real del skin** (el preview del
   ThemeEditor aún dibuja el menú classic viejo con "Explorar"; hay que reemplazarlo por el skin real).
 - **Fase 3 (avances):** preview real del skin en el editor (`SkinPreview.tsx`, render escalado con
