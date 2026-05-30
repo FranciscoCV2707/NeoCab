@@ -215,8 +215,8 @@ export function ThemeSwitcher({ onClose }: ThemeSwitcherProps) {
         setTransEntry(null);
         transRef.current = false;
         onClose();
-      }, 820);
-    }, 500);
+      }, 1250);
+    }, 750);
   };
 
   const cancelAndClose = () => {

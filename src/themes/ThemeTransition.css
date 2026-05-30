@@ -107,37 +107,37 @@
   box-shadow: 0 0 8px var(--xacc);
 }
 
-/* ── IS-OUT: screen collapses vertically (CRT off), 500ms ── */
+/* ── IS-OUT: screen collapses vertically (CRT off), 750ms ── */
 
 .nc-xfade.is-out {
-  animation: ncxfade-collapse 500ms cubic-bezier(0.55, 0, 1, 0.45) forwards;
+  animation: ncxfade-collapse 750ms cubic-bezier(0.55, 0, 1, 0.45) forwards;
 }
 .nc-xfade.is-out .nc-xfade-flash {
-  animation: ncxfade-flash 160ms ease-out forwards;
+  animation: ncxfade-flash 240ms ease-out forwards;
 }
 .nc-xfade.is-out .nc-xfade-sweep {
-  animation: ncxfade-sweep-in 200ms ease-out forwards, ncxfade-sweep-out 300ms ease-in 200ms forwards;
+  animation: ncxfade-sweep-in 300ms ease-out forwards, ncxfade-sweep-out 450ms ease-in 300ms forwards;
 }
 
-/* ── IS-IN: screen expands from line (CRT on), 820ms ── */
+/* ── IS-IN: screen expands from line (CRT on), 1250ms ── */
 
 .nc-xfade.is-in {
-  animation: ncxfade-expand 320ms cubic-bezier(0, 0.55, 0.45, 1) forwards;
+  animation: ncxfade-expand 480ms cubic-bezier(0, 0.55, 0.45, 1) forwards;
 }
 .nc-xfade.is-in .nc-xfade-sweep {
-  animation: ncxfade-sweep-in 280ms ease-out forwards;
+  animation: ncxfade-sweep-in 420ms ease-out forwards;
 }
 .nc-xfade.is-in .nc-xfade-line {
-  animation: ncxfade-line-pulse 500ms ease-out 180ms forwards;
+  animation: ncxfade-line-pulse 760ms ease-out 270ms forwards;
 }
 .nc-xfade.is-in .nc-xfade-grid {
-  animation: ncxfade-grid-on 700ms ease-out 80ms forwards;
+  animation: ncxfade-grid-on 1050ms ease-out 120ms forwards;
 }
 .nc-xfade.is-in .nc-xfade-badge {
-  animation: ncxfade-badge-in 420ms cubic-bezier(0, 0, 0.2, 1) 280ms forwards;
+  animation: ncxfade-badge-in 620ms cubic-bezier(0, 0, 0.2, 1) 420ms forwards;
 }
 .nc-xfade.is-in .nc-xfade-bar span {
-  animation: ncxfade-progress 640ms cubic-bezier(0.4, 0, 0.2, 1) 280ms forwards;
+  animation: ncxfade-progress 960ms cubic-bezier(0.4, 0, 0.2, 1) 420ms forwards;
 }
 
 /* ── Keyframes ── */
