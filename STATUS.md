@@ -157,6 +157,10 @@ defecto; el editor drag&drop será **por componente/widget** (combinar piezas en
       "Ajuste al redimensionar": Escalar (pieza entera), Recortar (tamaño fijo, la caja clipa) o
       Estirar (rellenar). `WidgetCanvas` usa `w.fit ?? def.fit`; en 'crop' renderiza a escala 1 y
       recorta con `overflow:hidden`.
+    - **Modo 'cover' (escalar y recortar sobrante):** varias piezas tienen margen vacío arriba/abajo
+      (la `base` de diseño es mayor que el contenido), dejando sobrante al ajustar entero. Nuevo modo
+      `cover`: escala con `max(boxW/baseW, boxH/baseH)` para rellenar la caja manteniendo proporción
+      y recorta el excedente con `overflow:hidden` → permite colocar el widget sin el margen muerto.
 - **Fase 3 — Eliminar `classic` + HyperRush por defecto + preview real del skin** (el preview del
   ThemeEditor aún dibuja el menú classic viejo con "Explorar"; hay que reemplazarlo por el skin real).
 - **Fase 3 (avances):** preview real del skin en el editor (`SkinPreview.tsx`, render escalado con

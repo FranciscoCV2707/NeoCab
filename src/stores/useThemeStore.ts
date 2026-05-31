@@ -20,7 +20,7 @@ export type ScreenKey = 'home' | 'systems' | 'games';
 // Every piece is a faithful slice of a real skin (rendered with that skin's own
 // markup + CSS), so picking a skin source reproduces its exact look.
 export type WidgetType = 'background' | 'marquee' | 'menu' | 'card' | 'gamewheel' | 'showcase' | 'clock';
-export type WidgetFit = 'scale' | 'crop' | 'stretch';
+export type WidgetFit = 'scale' | 'cover' | 'crop' | 'stretch';
 export interface WidgetInstance {
   id: string;
   type: WidgetType;
@@ -28,7 +28,7 @@ export interface WidgetInstance {
   skin: SkinId;
   x: number; y: number; w: number; h: number;
   z: number;
-  /** Overrides the piece's default fit: scale (whole), crop (clip), stretch (fill). */
+  /** Overrides the piece's default fit: scale (whole), cover (fill+crop excess), crop (native+clip), stretch. */
   fit?: WidgetFit;
 }
 export type WidgetLayout = Partial<Record<ScreenKey, WidgetInstance[]>>;

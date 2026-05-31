@@ -172,6 +172,7 @@ export const LayoutEditor: FC<Props> = ({ compose, widgets, vars, onSave, onClos
               <label style={fieldLbl}>Ajuste al redimensionar
                 <select value={sel.fit ?? PIECE_BY_TYPE[sel.type].fit} onChange={e => patchSel({ fit: e.target.value as WidgetFit })} style={input}>
                   <option value="scale">Escalar (pieza entera)</option>
+                  <option value="cover">Escalar y recortar sobrante</option>
                   <option value="crop">Recortar (tamaño fijo)</option>
                   <option value="stretch">Estirar (rellenar)</option>
                 </select>
