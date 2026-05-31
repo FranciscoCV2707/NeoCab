@@ -137,6 +137,12 @@ defecto; el editor drag&drop será **por componente/widget** (combinar piezas en
     fx-attract-clock/bat-pill/op-seg). Cada pieza se envuelve en su `theme-*` y conmuta por
     `instance.skin`, así elegir el origen reproduce el aspecto exacto de ese tema. `WidgetType`
     actualizado en el store; LayoutEditor limpiado (sin el widget de texto).
+  - **Widgets por TIPO de pantalla (2026-05-30):** las 3 pantallas (Inicio/Sistemas/Juegos) son de
+    tipos distintos, así que la paleta ahora se filtra por pantalla en vez de ofrecer lo mismo a las
+    tres. `PIECES_BY_SCREEN`: Inicio→[fondo, marquee, **menú**, reloj], Sistemas→[fondo, marquee,
+    **tarjeta**, reloj], Juegos→[fondo, marquee, **escaparate/CRT**, reloj]. Nueva pieza `menu`
+    = menú principal real de cada skin (hr-menu-item, nw-home-poster, fx-home-item, bat-menu-item,
+    op-menu-row) iterando `ARCADE_MENU`. El editor titula la sección "Widgets de <pantalla>".
 - **Fase 3 — Eliminar `classic` + HyperRush por defecto + preview real del skin** (el preview del
   ThemeEditor aún dibuja el menú classic viejo con "Explorar"; hay que reemplazarlo por el skin real).
 - **Fase 3 (avances):** preview real del skin en el editor (`SkinPreview.tsx`, render escalado con

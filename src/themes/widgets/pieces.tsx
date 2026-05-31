@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import type { WidgetType, WidgetInstance, ScreenKey, SkinId } from '../../stores/useThemeStore';
 import { SkinBackground } from '../shared/SkinBackground';
 import { SkinMarquee } from '../shared/SkinMarquee';
+import { ARCADE_MENU } from '../shared/menu';
 import { MediaShape, getSystemHue, getSystemShape } from '../../components/arcade';
 
 // Every widget piece is a faithful slice of a real skin: it renders that skin's
@@ -29,6 +30,69 @@ function useClock() {
   useEffect(() => { const id = setInterval(() => setT(new Date()), 1000); return () => clearInterval(id); }, []);
   const p = (n: number) => String(n).padStart(2, '0');
   return { hhmm: `${p(t.getHours())}:${p(t.getMinutes())}`, hms: `${p(t.getHours())}:${p(t.getMinutes())}:${p(t.getSeconds())}` };
+}
+
+// ── MENU: the home main-menu of each skin ─────────────────────────────────
+const NW_MENU_HUES: Record<string, number> = { play: 270, scan: 200, settings: 320, operator: 160 };
+
+function Menu({ skin }: { skin: SkinId }) {
+  if (skin === 'hyperrush' || skin === 'hyperwheel') return (
+    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="hr-home-menu" style={{ width: '100%' }}>
+      {ARCADE_MENU.map((item, i) => (
+        <button key={item.id} className={`hr-menu-item${i === 0 ? ' active' : ''}`} tabIndex={-1}>
+          <span className="mi-num">{String(i + 1).padStart(2, '0')}</span>
+          <span className="mi-icon">{item.icon}</span>
+          <span className="mi-body"><span className="mi-label">{item.label}</span><span className="mi-tag">{item.sub}</span></span>
+          {i === 0 && <span className="mi-arrow">▶</span>}
+        </button>
+      ))}
+    </div></Frame>
+  );
+  if (skin === 'neonwall') return (
+    <Frame skin={skin}><div className="nw-home-rail">
+      {ARCADE_MENU.map((it, i) => (
+        <div key={it.id} className={`nw-home-poster${i === 0 ? ' active' : ''}`} style={{ '--p-h': NW_MENU_HUES[it.id] ?? 270 } as CSSProperties}>
+          <div className="nw-home-poster-bg" /><div className="nw-home-poster-strip" />
+          <div className="nw-home-poster-num">{String(i + 1).padStart(2, '0')} / {String(ARCADE_MENU.length).padStart(2, '0')}</div>
+          <div className="nw-home-poster-ic">{it.icon}</div>
+          <div className="nw-home-poster-body"><div className="nw-home-poster-label">{it.label}</div><div className="nw-home-poster-tag">{it.sub}</div></div>
+        </div>
+      ))}
+    </div></Frame>
+  );
+  if (skin === 'flux') return (
+    <Frame skin={skin}><div style={{ display: 'flex', alignItems: 'flex-end' }}>
+      {ARCADE_MENU.map((item, i) => (
+        <div key={item.id} className={`fx-home-item${i === 0 ? ' active' : ''}`} style={{ marginRight: (ARCADE_MENU.length - 1 - i) * 30, opacity: i === 0 ? 1 : .82 }}>
+          <span className="num">{String(i + 1).padStart(2, '0')}</span>
+          <span className="ic">{item.icon}</span>
+          <span className="body"><span className="label">{item.label}</span><span className="tag">{item.sub}</span></span>
+          <span className="arrow">▶</span>
+        </div>
+      ))}
+    </div></Frame>
+  );
+  if (skin === 'batocera') return (
+    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="bat-menu" style={{ width: '100%' }}>
+      {ARCADE_MENU.map((item, i) => (
+        <button key={item.id} className={`bat-menu-item${i === 0 ? ' active' : ''}`} tabIndex={-1}>
+          <span className="mi-num">{String(i + 1).padStart(2, '0')}</span>
+          <span className="mi-icon">{item.icon}</span>
+          <span className="mi-body"><span className="mi-label">{item.label}</span><span className="mi-tag">{item.sub}</span></span>
+          {i === 0 && <span className="mi-arrow">▶</span>}
+        </button>
+      ))}
+    </div></Frame>
+  );
+  return (
+    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="op-menu" style={{ width: '100%' }}>
+      {ARCADE_MENU.map((item, i) => (
+        <div key={item.id} className={`op-menu-row${i === 0 ? ' active' : ''}`}>
+          <span className="key">[{i + 1}]</span><span className="ic">{item.icon}</span><span className="lbl">{item.label}</span><span className="tag">{item.sub}</span>
+        </div>
+      ))}
+    </div></Frame>
+  );
 }
 
 // ── CARD: the system card of each skin ────────────────────────────────────
@@ -157,6 +221,8 @@ export const PIECES: PieceDef[] = [
     render: ({ instance }) => <SkinBackground skin={instance.skin} /> },
   { type: 'marquee', label: 'Marquee', icon: '🏷️', defaultSize: { w: 100, h: 12 },
     render: ({ instance, screen }) => <SkinMarquee skin={instance.skin} title={SCREEN_TITLE[screen]} /> },
+  { type: 'menu', label: 'Menú principal', icon: '☰', defaultSize: { w: 40, h: 58 },
+    render: ({ instance }) => <Menu skin={instance.skin} /> },
   { type: 'card', label: 'Tarjeta de sistema', icon: '🎴', defaultSize: { w: 20, h: 52 },
     render: ({ instance }) => <Card skin={instance.skin} /> },
   { type: 'showcase', label: 'Escaparate / CRT', icon: '📺', defaultSize: { w: 42, h: 46 },
@@ -166,3 +232,11 @@ export const PIECES: PieceDef[] = [
 ];
 
 export const PIECE_BY_TYPE: Record<WidgetType, PieceDef> = Object.fromEntries(PIECES.map(p => [p.type, p])) as Record<WidgetType, PieceDef>;
+
+// Which pieces make sense on each screen type. Universal pieces (background,
+// marquee, clock) appear everywhere; the rest are screen-specific.
+export const PIECES_BY_SCREEN: Record<ScreenKey, WidgetType[]> = {
+  home:    ['background', 'marquee', 'menu', 'clock'],
+  systems: ['background', 'marquee', 'card', 'clock'],
+  games:   ['background', 'marquee', 'showcase', 'clock'],
+};

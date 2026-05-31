@@ -4,7 +4,7 @@ import type { ComposeMap, SkinId, ScreenKey, WidgetInstance, WidgetLayout, Widge
 import { THEME_REGISTRY } from '../../themes/registry';
 import { SkinBackground } from '../../themes/shared/SkinBackground';
 import { WidgetCanvas } from '../../themes/widgets/WidgetCanvas';
-import { PIECES, PIECE_BY_TYPE } from '../../themes/widgets/pieces';
+import { PIECES, PIECE_BY_TYPE, PIECES_BY_SCREEN } from '../../themes/widgets/pieces';
 
 interface Props {
   compose: ComposeMap;
@@ -125,9 +125,9 @@ export const LayoutEditor: FC<Props> = ({ compose, widgets, vars, onSave, onClos
             {opts.map(o => <option key={o.id} value={o.skin}>{o.name}</option>)}
           </select>
 
-          <p style={{ ...lbl, marginTop: 18 }}>Añadir widget</p>
+          <p style={{ ...lbl, marginTop: 18 }}>Widgets de "{SCREENS.find(s => s.key === screen)!.label}"</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {PIECES.map(p => (
+            {PIECES.filter(p => PIECES_BY_SCREEN[screen].includes(p.type)).map(p => (
               <button key={p.type} onClick={() => addWidget(p.type)}
                 style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 6, border: '1px solid #2a2a40', background: '#15152a', color: '#ddd', cursor: 'pointer', fontSize: 12, textAlign: 'left' }}>
                 <span style={{ fontSize: 16 }}>{p.icon}</span> {p.label}
