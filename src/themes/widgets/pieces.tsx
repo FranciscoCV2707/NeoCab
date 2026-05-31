@@ -161,6 +161,16 @@ function Card({ skin }: { skin: SkinId }) {
   );
 }
 
+// Faithful copy of NeonWall's coverflow transform (cvTransform).
+function nwCvTransform(d: number): string {
+  const sign = Math.sign(d), abs = Math.abs(d);
+  const x = d === 0 ? 0 : sign * (150 + (abs - 1) * 92);
+  const rotY = d === 0 ? 0 : -sign * 46;
+  const scale = d === 0 ? 1.18 : Math.max(0.5, 0.9 - (abs - 1) * 0.1);
+  const z = d === 0 ? 130 : -abs * 55;
+  return `translateX(${x}px) translateZ(${z}px) rotateY(${rotY}deg) scale(${scale})`;
+}
+
 // ── GAMEWHEEL: the game selection list/wheel of each skin ──────────────────
 function GameWheel({ skin }: { skin: SkinId }) {
   const hrCls = (i: number) => `hr-wheel-item${i === 0 ? ' active' : i === 1 ? ' n1' : i === 2 ? ' n2' : ' f'}`;
@@ -198,19 +208,28 @@ function GameWheel({ skin }: { skin: SkinId }) {
       ))}
     </div></div></Frame>
   );
-  if (skin === 'neonwall') return (
-    <Frame skin={skin}><div className="nw-cine-info" style={{ width: '100%' }}>
-      <div className="nw-cine-info-main">
-        <div className="nw-cine-eyebrow"><span className="dot" /><span>{SYS.display_name.toUpperCase()} · {GAME.year}</span></div>
-        <div className="nw-cine-title">{GAME.title}</div>
-        <div className="nw-cine-tag">RPG · {GAME.developer}</div>
-      </div>
-      <div className="nw-cine-info-side">
-        <div className="nw-cine-pos"><b>001</b> / 248</div>
-        <button className="nw-launch-btn" tabIndex={-1}><span className="kbd">A</span><span>Launch</span></button>
-      </div>
-    </div></Frame>
-  );
+  if (skin === 'neonwall') {
+    const tiles = [-3, -2, -1, 0, 1, 2, 3].map(d => ({ d, g: GAMES[((d % GAMES.length) + GAMES.length) % GAMES.length] }));
+    return (
+      <Frame skin={skin}><div className="nw-cv-wrap" style={{ width: '100%', height: '100%' }}>
+        <div className="nw-cv-floor" />
+        <div className="nw-cv"><div className="nw-cv-track">
+          {tiles.map(({ d, g }) => {
+            const absD = Math.abs(d);
+            return (
+              <div key={d} className={`nw-cv-tile${d === 0 ? ' active' : ''}`}
+                style={{ transform: nwCvTransform(d), opacity: d === 0 ? 1 : Math.max(.12, .82 - (absD - 1) * .15), filter: absD >= 4 ? `blur(${(absD - 3) * .9}px)` : 'none', '--g-h': H, '--g-h2': H, zIndex: 100 - absD } as CSSProperties}>
+                <div className="nw-cv-tile-bg" /><div className="nw-cv-tile-scan" /><div className="nw-cv-tile-strip" />
+                <div className="nw-cv-tile-ic">{g.title.charAt(0)}</div>
+                <div className="nw-cv-tile-name">{g.title}</div>
+              </div>
+            );
+          })}
+        </div></div>
+        <button className="nw-cv-arrow l">‹</button><button className="nw-cv-arrow r">›</button>
+      </div></Frame>
+    );
+  }
   // operator: the real game list
   return (
     <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="op-list" style={{ width: '100%' }}>
@@ -300,7 +319,7 @@ export const PIECES: PieceDef[] = [
     render: ({ instance }) => <Menu skin={instance.skin} /> },
   { type: 'card', label: 'Tarjeta de sistema', icon: '🎴', defaultSize: { w: 20, h: 52 }, base: { w: 300, h: 540 }, fit: 'scale',
     render: ({ instance }) => <Card skin={instance.skin} /> },
-  { type: 'gamewheel', label: 'Lista / rueda de juegos', icon: '🎮', defaultSize: { w: 30, h: 64 }, base: { w: 560, h: 680 }, fit: 'scale',
+  { type: 'gamewheel', label: 'Lista / rueda de juegos', icon: '🎮', defaultSize: { w: 34, h: 60 }, base: { w: 900, h: 680 }, fit: 'scale',
     render: ({ instance }) => <GameWheel skin={instance.skin} /> },
   { type: 'showcase', label: 'Escaparate / CRT', icon: '📺', defaultSize: { w: 42, h: 46 }, base: { w: 760, h: 520 }, fit: 'scale',
     render: ({ instance }) => <Showcase skin={instance.skin} /> },
