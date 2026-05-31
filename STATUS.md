@@ -168,6 +168,13 @@ defecto; el editor drag&drop será **por componente/widget** (combinar piezas en
       Operator `op-snapshot-screen` (antes NW/BAT/OP usaban marquee/título por error).
     - `menu` (Inicio): contenedores corregidos a los reales — Flux `fx-home-menu`, Batocera
       `bat-home-menu`, Operator `op-home-menu` (antes se adivinaron `fx`/`bat-menu`/`op-menu`).
+    - `card` (Sistemas): de Operator usaba `op-list`/`op-row` (lista de juegos) → ahora su tarjeta
+      real `op-sys-card`.
+    - `card` ahora es el **CARRUSEL** de sistemas completo (no una sola tarjeta): cada skin renderiza
+      su track real (`hr-carousel-track` stride 380, `nw-sys-track` 348, `fx-sys-track` 320,
+      `bat-carousel-track` 260, `op-sys-track` 240) con la carta central activa y las vecinas
+      escaladas/rotadas/difuminadas según la fórmula exacta de cada tema, 5 sistemas mock con
+      MediaShape por sistema. Renombrado a "Carrusel de sistemas".
 - **Fase 3 — Eliminar `classic` + HyperRush por defecto + preview real del skin** (el preview del
   ThemeEditor aún dibuja el menú classic viejo con "Explorar"; hay que reemplazarlo por el skin real).
 - **Fase 3 (avances):** preview real del skin en el editor (`SkinPreview.tsx`, render escalado con

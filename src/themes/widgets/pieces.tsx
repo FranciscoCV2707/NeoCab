@@ -25,7 +25,6 @@ const GAMES = [
   { id: 5, title: 'Star Fox', year: 1993 },
 ];
 const H = getSystemHue(SYS.name)[0];
-const SHORT = SYS.name.slice(0, 4).toUpperCase();
 
 function Frame({ skin, children, style }: { skin: SkinId; children: React.ReactNode; style?: CSSProperties }) {
   const root = skin === 'hyperwheel' ? 'theme-hyperrush hr-variant-wheel' : `theme-${skin}`;
@@ -109,61 +108,133 @@ function Menu({ skin }: { skin: SkinId }) {
   );
 }
 
-// ── CARD: the system card of each skin ────────────────────────────────────
+// ── CARD: the SYSTEM CAROUSEL of each skin (active card centered) ───────────
+const SYSTEMS = [
+  { id: 1, name: 'nes', display_name: 'Nintendo' },
+  { id: 2, name: 'snes', display_name: 'Super Nintendo' },
+  { id: 3, name: 'genesis', display_name: 'Mega Drive' },
+  { id: 4, name: 'psx', display_name: 'PlayStation' },
+  { id: 5, name: 'n64', display_name: 'Nintendo 64' },
+];
+const FI = 2; // centered system index
+const sysMedia = (name: string, h: number) => <MediaShape shape={getSystemShape(name)} hue={h} short={name.slice(0, 4).toUpperCase()} />;
+
 function Card({ skin }: { skin: SkinId }) {
-  const media = <MediaShape shape={getSystemShape(SYS.name)} hue={H} short={SHORT} />;
-  const hrLike = skin === 'hyperrush' || skin === 'hyperwheel';
-  if (hrLike) return (
-    <Frame skin={skin}><div className="hr-carousel"><div className="hr-sys-card active" style={{ '--c-h': H, '--c-h2': H } as CSSProperties}>
-      <div className="hr-sys-card-bg" /><div className="hr-sys-card-grid" />
-      <div className="hr-sys-card-kind">■ PLATFORM</div>
-      <div className="hr-sys-card-media">{media}</div>
-      <div className="hr-sys-card-body">
-        <div className="hr-sys-card-name">{SYS.display_name}</div>
-        <div className="hr-sys-card-tag">{SYS.name}</div>
-        <div className="hr-sys-card-foot"><span className="hr-sys-card-count">{SYS.game_count}</span><span className="hr-sys-card-count-k">TITLES</span></div>
+  if (skin === 'hyperrush' || skin === 'hyperwheel') return (
+    <Frame skin={skin}><div className="hr-carousel">
+      <div className="hr-carousel-track" style={{ transform: `translate(calc(-${FI * 380}px - 190px), -50%)` }}>
+        {SYSTEMS.map((s, i) => {
+          const d = i - FI, abs = Math.abs(d), h = getSystemHue(s.name)[0];
+          const scale = abs === 0 ? 1 : abs === 1 ? .78 : abs === 2 ? .6 : .46;
+          const opacity = abs === 0 ? 1 : abs === 1 ? .88 : abs === 2 ? .55 : .2;
+          const blur = abs === 0 ? 0 : abs === 1 ? .3 : abs === 2 ? 1.2 : 2.4;
+          return (
+            <div key={s.id} className={`hr-sys-card${d === 0 ? ' active' : ''}`} style={{ transform: `scale(${scale}) rotateY(${d * -16}deg)`, opacity, filter: `blur(${blur}px)`, zIndex: 100 - abs, '--c-h': h, '--c-h2': h } as CSSProperties}>
+              <div className="hr-sys-card-bg" /><div className="hr-sys-card-grid" />
+              <div className="hr-sys-card-kind">■ PLATFORM</div>
+              <div className="hr-sys-card-media">{sysMedia(s.name, h)}</div>
+              <div className="hr-sys-card-body">
+                <div className="hr-sys-card-name">{s.display_name}</div>
+                <div className="hr-sys-card-tag">{s.name}</div>
+                <div className="hr-sys-card-foot"><span className="hr-sys-card-count">{(6 - abs) * 40}</span><span className="hr-sys-card-count-k">TITLES</span></div>
+              </div>
+            </div>
+          );
+        })}
       </div>
-    </div></div></Frame>
+      <div className="hr-pointer" />
+    </div></Frame>
   );
   if (skin === 'neonwall') return (
-    <Frame skin={skin}><div className="nw-sys-card active" style={{ '--c-h': H, '--c-h2': H } as CSSProperties}>
-      <div className="nw-sys-card-bg" />
-      <div className="nw-sys-card-kind">■ PLATFORM</div>
-      <div className="nw-sys-card-media">{media}</div>
-      <div className="nw-sys-card-body">
-        <div className="nw-sys-card-name">{SYS.display_name}</div>
-        <div className="nw-sys-card-tag">{SYS.name}</div>
-        <div className="nw-sys-card-foot"><span className="nw-sys-card-count">{SYS.game_count}</span><span className="nw-sys-card-count-k">TITLES</span></div>
+    <Frame skin={skin}><div className="nw-sys-stage">
+      <div className="nw-sys-floor" />
+      <div className="nw-sys-track" style={{ transform: `translate(calc(-${FI * 348}px - 174px), -50%)` }}>
+        {SYSTEMS.map((s, i) => {
+          const d = i - FI, abs = Math.abs(d);
+          const [h, h2] = getSystemHue(s.name);
+          const scale = abs === 0 ? 1 : abs === 1 ? .82 : abs === 2 ? .62 : .46;
+          const opacity = abs === 0 ? 1 : abs === 1 ? .85 : abs === 2 ? .45 : .15;
+          const blur = abs === 0 ? 0 : abs === 1 ? .4 : abs === 2 ? 1.4 : 2.6;
+          return (
+            <div key={s.id} className={`nw-sys-card${d === 0 ? ' active' : ''}`} style={{ transform: `scale(${scale}) rotateY(${d * -16}deg)`, opacity, filter: `blur(${blur}px)`, zIndex: 100 - abs, '--c-h': h, '--c-h2': h2 } as CSSProperties}>
+              <div className="nw-sys-card-bg" />
+              <div className="nw-sys-card-kind">■ PLATFORM</div>
+              <div className="nw-sys-card-media">{sysMedia(s.name, h)}</div>
+              <div className="nw-sys-card-body">
+                <div className="nw-sys-card-name">{s.display_name}</div>
+                <div className="nw-sys-card-tag">{s.name}</div>
+                <div className="nw-sys-card-foot"><span className="nw-sys-card-count">{(6 - abs) * 40}</span><span className="nw-sys-card-count-k">TITLES</span></div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div></Frame>
   );
   if (skin === 'flux') return (
-    <Frame skin={skin}><div className="fx-sys-carousel"><button className="fx-sys-card active" style={{ '--c-h': H } as CSSProperties} tabIndex={-1}>
-      <div className="fx-sys-card-bg" />
-      <div className="fx-sys-card-short">{SHORT}</div>
-      <div className="fx-sys-card-name">{SYS.display_name}</div>
-      <div className="fx-sys-card-tag">{SYS.name}</div>
-      <div className="fx-sys-card-count"><b>{SYS.game_count}</b> titles</div>
-    </button></div></Frame>
+    <Frame skin={skin}><div className="fx-sys-carousel">
+      <div className="fx-sys-track" style={{ transform: `translate(calc(-${FI * 320}px - 130px), -50%)` }}>
+        {SYSTEMS.map((s, i) => {
+          const d = i - FI, abs = Math.abs(d), h = getSystemHue(s.name)[0];
+          const scale = abs === 0 ? 1.06 : abs === 1 ? .82 : abs === 2 ? .64 : .5;
+          const opacity = abs === 0 ? 1 : abs === 1 ? .8 : abs === 2 ? .45 : .2;
+          const blur = abs === 0 ? 0 : abs === 1 ? .4 : abs === 2 ? 1.3 : 2.4;
+          return (
+            <button key={s.id} className={`fx-sys-card${d === 0 ? ' active' : ''}`} style={{ transform: `rotateY(${d * -18}deg) rotate(${d * -2}deg) scale(${scale})`, opacity, filter: `blur(${blur}px)`, zIndex: 100 - abs, '--c-h': h } as CSSProperties} tabIndex={-1}>
+              <div className="fx-sys-card-bg" />
+              <div className="fx-sys-card-short">{s.name.slice(0, 4).toUpperCase()}</div>
+              <div className="fx-sys-card-name">{s.display_name}</div>
+              <div className="fx-sys-card-tag">{s.name}</div>
+              <div className="fx-sys-card-count"><b>{(6 - abs) * 40}</b> titles</div>
+            </button>
+          );
+        })}
+      </div>
+    </div></Frame>
   );
   if (skin === 'batocera') return (
-    <Frame skin={skin}><button className="bat-sys-card active" style={{ '--card-h': H } as CSSProperties} tabIndex={-1}>
-      <div className="sc-glow" /><div className="sc-shape">{media}</div>
-      <div className="sc-foot">
-        <div className="sc-name">{SYS.display_name}</div>
-        <div className="sc-tag">{SYS.name.toUpperCase()}</div>
-        <div className="sc-count"><b>{SYS.game_count}</b> titles</div>
+    <Frame skin={skin}><div className="bat-carousel">
+      <div className="bat-carousel-track" style={{ transform: `translate(calc(-${FI * 260}px - 130px), -50%)` }}>
+        {SYSTEMS.map((s, i) => {
+          const d = i - FI, abs = Math.abs(d), h = getSystemHue(s.name)[0];
+          const scale = d === 0 ? 1.2 : abs === 1 ? .78 : abs === 2 ? .58 : .42;
+          const opacity = abs === 0 ? 1 : abs === 1 ? .8 : abs === 2 ? .35 : .12;
+          const blur = abs === 0 ? 0 : abs === 1 ? .4 : abs === 2 ? 1.6 : 3;
+          return (
+            <button key={s.id} className={`bat-sys-card${d === 0 ? ' active' : ''}`} style={{ transform: `scale(${scale}) rotateY(${d * -14}deg)`, opacity, filter: `blur(${blur}px)`, zIndex: 100 - abs, '--card-h': h } as CSSProperties} tabIndex={-1}>
+              <div className="sc-glow" /><div className="sc-shape">{sysMedia(s.name, h)}</div>
+              <div className="sc-foot">
+                <div className="sc-name">{s.display_name}</div>
+                <div className="sc-tag">{s.name.toUpperCase()}</div>
+                <div className="sc-count"><b>{(6 - abs) * 40}</b> titles</div>
+              </div>
+            </button>
+          );
+        })}
       </div>
-    </button></Frame>
+    </div></Frame>
   );
-  // operator: its real system card (op-sys-card)
+  // operator system carousel
   return (
-    <Frame skin={skin}><div className="op-sys-card active" style={{ '--c-h': H } as CSSProperties}>
-      <div className="op-sys-card-head"><span className="short">{SHORT}</span><span className="id">1.sys</span></div>
-      <div className="op-sys-card-art">{media}</div>
-      <div className="op-sys-card-name">{SYS.display_name}</div>
-      <div className="op-sys-card-tag">{SYS.name}</div>
-      <div className="op-sys-card-count">{SYS.game_count} ROMS</div>
+    <Frame skin={skin}><div className="op-sys-carousel">
+      <div className="op-sys-track" style={{ transform: `translate(calc(-${FI * 240}px - 110px), -50%)` }}>
+        {SYSTEMS.map((s, i) => {
+          const d = i - FI, abs = Math.abs(d), h = getSystemHue(s.name)[0];
+          const scale = d === 0 ? 1.2 : abs === 1 ? .82 : abs === 2 ? .62 : .42;
+          const opacity = abs === 0 ? 1 : abs === 1 ? .65 : abs === 2 ? .25 : .08;
+          const blur = abs === 0 ? 0 : abs === 1 ? .35 : abs === 2 ? 1.2 : 2.2;
+          return (
+            <div key={s.id} className={`op-sys-card${d === 0 ? ' active' : ''}`} style={{ transform: `scale(${scale}) rotateY(${d * -15}deg)`, opacity, filter: `blur(${blur}px)`, zIndex: 100 - abs, '--c-h': h } as CSSProperties}>
+              <div className="op-sys-card-head"><span className="short">{s.name.slice(0, 4).toUpperCase()}</span><span className="id">{i + 1}.sys</span></div>
+              <div className="op-sys-card-art">{sysMedia(s.name, h)}</div>
+              <div className="op-sys-card-name">{s.display_name}</div>
+              <div className="op-sys-card-tag">{s.name}</div>
+              <div className="op-sys-card-count">{(6 - abs) * 40} ROMS</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="op-sys-pointer" />
     </div></Frame>
   );
 }
@@ -346,7 +417,7 @@ export const PIECES: PieceDef[] = [
     render: ({ instance, screen }) => <SkinMarquee skin={instance.skin} title={SCREEN_TITLE[screen]} /> },
   { type: 'menu', label: 'Menú principal', icon: '☰', defaultSize: { w: 40, h: 58 }, base: { w: 540, h: 640 }, fit: 'scale',
     render: ({ instance }) => <Menu skin={instance.skin} /> },
-  { type: 'card', label: 'Tarjeta de sistema', icon: '🎴', defaultSize: { w: 20, h: 52 }, base: { w: 300, h: 540 }, fit: 'scale',
+  { type: 'card', label: 'Carrusel de sistemas', icon: '🎴', defaultSize: { w: 64, h: 56 }, base: { w: 1280, h: 620 }, fit: 'scale',
     render: ({ instance }) => <Card skin={instance.skin} /> },
   { type: 'gamewheel', label: 'Lista / rueda de juegos', icon: '🎮', defaultSize: { w: 34, h: 60 }, base: { w: 900, h: 680 }, fit: 'scale',
     render: ({ instance }) => <GameWheel skin={instance.skin} /> },
