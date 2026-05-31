@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { CSSProperties, FC } from 'react';
-import type { ComposeMap, SkinId, ScreenKey, WidgetInstance, WidgetLayout, WidgetType } from '../../stores/useThemeStore';
+import type { ComposeMap, SkinId, ScreenKey, WidgetInstance, WidgetLayout, WidgetType, WidgetFit } from '../../stores/useThemeStore';
 import { THEME_REGISTRY } from '../../themes/registry';
 import { SkinBackground } from '../../themes/shared/SkinBackground';
 import { WidgetCanvas } from '../../themes/widgets/WidgetCanvas';
@@ -166,6 +166,14 @@ export const LayoutEditor: FC<Props> = ({ compose, widgets, vars, onSave, onClos
               <label style={fieldLbl}>Origen (skin)
                 <select value={sel.skin} onChange={e => patchSel({ skin: e.target.value as SkinId })} style={input}>
                   {opts.map(o => <option key={o.id} value={o.skin}>{o.name}</option>)}
+                </select>
+              </label>
+
+              <label style={fieldLbl}>Ajuste al redimensionar
+                <select value={sel.fit ?? PIECE_BY_TYPE[sel.type].fit} onChange={e => patchSel({ fit: e.target.value as WidgetFit })} style={input}>
+                  <option value="scale">Escalar (pieza entera)</option>
+                  <option value="crop">Recortar (tamaño fijo)</option>
+                  <option value="stretch">Estirar (rellenar)</option>
                 </select>
               </label>
 

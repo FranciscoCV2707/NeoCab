@@ -152,6 +152,11 @@ defecto; el editor drag&drop será **por componente/widget** (combinar piezas en
       con `ResizeObserver` y, para piezas 'scale', renderiza la pieza a su tamaño base y le aplica
       `transform: scale(min(boxW/baseW, boxH/baseH))` centrado → el widget se ve más grande o más
       pequeño de verdad en vez de cortarse.
+    - **Modo de ajuste por widget (recortar):** `WidgetInstance.fit` ('scale'|'crop'|'stretch')
+      sobreescribe el default de la pieza. El panel de propiedades del editor añade el selector
+      "Ajuste al redimensionar": Escalar (pieza entera), Recortar (tamaño fijo, la caja clipa) o
+      Estirar (rellenar). `WidgetCanvas` usa `w.fit ?? def.fit`; en 'crop' renderiza a escala 1 y
+      recorta con `overflow:hidden`.
 - **Fase 3 — Eliminar `classic` + HyperRush por defecto + preview real del skin** (el preview del
   ThemeEditor aún dibuja el menú classic viejo con "Explorar"; hay que reemplazarlo por el skin real).
 - **Fase 3 (avances):** preview real del skin en el editor (`SkinPreview.tsx`, render escalado con

@@ -52,12 +52,15 @@ export function WidgetCanvas({ widgets, screen, selectedId, onSelectWidget, onWi
           overflow: 'hidden',
         };
 
-        // 'stretch' fills the box; 'scale' keeps aspect and grows/shrinks.
+        // Effective fit: per-widget override, else the piece's default.
+        // 'stretch' fills the box; 'scale' keeps aspect and grows/shrinks the
+        // whole piece; 'crop' shows it at native size and clips to the box.
+        const fit = w.fit ?? def.fit;
         let inner;
-        if (def.fit === 'stretch') {
+        if (fit === 'stretch') {
           inner = <div style={{ position: 'absolute', inset: 0 }}>{def.render({ instance: w, screen })}</div>;
         } else {
-          const s = Math.min(boxW / def.base.w, boxH / def.base.h) || 0;
+          const s = fit === 'crop' ? 1 : (Math.min(boxW / def.base.w, boxH / def.base.h) || 0);
           inner = (
             <div style={{ position: 'absolute', left: '50%', top: '50%', width: def.base.w, height: def.base.h, transform: `translate(-50%,-50%) scale(${s})` }}>
               {def.render({ instance: w, screen })}
