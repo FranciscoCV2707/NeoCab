@@ -121,7 +121,7 @@ const sysMedia = (name: string, h: number) => <MediaShape shape={getSystemShape(
 
 function Card({ skin }: { skin: SkinId }) {
   if (skin === 'hyperrush' || skin === 'hyperwheel') return (
-    <Frame skin={skin}><div className="hr-carousel">
+    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="hr-carousel" style={{ width: '100%', height: '100%' }}>
       <div className="hr-carousel-track" style={{ transform: `translate(calc(-${FI * 380}px - 190px), -50%)` }}>
         {SYSTEMS.map((s, i) => {
           const d = i - FI, abs = Math.abs(d), h = getSystemHue(s.name)[0];
@@ -146,7 +146,7 @@ function Card({ skin }: { skin: SkinId }) {
     </div></Frame>
   );
   if (skin === 'neonwall') return (
-    <Frame skin={skin}><div className="nw-sys-stage">
+    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="nw-sys-stage" style={{ width: '100%', height: '100%' }}>
       <div className="nw-sys-floor" />
       <div className="nw-sys-track" style={{ transform: `translate(calc(-${FI * 348}px - 174px), -50%)` }}>
         {SYSTEMS.map((s, i) => {
@@ -172,7 +172,7 @@ function Card({ skin }: { skin: SkinId }) {
     </div></Frame>
   );
   if (skin === 'flux') return (
-    <Frame skin={skin}><div className="fx-sys-carousel">
+    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="fx-sys-carousel" style={{ width: '100%', height: '100%' }}>
       <div className="fx-sys-track" style={{ transform: `translate(calc(-${FI * 320}px - 130px), -50%)` }}>
         {SYSTEMS.map((s, i) => {
           const d = i - FI, abs = Math.abs(d), h = getSystemHue(s.name)[0];
@@ -216,7 +216,7 @@ function Card({ skin }: { skin: SkinId }) {
   );
   // operator system carousel
   return (
-    <Frame skin={skin}><div className="op-sys-carousel">
+    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="op-sys-carousel" style={{ width: '100%', height: '100%' }}>
       <div className="op-sys-track" style={{ transform: `translate(calc(-${FI * 240}px - 110px), -50%)` }}>
         {SYSTEMS.map((s, i) => {
           const d = i - FI, abs = Math.abs(d), h = getSystemHue(s.name)[0];
