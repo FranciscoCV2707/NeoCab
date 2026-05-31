@@ -156,14 +156,14 @@ function Card({ skin }: { skin: SkinId }) {
       </div>
     </button></Frame>
   );
-  // operator: a faithful list row
+  // operator: its real system card (op-sys-card)
   return (
-    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="op-list" style={{ width: '100%' }}>
-      <div className="op-list-head"><span>#</span><span>★</span><span>Title</span><span>Developer</span><span>Genre</span><span style={{ textAlign: 'right' }}>Plays</span></div>
-      <div className="op-row active">
-        <span className="num">001</span><span className="star">★</span><span className="ttl">{GAME.title}</span>
-        <span className="sys">{GAME.developer}</span><span className="genre">RPG</span><span className="plays">42</span>
-      </div>
+    <Frame skin={skin}><div className="op-sys-card active" style={{ '--c-h': H } as CSSProperties}>
+      <div className="op-sys-card-head"><span className="short">{SHORT}</span><span className="id">1.sys</span></div>
+      <div className="op-sys-card-art">{media}</div>
+      <div className="op-sys-card-name">{SYS.display_name}</div>
+      <div className="op-sys-card-tag">{SYS.name}</div>
+      <div className="op-sys-card-count">{SYS.game_count} ROMS</div>
     </div></Frame>
   );
 }
