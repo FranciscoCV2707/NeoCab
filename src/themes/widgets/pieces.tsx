@@ -17,6 +17,13 @@ const SCREEN_TITLE: Record<ScreenKey, string> = { home: 'Inicio', systems: 'Sist
 // Representative content (the skins are data-driven; widgets show a sample item).
 const SYS = { name: 'snes', display_name: 'Super Nintendo', game_count: 248 };
 const GAME = { title: 'Chrono Trigger', developer: 'Squaresoft', year: 1995 };
+const GAMES = [
+  { id: 1, title: 'Chrono Trigger', year: 1995 },
+  { id: 2, title: 'Super Metroid', year: 1994 },
+  { id: 3, title: 'F-Zero', year: 1990 },
+  { id: 4, title: 'Donkey Kong Country', year: 1994 },
+  { id: 5, title: 'Star Fox', year: 1993 },
+];
 const H = getSystemHue(SYS.name)[0];
 const SHORT = SYS.name.slice(0, 4).toUpperCase();
 
@@ -154,6 +161,70 @@ function Card({ skin }: { skin: SkinId }) {
   );
 }
 
+// ── GAMEWHEEL: the game selection list/wheel of each skin ──────────────────
+function GameWheel({ skin }: { skin: SkinId }) {
+  const hrCls = (i: number) => `hr-wheel-item${i === 0 ? ' active' : i === 1 ? ' n1' : i === 2 ? ' n2' : ' f'}`;
+  if (skin === 'hyperrush' || skin === 'hyperwheel') return (
+    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="hr-wheel-col" style={{ width: '100%' }}>
+      <div className="hr-wheel-frame"><div className="hr-wheel-track">
+        {GAMES.map((g, i) => (
+          <div key={g.id} className={hrCls(i)} style={{ '--c-h': H } as CSSProperties}>
+            <button className="hr-wheel-card" tabIndex={-1}>
+              <span className="num">{String(i + 1).padStart(2, '0')}</span>
+              <span className="ttl">{g.title}</span><span className="star" />
+            </button>
+          </div>
+        ))}
+      </div><div className="hr-wheel-rail" /></div>
+    </div></Frame>
+  );
+  if (skin === 'flux') return (
+    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="fx-list-col" style={{ width: '100%' }}><div className="fx-list">
+      {GAMES.map((g, i) => (
+        <button key={g.id} className={`fx-list-row d${Math.min(i, 3)}`} tabIndex={-1}>
+          <span className="num">{String(i + 1).padStart(2, '0')}</span><span className="star" />
+          <span className="ttl">{g.title}</span><span className="yr">{g.year}</span>
+        </button>
+      ))}
+    </div></div></Frame>
+  );
+  if (skin === 'batocera') return (
+    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="bat-list-col" style={{ width: '100%' }}><div className="bat-game-list">
+      {GAMES.map((g, i) => (
+        <button key={g.id} className={`bat-row${i === 0 ? ' active' : ''}`} tabIndex={-1}>
+          <span className="num">{String(i + 1).padStart(3, '0')}</span><span className="star" />
+          <span className="ttl">{g.title}</span><span className="pc"><b>{(5 - i) * 3}</b></span>
+        </button>
+      ))}
+    </div></div></Frame>
+  );
+  if (skin === 'neonwall') return (
+    <Frame skin={skin}><div className="nw-cine-info" style={{ width: '100%' }}>
+      <div className="nw-cine-info-main">
+        <div className="nw-cine-eyebrow"><span className="dot" /><span>{SYS.display_name.toUpperCase()} · {GAME.year}</span></div>
+        <div className="nw-cine-title">{GAME.title}</div>
+        <div className="nw-cine-tag">RPG · {GAME.developer}</div>
+      </div>
+      <div className="nw-cine-info-side">
+        <div className="nw-cine-pos"><b>001</b> / 248</div>
+        <button className="nw-launch-btn" tabIndex={-1}><span className="kbd">A</span><span>Launch</span></button>
+      </div>
+    </div></Frame>
+  );
+  // operator: the real game list
+  return (
+    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="op-list" style={{ width: '100%' }}>
+      <div className="op-list-head"><span>#</span><span>★</span><span>Title</span><span>Developer</span><span>Genre</span><span style={{ textAlign: 'right' }}>Plays</span></div>
+      {GAMES.map((g, i) => (
+        <div key={g.id} className={`op-row${i === 0 ? ' active' : ''}`}>
+          <span className="num">{String(i + 1).padStart(3, '0')}</span><span className="star">{i === 0 ? '★' : ' '}</span>
+          <span className="ttl">{g.title}</span><span className="sys">Squaresoft</span><span className="genre">RPG</span><span className="plays">{(5 - i) * 3}</span>
+        </div>
+      ))}
+    </div></Frame>
+  );
+}
+
 // ── SHOWCASE: the hero / feature panel of each skin ────────────────────────
 function Showcase({ skin }: { skin: SkinId }) {
   if (skin === 'hyperrush' || skin === 'hyperwheel') return (
@@ -213,21 +284,27 @@ export interface PieceDef {
   label: string;
   icon: string;
   defaultSize: { w: number; h: number };
+  /** Design pixel size the piece is authored at; the canvas scales it to fit. */
+  base: { w: number; h: number };
+  /** 'stretch' fills the box; 'scale' grows/shrinks the piece keeping aspect. */
+  fit: 'stretch' | 'scale';
   render: (ctx: { instance: WidgetInstance; screen: ScreenKey }) => JSX.Element;
 }
 
 export const PIECES: PieceDef[] = [
-  { type: 'background', label: 'Fondo', icon: '🌌', defaultSize: { w: 100, h: 100 },
+  { type: 'background', label: 'Fondo', icon: '🌌', defaultSize: { w: 100, h: 100 }, base: { w: 1280, h: 720 }, fit: 'stretch',
     render: ({ instance }) => <SkinBackground skin={instance.skin} /> },
-  { type: 'marquee', label: 'Marquee', icon: '🏷️', defaultSize: { w: 100, h: 12 },
+  { type: 'marquee', label: 'Marquee', icon: '🏷️', defaultSize: { w: 100, h: 12 }, base: { w: 1280, h: 120 }, fit: 'stretch',
     render: ({ instance, screen }) => <SkinMarquee skin={instance.skin} title={SCREEN_TITLE[screen]} /> },
-  { type: 'menu', label: 'Menú principal', icon: '☰', defaultSize: { w: 40, h: 58 },
+  { type: 'menu', label: 'Menú principal', icon: '☰', defaultSize: { w: 40, h: 58 }, base: { w: 540, h: 640 }, fit: 'scale',
     render: ({ instance }) => <Menu skin={instance.skin} /> },
-  { type: 'card', label: 'Tarjeta de sistema', icon: '🎴', defaultSize: { w: 20, h: 52 },
+  { type: 'card', label: 'Tarjeta de sistema', icon: '🎴', defaultSize: { w: 20, h: 52 }, base: { w: 300, h: 540 }, fit: 'scale',
     render: ({ instance }) => <Card skin={instance.skin} /> },
-  { type: 'showcase', label: 'Escaparate / CRT', icon: '📺', defaultSize: { w: 42, h: 46 },
+  { type: 'gamewheel', label: 'Lista / rueda de juegos', icon: '🎮', defaultSize: { w: 30, h: 64 }, base: { w: 560, h: 680 }, fit: 'scale',
+    render: ({ instance }) => <GameWheel skin={instance.skin} /> },
+  { type: 'showcase', label: 'Escaparate / CRT', icon: '📺', defaultSize: { w: 42, h: 46 }, base: { w: 760, h: 520 }, fit: 'scale',
     render: ({ instance }) => <Showcase skin={instance.skin} /> },
-  { type: 'clock', label: 'Reloj', icon: '🕒', defaultSize: { w: 16, h: 8 },
+  { type: 'clock', label: 'Reloj', icon: '🕒', defaultSize: { w: 16, h: 8 }, base: { w: 260, h: 96 }, fit: 'scale',
     render: ({ instance }) => <Clock skin={instance.skin} /> },
 ];
 
@@ -238,5 +315,5 @@ export const PIECE_BY_TYPE: Record<WidgetType, PieceDef> = Object.fromEntries(PI
 export const PIECES_BY_SCREEN: Record<ScreenKey, WidgetType[]> = {
   home:    ['background', 'marquee', 'menu', 'clock'],
   systems: ['background', 'marquee', 'card', 'clock'],
-  games:   ['background', 'marquee', 'showcase', 'clock'],
+  games:   ['background', 'marquee', 'gamewheel', 'showcase', 'clock'],
 };

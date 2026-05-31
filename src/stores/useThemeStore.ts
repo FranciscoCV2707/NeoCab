@@ -19,7 +19,7 @@ export interface ComposeMap {
 export type ScreenKey = 'home' | 'systems' | 'games';
 // Every piece is a faithful slice of a real skin (rendered with that skin's own
 // markup + CSS), so picking a skin source reproduces its exact look.
-export type WidgetType = 'background' | 'marquee' | 'menu' | 'card' | 'showcase' | 'clock';
+export type WidgetType = 'background' | 'marquee' | 'menu' | 'card' | 'gamewheel' | 'showcase' | 'clock';
 export interface WidgetInstance {
   id: string;
   type: WidgetType;

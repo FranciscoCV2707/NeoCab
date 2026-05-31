@@ -143,6 +143,15 @@ defecto; el editor drag&drop será **por componente/widget** (combinar piezas en
     **tarjeta**, reloj], Juegos→[fondo, marquee, **escaparate/CRT**, reloj]. Nueva pieza `menu`
     = menú principal real de cada skin (hr-menu-item, nw-home-poster, fx-home-item, bat-menu-item,
     op-menu-row) iterando `ARCADE_MENU`. El editor titula la sección "Widgets de <pantalla>".
+  - **Pieza de juegos + escalado real (2026-05-30):**
+    - Nueva pieza `gamewheel` = lista/rueda de juegos real de cada skin (hr-wheel-item, fx-list-row,
+      bat-row, op-row; NeonWall usa su panel nw-cine-info con botón Launch). Añadida a Juegos
+      (`PIECES_BY_SCREEN.games = [fondo, marquee, gamewheel, escaparate, reloj]`).
+    - **Resize ahora ESCALA, no recorta:** cada `PieceDef` declara `base` (tamaño de diseño en px) y
+      `fit` ('stretch' para fondo/marquee, 'scale' para el resto). `WidgetCanvas` mide su tamaño real
+      con `ResizeObserver` y, para piezas 'scale', renderiza la pieza a su tamaño base y le aplica
+      `transform: scale(min(boxW/baseW, boxH/baseH))` centrado → el widget se ve más grande o más
+      pequeño de verdad en vez de cortarse.
 - **Fase 3 — Eliminar `classic` + HyperRush por defecto + preview real del skin** (el preview del
   ThemeEditor aún dibuja el menú classic viejo con "Explorar"; hay que reemplazarlo por el skin real).
 - **Fase 3 (avances):** preview real del skin en el editor (`SkinPreview.tsx`, render escalado con
