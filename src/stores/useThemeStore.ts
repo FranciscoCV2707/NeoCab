@@ -17,7 +17,9 @@ export interface ComposeMap {
 // pieces (background, marquee, wheel, crt, clock, stats, text), each sourced
 // from any skin and freely positioned. Coordinates are percentages (0-100).
 export type ScreenKey = 'home' | 'systems' | 'games';
-export type WidgetType = 'background' | 'marquee' | 'wheel' | 'crt' | 'clock' | 'stats' | 'text';
+// Every piece is a faithful slice of a real skin (rendered with that skin's own
+// markup + CSS), so picking a skin source reproduces its exact look.
+export type WidgetType = 'background' | 'marquee' | 'card' | 'showcase' | 'clock';
 export interface WidgetInstance {
   id: string;
   type: WidgetType;
@@ -25,8 +27,6 @@ export interface WidgetInstance {
   skin: SkinId;
   x: number; y: number; w: number; h: number;
   z: number;
-  /** Free text for the 'text' widget. */
-  text?: string;
 }
 export type WidgetLayout = Partial<Record<ScreenKey, WidgetInstance[]>>;
 

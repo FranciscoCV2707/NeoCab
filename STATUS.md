@@ -126,8 +126,17 @@ defecto; el editor drag&drop será **por componente/widget** (combinar piezas en
     - `ThemeEditor`: hidrata/persiste `widgets`; al guardar crea tema `composed` con el overlay.
     - `App.tsx`: monta `WidgetCanvas` como overlay (pointer-events:none) sobre la pantalla activa
       cuando el tema tiene widgets.
-    - Pendiente: más piezas reales (rueda/CRT conectados a datos), snapping/guías, y arrastre desde
-      la paleta directo al lienzo (hoy se añade centrado y luego se arrastra).
+    - Pendiente: snapping/guías y arrastre desde la paleta directo al lienzo (hoy se añade centrado
+      y luego se arrastra).
+  - **Widgets 100% fieles a los temas (2026-05-30):** se eliminaron las piezas genéricas/inventadas
+    (wheel/crt/stats/text) y el catálogo pasa a 5 piezas que son slices REALES de cada skin,
+    renderizadas con su markup + clases + helpers compartidos (`components/arcade/MediaShape`):
+    `background`, `marquee`, `card` (tarjeta de sistema real: hr-sys-card/nw-sys-card/fx-sys-card/
+    bat-sys-card/op-row), `showcase` (hero real: CRT HyperRush, lightbox NeonWall, preview Flux,
+    marquee Batocera, marquee-pane Operator) y `clock` (reloj real: hr-marquee-meta/nw-time/
+    fx-attract-clock/bat-pill/op-seg). Cada pieza se envuelve en su `theme-*` y conmuta por
+    `instance.skin`, así elegir el origen reproduce el aspecto exacto de ese tema. `WidgetType`
+    actualizado en el store; LayoutEditor limpiado (sin el widget de texto).
 - **Fase 3 — Eliminar `classic` + HyperRush por defecto + preview real del skin** (el preview del
   ThemeEditor aún dibuja el menú classic viejo con "Explorar"; hay que reemplazarlo por el skin real).
 - **Fase 3 (avances):** preview real del skin en el editor (`SkinPreview.tsx`, render escalado con

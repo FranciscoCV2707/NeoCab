@@ -53,7 +53,6 @@ export const LayoutEditor: FC<Props> = ({ compose, widgets, vars, onSave, onClos
       y: type === 'background' ? 0 : type === 'marquee' ? 0 : clamp(40 - def.defaultSize.h / 2, 0, 80),
       w: def.defaultSize.w, h: def.defaultSize.h,
       z: type === 'background' ? 0 : items.length + 1,
-      text: type === 'text' ? 'TEXTO' : undefined,
     };
     setItems(prev => [...prev, w]);
     setSelId(w.id);
@@ -169,12 +168,6 @@ export const LayoutEditor: FC<Props> = ({ compose, widgets, vars, onSave, onClos
                   {opts.map(o => <option key={o.id} value={o.skin}>{o.name}</option>)}
                 </select>
               </label>
-
-              {sel.type === 'text' && (
-                <label style={fieldLbl}>Texto
-                  <input value={sel.text ?? ''} onChange={e => patchSel({ text: e.target.value })} style={input} />
-                </label>
-              )}
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 {(['x', 'y', 'w', 'h'] as const).map(k => (
