@@ -68,7 +68,8 @@ function Menu({ skin }: { skin: SkinId }) {
     </div></Frame>
   );
   if (skin === 'flux') return (
-    <Frame skin={skin}><div style={{ display: 'flex', alignItems: 'flex-end' }}>
+    <Frame skin={skin} style={{ alignItems: 'flex-end' }}><div className="fx-home-menu">
+      <div className="fx-home-menu-head"><span className="ln" /><span>MAIN MENU</span></div>
       {ARCADE_MENU.map((item, i) => (
         <div key={item.id} className={`fx-home-item${i === 0 ? ' active' : ''}`} style={{ marginRight: (ARCADE_MENU.length - 1 - i) * 30, opacity: i === 0 ? 1 : .82 }}>
           <span className="num">{String(i + 1).padStart(2, '0')}</span>
@@ -80,24 +81,30 @@ function Menu({ skin }: { skin: SkinId }) {
     </div></Frame>
   );
   if (skin === 'batocera') return (
-    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="bat-menu" style={{ width: '100%' }}>
-      {ARCADE_MENU.map((item, i) => (
-        <button key={item.id} className={`bat-menu-item${i === 0 ? ' active' : ''}`} tabIndex={-1}>
-          <span className="mi-num">{String(i + 1).padStart(2, '0')}</span>
-          <span className="mi-icon">{item.icon}</span>
-          <span className="mi-body"><span className="mi-label">{item.label}</span><span className="mi-tag">{item.sub}</span></span>
-          {i === 0 && <span className="mi-arrow">▶</span>}
-        </button>
-      ))}
+    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="bat-home-right" style={{ width: '100%' }}>
+      <div className="bat-home-menu-head"><span>MAIN MENU</span><div className="line" /></div>
+      <div className="bat-home-menu">
+        {ARCADE_MENU.map((item, i) => (
+          <button key={item.id} className={`bat-menu-item${i === 0 ? ' active' : ''}`} tabIndex={-1}>
+            <span className="mi-num">{String(i + 1).padStart(2, '0')}</span>
+            <span className="mi-icon">{item.icon}</span>
+            <span className="mi-body"><span className="mi-label">{item.label}</span><span className="mi-tag">{item.sub}</span></span>
+            {i === 0 && <span className="mi-arrow">▶</span>}
+          </button>
+        ))}
+      </div>
     </div></Frame>
   );
   return (
-    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div className="op-menu" style={{ width: '100%' }}>
-      {ARCADE_MENU.map((item, i) => (
-        <div key={item.id} className={`op-menu-row${i === 0 ? ' active' : ''}`}>
-          <span className="key">[{i + 1}]</span><span className="ic">{item.icon}</span><span className="lbl">{item.label}</span><span className="tag">{item.sub}</span>
-        </div>
-      ))}
+    <Frame skin={skin} style={{ alignItems: 'stretch' }}><div style={{ width: '100%' }}>
+      <div className="op-pane-head">MAIN MENU<span className="right">SELECT &amp; PRESS [ENTER]</span></div>
+      <div className="op-home-menu">
+        {ARCADE_MENU.map((item, i) => (
+          <div key={item.id} className={`op-menu-row${i === 0 ? ' active' : ''}`}>
+            <span className="key">[{i + 1}]</span><span className="ic">{item.icon}</span><span className="lbl">{item.label}</span><span className="tag">{item.sub}</span>
+          </div>
+        ))}
+      </div>
     </div></Frame>
   );
 }
@@ -260,9 +267,15 @@ function Showcase({ skin }: { skin: SkinId }) {
     </div></div></div></Frame>
   );
   if (skin === 'neonwall') return (
-    <Frame skin={skin}><div className="nw-cine-stage"><div className="nw-cine-marquee">
-      <div className="nw-cine-bulbs top" /><div className="nw-marquee-text">{GAME.title.toUpperCase()}</div><div className="nw-cine-bulbs bottom" />
-    </div></div></Frame>
+    <Frame skin={skin}><div className="nw-cine-screen" style={{ width: '100%', height: '100%' }}>
+      <div className="nw-cine-screen-sweep" />
+      <div className="nw-feat-screen-content">
+        <div className="big">{GAME.title.toUpperCase()}</div>
+        <div className="sub">{GAME.developer.toUpperCase()}</div>
+        <div className="copy">© {GAME.year} · {SYS.display_name.toUpperCase()}</div>
+      </div>
+      <div className="nw-feat-screen-scan" />
+    </div></Frame>
   );
   if (skin === 'flux') return (
     <Frame skin={skin}><div className="fx-preview-wrap"><div className="fx-preview"><div className="fx-preview-content">
@@ -271,10 +284,25 @@ function Showcase({ skin }: { skin: SkinId }) {
     </div></div></div></Frame>
   );
   if (skin === 'batocera') return (
-    <Frame skin={skin}><div className="bat-marquee"><div className="bat-marquee-text">{GAME.title.toUpperCase()}</div></div></Frame>
+    <Frame skin={skin}><div className="bat-preview" style={{ width: '100%', height: '100%' }}><div className="bat-screen" style={{ width: '100%', height: '100%' }}>
+      <div className="bat-screen-bg" />
+      <div className="bat-screen-art"><div className="big">{GAME.title.toUpperCase()}</div><div className="sub">{GAME.developer.toUpperCase()}</div></div>
+      <div className="bat-screen-corner"><span className="dot" /><span>SCREEN</span></div>
+      <div className="bat-screen-scan" />
+    </div></div></Frame>
   );
   return (
-    <Frame skin={skin}><div className="op-marquee-pane" style={{ width: '100%' }}><div className="op-marquee-text">{GAME.title.toUpperCase()}</div></div></Frame>
+    <Frame skin={skin}><div className="op-snapshot-pane" style={{ width: '100%' }}>
+      <div className="op-pane-head"><span>SNAPSHOT · SCREEN</span><span className="right">{GAME.title.slice(0, 20)}</span></div>
+      <div className="op-snapshot-screen">
+        <div className="op-snapshot-corner tl">CH 03</div><div className="op-snapshot-corner tr">● REC</div>
+        <div className="op-snapshot-corner bl">320×240 · 4:3</div><div className="op-snapshot-corner br">60.00 Hz</div>
+        <div className="op-snapshot-art">
+          <div className="ttl">{GAME.title.toUpperCase()}</div><div className="sub">{GAME.developer.toUpperCase()}</div>
+          <div className="copy">© {GAME.year} · {SYS.display_name.toUpperCase()}</div>
+        </div>
+      </div>
+    </div></Frame>
   );
 }
 

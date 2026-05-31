@@ -161,6 +161,13 @@ defecto; el editor drag&drop será **por componente/widget** (combinar piezas en
       (la `base` de diseño es mayor que el contenido), dejando sobrante al ajustar entero. Nuevo modo
       `cover`: escala con `max(boxW/baseW, boxH/baseH)` para rellenar la caja manteniendo proporción
       y recorta el excedente con `overflow:hidden` → permite colocar el widget sin el margen muerto.
+  - **Auditoría de fidelidad de widgets (2026-05-31):** revisados los 7 tipos en las 3 pantallas.
+    Correcciones:
+    - `showcase` (Juegos) ahora es la PANTALLA de vídeo/preview real, no el cartel del título:
+      HyperRush `hr-crt`, NeonWall `nw-cine-screen`, Flux `fx-preview`, Batocera `bat-screen`,
+      Operator `op-snapshot-screen` (antes NW/BAT/OP usaban marquee/título por error).
+    - `menu` (Inicio): contenedores corregidos a los reales — Flux `fx-home-menu`, Batocera
+      `bat-home-menu`, Operator `op-home-menu` (antes se adivinaron `fx`/`bat-menu`/`op-menu`).
 - **Fase 3 — Eliminar `classic` + HyperRush por defecto + preview real del skin** (el preview del
   ThemeEditor aún dibuja el menú classic viejo con "Explorar"; hay que reemplazarlo por el skin real).
 - **Fase 3 (avances):** preview real del skin en el editor (`SkinPreview.tsx`, render escalado con
