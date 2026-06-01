@@ -67,7 +67,7 @@ function Menu({ skin }: { skin: SkinId }) {
     </div></Frame>
   );
   if (skin === 'flux') return (
-    <Frame skin={skin} style={{ alignItems: 'flex-end' }}><div className="fx-home-menu">
+    <Frame skin={skin}><div className="fx-home-menu" style={{ position: 'relative', right: 'auto', top: 'auto', transform: 'rotate(-7deg)' }}>
       <div className="fx-home-menu-head"><span className="ln" /><span>MAIN MENU</span></div>
       {ARCADE_MENU.map((item, i) => (
         <div key={item.id} className={`fx-home-item${i === 0 ? ' active' : ''}`} style={{ marginRight: (ARCADE_MENU.length - 1 - i) * 30, opacity: i === 0 ? 1 : .82 }}>
@@ -97,7 +97,7 @@ function Menu({ skin }: { skin: SkinId }) {
   return (
     <Frame skin={skin} style={{ alignItems: 'stretch' }}><div style={{ width: '100%' }}>
       <div className="op-pane-head">MAIN MENU<span className="right">SELECT &amp; PRESS [ENTER]</span></div>
-      <div className="op-home-menu">
+      <div className="op-home-menu" style={{ flex: 'none', overflow: 'visible' }}>
         {ARCADE_MENU.map((item, i) => (
           <div key={item.id} className={`op-menu-row${i === 0 ? ' active' : ''}`}>
             <span className="key">[{i + 1}]</span><span className="ic">{item.icon}</span><span className="lbl">{item.label}</span><span className="tag">{item.sub}</span>
@@ -415,7 +415,7 @@ export const PIECES: PieceDef[] = [
     render: ({ instance }) => <SkinBackground skin={instance.skin} /> },
   { type: 'marquee', label: 'Marquee', icon: '🏷️', defaultSize: { w: 100, h: 12 }, base: { w: 1280, h: 120 }, fit: 'stretch',
     render: ({ instance, screen }) => <SkinMarquee skin={instance.skin} title={SCREEN_TITLE[screen]} /> },
-  { type: 'menu', label: 'Menú principal', icon: '☰', defaultSize: { w: 40, h: 58 }, base: { w: 540, h: 640 }, fit: 'scale',
+  { type: 'menu', label: 'Menú principal', icon: '☰', defaultSize: { w: 46, h: 54 }, base: { w: 820, h: 580 }, fit: 'scale',
     render: ({ instance }) => <Menu skin={instance.skin} /> },
   { type: 'card', label: 'Carrusel de sistemas', icon: '🎴', defaultSize: { w: 64, h: 56 }, base: { w: 1280, h: 620 }, fit: 'scale',
     render: ({ instance }) => <Card skin={instance.skin} /> },
